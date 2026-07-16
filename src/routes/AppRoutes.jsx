@@ -13,6 +13,9 @@ import ManageJobs from "../pages/ManageJobs"
 import ManageProjects from "../pages/ManageProjects"
 import CompanyApplications from "../pages/CompanyApplications"
 import CompanyBids from "../pages/CompanyBids"
+import AdminUsers from "../pages/AdminUsers"
+import AdminJobs from "../pages/AdminJobs"
+import AdminProjects from "../pages/AdminProjects"
 import CandidateDashboard from "../pages/CandidateDashboard"
 import CompanyDashboard from "../pages/CompanyDashboard"
 import AdminDashboard from "../pages/AdminDashboard"
@@ -37,6 +40,9 @@ export default function AppRoutes() {
         <Route path="/candidate/dashboard" element={<CandidateDashboard />} />
         <Route path="/company/dashboard" element={<CompanyDashboard />} />
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
+        <Route path="/admin/users" element={<AdminUsers />} />
+        <Route path="/admin/jobs" element={<AdminJobs />} />
+        <Route path="/admin/projects" element={<AdminProjects />} />
       </Routes>
     </BrowserRouter>
   )

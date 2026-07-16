@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import Button from './Button'
 
 const navLinks = [
   { label: 'About', href: '#about' },
@@ -41,18 +42,18 @@ export default function Navbar() {
           </div>
 
           <div className="flex items-center gap-3">
-            <a
-              href="/login"
-              className="rounded-md px-4 py-2 text-sm font-medium text-[#e6f1ff] transition-colors hover:text-[#64ffda]"
+            <Button
+              variant="ghost"
+              onClick={() => window.location.assign('/login')}
             >
               Login
-            </a>
-            <a
-              href="/register"
-              className="rounded-md border border-[#64ffda] px-4 py-2 text-sm font-medium text-[#64ffda] transition-colors hover:bg-[#64ffda]/10"
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => window.location.assign('/register')}
             >
               Get Started
-            </a>
+            </Button>
           </div>
         </div>
 
@@ -100,18 +101,19 @@ export default function Navbar() {
             ))}
 
             <div className="mt-4 grid grid-cols-2 gap-3 border-t border-[#233554] pt-5">
-              <a
-                href="/login"
-                className="rounded-md border border-[#233554] px-4 py-2.5 text-center text-sm font-medium text-[#e6f1ff] transition-colors hover:border-[#64ffda] hover:text-[#64ffda]"
+              <Button
+                variant="ghost"
+                className="border-[#233554] text-[#e6f1ff] hover:border-[#64ffda] hover:text-[#64ffda]"
+                onClick={() => window.location.assign('/login')}
               >
                 Login
-              </a>
-              <a
-                href="/register"
-                className="rounded-md border border-[#64ffda] px-4 py-2.5 text-center text-sm font-medium text-[#64ffda] transition-colors hover:bg-[#64ffda]/10"
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => window.location.assign('/register')}
               >
                 Get Started
-              </a>
+              </Button>
             </div>
           </div>
         </div>

@@ -8,6 +8,7 @@ import Projects from "../pages/Projects"
 import MyApplications from "../pages/MyApplications"
 import MyBids from "../pages/MyBids"
 import CandidateProfile from "../pages/CandidateProfile"
+import CompanyProfile from "../pages/CompanyProfile"
 import CandidateDashboard from "../pages/CandidateDashboard"
 import CompanyDashboard from "../pages/CompanyDashboard"
 import AdminDashboard from "../pages/AdminDashboard"
@@ -24,6 +25,7 @@ export default function AppRoutes() {
         <Route path="/candidate/applications" element={<MyApplications />} />
         <Route path="/candidate/bids" element={<MyBids />} />
         <Route path="/candidate/profile" element={<CandidateProfile />} />
+        <Route path="/company/profile" element={<CompanyProfile />} />
         <Route path="/candidate/dashboard" element={<CandidateDashboard />} />
         <Route path="/company/dashboard" element={<CompanyDashboard />} />
         <Route path="/admin/dashboard" element={<AdminDashboard />} />

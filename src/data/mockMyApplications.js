@@ -1,0 +1,58 @@
+const mockMyApplications = [
+  {
+    id: 1,
+    jobTitle: 'Junior Frontend Developer',
+    company: 'Tech Solutions',
+    location: 'Prishtina, Kosovo',
+    dateApplied: 'July 14, 2026',
+    status: 'Pending',
+    messagePreview: 'Your application is currently being reviewed by the hiring team.',
+  },
+  {
+    id: 2,
+    jobTitle: 'UI/UX Design Intern',
+    company: 'Creative Studio',
+    location: 'Remote',
+    dateApplied: 'July 10, 2026',
+    status: 'Accepted',
+    messagePreview: 'Congratulations! The team would like to invite you to an interview.',
+  },
+  {
+    id: 3,
+    jobTitle: 'Backend Developer Intern',
+    company: 'CodeLab',
+    location: 'Tirana, Albania',
+    dateApplied: 'July 7, 2026',
+    status: 'Pending',
+    messagePreview: 'CodeLab has received your application and will respond soon.',
+  },
+  {
+    id: 4,
+    jobTitle: 'React Developer Trainee',
+    company: 'AppWorks',
+    location: 'Prishtina, Kosovo',
+    dateApplied: 'July 2, 2026',
+    status: 'Rejected',
+    messagePreview: 'The company has decided to continue with another candidate.',
+  },
+  {
+    id: 5,
+    jobTitle: 'QA Tester Intern',
+    company: 'QualitySoft',
+    location: 'Remote',
+    dateApplied: 'June 28, 2026',
+    status: 'Pending',
+    messagePreview: 'Your profile has been shared with the quality assurance lead.',
+  },
+  {
+    id: 6,
+    jobTitle: 'Digital Marketing Assistant',
+    company: 'Marketly',
+    location: 'Skopje, North Macedonia',
+    dateApplied: 'June 24, 2026',
+    status: 'Rejected',
+    messagePreview: 'Thank you for applying. The role has been filled at this time.',
+  },
+]
+
+export default mockMyApplications

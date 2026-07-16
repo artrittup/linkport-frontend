@@ -4,6 +4,7 @@ import LandingPage from "../pages/LandingPage"
 import Login from "../pages/Login"
 import Register from "../pages/Register"
 import Jobs from "../pages/Jobs"
+import Projects from "../pages/Projects"
 import CandidateDashboard from "../pages/CandidateDashboard"
 import CompanyDashboard from "../pages/CompanyDashboard"
 import AdminDashboard from "../pages/AdminDashboard"
@@ -16,6 +17,7 @@ export default function AppRoutes() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/jobs" element={<Jobs />} />
+        <Route path="/projects" element={<Projects />} />
         <Route path="/candidate/dashboard" element={<CandidateDashboard />} />
         <Route path="/company/dashboard" element={<CompanyDashboard />} />
         <Route path="/admin/dashboard" element={<AdminDashboard />} />

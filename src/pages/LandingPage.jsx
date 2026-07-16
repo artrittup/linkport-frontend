@@ -1,6 +1,9 @@
+import Navbar from '../components/Navbar'
+
 export default function LandingPage() {
   return (
     <main className="min-h-screen bg-[#0a192f] text-[#e6f1ff]">
+      <Navbar />
       <section className="mx-auto flex min-h-screen max-w-6xl flex-col justify-center px-6">
         <p className="mb-4 font-mono text-sm text-[#64ffda]">
           Welcome to LinkPort

@@ -1,5 +1,6 @@
-import Button from '../components/Button'
 import Card from '../components/Card'
+import JobCard from '../components/JobCard'
+import ProjectCard from '../components/ProjectCard'
 import mockJobs from '../data/mockJobs'
 import mockProjects from '../data/mockProjects'
 import DashboardLayout from '../layouts/DashboardLayout'
@@ -34,21 +35,6 @@ function SectionHeading({ title, description }) {
     <div>
       <h2 className="text-xl font-semibold text-[#e6f1ff] sm:text-2xl">{title}</h2>
       <p className="mt-1 text-sm text-[#8892b0]">{description}</p>
-    </div>
-  )
-}
-
-function SkillBadges({ skills }) {
-  return (
-    <div className="flex flex-wrap gap-2">
-      {skills.map((skill) => (
-        <span
-          key={skill}
-          className="rounded-full border border-[#233554] bg-[#0a192f]/70 px-2.5 py-1 font-mono text-[11px] text-[#64ffda]"
-        >
-          {skill}
-        </span>
-      ))}
     </div>
   )
 }
@@ -96,43 +82,7 @@ export default function CandidateDashboard() {
           />
           <div className="mt-5 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
             {mockJobs.slice(0, 3).map((job) => (
-              <Card key={job.id} hover className="flex h-full flex-col">
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <h3 className="font-semibold leading-snug text-[#e6f1ff]">
-                      {job.title}
-                    </h3>
-                    <p className="mt-1 text-sm text-[#64ffda]">{job.company}</p>
-                  </div>
-                  <span className="rounded-full bg-[#22c55e]/10 px-2 py-1 text-[10px] font-medium text-[#22c55e]">
-                    {job.status}
-                  </span>
-                </div>
-
-                <div className="mt-5 grid grid-cols-2 gap-3 border-y border-[#233554] py-4 text-xs">
-                  <div>
-                    <p className="text-[#64748b]">Location</p>
-                    <p className="mt-1 text-[#8892b0]">{job.location}</p>
-                  </div>
-                  <div>
-                    <p className="text-[#64748b]">Type</p>
-                    <p className="mt-1 text-[#8892b0]">{job.type}</p>
-                  </div>
-                </div>
-
-                <div className="mt-4">
-                  <SkillBadges skills={job.skills} />
-                </div>
-                <div className="mt-auto flex items-end justify-between gap-3 pt-6">
-                  <div>
-                    <p className="text-[11px] text-[#64748b]">Apply before</p>
-                    <p className="mt-1 text-xs text-[#facc15]">{job.deadline}</p>
-                  </div>
-                  <Button variant="outline" size="sm">
-                    View Details
-                  </Button>
-                </div>
-              </Card>
+              <JobCard key={job.id} job={job} compact />
             ))}
           </div>
         </section>
@@ -144,41 +94,7 @@ export default function CandidateDashboard() {
           />
           <div className="mt-5 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
             {mockProjects.slice(0, 3).map((project) => (
-              <Card key={project.id} hover className="flex h-full flex-col">
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <h3 className="font-semibold leading-snug text-[#e6f1ff]">
-                      {project.title}
-                    </h3>
-                    <p className="mt-1 text-sm text-[#64ffda]">{project.company}</p>
-                  </div>
-                  <span className="rounded-full bg-[#22c55e]/10 px-2 py-1 text-[10px] font-medium text-[#22c55e]">
-                    {project.status}
-                  </span>
-                </div>
-
-                <div className="mt-5 grid grid-cols-2 gap-3 border-y border-[#233554] py-4 text-xs">
-                  <div>
-                    <p className="text-[#64748b]">Budget</p>
-                    <p className="mt-1 font-medium text-[#e6f1ff]">{project.budget}</p>
-                  </div>
-                  <div>
-                    <p className="text-[#64748b]">Current bids</p>
-                    <p className="mt-1 text-[#8892b0]">{project.bids} offers</p>
-                  </div>
-                </div>
-
-                <div className="mt-4">
-                  <SkillBadges skills={project.skills} />
-                </div>
-                <div className="mt-auto flex items-end justify-between gap-3 pt-6">
-                  <div>
-                    <p className="text-[11px] text-[#64748b]">Deadline</p>
-                    <p className="mt-1 text-xs text-[#facc15]">{project.deadline}</p>
-                  </div>
-                  <Button size="sm">Send Offer</Button>
-                </div>
-              </Card>
+              <ProjectCard key={project.id} project={project} compact />
             ))}
           </div>
         </section>

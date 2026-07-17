@@ -2,6 +2,7 @@ import { useState } from 'react'
 import Button from '../components/Button'
 import Card from '../components/Card'
 import EmptyState from '../components/EmptyState'
+import ProjectCard from '../components/ProjectCard'
 import useToast from '../hooks/useToast'
 import mockProjects from '../data/mockProjects'
 import DashboardLayout from '../layouts/DashboardLayout'
@@ -193,68 +194,16 @@ export default function Projects() {
           {filteredProjects.length > 0 ? (
             <div className="mt-5 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
               {filteredProjects.map((project) => (
-                <Card key={project.id} hover className="flex h-full flex-col">
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <p className="font-mono text-[10px] uppercase tracking-wider text-[#64748b]">
-                        {project.category}
-                      </p>
-                      <h3 className="mt-2 font-semibold leading-snug text-[#e6f1ff]">
-                        {project.title}
-                      </h3>
-                      <p className="mt-1 text-sm text-[#64ffda]">{project.company}</p>
-                    </div>
-                    <span className="rounded-full border border-[#22c55e]/30 bg-[#22c55e]/10 px-2.5 py-1 text-[10px] font-semibold text-[#22c55e]">
-                      {project.status}
-                    </span>
-                  </div>
-
-                  <p className="mt-4 text-sm leading-relaxed text-[#8892b0]">
-                    {project.description}
-                  </p>
-
-                  <div className="mt-5 grid grid-cols-3 gap-3 border-y border-[#233554] py-4 text-xs">
-                    <div>
-                      <p className="text-[#64748b]">Budget</p>
-                      <p className="mt-1 font-medium text-[#e6f1ff]">{project.budget}</p>
-                    </div>
-                    <div>
-                      <p className="text-[#64748b]">Deadline</p>
-                      <p className="mt-1 text-[#facc15]">{project.deadline}</p>
-                    </div>
-                    <div>
-                      <p className="text-[#64748b]">Bids</p>
-                      <p className="mt-1 text-[#8892b0]">{project.bids} offers</p>
-                    </div>
-                  </div>
-
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    {project.skills.map((item) => (
-                      <span
-                        key={item}
-                        className="rounded-full border border-[#233554] bg-[#0a192f]/70 px-2.5 py-1 font-mono text-[10px] text-[#64ffda]"
-                      >
-                        {item}
-                      </span>
-                    ))}
-                  </div>
-
-                  <div className="mt-auto grid grid-cols-2 gap-3 pt-6">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setModal({ type: 'details', project })}
-                    >
-                      View Details
-                    </Button>
-                    <Button
-                      size="sm"
-                      onClick={() => setModal({ type: 'offer', project })}
-                    >
-                      Send Offer
-                    </Button>
-                  </div>
-                </Card>
+                <ProjectCard
+                  key={project.id}
+                  project={project}
+                  onViewDetails={(selectedProject) =>
+                    setModal({ type: 'details', project: selectedProject })
+                  }
+                  onSendOffer={(selectedProject) =>
+                    setModal({ type: 'offer', project: selectedProject })
+                  }
+                />
               ))}
             </div>
           ) : (

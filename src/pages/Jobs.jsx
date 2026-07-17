@@ -2,6 +2,7 @@ import { useState } from 'react'
 import Button from '../components/Button'
 import Card from '../components/Card'
 import EmptyState from '../components/EmptyState'
+import JobCard from '../components/JobCard'
 import useToast from '../hooks/useToast'
 import mockJobs from '../data/mockJobs'
 import DashboardLayout from '../layouts/DashboardLayout'
@@ -151,57 +152,16 @@ export default function Jobs() {
           {filteredJobs.length > 0 ? (
             <div className="mt-5 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
               {filteredJobs.map((job) => (
-                <Card key={job.id} hover className="flex h-full flex-col">
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <h3 className="font-semibold leading-snug text-[#e6f1ff]">
-                        {job.title}
-                      </h3>
-                      <p className="mt-1 text-sm text-[#64ffda]">{job.company}</p>
-                    </div>
-                    <span className="rounded-full border border-[#22c55e]/30 bg-[#22c55e]/10 px-2.5 py-1 text-[10px] font-semibold text-[#22c55e]">
-                      {job.status}
-                    </span>
-                  </div>
-
-                  <div className="mt-5 flex flex-wrap gap-x-5 gap-y-2 border-y border-[#233554] py-4 text-xs text-[#8892b0]">
-                    <span>{job.location}</span>
-                    <span>{job.type}</span>
-                  </div>
-
-                  <p className="mt-4 text-sm leading-relaxed text-[#8892b0]">
-                    {job.description}
-                  </p>
-
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    {job.skills.map((item) => (
-                      <span
-                        key={item}
-                        className="rounded-full border border-[#233554] bg-[#0a192f]/70 px-2.5 py-1 font-mono text-[10px] text-[#64ffda]"
-                      >
-                        {item}
-                      </span>
-                    ))}
-                  </div>
-
-                  <div className="mt-auto pt-6">
-                    <p className="mb-4 text-xs text-[#64748b]">
-                      Deadline: <span className="text-[#facc15]">{job.deadline}</span>
-                    </p>
-                    <div className="grid grid-cols-2 gap-3">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setModal({ type: 'details', job })}
-                      >
-                        View Details
-                      </Button>
-                      <Button size="sm" onClick={() => setModal({ type: 'apply', job })}>
-                        Apply
-                      </Button>
-                    </div>
-                  </div>
-                </Card>
+                <JobCard
+                  key={job.id}
+                  job={job}
+                  onViewDetails={(selectedJob) =>
+                    setModal({ type: 'details', job: selectedJob })
+                  }
+                  onApply={(selectedJob) =>
+                    setModal({ type: 'apply', job: selectedJob })
+                  }
+                />
               ))}
             </div>
           ) : (

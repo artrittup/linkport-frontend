@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import Button from '../components/Button'
 import Card from '../components/Card'
+import EmptyState from '../components/EmptyState'
+import useToast from '../hooks/useToast'
 import mockProjects from '../data/mockProjects'
 import DashboardLayout from '../layouts/DashboardLayout'
 
@@ -22,6 +24,7 @@ const getMinimumBudget = (budget) =>
   Number(budget.match(/[\d,]+/)?.[0].replace(',', '') ?? 0)
 
 export default function Projects() {
+  const { showToast } = useToast()
   const [search, setSearch] = useState('')
   const [budgetRange, setBudgetRange] = useState('All budgets')
   const [deadline, setDeadline] = useState('Any deadline')
@@ -255,15 +258,9 @@ export default function Projects() {
               ))}
             </div>
           ) : (
-            <Card className="mt-5 text-center" padding="lg">
-              <p className="text-[#e6f1ff]">No projects match your filters.</p>
-              <p className="mt-2 text-sm text-[#8892b0]">
-                Try a broader search or clear the selected filters.
-              </p>
-              <Button variant="outline" size="sm" className="mt-5" onClick={clearFilters}>
-                Clear filters
-              </Button>
-            </Card>
+            <div className="mt-5">
+              <EmptyState title="No projects match your filters" description="Try a broader search or clear the selected filters." actionLabel="Clear filters" onAction={clearFilters} />
+            </div>
           )}
         </section>
       </div>
@@ -290,10 +287,15 @@ export default function Projects() {
                   ? 'Your offer form will be connected here once backend project bidding is available.'
                   : modal.project.description}
               </p>
-              <div className="mt-6 flex justify-end">
+              <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
                 <Button variant="outline" onClick={() => setModal(null)}>
                   Close
                 </Button>
+                {modal.type === 'offer' && (
+                  <Button onClick={() => { showToast(`Offer sent for ${modal.project.title}.`, 'success'); setModal(null) }}>
+                    Submit Offer
+                  </Button>
+                )}
               </div>
             </div>
           </Card>

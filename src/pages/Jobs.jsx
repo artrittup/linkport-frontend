@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import Button from '../components/Button'
 import Card from '../components/Card'
+import EmptyState from '../components/EmptyState'
+import useToast from '../hooks/useToast'
 import mockJobs from '../data/mockJobs'
 import DashboardLayout from '../layouts/DashboardLayout'
 
@@ -19,6 +21,7 @@ const controlClasses =
   'w-full rounded-md border border-[#233554] bg-[#112240] px-4 py-3 text-sm text-[#e6f1ff] outline-none transition-colors placeholder:text-[#64748b] focus:border-[#64ffda] focus:ring-1 focus:ring-[#64ffda]'
 
 export default function Jobs() {
+  const { showToast } = useToast()
   const [search, setSearch] = useState('')
   const [location, setLocation] = useState('All locations')
   const [jobType, setJobType] = useState('All types')
@@ -202,15 +205,9 @@ export default function Jobs() {
               ))}
             </div>
           ) : (
-            <Card className="mt-5 text-center" padding="lg">
-              <p className="text-[#e6f1ff]">No jobs match your filters.</p>
-              <p className="mt-2 text-sm text-[#8892b0]">
-                Try a broader search or clear the selected filters.
-              </p>
-              <Button variant="outline" size="sm" className="mt-5" onClick={clearFilters}>
-                Clear filters
-              </Button>
-            </Card>
+            <div className="mt-5">
+              <EmptyState title="No jobs match your filters" description="Try a broader search or clear the selected filters." actionLabel="Clear filters" onAction={clearFilters} />
+            </div>
           )}
         </section>
       </div>
@@ -237,10 +234,15 @@ export default function Jobs() {
                   ? 'Your application is ready to be submitted. Backend submission will be connected in a future update.'
                   : modal.job.description}
               </p>
-              <div className="mt-6 flex justify-end">
+              <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
                 <Button variant="outline" onClick={() => setModal(null)}>
                   Close
                 </Button>
+                {modal.type === 'apply' && (
+                  <Button onClick={() => { showToast(`Application submitted for ${modal.job.title}.`, 'success'); setModal(null) }}>
+                    Submit Application
+                  </Button>
+                )}
               </div>
             </div>
           </Card>

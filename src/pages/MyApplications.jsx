@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import Button from '../components/Button'
 import Card from '../components/Card'
+import EmptyState from '../components/EmptyState'
 import mockMyApplications from '../data/mockMyApplications'
 import DashboardLayout from '../layouts/DashboardLayout'
 
@@ -169,9 +170,7 @@ export default function MyApplications() {
           </div>
 
           {filteredApplications.length === 0 && (
-            <Card className="text-center" padding="lg">
-              <p>No applications match your filters.</p>
-            </Card>
+            <EmptyState title="No applications found" description="Try changing your search or status filter." />
           )}
         </section>
       </div>

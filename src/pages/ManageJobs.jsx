@@ -2,6 +2,7 @@ import { useState } from 'react'
 import Button from '../components/Button'
 import Card from '../components/Card'
 import SkillsInput from '../components/SkillsInput'
+import useToast from '../hooks/useToast'
 import mockJobs from '../data/mockJobs'
 import DashboardLayout from '../layouts/DashboardLayout'
 
@@ -97,6 +98,7 @@ function StatusBadge({ status }) {
 }
 
 export default function ManageJobs() {
+  const { showToast } = useToast()
   const [jobs, setJobs] = useState(initialJobs)
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [editingId, setEditingId] = useState(null)
@@ -146,6 +148,7 @@ export default function ManageJobs() {
 
   const handleSubmit = (event) => {
     event.preventDefault()
+    const wasEditing = editingId !== null
 
     if (editingId !== null) {
       setJobs((current) =>
@@ -167,11 +170,13 @@ export default function ManageJobs() {
     }
 
     closeForm()
+    showToast(wasEditing ? 'Job updated successfully.' : 'New job published successfully.', 'success')
   }
 
   const deleteJob = (job) => {
     if (window.confirm(`Delete “${job.title}”? This action cannot be undone.`)) {
       setJobs((current) => current.filter((item) => item.id !== job.id))
+      showToast(`${job.title} was deleted.`, 'error')
     }
   }
 

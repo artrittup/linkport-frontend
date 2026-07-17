@@ -2,6 +2,7 @@ import { useState } from 'react'
 import Button from '../components/Button'
 import Card from '../components/Card'
 import SkillsInput from '../components/SkillsInput'
+import useToast from '../hooks/useToast'
 import DashboardLayout from '../layouts/DashboardLayout'
 
 const navItems = [
@@ -41,6 +42,7 @@ function OverviewCard({ number, title, children, className = '' }) {
 }
 
 export default function CandidateProfile() {
+  const { showToast } = useToast()
   const [form, setForm] = useState(initialForm)
   const [skills, setSkills] = useState([
     'React',
@@ -60,6 +62,7 @@ export default function CandidateProfile() {
   const handleSubmit = (event) => {
     event.preventDefault()
     setSaved(true)
+    showToast('Candidate profile saved successfully.', 'success')
   }
 
   const scrollToEdit = () => {

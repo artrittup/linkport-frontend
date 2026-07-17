@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import Button from '../components/Button'
 import Card from '../components/Card'
+import EmptyState from '../components/EmptyState'
 import mockMyBids from '../data/mockMyBids'
 import DashboardLayout from '../layouts/DashboardLayout'
 
@@ -165,7 +166,7 @@ export default function MyBids() {
           </div>
 
           {filteredBids.length === 0 && (
-            <Card className="text-center" padding="lg"><p>No bids match your filters.</p></Card>
+            <EmptyState title="No bids found" description="Try changing your search or status filter." />
           )}
         </section>
       </div>

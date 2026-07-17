@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import Button from '../components/Button'
 import Card from '../components/Card'
+import useToast from '../hooks/useToast'
 import DashboardLayout from '../layouts/DashboardLayout'
 
 const navItems = [
@@ -70,6 +71,7 @@ function ItemList({ items, badge }) {
 }
 
 export default function CompanyProfile() {
+  const { showToast } = useToast()
   const [form, setForm] = useState(initialForm)
   const [logoName, setLogoName] = useState('No custom logo uploaded')
   const [saved, setSaved] = useState(false)
@@ -83,6 +85,7 @@ export default function CompanyProfile() {
   const handleSubmit = (event) => {
     event.preventDefault()
     setSaved(true)
+    showToast('Company profile saved successfully.', 'success')
   }
 
   const scrollToEdit = () => {

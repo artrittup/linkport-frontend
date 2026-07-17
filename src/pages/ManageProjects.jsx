@@ -2,6 +2,7 @@ import { useState } from 'react'
 import Button from '../components/Button'
 import Card from '../components/Card'
 import SkillsInput from '../components/SkillsInput'
+import useToast from '../hooks/useToast'
 import mockCompanyProjects from '../data/mockCompanyProjects'
 import mockProjects from '../data/mockProjects'
 import DashboardLayout from '../layouts/DashboardLayout'
@@ -112,6 +113,7 @@ function StatusBadge({ status }) {
 }
 
 export default function ManageProjects() {
+  const { showToast } = useToast()
   const [projects, setProjects] = useState(initialProjects)
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [editingId, setEditingId] = useState(null)
@@ -160,6 +162,7 @@ export default function ManageProjects() {
 
   const handleSubmit = (event) => {
     event.preventDefault()
+    const wasEditing = editingId !== null
 
     if (editingId !== null) {
       setProjects((current) =>
@@ -181,6 +184,7 @@ export default function ManageProjects() {
     }
 
     closeForm()
+    showToast(wasEditing ? 'Project updated successfully.' : 'New project published successfully.', 'success')
   }
 
   const deleteProject = (project) => {
@@ -192,6 +196,7 @@ export default function ManageProjects() {
       setProjects((current) =>
         current.filter((item) => item.id !== project.id),
       )
+      showToast(`${project.title} was deleted.`, 'error')
     }
   }
 

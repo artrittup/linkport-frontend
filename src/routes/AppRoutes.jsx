@@ -19,6 +19,11 @@ import AdminProjects from "../pages/AdminProjects"
 import CandidateDashboard from "../pages/CandidateDashboard"
 import CompanyDashboard from "../pages/CompanyDashboard"
 import AdminDashboard from "../pages/AdminDashboard"
+import ProtectedRoute from "./ProtectedRoute"
+
+const candidateRoles = ["candidate"]
+const companyRoles = ["company"]
+const adminRoles = ["admin"]
 
 export default function AppRoutes() {
   return (
@@ -27,22 +32,22 @@ export default function AppRoutes() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/jobs" element={<Jobs />} />
-        <Route path="/projects" element={<Projects />} />
-        <Route path="/candidate/applications" element={<MyApplications />} />
-        <Route path="/candidate/bids" element={<MyBids />} />
-        <Route path="/candidate/profile" element={<CandidateProfile />} />
-        <Route path="/company/profile" element={<CompanyProfile />} />
-        <Route path="/company/jobs" element={<ManageJobs />} />
-        <Route path="/company/projects" element={<ManageProjects />} />
-        <Route path="/company/applications" element={<CompanyApplications />} />
-        <Route path="/company/bids" element={<CompanyBids />} />
-        <Route path="/candidate/dashboard" element={<CandidateDashboard />} />
-        <Route path="/company/dashboard" element={<CompanyDashboard />} />
-        <Route path="/admin/dashboard" element={<AdminDashboard />} />
-        <Route path="/admin/users" element={<AdminUsers />} />
-        <Route path="/admin/jobs" element={<AdminJobs />} />
-        <Route path="/admin/projects" element={<AdminProjects />} />
+        <Route path="/jobs" element={<ProtectedRoute allowedRoles={candidateRoles}><Jobs /></ProtectedRoute>} />
+        <Route path="/projects" element={<ProtectedRoute allowedRoles={candidateRoles}><Projects /></ProtectedRoute>} />
+        <Route path="/candidate/applications" element={<ProtectedRoute allowedRoles={candidateRoles}><MyApplications /></ProtectedRoute>} />
+        <Route path="/candidate/bids" element={<ProtectedRoute allowedRoles={candidateRoles}><MyBids /></ProtectedRoute>} />
+        <Route path="/candidate/profile" element={<ProtectedRoute allowedRoles={candidateRoles}><CandidateProfile /></ProtectedRoute>} />
+        <Route path="/company/profile" element={<ProtectedRoute allowedRoles={companyRoles}><CompanyProfile /></ProtectedRoute>} />
+        <Route path="/company/jobs" element={<ProtectedRoute allowedRoles={companyRoles}><ManageJobs /></ProtectedRoute>} />
+        <Route path="/company/projects" element={<ProtectedRoute allowedRoles={companyRoles}><ManageProjects /></ProtectedRoute>} />
+        <Route path="/company/applications" element={<ProtectedRoute allowedRoles={companyRoles}><CompanyApplications /></ProtectedRoute>} />
+        <Route path="/company/bids" element={<ProtectedRoute allowedRoles={companyRoles}><CompanyBids /></ProtectedRoute>} />
+        <Route path="/candidate/dashboard" element={<ProtectedRoute allowedRoles={candidateRoles}><CandidateDashboard /></ProtectedRoute>} />
+        <Route path="/company/dashboard" element={<ProtectedRoute allowedRoles={companyRoles}><CompanyDashboard /></ProtectedRoute>} />
+        <Route path="/admin/dashboard" element={<ProtectedRoute allowedRoles={adminRoles}><AdminDashboard /></ProtectedRoute>} />
+        <Route path="/admin/users" element={<ProtectedRoute allowedRoles={adminRoles}><AdminUsers /></ProtectedRoute>} />
+        <Route path="/admin/jobs" element={<ProtectedRoute allowedRoles={adminRoles}><AdminJobs /></ProtectedRoute>} />
+        <Route path="/admin/projects" element={<ProtectedRoute allowedRoles={adminRoles}><AdminProjects /></ProtectedRoute>} />
       </Routes>
     </BrowserRouter>
   )

@@ -1,7 +1,18 @@
+import { useNavigate } from 'react-router'
+import { useAuth } from '../context/AuthContext'
+
 export default function Sidebar({ navItems = [], isOpen = false, onClose }) {
+  const navigate = useNavigate()
+  const { logout } = useAuth()
   const currentPath = window.location.pathname
   const mainItems = navItems.filter((item) => item.label.toLowerCase() !== 'logout')
   const logoutItem = navItems.find((item) => item.label.toLowerCase() === 'logout')
+
+  const handleLogout = () => {
+    logout()
+    onClose?.()
+    navigate('/login', { replace: true })
+  }
 
   const renderItem = (item) => {
     const isActive = currentPath === item.href
@@ -65,14 +76,14 @@ export default function Sidebar({ navItems = [], isOpen = false, onClose }) {
 
         {logoutItem && (
           <div className="border-t border-[#233554] p-3">
-            <a
-              href={logoutItem.href}
-              onClick={onClose}
-              className="flex items-center gap-3 rounded-md px-4 py-3 text-sm text-[#ef4444] transition-colors hover:bg-[#ef4444]/10"
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="flex w-full items-center gap-3 rounded-md px-4 py-3 text-sm text-[#ef4444] transition-colors hover:bg-[#ef4444]/10"
             >
               <span className="h-1.5 w-1.5 rounded-full bg-[#ef4444]" aria-hidden="true" />
               {logoutItem.label}
-            </a>
+            </button>
           </div>
         )}
       </aside>

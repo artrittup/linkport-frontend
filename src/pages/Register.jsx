@@ -1,6 +1,8 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router'
 import Button from '../components/Button'
 import Card from '../components/Card'
+import { useAuth } from '../context/AuthContext'
 
 const inputClasses =
   'mt-2 w-full rounded-md border border-[#233554] bg-[#0a192f]/70 px-4 py-3 text-sm text-[#e6f1ff] outline-none transition-colors placeholder:text-[#64748b] hover:border-[#8892b0] focus:border-[#64ffda] focus:ring-1 focus:ring-[#64ffda]'
@@ -19,8 +21,28 @@ const roles = [
 ]
 
 export default function Register() {
+  const navigate = useNavigate()
+  const { register } = useAuth()
   const [selectedRole, setSelectedRole] = useState('candidate')
-  const handleSubmit = (event) => event.preventDefault()
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+  })
+
+  const updateField = (event) => {
+    setFormData((current) => ({
+      ...current,
+      [event.target.name]: event.target.value,
+    }))
+  }
+
+  const handleSubmit = async (event) => {
+    event.preventDefault()
+    await register({ ...formData, role: selectedRole })
+    navigate(`/${selectedRole}/dashboard`, { replace: true })
+  }
 
   return (
     <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#0a192f] px-4 py-12 text-[#e6f1ff] sm:px-6">
@@ -53,10 +75,12 @@ export default function Register() {
               </label>
               <input
                 id="full-name"
-                name="fullName"
+                name="name"
                 type="text"
                 autoComplete="name"
                 required
+                value={formData.name}
+                onChange={updateField}
                 placeholder="Your full name"
                 className={inputClasses}
               />
@@ -72,6 +96,8 @@ export default function Register() {
                 type="email"
                 autoComplete="email"
                 required
+                value={formData.email}
+                onChange={updateField}
                 placeholder="you@example.com"
                 className={inputClasses}
               />
@@ -88,6 +114,8 @@ export default function Register() {
                   type="password"
                   autoComplete="new-password"
                   required
+                  value={formData.password}
+                  onChange={updateField}
                   placeholder="Create a password"
                   className={inputClasses}
                 />
@@ -102,6 +130,8 @@ export default function Register() {
                   type="password"
                   autoComplete="new-password"
                   required
+                  value={formData.confirmPassword}
+                  onChange={updateField}
                   placeholder="Repeat password"
                   className={inputClasses}
                 />

@@ -1,11 +1,24 @@
+import { useState } from 'react'
+import { useNavigate } from 'react-router'
 import Button from '../components/Button'
 import Card from '../components/Card'
+import { useAuth } from '../context/AuthContext'
 
 const inputClasses =
   'mt-2 w-full rounded-md border border-[#233554] bg-[#0a192f]/70 px-4 py-3 text-sm text-[#e6f1ff] outline-none transition-colors placeholder:text-[#64748b] hover:border-[#8892b0] focus:border-[#64ffda] focus:ring-1 focus:ring-[#64ffda]'
 
 export default function Login() {
-  const handleSubmit = (event) => event.preventDefault()
+  const navigate = useNavigate()
+  const { login } = useAuth()
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [role, setRole] = useState('candidate')
+
+  const handleSubmit = async (event) => {
+    event.preventDefault()
+    await login(email, password, role)
+    navigate(`/${role}/dashboard`, { replace: true })
+  }
 
   return (
     <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#0a192f] px-4 py-12 text-[#e6f1ff] sm:px-6">
@@ -42,6 +55,8 @@ export default function Login() {
                 type="email"
                 autoComplete="email"
                 required
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
                 placeholder="you@example.com"
                 className={inputClasses}
               />
@@ -65,9 +80,27 @@ export default function Login() {
                 type="password"
                 autoComplete="current-password"
                 required
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
                 placeholder="Enter your password"
                 className={inputClasses}
               />
+            </div>
+
+            <div>
+              <label htmlFor="login-role" className="text-sm font-medium text-[#e6f1ff]">
+                Demo role
+              </label>
+              <select
+                id="login-role"
+                value={role}
+                onChange={(event) => setRole(event.target.value)}
+                className={inputClasses}
+              >
+                <option value="candidate">Candidate</option>
+                <option value="company">Company</option>
+                <option value="admin">Admin</option>
+              </select>
             </div>
 
             <Button type="submit" size="lg" className="w-full">

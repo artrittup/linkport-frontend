@@ -1,6 +1,13 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import {
+  getCompanyProfile,
+  getProfileErrorMessage,
+  updateCompanyProfile,
+} from '../api/profileApi'
 import Button from '../components/Button'
 import Card from '../components/Card'
+import LoadingSpinner from '../components/LoadingSpinner'
+import { useAuth } from '../context/AuthContext'
 import useToast from '../hooks/useToast'
 import DashboardLayout from '../layouts/DashboardLayout'
 
@@ -20,6 +27,7 @@ const initialForm = {
   industry: 'Software Development',
   location: 'Prishtina, Kosovo',
   website: 'www.techsolutions.com',
+  // The API does not accept contact email; the authenticated user's email replaces this.
   contactEmail: 'hello@techsolutions.com',
   description:
     'Tech Solutions builds modern digital products for ambitious businesses. We invest in young talent through internships, junior roles, and hands-on projects that help emerging professionals grow.',
@@ -71,10 +79,57 @@ function ItemList({ items, badge }) {
 }
 
 export default function CompanyProfile() {
+  const { user } = useAuth()
   const { showToast } = useToast()
   const [form, setForm] = useState(initialForm)
   const [logoName, setLogoName] = useState('No custom logo uploaded')
   const [saved, setSaved] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+  const [isSaving, setIsSaving] = useState(false)
+  const [loadError, setLoadError] = useState('')
+  const [saveError, setSaveError] = useState('')
+
+  useEffect(() => {
+    let isActive = true
+
+    async function loadProfile() {
+      try {
+        const { profile } = await getCompanyProfile()
+
+        if (!isActive) return
+
+        setForm({
+          companyName: profile?.company_name ?? '',
+          industry: profile?.industry ?? '',
+          location: profile?.location ?? '',
+          website: profile?.website ?? '',
+          contactEmail: user?.email ?? '',
+          description: profile?.description ?? '',
+          phone: profile?.phone ?? '',
+          linkedinUrl: profile?.linkedin_url ?? '',
+          logoUrl: profile?.logo_url ?? '',
+          employeeCount: profile?.employee_count?.toString() ?? '',
+        })
+      } catch (requestError) {
+        if (isActive) {
+          setLoadError(
+            getProfileErrorMessage(
+              requestError,
+              'Unable to load your company profile.',
+            ),
+          )
+        }
+      } finally {
+        if (isActive) setIsLoading(false)
+      }
+    }
+
+    loadProfile()
+
+    return () => {
+      isActive = false
+    }
+  }, [user?.email])
 
   const updateField = (event) => {
     const { name, value } = event.target
@@ -82,10 +137,41 @@ export default function CompanyProfile() {
     setSaved(false)
   }
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault()
-    setSaved(true)
-    showToast('Company profile saved successfully.', 'success')
+    setSaveError('')
+    setSaved(false)
+    setIsSaving(true)
+
+    const nullable = (value = '') => value.trim() || null
+
+    try {
+      const response = await updateCompanyProfile({
+        company_name: nullable(form.companyName),
+        description: nullable(form.description),
+        industry: nullable(form.industry),
+        location: nullable(form.location),
+        phone: nullable(form.phone),
+        website: nullable(form.website),
+        linkedin_url: nullable(form.linkedinUrl),
+        logo_url: nullable(form.logoUrl),
+        employee_count: form.employeeCount
+          ? Number(form.employeeCount)
+          : null,
+      })
+
+      setSaved(true)
+      showToast(response.message ?? 'Company profile saved successfully.', 'success')
+    } catch (requestError) {
+      setSaveError(
+        getProfileErrorMessage(
+          requestError,
+          'Unable to save your company profile.',
+        ),
+      )
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   const scrollToEdit = () => {
@@ -93,6 +179,14 @@ export default function CompanyProfile() {
       behavior: 'smooth',
       block: 'start',
     })
+  }
+
+  if (isLoading) {
+    return (
+      <DashboardLayout title="Company Profile" navItems={navItems} userType="Company">
+        <LoadingSpinner label="Loading your company profile..." size="lg" />
+      </DashboardLayout>
+    )
   }
 
   return (
@@ -107,6 +201,12 @@ export default function CompanyProfile() {
             Manage your company information and public profile.
           </p>
         </section>
+
+        {loadError && (
+          <p role="alert" className="rounded-md border border-[#ef4444]/40 bg-[#ef4444]/10 px-4 py-3 text-sm text-[#fca5a5]">
+            {loadError}
+          </p>
+        )}
 
         <Card padding="lg" className="relative overflow-hidden">
           <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-[#64ffda]/5 blur-2xl" />
@@ -231,9 +331,10 @@ export default function CompanyProfile() {
                   <input
                     id="website"
                     name="website"
+                    type="url"
                     value={form.website}
                     onChange={updateField}
-                    placeholder="www.company.com"
+                    placeholder="https://www.company.com"
                     className={inputClasses}
                   />
                 </div>
@@ -246,10 +347,26 @@ export default function CompanyProfile() {
                     name="contactEmail"
                     type="email"
                     value={form.contactEmail}
-                    onChange={updateField}
-                    required
-                    className={inputClasses}
+                    readOnly
+                    className={`${inputClasses} cursor-not-allowed opacity-70`}
                   />
+                  <p className="mt-1 text-xs text-[#64748b]">Managed by your account and not saved with this profile.</p>
+                </div>
+                <div>
+                  <label htmlFor="company-phone" className="text-sm font-medium">Phone</label>
+                  <input id="company-phone" name="phone" type="tel" value={form.phone ?? ''} onChange={updateField} className={inputClasses} />
+                </div>
+                <div>
+                  <label htmlFor="company-linkedin" className="text-sm font-medium">LinkedIn URL</label>
+                  <input id="company-linkedin" name="linkedinUrl" type="url" value={form.linkedinUrl ?? ''} onChange={updateField} className={inputClasses} />
+                </div>
+                <div>
+                  <label htmlFor="logo-url" className="text-sm font-medium">Logo URL</label>
+                  <input id="logo-url" name="logoUrl" type="url" value={form.logoUrl ?? ''} onChange={updateField} className={inputClasses} />
+                </div>
+                <div>
+                  <label htmlFor="employee-count" className="text-sm font-medium">Employee count</label>
+                  <input id="employee-count" name="employeeCount" type="number" min="1" value={form.employeeCount ?? ''} onChange={updateField} className={inputClasses} />
                 </div>
               </div>
 
@@ -291,14 +408,15 @@ export default function CompanyProfile() {
 
               <div className="flex flex-col-reverse gap-3 border-t border-[#233554] pt-6 sm:flex-row sm:items-center sm:justify-between">
                 <div aria-live="polite">
+                  {saveError && <p role="alert" className="text-sm text-[#fca5a5]">{saveError}</p>}
                   {saved && (
                     <p className="text-sm text-[#22c55e]">
                       Company profile saved successfully.
                     </p>
                   )}
                 </div>
-                <Button type="submit" size="lg">
-                  Save Changes
+                <Button type="submit" size="lg" disabled={isSaving}>
+                  {isSaving ? 'Saving...' : 'Save Changes'}
                 </Button>
               </div>
             </form>

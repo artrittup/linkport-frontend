@@ -1,7 +1,23 @@
 /* eslint-disable react-refresh/only-export-components */
-import { createContext, useContext, useState } from 'react'
+import { createContext, useContext, useEffect, useState } from 'react'
+import {
+  getCurrentUser,
+  loginUser,
+  logoutUser,
+  registerUser,
+} from '../api/authApi'
 
 const AuthContext = createContext(null)
+
+const dashboardPaths = {
+  candidate: '/candidate/dashboard',
+  company: '/company/dashboard',
+  admin: '/admin/dashboard',
+}
+
+export function getDashboardPath(role) {
+  return dashboardPaths[role] ?? '/login'
+}
 
 const getStoredUser = () => {
   const storedUser = localStorage.getItem('linkport_user')
@@ -21,51 +37,98 @@ export function AuthProvider({ children }) {
   const [token, setToken] = useState(() =>
     localStorage.getItem('linkport_token'),
   )
+  const [isLoading, setIsLoading] = useState(() =>
+    Boolean(localStorage.getItem('linkport_token')),
+  )
 
-  const saveSession = (nextUser) => {
-    const mockToken = 'mock-token'
-
-    localStorage.setItem('linkport_token', mockToken)
-    localStorage.setItem('linkport_user', JSON.stringify(nextUser))
-    setToken(mockToken)
-    setUser(nextUser)
-
-    return nextUser
-  }
-
-  const login = async (email, password, role = 'candidate') => {
-    void password
-
-    return saveSession({
-      name: email.split('@')[0] || 'LinkPort User',
-      email,
-      role,
-    })
-  }
-
-  const register = async (data) => {
-    return saveSession({
-      name: data.name,
-      email: data.email,
-      role: data.role,
-    })
-  }
-
-  const logout = () => {
+  const clearSession = () => {
     localStorage.removeItem('linkport_token')
     localStorage.removeItem('linkport_user')
     setToken(null)
     setUser(null)
   }
 
+  const saveSession = ({ token: nextToken, user: nextUser }) => {
+    if (!nextToken || !nextUser) {
+      throw new Error('The server returned an invalid authentication response.')
+    }
+
+    localStorage.setItem('linkport_token', nextToken)
+    localStorage.setItem('linkport_user', JSON.stringify(nextUser))
+    setToken(nextToken)
+    setUser(nextUser)
+
+    return nextUser
+  }
+
+  useEffect(() => {
+    const handleUnauthorized = () => clearSession()
+    window.addEventListener('linkport:unauthorized', handleUnauthorized)
+
+    return () =>
+      window.removeEventListener('linkport:unauthorized', handleUnauthorized)
+  }, [])
+
+  useEffect(() => {
+    let isActive = true
+
+    async function verifySession() {
+      if (!token) {
+        setIsLoading(false)
+        return
+      }
+
+      try {
+        const currentUser = await getCurrentUser()
+
+        if (isActive) {
+          localStorage.setItem('linkport_user', JSON.stringify(currentUser))
+          setUser(currentUser)
+        }
+      } catch {
+        if (isActive) clearSession()
+      } finally {
+        if (isActive) setIsLoading(false)
+      }
+    }
+
+    verifySession()
+
+    return () => {
+      isActive = false
+    }
+  }, [token])
+
+  const login = async (credentials) => {
+    const response = await loginUser(credentials)
+    return saveSession(response)
+  }
+
+  const register = async (data) => {
+    const response = await registerUser(data)
+    return saveSession(response)
+  }
+
+  const logout = async () => {
+    try {
+      if (token) await logoutUser()
+    } catch {
+      // The local session must still end if the token is already invalid.
+    } finally {
+      clearSession()
+    }
+  }
+
   return (
     <AuthContext.Provider
       value={{
         user,
+        isLoading,
         isAuthenticated: Boolean(token && user),
         login,
         register,
         logout,
+        getDashboardPath,
       }}
     >
       {children}

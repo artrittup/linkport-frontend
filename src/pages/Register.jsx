@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router'
 import Button from '../components/Button'
 import Card from '../components/Card'
+import { getAuthErrorMessage } from '../api/authApi'
 import { useAuth } from '../context/AuthContext'
 
 const inputClasses =
@@ -22,7 +23,7 @@ const roles = [
 
 export default function Register() {
   const navigate = useNavigate()
-  const { register } = useAuth()
+  const { getDashboardPath, register } = useAuth()
   const [selectedRole, setSelectedRole] = useState('candidate')
   const [formData, setFormData] = useState({
     name: '',
@@ -30,6 +31,8 @@ export default function Register() {
     password: '',
     confirmPassword: '',
   })
+  const [error, setError] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const updateField = (event) => {
     setFormData((current) => ({
@@ -40,8 +43,25 @@ export default function Register() {
 
   const handleSubmit = async (event) => {
     event.preventDefault()
-    await register({ ...formData, role: selectedRole })
-    navigate(`/${selectedRole}/dashboard`, { replace: true })
+    setError('')
+    setIsSubmitting(true)
+
+    try {
+      const authenticatedUser = await register({
+        ...formData,
+        role: selectedRole,
+      })
+      navigate(getDashboardPath(authenticatedUser.role), { replace: true })
+    } catch (requestError) {
+      setError(
+        getAuthErrorMessage(
+          requestError,
+          'Unable to create your account. Please check your details and try again.',
+        ),
+      )
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -173,8 +193,17 @@ export default function Register() {
               <input type="hidden" name="role" value={selectedRole} />
             </fieldset>
 
-            <Button type="submit" size="lg" className="w-full">
-              Create Account
+            {error && (
+              <p
+                role="alert"
+                className="rounded-md border border-[#ef4444]/40 bg-[#ef4444]/10 px-4 py-3 text-sm text-[#fca5a5]"
+              >
+                {error}
+              </p>
+            )}
+
+            <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>
+              {isSubmitting ? 'Creating account...' : 'Create Account'}
             </Button>
           </form>
 

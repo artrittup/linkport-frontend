@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router'
 import Button from '../components/Button'
 import Card from '../components/Card'
+import { getAuthErrorMessage } from '../api/authApi'
 import { useAuth } from '../context/AuthContext'
 
 const inputClasses =
@@ -9,15 +10,30 @@ const inputClasses =
 
 export default function Login() {
   const navigate = useNavigate()
-  const { login } = useAuth()
+  const { getDashboardPath, login } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [role, setRole] = useState('candidate')
+  const [error, setError] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const handleSubmit = async (event) => {
     event.preventDefault()
-    await login(email, password, role)
-    navigate(`/${role}/dashboard`, { replace: true })
+    setError('')
+    setIsSubmitting(true)
+
+    try {
+      const authenticatedUser = await login({ email, password })
+      navigate(getDashboardPath(authenticatedUser.role), { replace: true })
+    } catch (requestError) {
+      setError(
+        getAuthErrorMessage(
+          requestError,
+          'Unable to log in. Please check your details and try again.',
+        ),
+      )
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -87,24 +103,17 @@ export default function Login() {
               />
             </div>
 
-            <div>
-              <label htmlFor="login-role" className="text-sm font-medium text-[#e6f1ff]">
-                Demo role
-              </label>
-              <select
-                id="login-role"
-                value={role}
-                onChange={(event) => setRole(event.target.value)}
-                className={inputClasses}
+            {error && (
+              <p
+                role="alert"
+                className="rounded-md border border-[#ef4444]/40 bg-[#ef4444]/10 px-4 py-3 text-sm text-[#fca5a5]"
               >
-                <option value="candidate">Candidate</option>
-                <option value="company">Company</option>
-                <option value="admin">Admin</option>
-              </select>
-            </div>
+                {error}
+              </p>
+            )}
 
-            <Button type="submit" size="lg" className="w-full">
-              Login
+            <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>
+              {isSubmitting ? 'Logging in...' : 'Login'}
             </Button>
           </form>
 

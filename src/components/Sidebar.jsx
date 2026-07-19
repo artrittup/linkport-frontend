@@ -8,8 +8,8 @@ export default function Sidebar({ navItems = [], isOpen = false, onClose }) {
   const mainItems = navItems.filter((item) => item.label.toLowerCase() !== 'logout')
   const logoutItem = navItems.find((item) => item.label.toLowerCase() === 'logout')
 
-  const handleLogout = () => {
-    logout()
+  const handleLogout = async () => {
+    await logout()
     onClose?.()
     navigate('/login', { replace: true })
   }

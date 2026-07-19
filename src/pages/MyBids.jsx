@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { getMyBids } from '../api/bidsApi'
 import Button from '../components/Button'
 import Card from '../components/Card'
 import EmptyState from '../components/EmptyState'
-import mockMyBids from '../data/mockMyBids'
+import LoadingSpinner from '../components/LoadingSpinner'
 import DashboardLayout from '../layouts/DashboardLayout'
 
 const navItems = [
@@ -24,19 +25,69 @@ const statusClasses = {
 }
 
 function StatusBadge({ status }) {
+  const statusClass =
+    statusClasses[status] ??
+    'border-[#233554] bg-[#0a192f]/70 text-[#8892b0]'
+
   return (
-    <span className={`inline-flex rounded-full border px-2.5 py-1 text-[10px] font-semibold ${statusClasses[status]}`}>
+    <span className={`inline-flex rounded-full border px-2.5 py-1 text-[10px] font-semibold ${statusClass}`}>
       {status}
     </span>
   )
 }
 
 export default function MyBids() {
+  const [bids, setBids] = useState([])
   const [search, setSearch] = useState('')
   const [status, setStatus] = useState('All statuses')
+  const [page, setPage] = useState(1)
+  const [pagination, setPagination] = useState({
+    current_page: 1,
+    total: 0,
+    per_page: 15,
+  })
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    let isActive = true
+
+    async function loadBids() {
+      setIsLoading(true)
+      setError('')
+
+      try {
+        const response = await getMyBids({
+          status: status === 'All statuses' ? undefined : status.toLowerCase(),
+          per_page: 15,
+          page,
+        })
+
+        if (!isActive) return
+        setBids(response.data)
+        setPagination(response)
+      } catch (requestError) {
+        if (!isActive) return
+        setBids([])
+        setError(
+          requestError.response?.data?.message ||
+            'Unable to load your bids. Please try again.',
+        )
+      } finally {
+        if (isActive) setIsLoading(false)
+      }
+    }
+
+    loadBids()
+
+    return () => {
+      isActive = false
+    }
+  }, [page, status])
+
   const query = search.trim().toLowerCase()
 
-  const filteredBids = mockMyBids.filter(
+  const filteredBids = bids.filter(
     (bid) =>
       (!query ||
         bid.projectTitle.toLowerCase().includes(query) ||
@@ -45,11 +96,16 @@ export default function MyBids() {
   )
 
   const stats = [
-    { label: 'Total Bids', value: mockMyBids.length },
-    { label: 'Pending', value: mockMyBids.filter((item) => item.status === 'Pending').length },
-    { label: 'Accepted', value: mockMyBids.filter((item) => item.status === 'Accepted').length },
-    { label: 'Rejected', value: mockMyBids.filter((item) => item.status === 'Rejected').length },
+    { label: 'Total Bids', value: pagination.total },
+    { label: 'Pending', value: bids.filter((item) => item.status === 'Pending').length },
+    { label: 'Accepted', value: bids.filter((item) => item.status === 'Accepted').length },
+    { label: 'Rejected', value: bids.filter((item) => item.status === 'Rejected').length },
   ]
+
+  const lastPage = Math.max(
+    1,
+    Math.ceil(pagination.total / pagination.per_page),
+  )
 
   const showProposal = (bid) =>
     window.alert(`${bid.projectTitle} for ${bid.company}\n\n${bid.proposalPreview}`)
@@ -95,7 +151,7 @@ export default function MyBids() {
               <select
                 id="bid-status"
                 value={status}
-                onChange={(event) => setStatus(event.target.value)}
+                onChange={(event) => { setStatus(event.target.value); setPage(1) }}
                 className="w-full rounded-md border border-[#233554] bg-[#0a192f]/70 px-4 py-3 text-sm text-[#e6f1ff] outline-none focus:border-[#64ffda] focus:ring-1 focus:ring-[#64ffda]"
               >
                 {statuses.map((item) => <option key={item}>{item}</option>)}
@@ -109,6 +165,12 @@ export default function MyBids() {
             Showing <span className="font-medium text-[#e6f1ff]">{filteredBids.length}</span> bids
           </p>
 
+          {isLoading ? (
+            <LoadingSpinner label="Loading your bids..." size="lg" />
+          ) : error ? (
+            <EmptyState title="Unable to load bids" description={error} />
+          ) : (
+            <>
           <Card padding="sm" className="hidden overflow-hidden md:block">
             <div className="overflow-x-auto">
               <table className="w-full min-w-[900px] text-left">
@@ -166,7 +228,20 @@ export default function MyBids() {
           </div>
 
           {filteredBids.length === 0 && (
-            <EmptyState title="No bids found" description="Try changing your search or status filter." />
+            <EmptyState
+              title="No bids found"
+              description={bids.length === 0 ? 'You have not submitted any bids with this status.' : 'Try changing your search.'}
+            />
+          )}
+
+          {lastPage > 1 && (
+            <div className="mt-6 flex items-center justify-center gap-4">
+              <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((current) => current - 1)}>Previous</Button>
+              <span className="text-sm text-[#8892b0]">Page {pagination.current_page} of {lastPage}</span>
+              <Button variant="outline" size="sm" disabled={page >= lastPage} onClick={() => setPage((current) => current + 1)}>Next</Button>
+            </div>
+          )}
+            </>
           )}
         </section>
       </div>

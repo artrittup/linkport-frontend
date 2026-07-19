@@ -1,10 +1,10 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { getJobById, getJobs } from '../api/jobsApi'
 import Button from '../components/Button'
 import Card from '../components/Card'
 import EmptyState from '../components/EmptyState'
 import JobCard from '../components/JobCard'
-import useToast from '../hooks/useToast'
-import mockJobs from '../data/mockJobs'
+import LoadingSpinner from '../components/LoadingSpinner'
 import DashboardLayout from '../layouts/DashboardLayout'
 
 const navItems = [
@@ -22,37 +22,85 @@ const controlClasses =
   'w-full rounded-md border border-[#233554] bg-[#112240] px-4 py-3 text-sm text-[#e6f1ff] outline-none transition-colors placeholder:text-[#64748b] focus:border-[#64ffda] focus:ring-1 focus:ring-[#64ffda]'
 
 export default function Jobs() {
-  const { showToast } = useToast()
+  const [jobs, setJobs] = useState([])
   const [search, setSearch] = useState('')
   const [location, setLocation] = useState('All locations')
-  const [jobType, setJobType] = useState('All types')
-  const [skill, setSkill] = useState('All skills')
+  const [locations, setLocations] = useState([])
+  const [page, setPage] = useState(1)
+  const [pagination, setPagination] = useState(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState('')
   const [modal, setModal] = useState(null)
 
-  const locations = [...new Set(mockJobs.map((job) => job.location))]
-  const jobTypes = [...new Set(mockJobs.map((job) => job.type))]
-  const skills = [...new Set(mockJobs.flatMap((job) => job.skills))].sort()
+  useEffect(() => {
+    let isActive = true
+    const timer = window.setTimeout(async () => {
+      setIsLoading(true)
+      setError('')
 
-  const query = search.trim().toLowerCase()
+      try {
+        const response = await getJobs({
+          search: search.trim() || undefined,
+          location: location === 'All locations' ? undefined : location,
+          per_page: 12,
+          page,
+        })
 
-  const filteredJobs = mockJobs.filter((job) => {
-    const matchesSearch =
-      !query ||
-      job.title.toLowerCase().includes(query) ||
-      job.company.toLowerCase().includes(query) ||
-      job.skills.some((item) => item.toLowerCase().includes(query))
-    const matchesLocation = location === 'All locations' || job.location === location
-    const matchesType = jobType === 'All types' || job.type === jobType
-    const matchesSkill = skill === 'All skills' || job.skills.includes(skill)
+        if (!isActive) return
 
-    return matchesSearch && matchesLocation && matchesType && matchesSkill
-  })
+        setJobs(response.data)
+        setPagination(response)
+        setLocations((current) =>
+          [...new Set([...current, ...response.data.map((job) => job.location).filter(Boolean)])].sort(),
+        )
+      } catch (requestError) {
+        if (!isActive) return
+        setJobs([])
+        setError(
+          requestError.response?.data?.message ||
+            'Unable to load jobs. Please try again.',
+        )
+      } finally {
+        if (isActive) setIsLoading(false)
+      }
+    }, 300)
+
+    return () => {
+      isActive = false
+      window.clearTimeout(timer)
+    }
+  }, [location, page, search])
+
+  const openDetails = async (job) => {
+    setModal({ type: 'details', job, isLoading: true, error: '' })
+
+    try {
+      const response = await getJobById(job.id)
+      setModal((current) =>
+        current?.type === 'details' && current.job.id === job.id
+          ? { type: 'details', job: response.job, isLoading: false, error: '' }
+          : current,
+      )
+    } catch (requestError) {
+      setModal((current) =>
+        current?.type === 'details' && current.job.id === job.id
+          ? {
+              type: 'details',
+              job,
+              isLoading: false,
+              error:
+                requestError.response?.data?.message ||
+                'Unable to load job details.',
+            }
+          : current,
+      )
+    }
+  }
 
   const clearFilters = () => {
     setSearch('')
     setLocation('All locations')
-    setJobType('All types')
-    setSkill('All skills')
+    setPage(1)
   }
 
   return (
@@ -67,7 +115,7 @@ export default function Jobs() {
         </section>
 
         <Card padding="md">
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <div className="grid gap-4 md:grid-cols-2">
             <div>
               <label htmlFor="job-search" className="mb-2 block text-xs text-[#8892b0]">
                 Search
@@ -76,8 +124,8 @@ export default function Jobs() {
                 id="job-search"
                 type="search"
                 value={search}
-                onChange={(event) => setSearch(event.target.value)}
-                placeholder="Title, company, or skill..."
+                onChange={(event) => { setSearch(event.target.value); setPage(1) }}
+                placeholder="Title, description, or requirements..."
                 className={controlClasses}
               />
             </div>
@@ -88,43 +136,11 @@ export default function Jobs() {
               <select
                 id="location-filter"
                 value={location}
-                onChange={(event) => setLocation(event.target.value)}
+                onChange={(event) => { setLocation(event.target.value); setPage(1) }}
                 className={controlClasses}
               >
                 <option>All locations</option>
                 {locations.map((item) => (
-                  <option key={item}>{item}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label htmlFor="type-filter" className="mb-2 block text-xs text-[#8892b0]">
-                Job type
-              </label>
-              <select
-                id="type-filter"
-                value={jobType}
-                onChange={(event) => setJobType(event.target.value)}
-                className={controlClasses}
-              >
-                <option>All types</option>
-                {jobTypes.map((item) => (
-                  <option key={item}>{item}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label htmlFor="skill-filter" className="mb-2 block text-xs text-[#8892b0]">
-                Skill
-              </label>
-              <select
-                id="skill-filter"
-                value={skill}
-                onChange={(event) => setSkill(event.target.value)}
-                className={controlClasses}
-              >
-                <option>All skills</option>
-                {skills.map((item) => (
                   <option key={item}>{item}</option>
                 ))}
               </select>
@@ -135,10 +151,10 @@ export default function Jobs() {
         <section>
           <div className="flex flex-wrap items-center justify-between gap-3">
             <p className="text-sm text-[#8892b0]">
-              Showing <span className="font-medium text-[#e6f1ff]">{filteredJobs.length}</span>{' '}
-              opportunities
+              Showing <span className="font-medium text-[#e6f1ff]">{jobs.length}</span>{' '}
+              of {pagination?.total ?? jobs.length} opportunities
             </p>
-            {(search || location !== 'All locations' || jobType !== 'All types' || skill !== 'All skills') && (
+            {(search || location !== 'All locations') && (
               <button
                 type="button"
                 onClick={clearFilters}
@@ -149,15 +165,19 @@ export default function Jobs() {
             )}
           </div>
 
-          {filteredJobs.length > 0 ? (
+          {isLoading ? (
+            <LoadingSpinner label="Loading jobs..." size="lg" />
+          ) : error ? (
+            <div className="mt-5">
+              <EmptyState title="Unable to load jobs" description={error} />
+            </div>
+          ) : jobs.length > 0 ? (
             <div className="mt-5 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-              {filteredJobs.map((job) => (
+              {jobs.map((job) => (
                 <JobCard
                   key={job.id}
                   job={job}
-                  onViewDetails={(selectedJob) =>
-                    setModal({ type: 'details', job: selectedJob })
-                  }
+                  onViewDetails={openDetails}
                   onApply={(selectedJob) =>
                     setModal({ type: 'apply', job: selectedJob })
                   }
@@ -167,6 +187,14 @@ export default function Jobs() {
           ) : (
             <div className="mt-5">
               <EmptyState title="No jobs match your filters" description="Try a broader search or clear the selected filters." actionLabel="Clear filters" onAction={clearFilters} />
+            </div>
+          )}
+
+          {!isLoading && !error && pagination?.last_page > 1 && (
+            <div className="mt-6 flex items-center justify-center gap-4">
+              <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((current) => current - 1)}>Previous</Button>
+              <span className="text-sm text-[#8892b0]">Page {pagination.current_page} of {pagination.last_page}</span>
+              <Button variant="outline" size="sm" disabled={page >= pagination.last_page} onClick={() => setPage((current) => current + 1)}>Next</Button>
             </div>
           )}
         </section>
@@ -189,18 +217,30 @@ export default function Jobs() {
                 {modal.job.title}
               </h2>
               <p className="mt-1 text-sm text-[#64ffda]">{modal.job.company}</p>
-              <p className="mt-5 text-sm leading-relaxed text-[#8892b0]">
-                {modal.type === 'apply'
-                  ? 'Your application is ready to be submitted. Backend submission will be connected in a future update.'
-                  : modal.job.description}
-              </p>
+              {modal.isLoading ? (
+                <LoadingSpinner label="Loading job details..." />
+              ) : (
+                <div className="mt-5 space-y-4 text-sm leading-relaxed text-[#8892b0]">
+                  <p>
+                    {modal.error || (modal.type === 'apply'
+                      ? 'Application submission is not connected yet.'
+                      : modal.job.description)}
+                  </p>
+                  {!modal.error && modal.type === 'details' && modal.job.requirements && (
+                    <div>
+                      <h3 className="font-medium text-[#e6f1ff]">Requirements</h3>
+                      <p className="mt-1 whitespace-pre-line">{modal.job.requirements}</p>
+                    </div>
+                  )}
+                </div>
+              )}
               <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
                 <Button variant="outline" onClick={() => setModal(null)}>
                   Close
                 </Button>
                 {modal.type === 'apply' && (
-                  <Button onClick={() => { showToast(`Application submitted for ${modal.job.title}.`, 'success'); setModal(null) }}>
-                    Submit Application
+                  <Button disabled>
+                    Application unavailable
                   </Button>
                 )}
               </div>

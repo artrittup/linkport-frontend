@@ -1,8 +1,11 @@
+import { useEffect, useState } from 'react'
+import { getJobs } from '../api/jobsApi'
+import { getProjects } from '../api/projectsApi'
 import Card from '../components/Card'
+import EmptyState from '../components/EmptyState'
 import JobCard from '../components/JobCard'
+import LoadingSpinner from '../components/LoadingSpinner'
 import ProjectCard from '../components/ProjectCard'
-import mockJobs from '../data/mockJobs'
-import mockProjects from '../data/mockProjects'
 import DashboardLayout from '../layouts/DashboardLayout'
 
 const navItems = [
@@ -40,6 +43,51 @@ function SectionHeading({ title, description }) {
 }
 
 export default function CandidateDashboard() {
+  const [jobs, setJobs] = useState([])
+  const [projects, setProjects] = useState([])
+  const [jobsError, setJobsError] = useState('')
+  const [projectsError, setProjectsError] = useState('')
+  const [isLoadingJobs, setIsLoadingJobs] = useState(true)
+  const [isLoadingProjects, setIsLoadingProjects] = useState(true)
+
+  useEffect(() => {
+    let isActive = true
+
+    getJobs({ per_page: 3 })
+      .then((response) => {
+        if (isActive) setJobs(response.data)
+      })
+      .catch((error) => {
+        if (isActive) {
+          setJobsError(
+            error.response?.data?.message || 'Unable to load recommended jobs.',
+          )
+        }
+      })
+      .finally(() => {
+        if (isActive) setIsLoadingJobs(false)
+      })
+
+    getProjects({ per_page: 3 })
+      .then((response) => {
+        if (isActive) setProjects(response.data)
+      })
+      .catch((error) => {
+        if (isActive) {
+          setProjectsError(
+            error.response?.data?.message || 'Unable to load open projects.',
+          )
+        }
+      })
+      .finally(() => {
+        if (isActive) setIsLoadingProjects(false)
+      })
+
+    return () => {
+      isActive = false
+    }
+  }, [])
+
   return (
     <DashboardLayout
       title="Candidate Dashboard"
@@ -80,11 +128,17 @@ export default function CandidateDashboard() {
             title="Recommended Jobs"
             description="Opportunities selected to match your profile and skills."
           />
-          <div className="mt-5 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-            {mockJobs.slice(0, 3).map((job) => (
-              <JobCard key={job.id} job={job} compact />
-            ))}
-          </div>
+          {isLoadingJobs ? (
+            <LoadingSpinner label="Loading recommended jobs..." />
+          ) : jobsError ? (
+            <div className="mt-5"><EmptyState title="Unable to load jobs" description={jobsError} /></div>
+          ) : jobs.length === 0 ? (
+            <div className="mt-5"><EmptyState title="No open jobs" description="There are no public job opportunities right now." /></div>
+          ) : (
+            <div className="mt-5 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+              {jobs.map((job) => <JobCard key={job.id} job={job} compact />)}
+            </div>
+          )}
         </section>
 
         <section>
@@ -92,11 +146,17 @@ export default function CandidateDashboard() {
             title="Open Projects"
             description="Put your skills into practice and send an offer for real work."
           />
-          <div className="mt-5 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-            {mockProjects.slice(0, 3).map((project) => (
-              <ProjectCard key={project.id} project={project} compact />
-            ))}
-          </div>
+          {isLoadingProjects ? (
+            <LoadingSpinner label="Loading open projects..." />
+          ) : projectsError ? (
+            <div className="mt-5"><EmptyState title="Unable to load projects" description={projectsError} /></div>
+          ) : projects.length === 0 ? (
+            <div className="mt-5"><EmptyState title="No open projects" description="There are no public projects right now." /></div>
+          ) : (
+            <div className="mt-5 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+              {projects.map((project) => <ProjectCard key={project.id} project={project} compact />)}
+            </div>
+          )}
         </section>
 
         <section>

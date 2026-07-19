@@ -53,6 +53,10 @@ export async function deleteProject(id) {
 }
 
 export async function sendProjectBid(projectId, data) {
-  const response = await api.post(`/projects/${projectId}/bids`, data);
-  return response.data;
+  const response = await api.post(`/projects/${projectId}/bids`, {
+    amount: Number(data.amount),
+    proposal: data.proposal ?? data.message,
+    estimated_days: Number(data.estimated_days ?? data.estimatedDays),
+  })
+  return response.data
 }

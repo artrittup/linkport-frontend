@@ -1,10 +1,14 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router'
 import { getProjectById, getProjects } from '../api/projectsApi'
 import Button from '../components/Button'
 import Card from '../components/Card'
 import EmptyState from '../components/EmptyState'
 import LoadingSpinner from '../components/LoadingSpinner'
 import ProjectCard from '../components/ProjectCard'
+import SendBidModal from '../components/SendBidModal'
+import { useAuth } from '../context/AuthContext'
+import useToast from '../hooks/useToast'
 import DashboardLayout from '../layouts/DashboardLayout'
 
 const navItems = [
@@ -32,6 +36,9 @@ const getDeadlineMonth = (deadline) =>
     : null
 
 export default function Projects() {
+  const navigate = useNavigate()
+  const { isAuthenticated, user } = useAuth()
+  const { showToast } = useToast()
   const [projects, setProjects] = useState([])
   const [search, setSearch] = useState('')
   const [budgetRange, setBudgetRange] = useState('All budgets')
@@ -44,6 +51,7 @@ export default function Projects() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
   const [modal, setModal] = useState(null)
+  const [bidProject, setBidProject] = useState(null)
 
   useEffect(() => {
     let isActive = true
@@ -139,6 +147,25 @@ export default function Projects() {
     budgetRange !== 'All budgets' ||
     deadline !== 'Any deadline' ||
     skill !== 'All skills'
+
+  const openBid = (project) => {
+    if (!isAuthenticated) {
+      navigate('/login')
+      return
+    }
+
+    if (user?.role !== 'candidate') {
+      showToast('Only candidates can bid on projects.', 'error')
+      return
+    }
+
+    setBidProject(project)
+  }
+
+  const handleBidSuccess = (response) => {
+    setBidProject(null)
+    showToast(response.message ?? 'Bid submitted successfully.', 'success')
+  }
 
   return (
     <DashboardLayout title="Explore Projects" navItems={navItems} userType="Candidate">
@@ -247,9 +274,7 @@ export default function Projects() {
                   key={project.id}
                   project={project}
                   onViewDetails={openDetails}
-                  onSendOffer={(selectedProject) =>
-                    setModal({ type: 'offer', project: selectedProject })
-                  }
+                  onSendOffer={openBid}
                 />
               ))}
             </div>
@@ -280,7 +305,7 @@ export default function Projects() {
           <Card className="w-full max-w-md shadow-2xl shadow-black/40" padding="lg">
             <div role="dialog" aria-modal="true" aria-labelledby="project-modal-title">
               <p className="font-mono text-xs uppercase tracking-wider text-[#64ffda]">
-                {modal.type === 'offer' ? 'Offer preview' : 'Project details'}
+                Project details
               </p>
               <h2 id="project-modal-title" className="mt-3 text-xl font-bold text-[#e6f1ff]">
                 {modal.project.title}
@@ -290,24 +315,25 @@ export default function Projects() {
                 <LoadingSpinner label="Loading project details..." />
               ) : (
                 <p className="mt-5 text-sm leading-relaxed text-[#8892b0]">
-                  {modal.error || (modal.type === 'offer'
-                    ? 'Project bidding is not connected yet.'
-                    : modal.project.description)}
+                  {modal.error || modal.project.description}
                 </p>
               )}
               <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
                 <Button variant="outline" onClick={() => setModal(null)}>
                   Close
                 </Button>
-                {modal.type === 'offer' && (
-                  <Button disabled>
-                    Offers unavailable
-                  </Button>
-                )}
               </div>
             </div>
           </Card>
         </div>
+      )}
+
+      {bidProject && (
+        <SendBidModal
+          project={bidProject}
+          onClose={() => setBidProject(null)}
+          onSuccess={handleBidSuccess}
+        />
       )}
     </DashboardLayout>
   )

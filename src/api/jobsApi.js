@@ -46,6 +46,8 @@ export async function deleteJob(id) {
 }
 
 export async function applyToJob(jobId, data) {
-  const response = await api.post(`/jobs/${jobId}/apply`, data);
-  return response.data;
+  const response = await api.post(`/jobs/${jobId}/applications`, {
+    cover_letter: data.cover_letter ?? data.coverLetter ?? null,
+  })
+  return response.data
 }

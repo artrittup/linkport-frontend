@@ -1,10 +1,14 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router'
 import { getJobById, getJobs } from '../api/jobsApi'
+import ApplyJobModal from '../components/ApplyJobModal'
 import Button from '../components/Button'
 import Card from '../components/Card'
 import EmptyState from '../components/EmptyState'
 import JobCard from '../components/JobCard'
 import LoadingSpinner from '../components/LoadingSpinner'
+import { useAuth } from '../context/AuthContext'
+import useToast from '../hooks/useToast'
 import DashboardLayout from '../layouts/DashboardLayout'
 
 const navItems = [
@@ -22,6 +26,9 @@ const controlClasses =
   'w-full rounded-md border border-[#233554] bg-[#112240] px-4 py-3 text-sm text-[#e6f1ff] outline-none transition-colors placeholder:text-[#64748b] focus:border-[#64ffda] focus:ring-1 focus:ring-[#64ffda]'
 
 export default function Jobs() {
+  const navigate = useNavigate()
+  const { isAuthenticated, user } = useAuth()
+  const { showToast } = useToast()
   const [jobs, setJobs] = useState([])
   const [search, setSearch] = useState('')
   const [location, setLocation] = useState('All locations')
@@ -31,6 +38,7 @@ export default function Jobs() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
   const [modal, setModal] = useState(null)
+  const [applicationJob, setApplicationJob] = useState(null)
 
   useEffect(() => {
     let isActive = true
@@ -101,6 +109,25 @@ export default function Jobs() {
     setSearch('')
     setLocation('All locations')
     setPage(1)
+  }
+
+  const openApplication = (job) => {
+    if (!isAuthenticated) {
+      navigate('/login')
+      return
+    }
+
+    if (user?.role !== 'candidate') {
+      showToast('Only candidates can apply for jobs.', 'error')
+      return
+    }
+
+    setApplicationJob(job)
+  }
+
+  const handleApplicationSuccess = (response) => {
+    setApplicationJob(null)
+    showToast(response.message ?? 'Application submitted successfully.', 'success')
   }
 
   return (
@@ -178,9 +205,7 @@ export default function Jobs() {
                   key={job.id}
                   job={job}
                   onViewDetails={openDetails}
-                  onApply={(selectedJob) =>
-                    setModal({ type: 'apply', job: selectedJob })
-                  }
+                  onApply={openApplication}
                 />
               ))}
             </div>
@@ -211,7 +236,7 @@ export default function Jobs() {
           <Card className="w-full max-w-md shadow-2xl shadow-black/40" padding="lg">
             <div role="dialog" aria-modal="true" aria-labelledby="job-modal-title">
               <p className="font-mono text-xs uppercase tracking-wider text-[#64ffda]">
-                {modal.type === 'apply' ? 'Application preview' : 'Job details'}
+                Job details
               </p>
               <h2 id="job-modal-title" className="mt-3 text-xl font-bold text-[#e6f1ff]">
                 {modal.job.title}
@@ -222,11 +247,9 @@ export default function Jobs() {
               ) : (
                 <div className="mt-5 space-y-4 text-sm leading-relaxed text-[#8892b0]">
                   <p>
-                    {modal.error || (modal.type === 'apply'
-                      ? 'Application submission is not connected yet.'
-                      : modal.job.description)}
+                    {modal.error || modal.job.description}
                   </p>
-                  {!modal.error && modal.type === 'details' && modal.job.requirements && (
+                  {!modal.error && modal.job.requirements && (
                     <div>
                       <h3 className="font-medium text-[#e6f1ff]">Requirements</h3>
                       <p className="mt-1 whitespace-pre-line">{modal.job.requirements}</p>
@@ -238,15 +261,18 @@ export default function Jobs() {
                 <Button variant="outline" onClick={() => setModal(null)}>
                   Close
                 </Button>
-                {modal.type === 'apply' && (
-                  <Button disabled>
-                    Application unavailable
-                  </Button>
-                )}
               </div>
             </div>
           </Card>
         </div>
+      )}
+
+      {applicationJob && (
+        <ApplyJobModal
+          job={applicationJob}
+          onClose={() => setApplicationJob(null)}
+          onSuccess={handleApplicationSuccess}
+        />
       )}
     </DashboardLayout>
   )

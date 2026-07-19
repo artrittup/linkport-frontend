@@ -30,19 +30,38 @@ export async function getJobById(id) {
   return { ...response.data, job: normalizeJob(response.data.job) }
 }
 
+export async function getCompanyJobs(params) {
+  const response = await api.get('/company/jobs', { params })
+  const payload = response.data
+
+  return {
+    ...payload,
+    data: Array.isArray(payload.data)
+      ? payload.data.map((job) => ({
+          ...normalizeJob(job),
+          applications: Number(job.applications_count ?? 0),
+          status: job.status
+            ? job.status.charAt(0).toUpperCase() + job.status.slice(1)
+            : 'Unknown',
+          deadline: job.deadline?.slice(0, 10) ?? '',
+        }))
+      : [],
+  }
+}
+
 export async function createJob(data) {
-  const response = await api.post("/jobs", data);
-  return response.data;
+  const response = await api.post('/jobs', data)
+  return response.data
 }
 
 export async function updateJob(id, data) {
-  const response = await api.put(`/jobs/${id}`, data);
-  return response.data;
+  const response = await api.put(`/jobs/${id}`, data)
+  return response.data
 }
 
 export async function deleteJob(id) {
-  const response = await api.delete(`/jobs/${id}`);
-  return response.data;
+  const response = await api.delete(`/jobs/${id}`)
+  return response.data
 }
 
 export async function applyToJob(jobId, data) {

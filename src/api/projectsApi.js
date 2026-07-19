@@ -37,19 +37,38 @@ export async function getProjectById(id) {
   }
 }
 
+export async function getCompanyProjects(params) {
+  const response = await api.get('/company/projects', { params })
+  const payload = response.data
+
+  return {
+    ...payload,
+    data: Array.isArray(payload.data)
+      ? payload.data.map((project) => ({
+          ...normalizeProject(project),
+          bids: Number(project.bids_count ?? 0),
+          status: project.status
+            ? project.status.charAt(0).toUpperCase() + project.status.slice(1)
+            : 'Unknown',
+          deadline: project.deadline?.slice(0, 10) ?? '',
+        }))
+      : [],
+  }
+}
+
 export async function createProject(data) {
-  const response = await api.post("/projects", data);
-  return response.data;
+  const response = await api.post('/projects', data)
+  return response.data
 }
 
 export async function updateProject(id, data) {
-  const response = await api.put(`/projects/${id}`, data);
-  return response.data;
+  const response = await api.put(`/projects/${id}`, data)
+  return response.data
 }
 
 export async function deleteProject(id) {
-  const response = await api.delete(`/projects/${id}`);
-  return response.data;
+  const response = await api.delete(`/projects/${id}`)
+  return response.data
 }
 
 export async function sendProjectBid(projectId, data) {

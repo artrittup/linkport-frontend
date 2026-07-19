@@ -1,7 +1,14 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import {
+  getCandidateProfile,
+  getProfileErrorMessage,
+  updateCandidateProfile,
+} from '../api/profileApi'
 import Button from '../components/Button'
 import Card from '../components/Card'
+import LoadingSpinner from '../components/LoadingSpinner'
 import SkillsInput from '../components/SkillsInput'
+import { useAuth } from '../context/AuthContext'
 import useToast from '../hooks/useToast'
 import DashboardLayout from '../layouts/DashboardLayout'
 
@@ -21,6 +28,7 @@ const initialForm = {
   professionalTitle: 'Junior Frontend Developer',
   location: 'Prishtina, Kosovo',
   bio: 'Computer Science student and frontend developer focused on building accessible, responsive digital products. I enjoy turning thoughtful design ideas into clean user experiences.',
+  // Education and experience are frontend-only until the profile API supports them.
   education: 'University of Prishtina — Computer Science',
   experience: 'Frontend Intern at Tech Solutions',
   portfolioLink: 'https://portfolio.example.com',
@@ -42,6 +50,7 @@ function OverviewCard({ number, title, children, className = '' }) {
 }
 
 export default function CandidateProfile() {
+  const { user } = useAuth()
   const { showToast } = useToast()
   const [form, setForm] = useState(initialForm)
   const [skills, setSkills] = useState([
@@ -52,6 +61,52 @@ export default function CandidateProfile() {
   ])
   const [cvName, setCvName] = useState('Arta_Krasniqi_CV.pdf')
   const [saved, setSaved] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+  const [isSaving, setIsSaving] = useState(false)
+  const [loadError, setLoadError] = useState('')
+  const [saveError, setSaveError] = useState('')
+
+  useEffect(() => {
+    let isActive = true
+
+    async function loadProfile() {
+      try {
+        const { profile } = await getCandidateProfile()
+
+        if (!isActive) return
+
+        setForm((current) => ({
+          ...current,
+          fullName: user?.name ?? '',
+          professionalTitle: profile?.headline ?? '',
+          location: profile?.location ?? '',
+          bio: profile?.bio ?? '',
+          phone: profile?.phone ?? '',
+          portfolioLink: profile?.website ?? '',
+          githubUrl: profile?.github_url ?? '',
+          linkedinUrl: profile?.linkedin_url ?? '',
+        }))
+        setSkills(profile?.skills ?? [])
+      } catch (requestError) {
+        if (isActive) {
+          setLoadError(
+            getProfileErrorMessage(
+              requestError,
+              'Unable to load your candidate profile.',
+            ),
+          )
+        }
+      } finally {
+        if (isActive) setIsLoading(false)
+      }
+    }
+
+    loadProfile()
+
+    return () => {
+      isActive = false
+    }
+  }, [user?.name])
 
   const updateField = (event) => {
     const { name, value } = event.target
@@ -59,10 +114,38 @@ export default function CandidateProfile() {
     setSaved(false)
   }
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault()
-    setSaved(true)
-    showToast('Candidate profile saved successfully.', 'success')
+    setSaveError('')
+    setSaved(false)
+    setIsSaving(true)
+
+    const nullable = (value = '') => value.trim() || null
+
+    try {
+      const response = await updateCandidateProfile({
+        headline: nullable(form.professionalTitle),
+        bio: nullable(form.bio),
+        location: nullable(form.location),
+        phone: nullable(form.phone),
+        website: nullable(form.portfolioLink),
+        github_url: nullable(form.githubUrl),
+        linkedin_url: nullable(form.linkedinUrl),
+        skills,
+      })
+
+      setSaved(true)
+      showToast(response.message ?? 'Candidate profile saved successfully.', 'success')
+    } catch (requestError) {
+      setSaveError(
+        getProfileErrorMessage(
+          requestError,
+          'Unable to save your candidate profile.',
+        ),
+      )
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   const scrollToEdit = () => {
@@ -70,6 +153,14 @@ export default function CandidateProfile() {
       behavior: 'smooth',
       block: 'start',
     })
+  }
+
+  if (isLoading) {
+    return (
+      <DashboardLayout title="My Profile" navItems={navItems} userType="Candidate">
+        <LoadingSpinner label="Loading your profile..." size="lg" />
+      </DashboardLayout>
+    )
   }
 
   return (
@@ -82,6 +173,12 @@ export default function CandidateProfile() {
             Manage your professional profile and portfolio.
           </p>
         </section>
+
+        {loadError && (
+          <p role="alert" className="rounded-md border border-[#ef4444]/40 bg-[#ef4444]/10 px-4 py-3 text-sm text-[#fca5a5]">
+            {loadError}
+          </p>
+        )}
 
         <Card padding="lg" className="relative overflow-hidden">
           <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-[#64ffda]/5 blur-2xl" />
@@ -177,7 +274,8 @@ export default function CandidateProfile() {
               <div className="grid gap-5 md:grid-cols-2">
                 <div>
                   <label htmlFor="fullName" className="text-sm font-medium">Full name</label>
-                  <input id="fullName" name="fullName" value={form.fullName} onChange={updateField} className={inputClasses} />
+                  <input id="fullName" name="fullName" value={form.fullName} readOnly className={`${inputClasses} cursor-not-allowed opacity-70`} />
+                  <p className="mt-1 text-xs text-[#64748b]">Managed by your account.</p>
                 </div>
                 <div>
                   <label htmlFor="professionalTitle" className="text-sm font-medium">Professional title</label>
@@ -198,6 +296,18 @@ export default function CandidateProfile() {
                 <div>
                   <label htmlFor="portfolioLink" className="text-sm font-medium">Portfolio link</label>
                   <input id="portfolioLink" name="portfolioLink" type="url" value={form.portfolioLink} onChange={updateField} className={inputClasses} />
+                </div>
+                <div>
+                  <label htmlFor="phone" className="text-sm font-medium">Phone</label>
+                  <input id="phone" name="phone" type="tel" value={form.phone ?? ''} onChange={updateField} className={inputClasses} />
+                </div>
+                <div>
+                  <label htmlFor="githubUrl" className="text-sm font-medium">GitHub URL</label>
+                  <input id="githubUrl" name="githubUrl" type="url" value={form.githubUrl ?? ''} onChange={updateField} className={inputClasses} />
+                </div>
+                <div>
+                  <label htmlFor="linkedinUrl" className="text-sm font-medium">LinkedIn URL</label>
+                  <input id="linkedinUrl" name="linkedinUrl" type="url" value={form.linkedinUrl ?? ''} onChange={updateField} className={inputClasses} />
                 </div>
               </div>
 
@@ -233,11 +343,14 @@ export default function CandidateProfile() {
 
               <div className="flex flex-col-reverse gap-3 border-t border-[#233554] pt-6 sm:flex-row sm:items-center sm:justify-between">
                 <div aria-live="polite">
+                  {saveError && <p role="alert" className="text-sm text-[#fca5a5]">{saveError}</p>}
                   {saved && (
                     <p className="text-sm text-[#22c55e]">Profile changes saved successfully.</p>
                   )}
                 </div>
-                <Button type="submit" size="lg">Save Changes</Button>
+                <Button type="submit" size="lg" disabled={isSaving}>
+                  {isSaving ? 'Saving...' : 'Save Changes'}
+                </Button>
               </div>
             </form>
           </Card>

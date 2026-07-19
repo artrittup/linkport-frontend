@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { getDashboardSummary } from '../api/dashboardApi'
 import { getJobs } from '../api/jobsApi'
 import { getProjects } from '../api/projectsApi'
 import Card from '../components/Card'
@@ -17,13 +18,6 @@ const navItems = [
   { label: 'My Bids', href: '/candidate/bids' },
   { label: 'Settings', href: '/settings' },
   { label: 'Logout', href: '/login' },
-]
-
-const stats = [
-  { label: 'Jobs Applied', value: '6' },
-  { label: 'Active Applications', value: '3' },
-  { label: 'Project Bids', value: '4' },
-  { label: 'Accepted Offers', value: '1' },
 ]
 
 const profileChecklist = [
@@ -49,6 +43,23 @@ export default function CandidateDashboard() {
   const [projectsError, setProjectsError] = useState('')
   const [isLoadingJobs, setIsLoadingJobs] = useState(true)
   const [isLoadingProjects, setIsLoadingProjects] = useState(true)
+  const [summary, setSummary] = useState({})
+  const [summaryError, setSummaryError] = useState('')
+  const [isLoadingSummary, setIsLoadingSummary] = useState(true)
+
+  const count = (key) => {
+    const value = Number(summary[key])
+    return Number.isFinite(value) ? value : 0
+  }
+
+  const stats = [
+    { label: 'Applications', value: count('applications_count') },
+    { label: 'Pending Applications', value: count('pending_applications_count') },
+    { label: 'Accepted Applications', value: count('accepted_applications_count') },
+    { label: 'Project Bids', value: count('bids_count') },
+    { label: 'Pending Bids', value: count('pending_bids_count') },
+    { label: 'Accepted Bids', value: count('accepted_bids_count') },
+  ]
 
   useEffect(() => {
     let isActive = true
@@ -83,6 +94,22 @@ export default function CandidateDashboard() {
         if (isActive) setIsLoadingProjects(false)
       })
 
+    getDashboardSummary()
+      .then((response) => {
+        if (isActive) setSummary(response ?? {})
+      })
+      .catch((error) => {
+        if (isActive) {
+          setSummaryError(
+            error.response?.data?.message ||
+              'Unable to load your dashboard summary.',
+          )
+        }
+      })
+      .finally(() => {
+        if (isActive) setIsLoadingSummary(false)
+      })
+
     return () => {
       isActive = false
     }
@@ -104,7 +131,14 @@ export default function CandidateDashboard() {
             Track your applications, discover jobs, and find project opportunities.
           </p>
 
-          <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          {isLoadingSummary ? (
+            <LoadingSpinner label="Loading dashboard summary..." />
+          ) : summaryError ? (
+            <div className="mt-8">
+              <EmptyState title="Unable to load summary" description={summaryError} />
+            </div>
+          ) : (
+          <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {stats.map((stat, index) => (
               <Card key={stat.label} hover>
                 <div className="flex items-start justify-between gap-4">
@@ -121,6 +155,7 @@ export default function CandidateDashboard() {
               </Card>
             ))}
           </div>
+          )}
         </section>
 
         <section>

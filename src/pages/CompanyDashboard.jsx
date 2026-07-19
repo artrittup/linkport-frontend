@@ -1,5 +1,9 @@
+import { useEffect, useState } from 'react'
+import { getDashboardSummary } from '../api/dashboardApi'
 import Button from '../components/Button'
 import Card from '../components/Card'
+import EmptyState from '../components/EmptyState'
+import LoadingSpinner from '../components/LoadingSpinner'
 import mockApplications from '../data/mockApplications'
 import mockCandidates from '../data/mockCandidates'
 import mockCompanyProjects from '../data/mockCompanyProjects'
@@ -14,13 +18,6 @@ const navItems = [
   { label: 'Bids', href: '/company/bids' },
   { label: 'Settings', href: '/settings' },
   { label: 'Logout', href: '/login' },
-]
-
-const stats = [
-  { label: 'Active Jobs', value: '5' },
-  { label: 'Applications Received', value: '18' },
-  { label: 'Active Projects', value: '4' },
-  { label: 'Project Bids', value: '12' },
 ]
 
 const statusClasses = {
@@ -65,6 +62,50 @@ function SectionHeading({ title, description }) {
 }
 
 export default function CompanyDashboard() {
+  const [summary, setSummary] = useState({})
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    let isActive = true
+
+    getDashboardSummary()
+      .then((response) => {
+        if (isActive) setSummary(response ?? {})
+      })
+      .catch((requestError) => {
+        if (isActive) {
+          setError(
+            requestError.response?.data?.message ||
+              'Unable to load the company dashboard summary.',
+          )
+        }
+      })
+      .finally(() => {
+        if (isActive) setIsLoading(false)
+      })
+
+    return () => {
+      isActive = false
+    }
+  }, [])
+
+  const count = (key) => {
+    const value = Number(summary[key])
+    return Number.isFinite(value) ? value : 0
+  }
+
+  const stats = [
+    { label: 'Jobs', value: count('jobs_count') },
+    { label: 'Open Jobs', value: count('open_jobs_count') },
+    { label: 'Applications', value: count('applications_count') },
+    { label: 'Pending Applications', value: count('pending_applications_count') },
+    { label: 'Projects', value: count('projects_count') },
+    { label: 'Open Projects', value: count('open_projects_count') },
+    { label: 'Project Bids', value: count('bids_count') },
+    { label: 'Pending Bids', value: count('pending_bids_count') },
+  ]
+
   return (
     <DashboardLayout title="Company Dashboard" navItems={navItems} userType="Company">
       <div className="space-y-10">
@@ -77,6 +118,11 @@ export default function CompanyDashboard() {
             Manage your jobs, projects, applications, and candidate offers.
           </p>
 
+          {isLoading ? (
+            <LoadingSpinner label="Loading dashboard summary..." />
+          ) : error ? (
+            <div className="mt-8"><EmptyState title="Unable to load summary" description={error} /></div>
+          ) : (
           <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             {stats.map((stat, index) => (
               <Card key={stat.label} hover>
@@ -94,6 +140,7 @@ export default function CompanyDashboard() {
               </Card>
             ))}
           </div>
+          )}
         </section>
 
         <section>

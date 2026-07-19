@@ -57,17 +57,50 @@ export async function getMyBids(params) {
   }
 }
 
-export async function getCompanyBids() {
-  const response = await api.get("/bids/company");
-  return response.data;
+const normalizeCompanyBid = (bid) => {
+  const candidate = bid?.candidate ?? {}
+  const profile = candidate.candidate_profile ?? {}
+  const project = bid?.project ?? {}
+
+  return {
+    ...bid,
+    status: capitalize(bid?.status),
+    candidateName: candidate.name ?? 'Unknown candidate',
+    candidateEmail: candidate.email ?? '',
+    headline: profile.headline ?? 'Headline not provided',
+    location: profile.location ?? 'Location not provided',
+    skills: Array.isArray(profile.skills) ? profile.skills : [],
+    projectTitle: project.title ?? 'Unavailable project',
+    offeredPrice: formatAmount(bid?.amount),
+    proposalMessage: bid?.proposal ?? '',
+    deliveryDays: bid?.estimated_days ?? null,
+    dateSubmitted: formatDate(bid?.created_at),
+    candidate,
+    project,
+  }
+}
+
+export async function getCompanyBids(params) {
+  const response = await api.get('/company/bids', { params })
+  const payload = response.data ?? {}
+
+  return {
+    ...payload,
+    data: Array.isArray(payload.data)
+      ? payload.data.map(normalizeCompanyBid)
+      : [],
+    current_page: Number(payload.current_page ?? 1),
+    total: Number(payload.total ?? 0),
+    per_page: Number(payload.per_page ?? params?.per_page ?? 15),
+  }
 }
 
 export async function acceptBid(id) {
-  const response = await api.patch(`/bids/${id}/accept`);
-  return response.data;
+  const response = await api.patch(`/project-bids/${id}/accept`)
+  return response.data
 }
 
 export async function rejectBid(id) {
-  const response = await api.patch(`/bids/${id}/reject`);
-  return response.data;
+  const response = await api.patch(`/project-bids/${id}/reject`)
+  return response.data
 }

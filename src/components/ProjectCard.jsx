@@ -16,6 +16,15 @@ export default function ProjectCard({
   const statusClass =
     statusClasses[project.status?.toLowerCase()] ??
     'border-[#233554] bg-[#0a192f]/70 text-[#8892b0]'
+  const budget = new Intl.NumberFormat(undefined, {
+    style: 'currency',
+    currency: 'EUR',
+  }).format(Number(project.budget ?? 0))
+  const deadline = project.deadline
+    ? new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' }).format(
+        new Date(project.deadline),
+      )
+    : 'No deadline'
 
   return (
     <Card
@@ -36,7 +45,7 @@ export default function ProjectCard({
           <p className="mt-1 text-sm text-[#64ffda]">{project.company}</p>
         </div>
         <span
-          className={`shrink-0 rounded-full border px-2.5 py-1 text-[10px] font-semibold ${statusClass}`}
+          className={`shrink-0 rounded-full border px-2.5 py-1 text-[10px] font-semibold capitalize ${statusClass}`}
         >
           {project.status}
         </span>
@@ -49,22 +58,24 @@ export default function ProjectCard({
       )}
 
       <div
-        className={`grid grid-cols-3 gap-3 border-y border-[#233554] text-xs ${
+        className={`grid ${project.bids == null ? 'grid-cols-2' : 'grid-cols-3'} gap-3 border-y border-[#233554] text-xs ${
           compact ? 'mt-4 py-3' : 'mt-5 py-4'
         }`}
       >
         <div>
           <p className="text-[#64748b]">Budget</p>
-          <p className="mt-1 font-medium text-[#e6f1ff]">{project.budget}</p>
+          <p className="mt-1 font-medium text-[#e6f1ff]">{budget}</p>
         </div>
         <div>
           <p className="text-[#64748b]">Deadline</p>
-          <p className="mt-1 text-[#facc15]">{project.deadline}</p>
+          <p className="mt-1 text-[#facc15]">{deadline}</p>
         </div>
-        <div>
-          <p className="text-[#64748b]">Bids</p>
-          <p className="mt-1 text-[#8892b0]">{project.bids} offers</p>
-        </div>
+        {project.bids != null && (
+          <div>
+            <p className="text-[#64748b]">Bids</p>
+            <p className="mt-1 text-[#8892b0]">{project.bids} offers</p>
+          </div>
+        )}
       </div>
 
       <div className={`${compact ? 'mt-3' : 'mt-4'} flex flex-wrap gap-2`}>
@@ -78,18 +89,20 @@ export default function ProjectCard({
         ))}
       </div>
 
-      <div className={`mt-auto grid grid-cols-2 gap-3 ${compact ? 'pt-4' : 'pt-6'}`}>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => onViewDetails?.(project)}
-        >
-          View Details
-        </Button>
-        <Button size="sm" onClick={() => onSendOffer?.(project)}>
-          Send Offer
-        </Button>
-      </div>
+      {(onViewDetails || onSendOffer) && (
+        <div className={`mt-auto grid gap-3 ${onViewDetails && onSendOffer ? 'grid-cols-2' : 'grid-cols-1'} ${compact ? 'pt-4' : 'pt-6'}`}>
+          {onViewDetails && (
+            <Button variant="outline" size="sm" onClick={() => onViewDetails(project)}>
+              View Details
+            </Button>
+          )}
+          {onSendOffer && (
+            <Button size="sm" onClick={() => onSendOffer(project)}>
+              Send Offer
+            </Button>
+          )}
+        </div>
+      )}
     </Card>
   )
 }

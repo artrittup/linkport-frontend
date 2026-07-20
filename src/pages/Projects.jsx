@@ -1,10 +1,14 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router'
+import { getProjectById, getProjects } from '../api/projectsApi'
 import Button from '../components/Button'
 import Card from '../components/Card'
 import EmptyState from '../components/EmptyState'
+import LoadingSpinner from '../components/LoadingSpinner'
 import ProjectCard from '../components/ProjectCard'
+import SendBidModal from '../components/SendBidModal'
+import { useAuth } from '../context/AuthContext'
 import useToast from '../hooks/useToast'
-import mockProjects from '../data/mockProjects'
 import DashboardLayout from '../layouts/DashboardLayout'
 
 const navItems = [
@@ -22,64 +26,146 @@ const controlClasses =
   'w-full rounded-md border border-[#233554] bg-[#112240] px-4 py-3 text-sm text-[#e6f1ff] outline-none transition-colors placeholder:text-[#64748b] focus:border-[#64ffda] focus:ring-1 focus:ring-[#64ffda]'
 
 const getMinimumBudget = (budget) =>
-  Number(budget.match(/[\d,]+/)?.[0].replace(',', '') ?? 0)
+  Number(String(budget ?? 0).replace(/[^\d.]/g, ''))
+
+const getDeadlineMonth = (deadline) =>
+  deadline
+    ? new Intl.DateTimeFormat(undefined, { month: 'short' }).format(
+        new Date(deadline),
+      )
+    : null
 
 export default function Projects() {
+  const navigate = useNavigate()
+  const { isAuthenticated, user } = useAuth()
   const { showToast } = useToast()
+  const [projects, setProjects] = useState([])
   const [search, setSearch] = useState('')
   const [budgetRange, setBudgetRange] = useState('All budgets')
   const [deadline, setDeadline] = useState('Any deadline')
-  const [category, setCategory] = useState('All categories')
   const [skill, setSkill] = useState('All skills')
+  const [skills, setSkills] = useState([])
+  const [deadlineMonths, setDeadlineMonths] = useState([])
+  const [page, setPage] = useState(1)
+  const [pagination, setPagination] = useState(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState('')
   const [modal, setModal] = useState(null)
+  const [bidProject, setBidProject] = useState(null)
 
-  const categories = [...new Set(mockProjects.map((project) => project.category))].sort()
-  const skills = [...new Set(mockProjects.flatMap((project) => project.skills))].sort()
-  const deadlineMonths = [...new Set(mockProjects.map((project) => project.deadline.split(' ')[0]))]
-  const query = search.trim().toLowerCase()
+  useEffect(() => {
+    let isActive = true
+    const timer = window.setTimeout(async () => {
+      setIsLoading(true)
+      setError('')
 
-  const filteredProjects = mockProjects.filter((project) => {
+      try {
+        const response = await getProjects({
+          search: search.trim() || undefined,
+          skill: skill === 'All skills' ? undefined : skill,
+          per_page: 12,
+          page,
+        })
+
+        if (!isActive) return
+
+        setProjects(response.data)
+        setPagination(response)
+        setSkills((current) =>
+          [...new Set([...current, ...response.data.flatMap((project) => project.skills)])].sort(),
+        )
+        setDeadlineMonths((current) =>
+          [...new Set([...current, ...response.data.map((project) => getDeadlineMonth(project.deadline)).filter(Boolean)])],
+        )
+      } catch (requestError) {
+        if (!isActive) return
+        setProjects([])
+        setError(
+          requestError.response?.data?.message ||
+            'Unable to load projects. Please try again.',
+        )
+      } finally {
+        if (isActive) setIsLoading(false)
+      }
+    }, 300)
+
+    return () => {
+      isActive = false
+      window.clearTimeout(timer)
+    }
+  }, [page, search, skill])
+
+  const filteredProjects = projects.filter((project) => {
     const minimumBudget = getMinimumBudget(project.budget)
-    const matchesSearch =
-      !query ||
-      project.title.toLowerCase().includes(query) ||
-      project.company.toLowerCase().includes(query) ||
-      project.category.toLowerCase().includes(query) ||
-      project.skills.some((item) => item.toLowerCase().includes(query))
     const matchesBudget =
       budgetRange === 'All budgets' ||
       (budgetRange === 'Under €1,000' && minimumBudget < 1000) ||
       (budgetRange === '€1,000–€1,499' && minimumBudget >= 1000 && minimumBudget < 1500) ||
       (budgetRange === '€1,500+' && minimumBudget >= 1500)
     const matchesDeadline =
-      deadline === 'Any deadline' || project.deadline.startsWith(deadline)
-    const matchesCategory =
-      category === 'All categories' || project.category === category
-    const matchesSkill = skill === 'All skills' || project.skills.includes(skill)
+      deadline === 'Any deadline' || getDeadlineMonth(project.deadline) === deadline
 
-    return (
-      matchesSearch &&
-      matchesBudget &&
-      matchesDeadline &&
-      matchesCategory &&
-      matchesSkill
-    )
+    return matchesBudget && matchesDeadline
   })
+
+  const openDetails = async (project) => {
+    setModal({ type: 'details', project, isLoading: true, error: '' })
+
+    try {
+      const response = await getProjectById(project.id)
+      setModal((current) =>
+        current?.type === 'details' && current.project.id === project.id
+          ? { type: 'details', project: response.project, isLoading: false, error: '' }
+          : current,
+      )
+    } catch (requestError) {
+      setModal((current) =>
+        current?.type === 'details' && current.project.id === project.id
+          ? {
+              type: 'details',
+              project,
+              isLoading: false,
+              error:
+                requestError.response?.data?.message ||
+                'Unable to load project details.',
+            }
+          : current,
+      )
+    }
+  }
 
   const clearFilters = () => {
     setSearch('')
     setBudgetRange('All budgets')
     setDeadline('Any deadline')
-    setCategory('All categories')
     setSkill('All skills')
+    setPage(1)
   }
 
   const hasFilters =
     search ||
     budgetRange !== 'All budgets' ||
     deadline !== 'Any deadline' ||
-    category !== 'All categories' ||
     skill !== 'All skills'
+
+  const openBid = (project) => {
+    if (!isAuthenticated) {
+      navigate('/login')
+      return
+    }
+
+    if (user?.role !== 'candidate') {
+      showToast('Only candidates can bid on projects.', 'error')
+      return
+    }
+
+    setBidProject(project)
+  }
+
+  const handleBidSuccess = (response) => {
+    setBidProject(null)
+    showToast(response.message ?? 'Bid submitted successfully.', 'success')
+  }
 
   return (
     <DashboardLayout title="Explore Projects" navItems={navItems} userType="Candidate">
@@ -93,7 +179,7 @@ export default function Projects() {
         </section>
 
         <Card padding="md">
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             <div>
               <label htmlFor="project-search" className="mb-2 block text-xs text-[#8892b0]">
                 Search
@@ -102,8 +188,8 @@ export default function Projects() {
                 id="project-search"
                 type="search"
                 value={search}
-                onChange={(event) => setSearch(event.target.value)}
-                placeholder="Project, company, skill..."
+                onChange={(event) => { setSearch(event.target.value); setPage(1) }}
+                placeholder="Project title or description..."
                 className={controlClasses}
               />
             </div>
@@ -114,7 +200,7 @@ export default function Projects() {
               <select
                 id="budget-filter"
                 value={budgetRange}
-                onChange={(event) => setBudgetRange(event.target.value)}
+                onChange={(event) => { setBudgetRange(event.target.value); setPage(1) }}
                 className={controlClasses}
               >
                 {['All budgets', 'Under €1,000', '€1,000–€1,499', '€1,500+'].map((item) => (
@@ -129,27 +215,11 @@ export default function Projects() {
               <select
                 id="deadline-filter"
                 value={deadline}
-                onChange={(event) => setDeadline(event.target.value)}
+                onChange={(event) => { setDeadline(event.target.value); setPage(1) }}
                 className={controlClasses}
               >
                 <option>Any deadline</option>
                 {deadlineMonths.map((item) => (
-                  <option key={item}>{item}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label htmlFor="category-filter" className="mb-2 block text-xs text-[#8892b0]">
-                Category
-              </label>
-              <select
-                id="category-filter"
-                value={category}
-                onChange={(event) => setCategory(event.target.value)}
-                className={controlClasses}
-              >
-                <option>All categories</option>
-                {categories.map((item) => (
                   <option key={item}>{item}</option>
                 ))}
               </select>
@@ -161,7 +231,7 @@ export default function Projects() {
               <select
                 id="project-skill-filter"
                 value={skill}
-                onChange={(event) => setSkill(event.target.value)}
+                onChange={(event) => { setSkill(event.target.value); setPage(1) }}
                 className={controlClasses}
               >
                 <option>All skills</option>
@@ -191,24 +261,34 @@ export default function Projects() {
             )}
           </div>
 
-          {filteredProjects.length > 0 ? (
+          {isLoading ? (
+            <LoadingSpinner label="Loading projects..." size="lg" />
+          ) : error ? (
+            <div className="mt-5">
+              <EmptyState title="Unable to load projects" description={error} />
+            </div>
+          ) : filteredProjects.length > 0 ? (
             <div className="mt-5 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
               {filteredProjects.map((project) => (
                 <ProjectCard
                   key={project.id}
                   project={project}
-                  onViewDetails={(selectedProject) =>
-                    setModal({ type: 'details', project: selectedProject })
-                  }
-                  onSendOffer={(selectedProject) =>
-                    setModal({ type: 'offer', project: selectedProject })
-                  }
+                  onViewDetails={openDetails}
+                  onSendOffer={openBid}
                 />
               ))}
             </div>
           ) : (
             <div className="mt-5">
               <EmptyState title="No projects match your filters" description="Try a broader search or clear the selected filters." actionLabel="Clear filters" onAction={clearFilters} />
+            </div>
+          )}
+
+          {!isLoading && !error && pagination?.last_page > 1 && (
+            <div className="mt-6 flex items-center justify-center gap-4">
+              <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((current) => current - 1)}>Previous</Button>
+              <span className="text-sm text-[#8892b0]">Page {pagination.current_page} of {pagination.last_page}</span>
+              <Button variant="outline" size="sm" disabled={page >= pagination.last_page} onClick={() => setPage((current) => current + 1)}>Next</Button>
             </div>
           )}
         </section>
@@ -225,30 +305,35 @@ export default function Projects() {
           <Card className="w-full max-w-md shadow-2xl shadow-black/40" padding="lg">
             <div role="dialog" aria-modal="true" aria-labelledby="project-modal-title">
               <p className="font-mono text-xs uppercase tracking-wider text-[#64ffda]">
-                {modal.type === 'offer' ? 'Offer preview' : 'Project details'}
+                Project details
               </p>
               <h2 id="project-modal-title" className="mt-3 text-xl font-bold text-[#e6f1ff]">
                 {modal.project.title}
               </h2>
               <p className="mt-1 text-sm text-[#64ffda]">{modal.project.company}</p>
-              <p className="mt-5 text-sm leading-relaxed text-[#8892b0]">
-                {modal.type === 'offer'
-                  ? 'Your offer form will be connected here once backend project bidding is available.'
-                  : modal.project.description}
-              </p>
+              {modal.isLoading ? (
+                <LoadingSpinner label="Loading project details..." />
+              ) : (
+                <p className="mt-5 text-sm leading-relaxed text-[#8892b0]">
+                  {modal.error || modal.project.description}
+                </p>
+              )}
               <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
                 <Button variant="outline" onClick={() => setModal(null)}>
                   Close
                 </Button>
-                {modal.type === 'offer' && (
-                  <Button onClick={() => { showToast(`Offer sent for ${modal.project.title}.`, 'success'); setModal(null) }}>
-                    Submit Offer
-                  </Button>
-                )}
               </div>
             </div>
           </Card>
         </div>
+      )}
+
+      {bidProject && (
+        <SendBidModal
+          project={bidProject}
+          onClose={() => setBidProject(null)}
+          onSuccess={handleBidSuccess}
+        />
       )}
     </DashboardLayout>
   )

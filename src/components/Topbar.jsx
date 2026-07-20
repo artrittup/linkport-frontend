@@ -1,5 +1,15 @@
+import { useAuth } from '../context/AuthContext'
+
 export default function Topbar({ title, userType, onMenuClick }) {
-  const initials = userType?.slice(0, 2).toUpperCase() || 'LP'
+  const { user } = useAuth()
+  const displayName = user?.name || userType || 'LinkPort User'
+  const initials = displayName
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join('')
+    .toUpperCase()
 
   return (
     <header className="sticky top-0 z-30 border-b border-[#233554] bg-[#0a192f]/90 backdrop-blur-md">
@@ -36,7 +46,7 @@ export default function Topbar({ title, userType, onMenuClick }) {
             {initials}
           </div>
           <div className="hidden sm:block">
-            <p className="text-sm font-medium text-[#e6f1ff]">LinkPort User</p>
+            <p className="text-sm font-medium text-[#e6f1ff]">{displayName}</p>
             <p className="text-xs text-[#8892b0]">{userType}</p>
           </div>
         </div>

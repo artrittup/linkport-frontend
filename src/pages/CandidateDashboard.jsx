@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react'
 import { getDashboardSummary } from '../api/dashboardApi'
 import { getJobs } from '../api/jobsApi'
+import { getCandidateProfile } from '../api/profileApi'
 import { getProjects } from '../api/projectsApi'
 import Card from '../components/Card'
 import EmptyState from '../components/EmptyState'
 import JobCard from '../components/JobCard'
 import LoadingSpinner from '../components/LoadingSpinner'
 import ProjectCard from '../components/ProjectCard'
+import { useAuth } from '../context/AuthContext'
 import DashboardLayout from '../layouts/DashboardLayout'
 
 const navItems = [
@@ -20,13 +22,6 @@ const navItems = [
   { label: 'Logout', href: '/login' },
 ]
 
-const profileChecklist = [
-  { label: 'Profile information completed', complete: true },
-  { label: 'Skills added', complete: true },
-  { label: 'CV uploaded', complete: true },
-  { label: 'Portfolio missing', complete: false },
-]
-
 function SectionHeading({ title, description }) {
   return (
     <div>
@@ -37,6 +32,7 @@ function SectionHeading({ title, description }) {
 }
 
 export default function CandidateDashboard() {
+  const { user } = useAuth()
   const [jobs, setJobs] = useState([])
   const [projects, setProjects] = useState([])
   const [jobsError, setJobsError] = useState('')
@@ -46,6 +42,9 @@ export default function CandidateDashboard() {
   const [summary, setSummary] = useState({})
   const [summaryError, setSummaryError] = useState('')
   const [isLoadingSummary, setIsLoadingSummary] = useState(true)
+  const [profile, setProfile] = useState(null)
+  const [profileError, setProfileError] = useState('')
+  const [isLoadingProfile, setIsLoadingProfile] = useState(true)
 
   const count = (key) => {
     const value = Number(summary[key])
@@ -60,6 +59,22 @@ export default function CandidateDashboard() {
     { label: 'Pending Bids', value: count('pending_bids_count') },
     { label: 'Accepted Bids', value: count('accepted_bids_count') },
   ]
+  const profileChecklist = [
+    {
+      label: 'Profile information completed',
+      complete: Boolean(profile?.headline && profile?.bio && profile?.location),
+    },
+    { label: 'Skills added', complete: Boolean(profile?.skills?.length) },
+    { label: 'CV linked', complete: Boolean(profile?.cv_url) },
+    {
+      label: 'Portfolio or professional link added',
+      complete: Boolean(profile?.website || profile?.github_url || profile?.linkedin_url),
+    },
+  ]
+  const completedProfileSteps = profileChecklist.filter((item) => item.complete).length
+  const profileCompletion = Math.round(
+    (completedProfileSteps / profileChecklist.length) * 100,
+  )
 
   useEffect(() => {
     let isActive = true
@@ -110,6 +125,21 @@ export default function CandidateDashboard() {
         if (isActive) setIsLoadingSummary(false)
       })
 
+    getCandidateProfile()
+      .then((response) => {
+        if (isActive) setProfile(response.profile ?? null)
+      })
+      .catch((error) => {
+        if (isActive) {
+          setProfileError(
+            error.response?.data?.message || 'Unable to load profile completion.',
+          )
+        }
+      })
+      .finally(() => {
+        if (isActive) setIsLoadingProfile(false)
+      })
+
     return () => {
       isActive = false
     }
@@ -125,7 +155,7 @@ export default function CandidateDashboard() {
         <section>
           <p className="font-mono text-sm text-[#64ffda]">Candidate workspace</p>
           <h2 className="mt-2 text-2xl font-bold tracking-tight sm:text-3xl">
-            Welcome back, Candidate
+            Welcome back{user?.name ? `, ${user.name}` : ''}
           </h2>
           <p className="mt-3 max-w-2xl text-[#8892b0]">
             Track your applications, discover jobs, and find project opportunities.
@@ -199,6 +229,11 @@ export default function CandidateDashboard() {
             title="Profile Completion"
             description="A complete profile helps companies discover and trust your work."
           />
+          {isLoadingProfile ? (
+            <LoadingSpinner label="Loading profile completion..." />
+          ) : profileError ? (
+            <div className="mt-5"><EmptyState title="Unable to load profile" description={profileError} /></div>
+          ) : (
           <Card className="mt-5 max-w-3xl" padding="lg">
             <div className="flex items-end justify-between gap-4">
               <div>
@@ -207,18 +242,18 @@ export default function CandidateDashboard() {
                   Complete the remaining step to improve your visibility.
                 </p>
               </div>
-              <span className="font-mono text-2xl font-bold text-[#64ffda]">70%</span>
+              <span className="font-mono text-2xl font-bold text-[#64ffda]">{profileCompletion}%</span>
             </div>
 
             <div
               className="mt-5 h-2 overflow-hidden rounded-full bg-[#0a192f]"
               role="progressbar"
               aria-label="Profile completion"
-              aria-valuenow="70"
+              aria-valuenow={profileCompletion}
               aria-valuemin="0"
               aria-valuemax="100"
             >
-              <div className="h-full w-[70%] rounded-full bg-[#64ffda]" />
+              <div className="h-full rounded-full bg-[#64ffda]" style={{ width: `${profileCompletion}%` }} />
             </div>
 
             <ul className="mt-6 grid gap-3 sm:grid-cols-2">
@@ -241,6 +276,7 @@ export default function CandidateDashboard() {
               ))}
             </ul>
           </Card>
+          )}
         </section>
       </div>
     </DashboardLayout>

@@ -1,11 +1,9 @@
 import { useEffect, useState } from 'react'
+import { getAdminJobs, getAdminProjects, getAdminUsers } from '../api/adminApi'
 import { getDashboardSummary } from '../api/dashboardApi'
 import Card from '../components/Card'
 import EmptyState from '../components/EmptyState'
 import LoadingSpinner from '../components/LoadingSpinner'
-import mockAdminJobs from '../data/mockAdminJobs'
-import mockAdminProjects from '../data/mockAdminProjects'
-import mockAdminUsers from '../data/mockAdminUsers'
 import DashboardLayout from '../layouts/DashboardLayout'
 
 const navItems = [
@@ -22,39 +20,55 @@ const navItems = [
 function RecentList({ items, getTitle, getMeta, href }) {
   return (
     <Card className="h-full">
-      <div className="space-y-1">
-        {items.slice(0, 4).map((item) => (
-          <div key={item.id} className="flex items-center justify-between gap-3 border-b border-[#233554]/70 py-3 first:pt-0 last:border-0 last:pb-0">
-            <div className="min-w-0">
-              <p className="truncate text-sm font-medium text-[#e6f1ff]">{getTitle(item)}</p>
-              <p className="mt-1 truncate text-xs text-[#8892b0]">{getMeta(item)}</p>
+      {items.length === 0 ? (
+        <p className="text-sm text-[#8892b0]">No records available.</p>
+      ) : (
+        <div className="space-y-1">
+          {items.map((item) => (
+            <div key={item.id} className="flex items-center justify-between gap-3 border-b border-[#233554]/70 py-3 first:pt-0 last:border-0 last:pb-0">
+              <div className="min-w-0">
+                <p className="truncate text-sm font-medium text-[#e6f1ff]">{getTitle(item)}</p>
+                <p className="mt-1 truncate text-xs text-[#8892b0]">{getMeta(item)}</p>
+              </div>
+              <span className="shrink-0 text-[10px] text-[#64ffda]">{item.status}</span>
             </div>
-            <span className="shrink-0 font-mono text-[10px] text-[#64ffda]">{item.status}</span>
-          </div>
-        ))}
-      </div>
-      <a href={href} className="mt-5 inline-block text-xs text-[#64ffda] hover:opacity-80">View all →</a>
+          ))}
+        </div>
+      )}
+      <a href={href} className="mt-5 inline-block text-xs text-[#64ffda] hover:opacity-80">View all</a>
     </Card>
   )
 }
 
 export default function AdminDashboard() {
   const [summary, setSummary] = useState({})
+  const [recentUsers, setRecentUsers] = useState([])
+  const [recentJobs, setRecentJobs] = useState([])
+  const [recentProjects, setRecentProjects] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
 
   useEffect(() => {
     let isActive = true
 
-    getDashboardSummary()
-      .then((response) => {
-        if (isActive) setSummary(response ?? {})
+    Promise.all([
+      getDashboardSummary(),
+      getAdminUsers({ per_page: 4 }),
+      getAdminJobs({ per_page: 4 }),
+      getAdminProjects({ per_page: 4 }),
+    ])
+      .then(([summaryResponse, usersResponse, jobsResponse, projectsResponse]) => {
+        if (!isActive) return
+        setSummary(summaryResponse ?? {})
+        setRecentUsers(usersResponse.data)
+        setRecentJobs(jobsResponse.data)
+        setRecentProjects(projectsResponse.data)
       })
       .catch((requestError) => {
         if (isActive) {
           setError(
             requestError.response?.data?.message ||
-              'Unable to load the admin dashboard summary.',
+              'Unable to load the admin dashboard.',
           )
         }
       })
@@ -89,41 +103,31 @@ export default function AdminDashboard() {
           <p className="mt-3 text-[#8892b0]">Monitor users, companies, jobs, projects, applications, and bids.</p>
 
           {isLoading ? (
-            <LoadingSpinner label="Loading dashboard summary..." />
+            <LoadingSpinner label="Loading admin dashboard..." />
           ) : error ? (
-            <div className="mt-8"><EmptyState title="Unable to load summary" description={error} /></div>
+            <div className="mt-8"><EmptyState title="Unable to load dashboard" description={error} /></div>
           ) : (
             <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
               {stats.map(([label, value], index) => (
                 <Card key={label} hover>
                   <p className="text-sm text-[#8892b0]">{label}</p>
-                  <div className="mt-3 flex items-end justify-between">
-                    <p className="text-3xl font-bold">{value}</p>
-                    <span className="font-mono text-xs text-[#64ffda]">0{index + 1}</span>
-                  </div>
+                  <div className="mt-3 flex items-end justify-between"><p className="text-3xl font-bold">{value}</p><span className="font-mono text-xs text-[#64ffda]">0{index + 1}</span></div>
                 </Card>
               ))}
             </div>
           )}
         </section>
 
-        <section>
-          <h2 className="mb-5 text-xl font-semibold sm:text-2xl">Recent Activity</h2>
-          <div className="grid gap-5 lg:grid-cols-3">
-            <div>
-              <h3 className="mb-3 text-sm text-[#8892b0]">Recent Users</h3>
-              <RecentList items={mockAdminUsers} getTitle={(item) => item.name} getMeta={(item) => `${item.role} · ${item.createdDate}`} href="/admin/users" />
+        {!isLoading && !error && (
+          <section>
+            <h2 className="mb-5 text-xl font-semibold sm:text-2xl">Recent Activity</h2>
+            <div className="grid gap-5 lg:grid-cols-3">
+              <div><h3 className="mb-3 text-sm text-[#8892b0]">Recent Users</h3><RecentList items={recentUsers} getTitle={(item) => item.name} getMeta={(item) => `${item.role} - ${item.createdDate}`} href="/admin/users" /></div>
+              <div><h3 className="mb-3 text-sm text-[#8892b0]">Recent Jobs</h3><RecentList items={recentJobs} getTitle={(item) => item.title} getMeta={(item) => `${item.company} - ${item.createdDate}`} href="/admin/jobs" /></div>
+              <div><h3 className="mb-3 text-sm text-[#8892b0]">Recent Projects</h3><RecentList items={recentProjects} getTitle={(item) => item.title} getMeta={(item) => `${item.company} - ${item.createdDate}`} href="/admin/projects" /></div>
             </div>
-            <div>
-              <h3 className="mb-3 text-sm text-[#8892b0]">Recent Jobs</h3>
-              <RecentList items={mockAdminJobs} getTitle={(item) => item.title} getMeta={(item) => `${item.company} · ${item.createdDate}`} href="/admin/jobs" />
-            </div>
-            <div>
-              <h3 className="mb-3 text-sm text-[#8892b0]">Recent Projects</h3>
-              <RecentList items={mockAdminProjects} getTitle={(item) => item.title} getMeta={(item) => `${item.company} · ${item.createdDate}`} href="/admin/projects" />
-            </div>
-          </div>
-        </section>
+          </section>
+        )}
       </div>
     </DashboardLayout>
   )

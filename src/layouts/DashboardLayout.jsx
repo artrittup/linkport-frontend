@@ -13,7 +13,7 @@ export default function DashboardLayout({ children, title, navItems, userType })
         onClose={() => setIsSidebarOpen(false)}
       />
 
-      <div className="min-h-screen lg:ml-64">
+      <div className="min-h-screen lg:ml-20">
         <Topbar
           title={title}
           userType={userType}

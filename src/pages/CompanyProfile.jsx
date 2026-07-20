@@ -4,6 +4,8 @@ import {
   getProfileErrorMessage,
   updateCompanyProfile,
 } from '../api/profileApi'
+import { getCompanyJobs } from '../api/jobsApi'
+import { getCompanyProjects } from '../api/projectsApi'
 import Button from '../components/Button'
 import Card from '../components/Card'
 import LoadingSpinner from '../components/LoadingSpinner'
@@ -23,27 +25,17 @@ const navItems = [
 ]
 
 const initialForm = {
-  companyName: 'Tech Solutions',
-  industry: 'Software Development',
-  location: 'Prishtina, Kosovo',
-  website: 'www.techsolutions.com',
-  // The API does not accept contact email; the authenticated user's email replaces this.
-  contactEmail: 'hello@techsolutions.com',
-  description:
-    'Tech Solutions builds modern digital products for ambitious businesses. We invest in young talent through internships, junior roles, and hands-on projects that help emerging professionals grow.',
+  companyName: '',
+  industry: '',
+  location: '',
+  website: '',
+  contactEmail: '',
+  description: '',
+  phone: '',
+  linkedinUrl: '',
+  logoUrl: '',
+  employeeCount: '',
 }
-
-const openJobs = [
-  'Junior Frontend Developer',
-  'Backend Developer Intern',
-  'UI/UX Design Intern',
-]
-
-const activeProjects = [
-  'Restaurant Website',
-  'Booking System UI',
-  'Company Portfolio Website',
-]
 
 const inputClasses =
   'mt-2 w-full rounded-md border border-[#233554] bg-[#0a192f]/70 px-4 py-3 text-sm text-[#e6f1ff] outline-none transition-colors placeholder:text-[#64748b] focus:border-[#64ffda] focus:ring-1 focus:ring-[#64ffda]'
@@ -61,6 +53,10 @@ function InformationCard({ number, title, children, className = '' }) {
 }
 
 function ItemList({ items, badge }) {
+  if (items.length === 0) {
+    return <p className="text-sm text-[#8892b0]">No records available.</p>
+  }
+
   return (
     <ul className="space-y-3">
       {items.map((item) => (
@@ -82,7 +78,8 @@ export default function CompanyProfile() {
   const { user } = useAuth()
   const { showToast } = useToast()
   const [form, setForm] = useState(initialForm)
-  const [logoName, setLogoName] = useState('No custom logo uploaded')
+  const [openJobs, setOpenJobs] = useState([])
+  const [activeProjects, setActiveProjects] = useState([])
   const [saved, setSaved] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
@@ -94,7 +91,12 @@ export default function CompanyProfile() {
 
     async function loadProfile() {
       try {
-        const { profile } = await getCompanyProfile()
+        const [profileResponse, jobsResponse, projectsResponse] = await Promise.all([
+          getCompanyProfile(),
+          getCompanyJobs({ status: 'open', per_page: 5 }),
+          getCompanyProjects({ status: 'open', per_page: 5 }),
+        ])
+        const { profile } = profileResponse
 
         if (!isActive) return
 
@@ -110,6 +112,8 @@ export default function CompanyProfile() {
           logoUrl: profile?.logo_url ?? '',
           employeeCount: profile?.employee_count?.toString() ?? '',
         })
+        setOpenJobs(jobsResponse.data.map((job) => job.title))
+        setActiveProjects(projectsResponse.data.map((project) => project.title))
       } catch (requestError) {
         if (isActive) {
           setLoadError(
@@ -212,7 +216,13 @@ export default function CompanyProfile() {
           <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-[#64ffda]/5 blur-2xl" />
           <div className="relative flex flex-col gap-6 sm:flex-row sm:items-center">
             <div className="flex h-24 w-24 shrink-0 items-center justify-center rounded-xl border-2 border-[#64ffda]/40 bg-[#172a45] font-mono text-2xl font-bold text-[#64ffda]">
-              TS
+              {(form.companyName || 'Company')
+                .split(' ')
+                .filter(Boolean)
+                .slice(0, 2)
+                .map((part) => part[0])
+                .join('')
+                .toUpperCase()}
             </div>
             <div className="min-w-0 flex-1">
               <h3 className="text-2xl font-bold text-[#e6f1ff]">{form.companyName}</h3>
@@ -243,14 +253,14 @@ export default function CompanyProfile() {
             </InformationCard>
 
             <InformationCard number="04" title="Website">
-              <a
+              {form.website ? <a
                 href={`https://${form.website.replace(/^https?:\/\//, '')}`}
                 target="_blank"
                 rel="noreferrer"
                 className="break-all text-sm text-[#64ffda] transition-opacity hover:opacity-80"
               >
                 {form.website}
-              </a>
+              </a> : <p className="text-sm text-[#8892b0]">Not provided.</p>}
             </InformationCard>
 
             <InformationCard number="05" title="Contact Email">
@@ -382,28 +392,6 @@ export default function CompanyProfile() {
                   onChange={updateField}
                   className={`${inputClasses} resize-y`}
                 />
-              </div>
-
-              <div>
-                <label htmlFor="logo-upload" className="text-sm font-medium">
-                  Company logo
-                </label>
-                <div className="mt-2 rounded-md border border-dashed border-[#233554] bg-[#0a192f]/40 p-4">
-                  <input
-                    id="logo-upload"
-                    type="file"
-                    accept="image/png,image/jpeg,image/svg+xml"
-                    onChange={(event) => {
-                      const file = event.target.files?.[0]
-                      if (file) setLogoName(file.name)
-                      setSaved(false)
-                    }}
-                    className="block w-full text-sm text-[#8892b0] file:mr-4 file:rounded-md file:border file:border-[#64ffda] file:bg-transparent file:px-4 file:py-2 file:text-sm file:text-[#64ffda] hover:file:bg-[#64ffda]/10"
-                  />
-                  <p className="mt-2 text-xs text-[#64748b]">
-                    {logoName}. PNG, JPG, or SVG. Frontend preview only.
-                  </p>
-                </div>
               </div>
 
               <div className="flex flex-col-reverse gap-3 border-t border-[#233554] pt-6 sm:flex-row sm:items-center sm:justify-between">

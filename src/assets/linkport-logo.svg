@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 130" fill="none">
+  <path
+    d="M113 35A56 56 0 1 1 81.3 9.7"
+    stroke="#e6f1ff"
+    stroke-width="16"
+    stroke-linecap="butt"
+  />
+  <path
+    d="M92.1 99A56 56 0 1 1 117.7 116.3"
+    stroke="#64ffda"
+    stroke-width="16"
+    stroke-linecap="butt"
+  />
+</svg>

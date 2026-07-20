@@ -24,14 +24,17 @@ const navItems = [
 ]
 
 const initialForm = {
-  fullName: 'Arta Krasniqi',
-  professionalTitle: 'Junior Frontend Developer',
-  location: 'Prishtina, Kosovo',
-  bio: 'Computer Science student and frontend developer focused on building accessible, responsive digital products. I enjoy turning thoughtful design ideas into clean user experiences.',
-  // Education and experience are frontend-only until the profile API supports them.
-  education: 'University of Prishtina — Computer Science',
-  experience: 'Frontend Intern at Tech Solutions',
-  portfolioLink: 'https://portfolio.example.com',
+  fullName: '',
+  professionalTitle: '',
+  location: '',
+  bio: '',
+  education: '',
+  experience: '',
+  portfolioLink: '',
+  phone: '',
+  githubUrl: '',
+  linkedinUrl: '',
+  cvUrl: '',
 }
 
 const inputClasses =
@@ -53,13 +56,7 @@ export default function CandidateProfile() {
   const { user } = useAuth()
   const { showToast } = useToast()
   const [form, setForm] = useState(initialForm)
-  const [skills, setSkills] = useState([
-    'React',
-    'JavaScript',
-    'Tailwind CSS',
-    'UI Design',
-  ])
-  const [cvName, setCvName] = useState('Arta_Krasniqi_CV.pdf')
+  const [skills, setSkills] = useState([])
   const [saved, setSaved] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
@@ -85,6 +82,9 @@ export default function CandidateProfile() {
           portfolioLink: profile?.website ?? '',
           githubUrl: profile?.github_url ?? '',
           linkedinUrl: profile?.linkedin_url ?? '',
+          education: profile?.education ?? '',
+          experience: profile?.experience ?? '',
+          cvUrl: profile?.cv_url ?? '',
         }))
         setSkills(profile?.skills ?? [])
       } catch (requestError) {
@@ -131,6 +131,9 @@ export default function CandidateProfile() {
         website: nullable(form.portfolioLink),
         github_url: nullable(form.githubUrl),
         linkedin_url: nullable(form.linkedinUrl),
+        education: nullable(form.education),
+        experience: nullable(form.experience),
+        cv_url: nullable(form.cvUrl),
         skills,
       })
 
@@ -184,7 +187,13 @@ export default function CandidateProfile() {
           <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-[#64ffda]/5 blur-2xl" />
           <div className="relative flex flex-col gap-6 sm:flex-row sm:items-center">
             <div className="flex h-24 w-24 shrink-0 items-center justify-center rounded-full border-2 border-[#64ffda]/40 bg-[#172a45] font-mono text-2xl font-bold text-[#64ffda]">
-              AK
+              {(form.fullName || 'User')
+                .split(' ')
+                .filter(Boolean)
+                .slice(0, 2)
+                .map((part) => part[0])
+                .join('')
+                .toUpperCase()}
             </div>
             <div className="min-w-0 flex-1">
               <h3 className="text-2xl font-bold text-[#e6f1ff]">{form.fullName}</h3>
@@ -224,36 +233,42 @@ export default function CandidateProfile() {
               <p className="text-sm text-[#e6f1ff]">{form.experience}</p>
             </OverviewCard>
 
-            <OverviewCard number="05" title="Portfolio Projects">
-              <ul className="space-y-3 text-sm text-[#8892b0]">
-                {[
-                  'Personal Portfolio Website',
-                  'Restaurant Website',
-                  'Dashboard UI Concept',
-                ].map((project) => (
-                  <li key={project} className="flex items-center gap-2">
-                    <span className="h-1.5 w-1.5 rounded-full bg-[#64ffda]" />
-                    {project}
-                  </li>
-                ))}
-              </ul>
+            <OverviewCard number="05" title="Professional Links">
+              {form.portfolioLink || form.githubUrl || form.linkedinUrl ? (
+                <div className="space-y-3 text-sm">
+                  {[
+                    ['Portfolio', form.portfolioLink],
+                    ['GitHub', form.githubUrl],
+                    ['LinkedIn', form.linkedinUrl],
+                  ]
+                    .filter(([, url]) => url)
+                    .map(([label, url]) => (
+                      <a key={label} href={url} target="_blank" rel="noreferrer" className="block text-[#64ffda] hover:opacity-80">
+                        {label}
+                      </a>
+                    ))}
+                </div>
+              ) : (
+                <p className="text-sm text-[#8892b0]">No professional links added.</p>
+              )}
             </OverviewCard>
 
             <OverviewCard number="06" title="CV">
-              <div className="flex items-center gap-3 rounded-md border border-[#233554] bg-[#0a192f]/50 p-3">
+              {form.cvUrl ? <div className="flex items-center gap-3 rounded-md border border-[#233554] bg-[#0a192f]/50 p-3">
                 <span className="flex h-9 w-9 items-center justify-center rounded-md bg-[#22c55e]/10 text-sm text-[#22c55e]">
                   ✓
                 </span>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm text-[#e6f1ff]">{cvName}</p>
-                  <p className="mt-0.5 text-xs text-[#22c55e]">CV uploaded</p>
+                  <p className="truncate text-sm text-[#e6f1ff]">CV link available</p>
+                  <p className="mt-0.5 text-xs text-[#22c55e]">Saved in your profile</p>
                 </div>
-              </div>
+              </div> : <p className="text-sm text-[#8892b0]">No CV link added.</p>}
               <Button
                 variant="outline"
                 size="sm"
                 className="mt-4 w-full"
-                onClick={() => window.alert(`Previewing ${cvName}`)}
+                disabled={!form.cvUrl}
+                onClick={() => window.open(form.cvUrl, '_blank', 'noopener,noreferrer')}
               >
                 View CV
               </Button>
@@ -324,21 +339,16 @@ export default function CandidateProfile() {
               </div>
 
               <div>
-                <label htmlFor="cv-upload" className="text-sm font-medium">CV upload</label>
-                <div className="mt-2 rounded-md border border-dashed border-[#233554] bg-[#0a192f]/40 p-4">
-                  <input
-                    id="cv-upload"
-                    type="file"
-                    accept=".pdf,.doc,.docx"
-                    onChange={(event) => {
-                      const file = event.target.files?.[0]
-                      if (file) setCvName(file.name)
-                      setSaved(false)
-                    }}
-                    className="block w-full text-sm text-[#8892b0] file:mr-4 file:rounded-md file:border file:border-[#64ffda] file:bg-transparent file:px-4 file:py-2 file:text-sm file:text-[#64ffda] hover:file:bg-[#64ffda]/10"
-                  />
-                  <p className="mt-2 text-xs text-[#64748b]">PDF, DOC, or DOCX. Frontend preview only.</p>
-                </div>
+                <label htmlFor="cvUrl" className="text-sm font-medium">CV URL</label>
+                <input
+                  id="cvUrl"
+                  name="cvUrl"
+                  type="url"
+                  value={form.cvUrl}
+                  onChange={updateField}
+                  placeholder="https://example.com/cv.pdf"
+                  className={inputClasses}
+                />
               </div>
 
               <div className="flex flex-col-reverse gap-3 border-t border-[#233554] pt-6 sm:flex-row sm:items-center sm:justify-between">

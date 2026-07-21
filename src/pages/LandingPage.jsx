@@ -340,6 +340,7 @@ function CommunityVisual() {
 }
 
 const sectionClass = 'scroll-mt-40 py-20 sm:py-24 lg:scroll-mt-24'
+const audienceSectionClass = 'scroll-mt-40 py-24 sm:py-28 lg:scroll-mt-24 lg:py-32'
 
 const formatCurrency = (value) => {
   const amount = Number(value)
@@ -497,14 +498,14 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section id="candidates" className={`${sectionClass} border-b border-[#233554]/70`}>
+        <section id="candidates" className={`${audienceSectionClass} border-b border-[#233554]/70`}>
           <div className="mx-auto max-w-7xl px-6 lg:px-10">
             <SectionHeader label="For candidates" title="Turn potential into proof." description="Create a profile that works for you, then move from discovery to real experience." />
             <div className="mt-10 grid gap-4 md:grid-cols-3">{candidateFeatures.map((feature) => <FeatureCard key={feature.title} feature={feature} />)}</div>
           </div>
         </section>
 
-        <section id="companies" className={`${sectionClass} border-b border-[#233554]/70 bg-[#071426]/35`}>
+        <section id="companies" className={`${audienceSectionClass} border-b border-[#233554]/70 bg-[#071426]/35`}>
           <div className="mx-auto max-w-7xl px-6 lg:px-10">
             <SectionHeader label="For companies" title="Find the signal in emerging talent." description="Publish opportunities, review strong matches, and build the team or solution you need." />
             <div className="mt-10 grid gap-4 md:grid-cols-3">{companyFeatures.map((feature) => <FeatureCard key={feature.title} feature={feature} />)}</div>

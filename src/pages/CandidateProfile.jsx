@@ -14,7 +14,7 @@ import DashboardLayout from '../layouts/DashboardLayout'
 
 const navItems = [
   { label: 'Dashboard', href: '/candidate/dashboard' },
-  { label: 'My Profile', href: '/candidate/profile' },
+  { label: 'Member Profile', href: '/candidate/profile' },
   { label: 'Jobs', href: '/jobs' },
   { label: 'My Applications', href: '/candidate/applications' },
   { label: 'Projects', href: '/projects' },
@@ -92,7 +92,7 @@ export default function CandidateProfile() {
           setLoadError(
             getProfileErrorMessage(
               requestError,
-              'Unable to load your candidate profile.',
+              'Unable to load your member profile.',
             ),
           )
         }
@@ -123,7 +123,7 @@ export default function CandidateProfile() {
     const nullable = (value = '') => value.trim() || null
 
     try {
-      const response = await updateCandidateProfile({
+      await updateCandidateProfile({
         headline: nullable(form.professionalTitle),
         bio: nullable(form.bio),
         location: nullable(form.location),
@@ -138,12 +138,12 @@ export default function CandidateProfile() {
       })
 
       setSaved(true)
-      showToast(response.message ?? 'Candidate profile saved successfully.', 'success')
+      showToast('Member profile saved successfully.', 'success')
     } catch (requestError) {
       setSaveError(
         getProfileErrorMessage(
           requestError,
-          'Unable to save your candidate profile.',
+          'Unable to save your member profile.',
         ),
       )
     } finally {
@@ -160,18 +160,18 @@ export default function CandidateProfile() {
 
   if (isLoading) {
     return (
-      <DashboardLayout title="My Profile" navItems={navItems} userType="Candidate">
+      <DashboardLayout title="Member Profile" navItems={navItems} userType="Member">
         <LoadingSpinner label="Loading your profile..." size="lg" />
       </DashboardLayout>
     )
   }
 
   return (
-    <DashboardLayout title="My Profile" navItems={navItems} userType="Candidate">
+    <DashboardLayout title="Member Profile" navItems={navItems} userType="Member">
       <div className="space-y-10">
         <section>
           <p className="font-mono text-sm text-[#64ffda]">Professional profile</p>
-          <h2 className="mt-2 text-2xl font-bold tracking-tight sm:text-3xl">My Profile</h2>
+          <h2 className="mt-2 text-2xl font-bold tracking-tight sm:text-3xl">Member Profile</h2>
           <p className="mt-3 text-[#8892b0]">
             Manage your professional profile and portfolio.
           </p>

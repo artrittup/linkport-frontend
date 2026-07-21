@@ -13,7 +13,7 @@ import DashboardLayout from '../layouts/DashboardLayout'
 
 const navItems = [
   { label: 'Dashboard', href: '/candidate/dashboard' },
-  { label: 'My Profile', href: '/candidate/profile' },
+  { label: 'Member Profile', href: '/candidate/profile' },
   { label: 'Jobs', href: '/jobs' },
   { label: 'My Applications', href: '/candidate/applications' },
   { label: 'Projects', href: '/projects' },
@@ -147,13 +147,13 @@ export default function CandidateDashboard() {
 
   return (
     <DashboardLayout
-      title="Candidate Dashboard"
+      title="Member Dashboard"
       navItems={navItems}
-      userType="Candidate"
+      userType="Member"
     >
       <div className="space-y-10">
         <section>
-          <p className="font-mono text-sm text-[#64ffda]">Candidate workspace</p>
+          <p className="font-mono text-sm text-[#64ffda]">Member workspace</p>
           <h2 className="mt-2 text-2xl font-bold tracking-tight sm:text-3xl">
             Welcome back{user?.name ? `, ${user.name}` : ''}
           </h2>

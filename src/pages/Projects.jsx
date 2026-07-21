@@ -13,7 +13,7 @@ import DashboardLayout from '../layouts/DashboardLayout'
 
 const navItems = [
   { label: 'Dashboard', href: '/candidate/dashboard' },
-  { label: 'My Profile', href: '/candidate/profile' },
+  { label: 'Member Profile', href: '/candidate/profile' },
   { label: 'Jobs', href: '/jobs' },
   { label: 'My Applications', href: '/candidate/applications' },
   { label: 'Projects', href: '/projects' },
@@ -155,7 +155,7 @@ export default function Projects() {
     }
 
     if (user?.role !== 'candidate') {
-      showToast('Only candidates can bid on projects.', 'error')
+      showToast('Only members can bid on projects.', 'error')
       return
     }
 
@@ -168,7 +168,7 @@ export default function Projects() {
   }
 
   return (
-    <DashboardLayout title="Explore Projects" navItems={navItems} userType="Candidate">
+    <DashboardLayout title="Explore Projects" navItems={navItems} userType="Member">
       <div className="space-y-8">
         <section>
           <p className="font-mono text-sm text-[#64ffda]">Project marketplace</p>

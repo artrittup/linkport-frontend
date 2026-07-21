@@ -122,7 +122,7 @@ export default function CompanyDashboard() {
         <section>
           <p className="font-mono text-sm text-[#64ffda]">Company workspace</p>
           <h2 className="mt-2 text-2xl font-bold tracking-tight sm:text-3xl">Company Dashboard</h2>
-          <p className="mt-3 max-w-2xl text-[#8892b0]">Manage your jobs, projects, applications, and candidate offers.</p>
+          <p className="mt-3 max-w-2xl text-[#8892b0]">Manage your jobs, projects, applications, and member offers.</p>
 
           {isLoading ? (
             <LoadingSpinner label="Loading company dashboard..." />
@@ -145,14 +145,14 @@ export default function CompanyDashboard() {
         {!isLoading && !error && (
           <>
             <section>
-              <SectionHeading title="Recent Applications" description="Latest candidates interested in your roles." href="/company/applications" action="View all applications" />
+              <SectionHeading title="Recent Applications" description="Latest members interested in your roles." href="/company/applications" action="View all applications" />
               {applications.length === 0 ? (
                 <div className="mt-5"><EmptyState title="No applications yet" description="Applications to your jobs will appear here." /></div>
               ) : (
                 <Card padding="sm" className="mt-5 overflow-hidden">
                   <div className="overflow-x-auto">
                     <table className="w-full min-w-[760px] text-left">
-                      <thead><tr className="border-b border-[#233554] text-[11px] uppercase tracking-wider text-[#64748b]"><th className="p-4">Candidate</th><th className="p-4">Role</th><th className="p-4">Skills</th><th className="p-4">Applied</th><th className="p-4">Status</th></tr></thead>
+                      <thead><tr className="border-b border-[#233554] text-[11px] uppercase tracking-wider text-[#64748b]"><th className="p-4">Member</th><th className="p-4">Role</th><th className="p-4">Skills</th><th className="p-4">Applied</th><th className="p-4">Status</th></tr></thead>
                       <tbody>{applications.map((application) => (
                         <tr key={application.id} className="border-b border-[#233554]/70 last:border-0">
                           <td className="p-4 text-sm font-medium text-[#e6f1ff]">{application.candidateName}</td>
@@ -169,7 +169,7 @@ export default function CompanyDashboard() {
             </section>
 
             <section>
-              <SectionHeading title="Active Projects" description="Open briefs currently receiving candidate bids." href="/company/projects" action="Manage projects" />
+              <SectionHeading title="Active Projects" description="Open briefs currently receiving member bids." href="/company/projects" action="Manage projects" />
               {projects.length === 0 ? (
                 <div className="mt-5"><EmptyState title="No active projects" description="Publish a project to start receiving bids." /></div>
               ) : (
@@ -192,7 +192,7 @@ export default function CompanyDashboard() {
             <section>
               <SectionHeading title="Recent Project Bids" description="Latest proposals submitted to your projects." href="/company/bids" action="View all bids" />
               {bids.length === 0 ? (
-                <div className="mt-5"><EmptyState title="No project bids yet" description="Candidate proposals will appear here." /></div>
+                <div className="mt-5"><EmptyState title="No project bids yet" description="Member proposals will appear here." /></div>
               ) : (
                 <div className="mt-5 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
                   {bids.map((bid) => (

@@ -8,7 +8,7 @@ import DashboardLayout from '../layouts/DashboardLayout'
 
 const navItems = [
   { label: 'Dashboard', href: '/candidate/dashboard' },
-  { label: 'My Profile', href: '/candidate/profile' },
+  { label: 'Member Profile', href: '/candidate/profile' },
   { label: 'Jobs', href: '/jobs' },
   { label: 'My Applications', href: '/candidate/applications' },
   { label: 'Projects', href: '/projects' },
@@ -111,7 +111,7 @@ export default function MyApplications() {
     window.alert(`${application.jobTitle} at ${application.company}\n\n${application.messagePreview}`)
 
   return (
-    <DashboardLayout title="My Applications" navItems={navItems} userType="Candidate">
+    <DashboardLayout title="My Applications" navItems={navItems} userType="Member">
       <div className="space-y-8">
         <section>
           <p className="font-mono text-sm text-[#64ffda]">Application tracker</p>

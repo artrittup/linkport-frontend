@@ -14,7 +14,7 @@ import DashboardLayout from '../layouts/DashboardLayout'
 const navItems = [
   { label: 'Dashboard', href: '/admin/dashboard' },
   { label: 'Users', href: '/admin/users' },
-  { label: 'Candidates', href: '/admin/candidates' },
+  { label: 'Members', href: '/admin/candidates' },
   { label: 'Companies', href: '/admin/companies' },
   { label: 'Jobs', href: '/admin/jobs' },
   { label: 'Projects', href: '/admin/projects' },
@@ -28,6 +28,7 @@ const roleStyle = {
   Candidate: 'bg-blue-500/10 text-blue-300',
   Company: 'bg-violet-500/10 text-violet-300',
 }
+const displayRole = (role) => role === 'Candidate' ? 'Member' : role
 
 const getErrorMessage = (error, fallback) => {
   const errors = error.response?.data?.errors
@@ -43,7 +44,7 @@ function UserBadges({ user }) {
       <span
         className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${roleStyle[user.role] ?? 'bg-[#233554] text-[#8892b0]'}`}
       >
-        {user.role}
+        {displayRole(user.role)}
       </span>
       <span
         className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${user.status === 'Active' ? 'bg-[#22c55e]/10 text-[#22c55e]' : 'bg-[#ef4444]/10 text-[#ef4444]'}`}
@@ -170,7 +171,7 @@ export default function AdminUsers() {
     const profileDetail =
       profile?.headline ?? profile?.company_name ?? 'No profile details available'
     window.alert(
-      `${user.name}\n${user.email}\n${user.role} · ${user.status}\n${profileDetail}`,
+      `${user.name}\n${user.email}\n${displayRole(user.role)} · ${user.status}\n${profileDetail}`,
     )
   }
 
@@ -234,7 +235,7 @@ export default function AdminUsers() {
               className={control}
             >
               {['All', 'Candidate', 'Company', 'Admin'].map((item) => (
-                <option key={item}>{item}</option>
+                <option key={item} value={item}>{displayRole(item)}</option>
               ))}
             </select>
             <select
@@ -298,7 +299,7 @@ export default function AdminUsers() {
                             <span
                               className={`rounded-full px-2.5 py-1 text-[10px] ${roleStyle[user.role] ?? 'bg-[#233554] text-[#8892b0]'}`}
                             >
-                              {user.role}
+                              {displayRole(user.role)}
                             </span>
                           </td>
                           <td className="p-4">

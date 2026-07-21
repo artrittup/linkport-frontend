@@ -12,7 +12,7 @@ export async function registerUser(data) {
   const role = data.role
 
   if (!['candidate', 'company'].includes(role)) {
-    throw new Error('Please register as a candidate or company.')
+    throw new Error('Please register as a member or company.')
   }
 
   const optionalString = (value) => value?.trim() || undefined

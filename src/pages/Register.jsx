@@ -12,7 +12,7 @@ const inputClasses =
 const roles = [
   {
     value: 'candidate',
-    label: 'Candidate',
+    label: 'Member',
     description: 'Find jobs and projects',
   },
   {
@@ -207,7 +207,7 @@ export default function Register() {
             </p>
             <h1 className="text-3xl font-bold tracking-tight">Create your account</h1>
             <p className="mt-3 text-sm text-[#8892b0]">
-              Join LinkPort as a candidate or company.
+              Join LinkPort as a member or company.
             </p>
           </div>
 
@@ -343,7 +343,7 @@ export default function Register() {
                 <span>
                   <span className="block text-sm font-semibold text-[#e6f1ff]">
                     {selectedRole === 'candidate'
-                      ? 'Candidate profile details'
+                      ? 'Member profile details'
                       : 'Company profile details'}
                   </span>
                   <span className="mt-1 block text-xs leading-5 text-[#8892b0]">

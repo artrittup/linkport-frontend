@@ -9,13 +9,15 @@ import DashboardLayout from '../layouts/DashboardLayout'
 const navItems = [
   { label: 'Dashboard', href: '/admin/dashboard' },
   { label: 'Users', href: '/admin/users' },
-  { label: 'Candidates', href: '/admin/candidates' },
+  { label: 'Members', href: '/admin/candidates' },
   { label: 'Companies', href: '/admin/companies' },
   { label: 'Jobs', href: '/admin/jobs' },
   { label: 'Projects', href: '/admin/projects' },
   { label: 'Reports', href: '/admin/reports' },
   { label: 'Logout', href: '/login' },
 ]
+
+const displayRole = (role) => role === 'Candidate' ? 'Member' : role
 
 function RecentList({ items, getTitle, getMeta, href }) {
   return (
@@ -88,7 +90,7 @@ export default function AdminDashboard() {
 
   const stats = [
     ['Total Users', count('users_count')],
-    ['Candidates', count('candidates_count')],
+    ['Members', count('candidates_count')],
     ['Companies', count('companies_count')],
     ['Jobs', count('jobs_count')],
     ['Projects', count('projects_count')],
@@ -122,7 +124,7 @@ export default function AdminDashboard() {
           <section>
             <h2 className="mb-5 text-xl font-semibold sm:text-2xl">Recent Activity</h2>
             <div className="grid gap-5 lg:grid-cols-3">
-              <div><h3 className="mb-3 text-sm text-[#8892b0]">Recent Users</h3><RecentList items={recentUsers} getTitle={(item) => item.name} getMeta={(item) => `${item.role} - ${item.createdDate}`} href="/admin/users" /></div>
+              <div><h3 className="mb-3 text-sm text-[#8892b0]">Recent Users</h3><RecentList items={recentUsers} getTitle={(item) => item.name} getMeta={(item) => `${displayRole(item.role)} - ${item.createdDate}`} href="/admin/users" /></div>
               <div><h3 className="mb-3 text-sm text-[#8892b0]">Recent Jobs</h3><RecentList items={recentJobs} getTitle={(item) => item.title} getMeta={(item) => `${item.company} - ${item.createdDate}`} href="/admin/jobs" /></div>
               <div><h3 className="mb-3 text-sm text-[#8892b0]">Recent Projects</h3><RecentList items={recentProjects} getTitle={(item) => item.title} getMeta={(item) => `${item.company} - ${item.createdDate}`} href="/admin/projects" /></div>
             </div>

@@ -7,11 +7,11 @@ import { useAuth } from '../context/AuthContext'
 
 const navigation = [
   { id: 'home', label: 'Home', icon: 'home' },
-  { id: 'candidates', label: 'Candidates', icon: 'users' },
+  { id: 'candidates', label: 'Members', icon: 'users' },
   { id: 'companies', label: 'Companies', icon: 'building' },
   { id: 'projects', label: 'Projects', icon: 'layers' },
   { id: 'jobs', label: 'Jobs', icon: 'briefcase' },
-  { id: 'community', label: 'Community', icon: 'network' },
+  { id: 'community', label: 'Circles', icon: 'network' },
 ]
 
 const candidateFeatures = [
@@ -500,7 +500,7 @@ export default function LandingPage() {
 
         <section id="candidates" className={`${audienceSectionClass} border-b border-[#233554]/70`}>
           <div className="mx-auto max-w-7xl px-6 lg:px-10">
-            <SectionHeader label="For candidates" title="Turn potential into proof." description="Create a profile that works for you, then move from discovery to real experience." />
+            <SectionHeader label="For members" title="Turn potential into proof." description="Create a profile that works for you, then move from discovery to real experience." />
             <div className="mt-10 grid gap-4 md:grid-cols-3">{candidateFeatures.map((feature) => <FeatureCard key={feature.title} feature={feature} />)}</div>
           </div>
         </section>
@@ -547,9 +547,9 @@ export default function LandingPage() {
         <section id="community" className={sectionClass}>
           <div className="mx-auto grid max-w-7xl gap-12 px-6 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:px-10">
             <div>
-              <SectionHeader label="Community" title="Connections that compound." description="A growing network for learning, collaboration, shared resources, and the conversations that shape better careers." />
+              <SectionHeader label="Circles" title="Build better, together." description="Members can create circles, invite other members, and collaborate on projects as a team." />
               <div className="mt-8 grid grid-cols-2 gap-3">
-                {['Learn together', 'Meet collaborators', 'Share experience', 'Grow your network'].map((item) => (
+                {['Create a circle', 'Invite members', 'Collaborate as a team', 'Deliver projects together'].map((item) => (
                   <div key={item} className="flex items-center gap-2 rounded-xl border border-[#233554] bg-[#112240]/55 p-3 text-sm text-[#e6f1ff]">
                     <span className="text-[#64ffda]"><Icon name="check" className="h-4 w-4" /></span>{item}
                   </div>

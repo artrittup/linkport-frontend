@@ -16,6 +16,8 @@ function SidebarIcon({ label }) {
     content = <><rect x="3" y="7" width="18" height="13" rx="2" /><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 12h18" /></>
   } else if (key.includes('project')) {
     content = <><path d="m12 2 9 5-9 5-9-5 9-5Z" /><path d="m3 12 9 5 9-5M3 17l9 5 9-5" /></>
+  } else if (key.includes('circle')) {
+    content = <><circle cx="12" cy="12" r="3" /><circle cx="5" cy="6" r="2" /><circle cx="19" cy="6" r="2" /><circle cx="5" cy="18" r="2" /><circle cx="19" cy="18" r="2" /><path d="m7 7.5 2.5 2.5m5 0L17 7.5m-7.5 6.5L7 16.5m7.5-2.5 2.5 2.5" /></>
   } else if (key.includes('bid')) {
     content = <><path d="m22 2-7 20-4-9-9-4 20-7Z" /><path d="M22 2 11 13" /></>
   } else if (key.includes('compan')) {
@@ -45,10 +47,22 @@ function LogoutIcon() {
 
 export default function Sidebar({ navItems = [], isOpen = false, onClose }) {
   const navigate = useNavigate()
-  const { logout } = useAuth()
+  const { logout, user } = useAuth()
   const currentPath = window.location.pathname
-  const mainItems = navItems.filter((item) => item.label.toLowerCase() !== 'logout')
-  const logoutItem = navItems.find((item) => item.label.toLowerCase() === 'logout')
+  const hasCircles = navItems.some((item) => item.href === '/circles')
+  const firstUtilityIndex = navItems.findIndex((item) =>
+    ['settings', 'logout'].includes(item.label.toLowerCase()),
+  )
+  const circlesIndex = firstUtilityIndex === -1 ? navItems.length : firstUtilityIndex
+  const navigationItems = user?.role === 'candidate' && !hasCircles
+    ? [
+        ...navItems.slice(0, circlesIndex),
+        { label: 'Circles', href: '/circles' },
+        ...navItems.slice(circlesIndex),
+      ]
+    : navItems
+  const mainItems = navigationItems.filter((item) => item.label.toLowerCase() !== 'logout')
+  const logoutItem = navigationItems.find((item) => item.label.toLowerCase() === 'logout')
 
   const handleLogout = async () => {
     await logout()
@@ -76,6 +90,7 @@ export default function Sidebar({ navItems = [], isOpen = false, onClose }) {
         <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4 lg:px-2" aria-label="Dashboard navigation">
           {mainItems.map((item) => {
             const isActive = currentPath === item.href
+              || (item.href === '/circles' && currentPath.startsWith('/circles/'))
 
             return (
               <a

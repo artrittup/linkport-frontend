@@ -17,6 +17,8 @@ import AdminUsers from "../pages/AdminUsers"
 import AdminJobs from "../pages/AdminJobs"
 import AdminProjects from "../pages/AdminProjects"
 import CandidateDashboard from "../pages/CandidateDashboard"
+import Circles from "../pages/Circles"
+import CircleDetails from "../pages/CircleDetails"
 import CompanyDashboard from "../pages/CompanyDashboard"
 import AdminDashboard from "../pages/AdminDashboard"
 import ProtectedRoute from "./ProtectedRoute"
@@ -37,6 +39,8 @@ export default function AppRoutes() {
         <Route path="/candidate/applications" element={<ProtectedRoute allowedRoles={candidateRoles}><MyApplications /></ProtectedRoute>} />
         <Route path="/candidate/bids" element={<ProtectedRoute allowedRoles={candidateRoles}><MyBids /></ProtectedRoute>} />
         <Route path="/candidate/profile" element={<ProtectedRoute allowedRoles={candidateRoles}><CandidateProfile /></ProtectedRoute>} />
+        <Route path="/circles" element={<ProtectedRoute allowedRoles={candidateRoles}><Circles /></ProtectedRoute>} />
+        <Route path="/circles/:id" element={<ProtectedRoute allowedRoles={candidateRoles}><CircleDetails /></ProtectedRoute>} />
         <Route path="/company/profile" element={<ProtectedRoute allowedRoles={companyRoles}><CompanyProfile /></ProtectedRoute>} />
         <Route path="/company/jobs" element={<ProtectedRoute allowedRoles={companyRoles}><ManageJobs /></ProtectedRoute>} />
         <Route path="/company/projects" element={<ProtectedRoute allowedRoles={companyRoles}><ManageProjects /></ProtectedRoute>} />

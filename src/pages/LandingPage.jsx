@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Link, useNavigate } from 'react-router'
 import { getJobs } from '../api/jobsApi'
 import { getProjects } from '../api/projectsApi'
 import Button from '../components/Button'
@@ -128,8 +129,8 @@ function DesktopSidebar({ activeSection, onSelect }) {
           <div className="mx-auto my-3 h-8 w-8 animate-pulse rounded-full bg-[#112240]" />
         ) : isAuthenticated ? (
           <div className="space-y-1">
-            <a
-              href={getDashboardPath(user?.role)}
+            <Link
+              to={getDashboardPath(user?.role)}
               title={user?.name || 'Open dashboard'}
               className="flex w-full flex-col items-center gap-1 rounded-xl px-1 py-2 text-[9px] text-[#64ffda] transition-colors hover:bg-[#112240]"
             >
@@ -137,7 +138,7 @@ function DesktopSidebar({ activeSection, onSelect }) {
                 {(user?.name || 'U').split(' ').filter(Boolean).slice(0, 2).map((part) => part[0]).join('').toUpperCase()}
               </span>
               Account
-            </a>
+            </Link>
             <button
               type="button"
               onClick={logout}
@@ -148,8 +149,8 @@ function DesktopSidebar({ activeSection, onSelect }) {
             </button>
           </div>
         ) : (
-          <a
-            href="/login"
+          <Link
+            to="/login"
             title="Not signed in"
             className="flex w-full flex-col items-center gap-1.5 rounded-xl px-1 py-3 text-center text-[9px] leading-tight text-[#64748b] transition-colors hover:bg-[#112240] hover:text-[#e6f1ff]"
           >
@@ -158,7 +159,7 @@ function DesktopSidebar({ activeSection, onSelect }) {
               <span className="absolute -bottom-0.5 -right-0.5 h-2 w-2 rounded-full border border-[#071426] bg-[#64748b]" />
             </span>
             Not signed in
-          </a>
+          </Link>
         )}
       </div>
     </aside>
@@ -325,6 +326,7 @@ const formatCurrency = (value) => {
 }
 
 export default function LandingPage() {
+  const navigate = useNavigate()
   const { user, isLoading, isAuthenticated, getDashboardPath } = useAuth()
   const [activeSection, setActiveSection] = useState('home')
   const [jobs, setJobs] = useState([])
@@ -336,11 +338,18 @@ export default function LandingPage() {
   const [isLoadingOpportunities, setIsLoadingOpportunities] = useState(true)
   const goToPrimaryAction = () => {
     if (isLoading) return
-    window.location.assign(
-      isAuthenticated ? getDashboardPath(user?.role) : '/register',
-    )
+    navigate(isAuthenticated ? getDashboardPath(user?.role) : '/register')
   }
   const primaryActionLabel = isAuthenticated ? 'Open Dashboard' : 'Get Started'
+  const canExploreMemberFeatures = isAuthenticated && user?.role === 'candidate'
+  const protectedLandingTarget = (path) => {
+    if (!isAuthenticated) return '/login'
+    return canExploreMemberFeatures ? path : getDashboardPath(user?.role)
+  }
+  const protectedCtaLabel = (memberLabel) => {
+    if (!isAuthenticated) return 'Sign in to explore'
+    return canExploreMemberFeatures ? memberLabel : 'Open dashboard'
+  }
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -490,8 +499,10 @@ export default function LandingPage() {
         <section id="projects" className={`${sectionClass} border-b border-[#233554]/70`}>
           <div className="mx-auto max-w-7xl px-6 lg:px-10">
             <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
-              <SectionHeader label="Project marketplace" title="Build something real." description="Browse focused briefs, send a clear proposal, and turn your skills into delivered work." />
-              <a href="/projects" className="inline-flex items-center gap-2 text-sm font-semibold text-[#64ffda]">View projects <Icon name="arrow" className="h-4 w-4" /></a>
+              <SectionHeader label="Project marketplace" title="Build something real." description="Preview focused briefs from growing companies. Members can sign in to send proposals and turn their skills into delivered work." />
+              <Link to={protectedLandingTarget('/projects')} className="inline-flex items-center gap-2 text-sm font-semibold text-[#64ffda]">
+                {protectedCtaLabel('View projects')} <Icon name="arrow" className="h-4 w-4" />
+              </Link>
             </div>
             {projectsError ? (
               <p className="mt-10 rounded-xl border border-[#ef4444]/30 bg-[#ef4444]/10 p-4 text-sm text-[#fca5a5]">{projectsError}</p>
@@ -506,8 +517,10 @@ export default function LandingPage() {
         <section id="jobs" className={`${sectionClass} border-b border-[#233554]/70 bg-[#071426]/35`}>
           <div className="mx-auto max-w-7xl px-6 lg:px-10">
             <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
-              <SectionHeader label="Jobs board" title="Your next role could start here." description="Discover early-career openings from companies looking for fresh thinking and real potential." />
-              <a href="/jobs" className="inline-flex items-center gap-2 text-sm font-semibold text-[#64ffda]">View jobs <Icon name="arrow" className="h-4 w-4" /></a>
+              <SectionHeader label="Jobs board" title="Your next role could start here." description="Preview early-career openings from companies looking for fresh thinking. Members can sign in to explore and apply." />
+              <Link to={protectedLandingTarget('/jobs')} className="inline-flex items-center gap-2 text-sm font-semibold text-[#64ffda]">
+                {protectedCtaLabel('View jobs')} <Icon name="arrow" className="h-4 w-4" />
+              </Link>
             </div>
             {jobsError ? (
               <p className="mt-10 rounded-xl border border-[#ef4444]/30 bg-[#ef4444]/10 p-4 text-sm text-[#fca5a5]">{jobsError}</p>
@@ -522,7 +535,7 @@ export default function LandingPage() {
         <section id="community" className={sectionClass}>
           <div className="mx-auto grid max-w-7xl gap-12 px-6 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:px-10">
             <div>
-              <SectionHeader label="Circles" title="Build better, together." description="Members can create circles, invite other members, and collaborate on projects as a team." />
+              <SectionHeader label="Circles" title="Build better, together." description="Members can create circles, invite others, and collaborate as a team. A LinkPort member account is required to join or participate." />
               <div className="mt-8 grid grid-cols-2 gap-3">
                 {['Create a circle', 'Invite members', 'Collaborate as a team', 'Deliver projects together'].map((item) => (
                   <div key={item} className="flex items-center gap-2 rounded-xl border border-[#233554] bg-[#112240]/55 p-3 text-sm text-[#e6f1ff]">
@@ -530,9 +543,9 @@ export default function LandingPage() {
                   </div>
                 ))}
               </div>
-              <a href="/circles" className="mt-7 inline-flex items-center gap-2 text-sm font-semibold text-[#64ffda] transition-opacity hover:opacity-80">
-                Explore Circles <Icon name="arrow" className="h-4 w-4" />
-              </a>
+              <Link to={protectedLandingTarget('/circles')} className="mt-7 inline-flex items-center gap-2 text-sm font-semibold text-[#64ffda] transition-opacity hover:opacity-80">
+                {protectedCtaLabel('Explore Circles')} <Icon name="arrow" className="h-4 w-4" />
+              </Link>
             </div>
             <div className="overflow-hidden rounded-3xl border border-[#233554] bg-[#112240]/65 p-7 shadow-xl shadow-black/10 sm:p-9">
               <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-[#64ffda]/25 bg-[#64ffda]/10 text-[#64ffda]">

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router'
 import { getAdminJobs, getAdminProjects, getAdminUsers } from '../api/adminApi'
 import { getDashboardSummary } from '../api/dashboardApi'
 import Card from '../components/Card'
@@ -9,11 +10,8 @@ import DashboardLayout from '../layouts/DashboardLayout'
 const navItems = [
   { label: 'Dashboard', href: '/admin/dashboard' },
   { label: 'Users', href: '/admin/users' },
-  { label: 'Members', href: '/admin/candidates' },
-  { label: 'Companies', href: '/admin/companies' },
   { label: 'Jobs', href: '/admin/jobs' },
   { label: 'Projects', href: '/admin/projects' },
-  { label: 'Reports', href: '/admin/reports' },
   { label: 'Logout', href: '/login' },
 ]
 
@@ -37,7 +35,7 @@ function RecentList({ items, getTitle, getMeta, href }) {
           ))}
         </div>
       )}
-      <a href={href} className="mt-5 inline-block text-xs text-[#64ffda] hover:opacity-80">View all</a>
+      <Link to={href} className="mt-5 inline-block text-xs text-[#64ffda] hover:opacity-80">View all</Link>
     </Card>
   )
 }

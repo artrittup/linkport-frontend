@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Link, useNavigate } from 'react-router'
 import { getCompanyApplications } from '../api/applicationsApi'
 import { getCompanyBids } from '../api/bidsApi'
 import { getDashboardSummary } from '../api/dashboardApi'
@@ -16,7 +17,6 @@ const navItems = [
   { label: 'Applications', href: '/company/applications' },
   { label: 'Projects', href: '/company/projects' },
   { label: 'Bids', href: '/company/bids' },
-  { label: 'Settings', href: '/settings' },
   { label: 'Logout', href: '/login' },
 ]
 
@@ -54,12 +54,13 @@ function SectionHeading({ title, description, href, action }) {
         <h2 className="text-xl font-semibold text-[#e6f1ff] sm:text-2xl">{title}</h2>
         <p className="mt-1 text-sm text-[#8892b0]">{description}</p>
       </div>
-      {href && <a href={href} className="text-sm font-medium text-[#64ffda] hover:opacity-80">{action}</a>}
+      {href && <Link to={href} className="text-sm font-medium text-[#64ffda] hover:opacity-80">{action}</Link>}
     </div>
   )
 }
 
 export default function CompanyDashboard() {
+  const navigate = useNavigate()
   const [summary, setSummary] = useState({})
   const [applications, setApplications] = useState([])
   const [projects, setProjects] = useState([])
@@ -182,7 +183,7 @@ export default function CompanyDashboard() {
                         <p className="flex justify-between gap-3"><span className="text-[#64748b]">Deadline</span><span>{project.deadline || 'No deadline'}</span></p>
                         <p className="flex justify-between gap-3"><span className="text-[#64748b]">Bids</span><span>{project.bids}</span></p>
                       </div>
-                      <Button variant="outline" size="sm" className="mt-5 w-full" onClick={() => window.location.assign('/company/bids')}>View Bids</Button>
+                      <Button variant="outline" size="sm" className="mt-5 w-full" onClick={() => navigate('/company/bids')}>View Bids</Button>
                     </Card>
                   ))}
                 </div>

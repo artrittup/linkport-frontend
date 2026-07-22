@@ -27,7 +27,6 @@ const navItems = [
   { label: 'Projects', href: '/projects' },
   { label: 'My Bids', href: '/candidate/bids' },
   { label: 'Circles', href: '/circles' },
-  { label: 'Settings', href: '/settings' },
   { label: 'Logout', href: '/login' },
 ]
 

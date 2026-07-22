@@ -26,6 +26,7 @@ import MemberPublicProfile from "../pages/MemberPublicProfile"
 import CompanyPublicProfile from "../pages/CompanyPublicProfile"
 import Connections from "../pages/Connections"
 import Notifications from "../pages/Notifications"
+import NotFound from "../pages/NotFound"
 
 const candidateRoles = ["candidate"]
 const companyRoles = ["company"]
@@ -61,6 +62,7 @@ export default function AppRoutes() {
         <Route path="/admin/users" element={<ProtectedRoute allowedRoles={adminRoles}><AdminUsers /></ProtectedRoute>} />
         <Route path="/admin/jobs" element={<ProtectedRoute allowedRoles={adminRoles}><AdminJobs /></ProtectedRoute>} />
         <Route path="/admin/projects" element={<ProtectedRoute allowedRoles={adminRoles}><AdminProjects /></ProtectedRoute>} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
   )

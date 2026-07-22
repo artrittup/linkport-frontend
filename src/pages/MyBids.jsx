@@ -13,7 +13,6 @@ const navItems = [
   { label: 'My Applications', href: '/candidate/applications' },
   { label: 'Projects', href: '/projects' },
   { label: 'My Bids', href: '/candidate/bids' },
-  { label: 'Settings', href: '/settings' },
   { label: 'Logout', href: '/login' },
 ]
 

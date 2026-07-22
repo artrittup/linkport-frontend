@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router'
+import { Link, useLocation, useNavigate } from 'react-router'
 import linkPortLogo from '../assets/linkport-logo.svg'
 import { useAuth } from '../context/AuthContext'
 
@@ -47,8 +47,9 @@ function LogoutIcon() {
 
 export default function Sidebar({ navItems = [], isOpen = false, onClose }) {
   const navigate = useNavigate()
+  const location = useLocation()
   const { logout, user } = useAuth()
-  const currentPath = window.location.pathname
+  const currentPath = location.pathname
   const hasCircles = navItems.some((item) => item.href === '/circles')
   const hasConnections = navItems.some((item) => item.href === '/connections')
   const visibleItems = navItems.filter((item) => !(
@@ -84,10 +85,10 @@ export default function Sidebar({ navItems = [], isOpen = false, onClose }) {
 
       <aside className={`fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-[#233554]/80 bg-[#071426]/95 shadow-2xl shadow-black/20 backdrop-blur-lg transition-transform duration-300 lg:w-20 lg:translate-x-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="flex h-20 shrink-0 items-center justify-between border-b border-[#233554]/80 px-5 lg:justify-center lg:px-2">
-          <a href="/" className="flex items-center gap-2.5 font-bold text-[#e6f1ff]" aria-label="LinkPort home">
+          <Link to="/" className="flex items-center gap-2.5 font-bold text-[#e6f1ff]" aria-label="LinkPort home">
             <img src={linkPortLogo} alt="LinkPort logo" className="h-8 w-auto" />
             <span className="text-xl lg:hidden">Link<span className="text-[#64ffda]">Port</span></span>
-          </a>
+          </Link>
           <button type="button" onClick={onClose} className="flex h-9 w-9 items-center justify-center rounded-lg text-xl text-[#8892b0] hover:bg-[#112240] hover:text-[#64ffda] lg:hidden" aria-label="Close menu">
             &times;
           </button>
@@ -99,9 +100,9 @@ export default function Sidebar({ navItems = [], isOpen = false, onClose }) {
               || (item.href === '/circles' && currentPath.startsWith('/circles/'))
 
             return (
-              <a
+              <Link
                 key={item.label}
-                href={item.href}
+                to={item.href}
                 onClick={onClose}
                 aria-current={isActive ? 'page' : undefined}
                 title={item.label}
@@ -113,7 +114,7 @@ export default function Sidebar({ navItems = [], isOpen = false, onClose }) {
               >
                 <SidebarIcon label={item.label} />
                 <span>{item.label}</span>
-              </a>
+              </Link>
             )
           })}
         </nav>

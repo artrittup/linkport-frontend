@@ -14,7 +14,6 @@ const navItems = [
   { label: 'Applications', href: '/company/applications' },
   { label: 'Projects', href: '/company/projects' },
   { label: 'Bids', href: '/company/bids' },
-  { label: 'Settings', href: '/settings' },
   { label: 'Logout', href: '/login' },
 ]
 

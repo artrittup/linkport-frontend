@@ -1,43 +1,56 @@
-import { BrowserRouter, Route, Routes } from "react-router"
+import { lazy, Suspense } from 'react'
+import { BrowserRouter, Route, Routes } from 'react-router'
+import LoadingSpinner from '../components/LoadingSpinner'
+import ProtectedRoute from './ProtectedRoute'
 
-import LandingPage from "../pages/LandingPage"
-import Login from "../pages/Login"
-import Register from "../pages/Register"
-import Jobs from "../pages/Jobs"
-import Projects from "../pages/Projects"
-import MyApplications from "../pages/MyApplications"
-import MyBids from "../pages/MyBids"
-import CandidateProfile from "../pages/CandidateProfile"
-import CompanyProfile from "../pages/CompanyProfile"
-import ManageJobs from "../pages/ManageJobs"
-import ManageProjects from "../pages/ManageProjects"
-import CompanyApplications from "../pages/CompanyApplications"
-import CompanyBids from "../pages/CompanyBids"
-import AdminUsers from "../pages/AdminUsers"
-import AdminJobs from "../pages/AdminJobs"
-import AdminProjects from "../pages/AdminProjects"
-import CandidateDashboard from "../pages/CandidateDashboard"
-import Circles from "../pages/Circles"
-import CircleDetails from "../pages/CircleDetails"
-import CompanyDashboard from "../pages/CompanyDashboard"
-import AdminDashboard from "../pages/AdminDashboard"
-import ProtectedRoute from "./ProtectedRoute"
-import InfoPage from "../pages/InfoPage"
-import MemberPublicProfile from "../pages/MemberPublicProfile"
-import CompanyPublicProfile from "../pages/CompanyPublicProfile"
-import Connections from "../pages/Connections"
-import Notifications from "../pages/Notifications"
-import NotFound from "../pages/NotFound"
+const LandingPage = lazy(() => import('../pages/LandingPage'))
+const Login = lazy(() => import('../pages/Login'))
+const Register = lazy(() => import('../pages/Register'))
+const InfoPage = lazy(() => import('../pages/InfoPage'))
+const Jobs = lazy(() => import('../pages/Jobs'))
+const Projects = lazy(() => import('../pages/Projects'))
+const MyApplications = lazy(() => import('../pages/MyApplications'))
+const MyBids = lazy(() => import('../pages/MyBids'))
+const CandidateProfile = lazy(() => import('../pages/CandidateProfile'))
+const CandidateDashboard = lazy(() => import('../pages/CandidateDashboard'))
+const Connections = lazy(() => import('../pages/Connections'))
+const Circles = lazy(() => import('../pages/Circles'))
+const CircleDetails = lazy(() => import('../pages/CircleDetails'))
+const CompanyProfile = lazy(() => import('../pages/CompanyProfile'))
+const CompanyDashboard = lazy(() => import('../pages/CompanyDashboard'))
+const ManageJobs = lazy(() => import('../pages/ManageJobs'))
+const ManageProjects = lazy(() => import('../pages/ManageProjects'))
+const CompanyApplications = lazy(() => import('../pages/CompanyApplications'))
+const CompanyBids = lazy(() => import('../pages/CompanyBids'))
+const AdminDashboard = lazy(() => import('../pages/AdminDashboard'))
+const AdminUsers = lazy(() => import('../pages/AdminUsers'))
+const AdminJobs = lazy(() => import('../pages/AdminJobs'))
+const AdminProjects = lazy(() => import('../pages/AdminProjects'))
+const MemberPublicProfile = lazy(() => import('../pages/MemberPublicProfile'))
+const CompanyPublicProfile = lazy(() => import('../pages/CompanyPublicProfile'))
+const Notifications = lazy(() => import('../pages/Notifications'))
+const NotFound = lazy(() => import('../pages/NotFound'))
 
-const candidateRoles = ["candidate"]
-const companyRoles = ["company"]
-const adminRoles = ["admin"]
-const authenticatedRoles = ["candidate", "company", "admin"]
+const candidateRoles = ['candidate']
+const companyRoles = ['company']
+const adminRoles = ['admin']
+const authenticatedRoles = ['candidate', 'company', 'admin']
+
+function RouteLoadingFallback() {
+  return (
+    <main className="flex min-h-screen items-center justify-center bg-[#0a192f] px-4 text-[#e6f1ff]">
+      <div className="rounded-2xl border border-[#233554] bg-[#112240]/80 px-10 py-5 shadow-xl shadow-black/20">
+        <LoadingSpinner label="Loading LinkPort..." />
+      </div>
+    </main>
+  )
+}
 
 export default function AppRoutes() {
   return (
     <BrowserRouter>
-      <Routes>
+      <Suspense fallback={<RouteLoadingFallback />}>
+        <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
@@ -65,7 +78,8 @@ export default function AppRoutes() {
         <Route path="/admin/jobs" element={<ProtectedRoute allowedRoles={adminRoles}><AdminJobs /></ProtectedRoute>} />
         <Route path="/admin/projects" element={<ProtectedRoute allowedRoles={adminRoles}><AdminProjects /></ProtectedRoute>} />
         <Route path="*" element={<NotFound />} />
-      </Routes>
+        </Routes>
+      </Suspense>
     </BrowserRouter>
   )
 }

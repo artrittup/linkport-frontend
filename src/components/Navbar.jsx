@@ -1,6 +1,8 @@
 import Button from './Button'
 import linkPortLogo from '../assets/linkport-logo.svg'
 import { useAuth } from '../context/AuthContext'
+import GlobalSearch from './GlobalSearch'
+import NotificationBell from './NotificationBell'
 
 export default function Navbar() {
   const {
@@ -29,10 +31,16 @@ export default function Navbar() {
           </span>
         </a>
 
+        <GlobalSearch
+          placeholder="Search members or companies..."
+          className="mx-2 w-10 transition-[width] duration-200 focus-within:w-48 sm:w-full sm:max-w-xs"
+        />
+
         {isLoading ? (
           <div className="h-9 w-32 animate-pulse rounded-lg bg-[#112240]" aria-label="Checking account" />
         ) : isAuthenticated ? (
           <div className="flex items-center gap-2 sm:gap-3">
+            <NotificationBell />
             <span className="hidden max-w-40 truncate text-sm text-[#8892b0] sm:block">
               {user?.name}
             </span>

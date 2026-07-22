@@ -50,17 +50,23 @@ export default function Sidebar({ navItems = [], isOpen = false, onClose }) {
   const { logout, user } = useAuth()
   const currentPath = window.location.pathname
   const hasCircles = navItems.some((item) => item.href === '/circles')
-  const firstUtilityIndex = navItems.findIndex((item) =>
+  const hasConnections = navItems.some((item) => item.href === '/connections')
+  const visibleItems = navItems.filter((item) => !(
+    ['candidate', 'company'].includes(user?.role)
+    && item.label.toLowerCase() === 'settings'
+  ))
+  const firstUtilityIndex = visibleItems.findIndex((item) =>
     ['settings', 'logout'].includes(item.label.toLowerCase()),
   )
-  const circlesIndex = firstUtilityIndex === -1 ? navItems.length : firstUtilityIndex
+  const utilityIndex = firstUtilityIndex === -1 ? visibleItems.length : firstUtilityIndex
+  const candidateItems = user?.role === 'candidate' && !hasConnections
+    ? [...visibleItems.slice(0, utilityIndex), { label: 'My Network', href: '/connections' }, ...visibleItems.slice(utilityIndex)]
+    : visibleItems
+  const nextUtilityIndex = candidateItems.findIndex((item) => ['settings', 'logout'].includes(item.label.toLowerCase()))
+  const circlesIndex = nextUtilityIndex === -1 ? candidateItems.length : nextUtilityIndex
   const navigationItems = user?.role === 'candidate' && !hasCircles
-    ? [
-        ...navItems.slice(0, circlesIndex),
-        { label: 'Circles', href: '/circles' },
-        ...navItems.slice(circlesIndex),
-      ]
-    : navItems
+    ? [...candidateItems.slice(0, circlesIndex), { label: 'Circles', href: '/circles' }, ...candidateItems.slice(circlesIndex)]
+    : candidateItems
   const mainItems = navigationItems.filter((item) => item.label.toLowerCase() !== 'logout')
   const logoutItem = navigationItems.find((item) => item.label.toLowerCase() === 'logout')
 

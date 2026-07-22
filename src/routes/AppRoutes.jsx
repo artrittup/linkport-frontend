@@ -20,6 +20,7 @@ import CandidateDashboard from "../pages/CandidateDashboard"
 import CompanyDashboard from "../pages/CompanyDashboard"
 import AdminDashboard from "../pages/AdminDashboard"
 import ProtectedRoute from "./ProtectedRoute"
+import InfoPage from "../pages/InfoPage"
 
 const candidateRoles = ["candidate"]
 const companyRoles = ["company"]
@@ -32,6 +33,7 @@ export default function AppRoutes() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/:page" element={<InfoPage />} />
         <Route path="/jobs" element={<ProtectedRoute allowedRoles={candidateRoles}><Jobs /></ProtectedRoute>} />
         <Route path="/projects" element={<ProtectedRoute allowedRoles={candidateRoles}><Projects /></ProtectedRoute>} />
         <Route path="/candidate/applications" element={<ProtectedRoute allowedRoles={candidateRoles}><MyApplications /></ProtectedRoute>} />

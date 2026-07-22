@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router'
 import { getJobs } from '../api/jobsApi'
 import { getProjects } from '../api/projectsApi'
 import Button from '../components/Button'
@@ -573,8 +574,15 @@ export default function LandingPage() {
           <div className="mx-auto flex max-w-7xl flex-col gap-5 text-sm sm:flex-row sm:items-center sm:justify-between">
             <p className="text-[#8892b0]">&copy; 2026 LinkPort. All rights reserved.</p>
             <nav className="flex flex-wrap gap-x-6 gap-y-3" aria-label="Footer navigation">
-              {['About Us', 'Terms of Service', 'Privacy Policy', 'Help & Support'].map((label) => (
-                <a key={label} href="#home" onClick={(event) => scrollToSection(event, 'home')} className="text-[#8892b0] transition-colors hover:text-[#64ffda]">{label}</a>
+              {[
+                ['About Us', '/about'],
+                ['FAQ', '/faq'],
+                ['Help & Support', '/help'],
+                ['Terms of Service', '/terms'],
+                ['Privacy Policy', '/privacy'],
+                ['Cookie Policy', '/cookies'],
+              ].map(([label, path]) => (
+                <Link key={path} to={path} className="text-[#8892b0] transition-colors hover:text-[#64ffda]">{label}</Link>
               ))}
             </nav>
           </div>

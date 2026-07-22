@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router'
+import { Link, useSearchParams } from 'react-router'
 import {
   acceptConnection,
   deleteConnection,
@@ -14,18 +14,6 @@ import LoadingSpinner from '../components/LoadingSpinner'
 import { useAuth } from '../context/AuthContext'
 import useToast from '../hooks/useToast'
 import DashboardLayout from '../layouts/DashboardLayout'
-
-const navItems = [
-  { label: 'Dashboard', href: '/candidate/dashboard' },
-  { label: 'Profile', href: '/candidate/profile' },
-  { label: 'Jobs', href: '/jobs' },
-  { label: 'Applications', href: '/candidate/applications' },
-  { label: 'Projects', href: '/projects' },
-  { label: 'Bids', href: '/candidate/bids' },
-  { label: 'My Network', href: '/connections' },
-  { label: 'Circles', href: '/circles' },
-  { label: 'Logout', href: '/login' },
-]
 
 const tabs = [
   { id: 'network', label: 'My Network' },
@@ -47,7 +35,9 @@ function MemberRow({ member, children }) {
 export default function Connections() {
   const { user } = useAuth()
   const { showToast } = useToast()
-  const [tab, setTab] = useState('network')
+  const [searchParams, setSearchParams] = useSearchParams()
+  const requestedTab = searchParams.get('tab')
+  const tab = tabs.some((item) => item.id === requestedTab) ? requestedTab : 'network'
   const [items, setItems] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
@@ -72,7 +62,9 @@ export default function Connections() {
   }, [tab])
 
   const changeTab = (nextTab) => {
-    setTab(nextTab)
+    const nextParams = new URLSearchParams(searchParams)
+    nextParams.set('tab', nextTab)
+    setSearchParams(nextParams)
     setItems([])
     setError('')
     setIsLoading(true)
@@ -95,7 +87,7 @@ export default function Connections() {
   const emptyText = tab === 'network' ? 'You have no connections yet.' : tab === 'requests' ? 'No incoming requests.' : 'No pending sent requests.'
 
   return (
-    <DashboardLayout title="My Network" navItems={navItems} userType="Member">
+    <DashboardLayout title="My Network" userType="Member">
       <div className="mx-auto max-w-5xl space-y-6">
         <div><p className="font-mono text-sm text-[#64ffda]">Connections</p><h2 className="mt-2 text-3xl font-bold text-[#e6f1ff]">My Network</h2><p className="mt-2 text-[#8892b0]">Manage the members you know and connection requests you receive.</p></div>
         <div className="flex gap-1 rounded-xl border border-[#233554] bg-[#071426] p-1" role="tablist">

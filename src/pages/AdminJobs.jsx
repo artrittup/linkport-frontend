@@ -4,16 +4,10 @@ import Button from '../components/Button'
 import Card from '../components/Card'
 import EmptyState from '../components/EmptyState'
 import LoadingSpinner from '../components/LoadingSpinner'
+import Modal, { DetailGrid, DetailSection, SkillList } from '../components/Modal'
 import useToast from '../hooks/useToast'
 import DashboardLayout from '../layouts/DashboardLayout'
 
-const navItems = [
-  { label: 'Dashboard', href: '/admin/dashboard' },
-  { label: 'Users', href: '/admin/users' },
-  { label: 'Jobs', href: '/admin/jobs' },
-  { label: 'Projects', href: '/admin/projects' },
-  { label: 'Logout', href: '/login' },
-]
 const control =
   'rounded-md border border-[#233554] bg-[#0a192f]/70 px-4 py-3 text-sm outline-none focus:border-[#64ffda]'
 
@@ -50,6 +44,7 @@ export default function AdminJobs() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
   const [deletingId, setDeletingId] = useState(null)
+  const [selectedJob, setSelectedJob] = useState(null)
 
   useEffect(() => {
     const timeout = window.setTimeout(
@@ -126,9 +121,7 @@ export default function AdminJobs() {
       <Button
         variant="outline"
         size="sm"
-        onClick={() =>
-          window.alert(`${job.title}\n${job.company}\n\n${job.description ?? ''}`)
-        }
+        onClick={() => setSelectedJob(job)}
       >
         View
       </Button>
@@ -144,7 +137,7 @@ export default function AdminJobs() {
   )
 
   return (
-    <DashboardLayout title="Jobs" navItems={navItems} userType="Admin">
+    <DashboardLayout title="Jobs" userType="Admin">
       <section className="mb-8">
         <p className="font-mono text-sm text-[#64ffda]">Content moderation</p>
         <h2 className="mt-2 text-2xl font-bold sm:text-3xl">Jobs</h2>
@@ -282,6 +275,13 @@ export default function AdminJobs() {
           </Button>
         </div>
       )}
+      <Modal isOpen={Boolean(selectedJob)} onClose={() => setSelectedJob(null)} eyebrow="Admin job details" title={selectedJob?.title ?? 'Job details'}>
+        {selectedJob && <><DetailGrid items={[
+          { label: 'Company', value: selectedJob.company }, { label: 'Status', value: selectedJob.status },
+          { label: 'Type', value: selectedJob.type ?? 'Not specified' }, { label: 'Location', value: selectedJob.location },
+          { label: 'Deadline', value: selectedJob.deadline ?? 'No deadline' }, { label: 'Created', value: selectedJob.createdDate },
+        ]} /><SkillList skills={selectedJob.skills} /><DetailSection label="Description">{selectedJob.description}</DetailSection><DetailSection label="Requirements">{selectedJob.requirements}</DetailSection></>}
+      </Modal>
     </DashboardLayout>
   )
 }

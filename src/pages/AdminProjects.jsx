@@ -4,16 +4,10 @@ import Button from '../components/Button'
 import Card from '../components/Card'
 import EmptyState from '../components/EmptyState'
 import LoadingSpinner from '../components/LoadingSpinner'
+import Modal, { DetailGrid, DetailSection, SkillList } from '../components/Modal'
 import useToast from '../hooks/useToast'
 import DashboardLayout from '../layouts/DashboardLayout'
 
-const navItems = [
-  { label: 'Dashboard', href: '/admin/dashboard' },
-  { label: 'Users', href: '/admin/users' },
-  { label: 'Jobs', href: '/admin/jobs' },
-  { label: 'Projects', href: '/admin/projects' },
-  { label: 'Logout', href: '/login' },
-]
 const control =
   'rounded-md border border-[#233554] bg-[#0a192f]/70 px-4 py-3 text-sm outline-none focus:border-[#64ffda]'
 
@@ -60,6 +54,7 @@ export default function AdminProjects() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
   const [deletingId, setDeletingId] = useState(null)
+  const [selectedProject, setSelectedProject] = useState(null)
 
   useEffect(() => {
     const timeout = window.setTimeout(
@@ -136,11 +131,7 @@ export default function AdminProjects() {
       <Button
         variant="outline"
         size="sm"
-        onClick={() =>
-          window.alert(
-            `${project.title}\n${project.company}\n${formatBudget(project.budget)}\n\n${project.description ?? ''}`,
-          )
-        }
+        onClick={() => setSelectedProject(project)}
       >
         View
       </Button>
@@ -156,7 +147,7 @@ export default function AdminProjects() {
   )
 
   return (
-    <DashboardLayout title="Projects" navItems={navItems} userType="Admin">
+    <DashboardLayout title="Projects" userType="Admin">
       <section className="mb-8">
         <p className="font-mono text-sm text-[#64ffda]">Content moderation</p>
         <h2 className="mt-2 text-2xl font-bold sm:text-3xl">Projects</h2>
@@ -301,6 +292,13 @@ export default function AdminProjects() {
           </Button>
         </div>
       )}
+      <Modal isOpen={Boolean(selectedProject)} onClose={() => setSelectedProject(null)} eyebrow="Admin project details" title={selectedProject?.title ?? 'Project details'}>
+        {selectedProject && <><DetailGrid items={[
+          { label: 'Company', value: selectedProject.company }, { label: 'Status', value: selectedProject.status },
+          { label: 'Category', value: selectedProject.category ?? 'Not specified' }, { label: 'Budget', value: formatBudget(selectedProject.budget) },
+          { label: 'Deadline', value: selectedProject.deadline ?? 'No deadline' }, { label: 'Created', value: selectedProject.createdDate },
+        ]} /><SkillList skills={selectedProject.skills ?? selectedProject.required_skills} /><DetailSection label="Description">{selectedProject.description}</DetailSection></>}
+      </Modal>
     </DashboardLayout>
   )
 }

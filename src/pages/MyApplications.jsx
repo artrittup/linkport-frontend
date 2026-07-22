@@ -4,17 +4,8 @@ import Button from '../components/Button'
 import Card from '../components/Card'
 import EmptyState from '../components/EmptyState'
 import LoadingSpinner from '../components/LoadingSpinner'
+import Modal, { DetailGrid, DetailSection } from '../components/Modal'
 import DashboardLayout from '../layouts/DashboardLayout'
-
-const navItems = [
-  { label: 'Dashboard', href: '/candidate/dashboard' },
-  { label: 'Member Profile', href: '/candidate/profile' },
-  { label: 'Jobs', href: '/jobs' },
-  { label: 'My Applications', href: '/candidate/applications' },
-  { label: 'Projects', href: '/projects' },
-  { label: 'My Bids', href: '/candidate/bids' },
-  { label: 'Logout', href: '/login' },
-]
 
 const statuses = ['All statuses', 'Pending', 'Accepted', 'Rejected']
 const statusClasses = {
@@ -47,6 +38,7 @@ export default function MyApplications() {
   })
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
+  const [selectedApplication, setSelectedApplication] = useState(null)
 
   useEffect(() => {
     let isActive = true
@@ -106,11 +98,10 @@ export default function MyApplications() {
     Math.ceil(pagination.total / pagination.per_page),
   )
 
-  const showDetails = (application) =>
-    window.alert(`${application.jobTitle} at ${application.company}\n\n${application.messagePreview}`)
+  const showDetails = (application) => setSelectedApplication(application)
 
   return (
-    <DashboardLayout title="My Applications" navItems={navItems} userType="Member">
+    <DashboardLayout title="My Applications" userType="Member">
       <div className="space-y-8">
         <section>
           <p className="font-mono text-sm text-[#64ffda]">Application tracker</p>
@@ -248,6 +239,13 @@ export default function MyApplications() {
           )}
         </section>
       </div>
+      <Modal isOpen={Boolean(selectedApplication)} onClose={() => setSelectedApplication(null)} eyebrow="Application details" title={selectedApplication?.jobTitle ?? 'Application details'}>
+        {selectedApplication && <><DetailGrid items={[
+          { label: 'Company', value: selectedApplication.company }, { label: 'Status', value: selectedApplication.status },
+          { label: 'Location', value: selectedApplication.location }, { label: 'Applied', value: selectedApplication.dateApplied },
+          { label: 'Deadline', value: selectedApplication.deadline ? new Date(selectedApplication.deadline).toLocaleDateString() : 'No deadline' },
+        ]} /><DetailSection label="Cover letter">{selectedApplication.coverLetter || selectedApplication.messagePreview}</DetailSection></>}
+      </Modal>
     </DashboardLayout>
   )
 }

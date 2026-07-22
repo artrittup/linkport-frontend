@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { useNavigate } from 'react-router'
+import { useNavigate, useSearchParams } from 'react-router'
 import {
   acceptInvitation,
   createCircle,
@@ -18,17 +18,6 @@ import LoadingSpinner from '../components/LoadingSpinner'
 import SkillsInput from '../components/SkillsInput'
 import useToast from '../hooks/useToast'
 import DashboardLayout from '../layouts/DashboardLayout'
-
-const navItems = [
-  { label: 'Dashboard', href: '/candidate/dashboard' },
-  { label: 'Member Profile', href: '/candidate/profile' },
-  { label: 'Jobs', href: '/jobs' },
-  { label: 'My Applications', href: '/candidate/applications' },
-  { label: 'Projects', href: '/projects' },
-  { label: 'My Bids', href: '/candidate/bids' },
-  { label: 'Circles', href: '/circles' },
-  { label: 'Logout', href: '/login' },
-]
 
 const emptyForm = {
   name: '',
@@ -127,7 +116,9 @@ function CircleCard({ circle, onView, action }) {
 
 export default function Circles() {
   const navigate = useNavigate()
+  const [searchParams, setSearchParams] = useSearchParams()
   const { showToast } = useToast()
+  const circleTab = searchParams.get('tab') === 'invitations' ? 'invitations' : 'overview'
   const [myCircles, setMyCircles] = useState([])
   const [publicCircles, setPublicCircles] = useState([])
   const [invitations, setInvitations] = useState([])
@@ -201,6 +192,13 @@ export default function Circles() {
     () => new Set(joinRequests.map((request) => request.circle_id)),
     [joinRequests],
   )
+
+  const changeCircleTab = (nextTab) => {
+    const nextParams = new URLSearchParams(searchParams)
+    if (nextTab === 'overview') nextParams.delete('tab')
+    else nextParams.set('tab', nextTab)
+    setSearchParams(nextParams)
+  }
 
   const closeCreate = () => {
     setIsCreateOpen(false)
@@ -288,7 +286,7 @@ export default function Circles() {
   }
 
   return (
-    <DashboardLayout title="Circles" navItems={navItems} userType="Member">
+    <DashboardLayout title="Circles" userType="Member">
       <div className="space-y-12">
         <section className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
           <div>
@@ -300,6 +298,11 @@ export default function Circles() {
           </div>
           <Button size="lg" onClick={() => setIsCreateOpen(true)}>Create Circle</Button>
         </section>
+
+        <div className="flex max-w-md gap-1 rounded-xl border border-[#233554] bg-[#071426] p-1" role="tablist" aria-label="Circle views">
+          <button type="button" role="tab" aria-selected={circleTab === 'overview'} onClick={() => changeCircleTab('overview')} className={`flex-1 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${circleTab === 'overview' ? 'bg-[#112240] text-[#64ffda]' : 'text-[#8892b0] hover:text-[#e6f1ff]'}`}>Circles</button>
+          <button type="button" role="tab" aria-selected={circleTab === 'invitations'} onClick={() => changeCircleTab('invitations')} className={`flex-1 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${circleTab === 'invitations' ? 'bg-[#112240] text-[#64ffda]' : 'text-[#8892b0] hover:text-[#e6f1ff]'}`}>Invitations{invitations.length > 0 ? ` (${invitations.length})` : ''}</button>
+        </div>
 
         {loadError && (
           <div role="alert" className="flex flex-col gap-4 rounded-lg border border-[#ef4444]/40 bg-[#ef4444]/10 p-4 sm:flex-row sm:items-center sm:justify-between">
@@ -322,7 +325,7 @@ export default function Circles() {
           <LoadingSpinner label="Loading circles from LinkPort..." size="lg" />
         ) : (
           <>
-            <section>
+            {circleTab === 'overview' && <section>
               <SectionHeading title="My Circles" description="Small teams you already collaborate with." />
               {myCircles.length === 0 ? (
                 <div className="mt-6">
@@ -340,9 +343,9 @@ export default function Circles() {
                   ))}
                 </div>
               )}
-            </section>
+            </section>}
 
-            <section>
+            {circleTab === 'overview' && <section>
               <SectionHeading title="Explore Circles" description="Discover public circles that match your interests and skills." />
               {exploreCircles.length === 0 ? (
                 <div className="mt-6">
@@ -370,7 +373,7 @@ export default function Circles() {
                   ))}
                 </div>
               )}
-            </section>
+            </section>}
 
             <section>
               <SectionHeading title="Invitations" description="Pending invitations from members who want to collaborate with you." />

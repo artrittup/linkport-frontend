@@ -8,16 +8,10 @@ import Button from '../components/Button'
 import Card from '../components/Card'
 import EmptyState from '../components/EmptyState'
 import LoadingSpinner from '../components/LoadingSpinner'
+import Modal, { DetailGrid, DetailSection, SkillList } from '../components/Modal'
 import useToast from '../hooks/useToast'
 import DashboardLayout from '../layouts/DashboardLayout'
 
-const navItems = [
-  { label: 'Dashboard', href: '/admin/dashboard' },
-  { label: 'Users', href: '/admin/users' },
-  { label: 'Jobs', href: '/admin/jobs' },
-  { label: 'Projects', href: '/admin/projects' },
-  { label: 'Logout', href: '/login' },
-]
 const control =
   'w-full rounded-md border border-[#233554] bg-[#0a192f]/70 px-4 py-3 text-sm text-[#e6f1ff] outline-none placeholder:text-[#64748b] focus:border-[#64ffda]'
 const roleStyle = {
@@ -70,6 +64,7 @@ export default function AdminUsers() {
   const [error, setError] = useState('')
   const [updatingId, setUpdatingId] = useState(null)
   const [deletingId, setDeletingId] = useState(null)
+  const [selectedUser, setSelectedUser] = useState(null)
 
   useEffect(() => {
     const timeout = window.setTimeout(() => {
@@ -165,12 +160,13 @@ export default function AdminUsers() {
   }
 
   const viewUser = (user) => {
+    setSelectedUser(user)
     const profile = user.candidateProfile ?? user.companyProfile
     const profileDetail =
       profile?.headline ?? profile?.company_name ?? 'No profile details available'
-    window.alert(
+    void [
       `${user.name}\n${user.email}\n${displayRole(user.role)} · ${user.status}\n${profileDetail}`,
-    )
+    ]
   }
 
   const Actions = ({ user }) => {
@@ -205,7 +201,7 @@ export default function AdminUsers() {
   }
 
   return (
-    <DashboardLayout title="Users" navItems={navItems} userType="Admin">
+    <DashboardLayout title="Users" userType="Admin">
       <div className="space-y-8">
         <section>
           <p className="font-mono text-sm text-[#64ffda]">User management</p>
@@ -371,6 +367,15 @@ export default function AdminUsers() {
           )}
         </section>
       </div>
+      <Modal isOpen={Boolean(selectedUser)} onClose={() => setSelectedUser(null)} eyebrow="Admin user details" title={selectedUser?.name ?? 'User details'}>
+        {selectedUser && <><DetailGrid items={[
+          { label: 'Email', value: selectedUser.email, fullWidth: true },
+          { label: 'Role', value: displayRole(selectedUser.role) },
+          { label: 'Status', value: selectedUser.status },
+          { label: 'Created', value: selectedUser.createdDate },
+          { label: 'Location', value: (selectedUser.candidateProfile ?? selectedUser.companyProfile)?.location },
+        ]} /><DetailSection label="Profile summary">{(selectedUser.candidateProfile ?? selectedUser.companyProfile)?.headline ?? (selectedUser.candidateProfile ?? selectedUser.companyProfile)?.company_name ?? (selectedUser.candidateProfile ?? selectedUser.companyProfile)?.bio ?? (selectedUser.candidateProfile ?? selectedUser.companyProfile)?.description}</DetailSection><SkillList skills={(selectedUser.candidateProfile ?? selectedUser.companyProfile)?.skills} /></>}
+      </Modal>
     </DashboardLayout>
   )
 }

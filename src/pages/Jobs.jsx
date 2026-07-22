@@ -11,16 +11,6 @@ import { useAuth } from '../context/AuthContext'
 import useToast from '../hooks/useToast'
 import DashboardLayout from '../layouts/DashboardLayout'
 
-const navItems = [
-  { label: 'Dashboard', href: '/candidate/dashboard' },
-  { label: 'Member Profile', href: '/candidate/profile' },
-  { label: 'Jobs', href: '/jobs' },
-  { label: 'My Applications', href: '/candidate/applications' },
-  { label: 'Projects', href: '/projects' },
-  { label: 'My Bids', href: '/candidate/bids' },
-  { label: 'Logout', href: '/login' },
-]
-
 const controlClasses =
   'w-full rounded-md border border-[#233554] bg-[#112240] px-4 py-3 text-sm text-[#e6f1ff] outline-none transition-colors placeholder:text-[#64748b] focus:border-[#64ffda] focus:ring-1 focus:ring-[#64ffda]'
 
@@ -130,7 +120,7 @@ export default function Jobs() {
   }
 
   return (
-    <DashboardLayout title="Explore Jobs" navItems={navItems} userType="Member">
+    <DashboardLayout title="Explore Jobs" userType="Member">
       <div className="space-y-8">
         <section>
           <p className="font-mono text-sm text-[#64ffda]">Career opportunities</p>

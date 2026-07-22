@@ -11,16 +11,6 @@ import ProjectCard from '../components/ProjectCard'
 import { useAuth } from '../context/AuthContext'
 import DashboardLayout from '../layouts/DashboardLayout'
 
-const navItems = [
-  { label: 'Dashboard', href: '/candidate/dashboard' },
-  { label: 'Member Profile', href: '/candidate/profile' },
-  { label: 'Jobs', href: '/jobs' },
-  { label: 'My Applications', href: '/candidate/applications' },
-  { label: 'Projects', href: '/projects' },
-  { label: 'My Bids', href: '/candidate/bids' },
-  { label: 'Logout', href: '/login' },
-]
-
 function SectionHeading({ title, description }) {
   return (
     <div>
@@ -147,7 +137,6 @@ export default function CandidateDashboard() {
   return (
     <DashboardLayout
       title="Member Dashboard"
-      navItems={navItems}
       userType="Member"
     >
       <div className="space-y-10">

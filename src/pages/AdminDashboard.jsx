@@ -7,20 +7,16 @@ import EmptyState from '../components/EmptyState'
 import LoadingSpinner from '../components/LoadingSpinner'
 import DashboardLayout from '../layouts/DashboardLayout'
 
-const navItems = [
-  { label: 'Dashboard', href: '/admin/dashboard' },
-  { label: 'Users', href: '/admin/users' },
-  { label: 'Jobs', href: '/admin/jobs' },
-  { label: 'Projects', href: '/admin/projects' },
-  { label: 'Logout', href: '/login' },
-]
-
 const displayRole = (role) => role === 'Candidate' ? 'Member' : role
 
-function RecentList({ items, getTitle, getMeta, href }) {
+function RecentList({ items, getTitle, getMeta, href, isLoading, error }) {
   return (
     <Card className="h-full">
-      {items.length === 0 ? (
+      {isLoading ? (
+        <p className="text-sm text-[#8892b0]">Loading records...</p>
+      ) : error ? (
+        <p role="alert" className="rounded-lg border border-[#ef4444]/30 bg-[#ef4444]/10 px-3 py-2 text-sm text-[#fca5a5]">{error}</p>
+      ) : items.length === 0 ? (
         <p className="text-sm text-[#8892b0]">No records available.</p>
       ) : (
         <div className="space-y-1">
@@ -45,36 +41,51 @@ export default function AdminDashboard() {
   const [recentUsers, setRecentUsers] = useState([])
   const [recentJobs, setRecentJobs] = useState([])
   const [recentProjects, setRecentProjects] = useState([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState('')
+  const [isLoadingSummary, setIsLoadingSummary] = useState(true)
+  const [isLoadingUsers, setIsLoadingUsers] = useState(true)
+  const [isLoadingJobs, setIsLoadingJobs] = useState(true)
+  const [isLoadingProjects, setIsLoadingProjects] = useState(true)
+  const [summaryError, setSummaryError] = useState('')
+  const [usersError, setUsersError] = useState('')
+  const [jobsError, setJobsError] = useState('')
+  const [projectsError, setProjectsError] = useState('')
 
   useEffect(() => {
     let isActive = true
 
-    Promise.all([
-      getDashboardSummary(),
-      getAdminUsers({ per_page: 4 }),
-      getAdminJobs({ per_page: 4 }),
-      getAdminProjects({ per_page: 4 }),
-    ])
-      .then(([summaryResponse, usersResponse, jobsResponse, projectsResponse]) => {
-        if (!isActive) return
-        setSummary(summaryResponse ?? {})
-        setRecentUsers(usersResponse.data)
-        setRecentJobs(jobsResponse.data)
-        setRecentProjects(projectsResponse.data)
-      })
-      .catch((requestError) => {
-        if (isActive) {
-          setError(
-            requestError.response?.data?.message ||
-              'Unable to load the admin dashboard.',
-          )
-        }
-      })
-      .finally(() => {
-        if (isActive) setIsLoading(false)
-      })
+    const messageFor = (error, fallback) => error?.response?.data?.message || fallback
+
+    getDashboardSummary().then((response) => {
+      if (isActive) setSummary(response ?? {})
+    }).catch((error) => {
+      if (isActive) setSummaryError(messageFor(error, 'Unable to load platform totals.'))
+    }).finally(() => {
+      if (isActive) setIsLoadingSummary(false)
+    })
+
+    getAdminUsers({ per_page: 4 }).then((response) => {
+      if (isActive) setRecentUsers(response.data)
+    }).catch((error) => {
+      if (isActive) setUsersError(messageFor(error, 'Unable to load recent users.'))
+    }).finally(() => {
+      if (isActive) setIsLoadingUsers(false)
+    })
+
+    getAdminJobs({ per_page: 4 }).then((response) => {
+      if (isActive) setRecentJobs(response.data)
+    }).catch((error) => {
+      if (isActive) setJobsError(messageFor(error, 'Unable to load recent jobs.'))
+    }).finally(() => {
+      if (isActive) setIsLoadingJobs(false)
+    })
+
+    getAdminProjects({ per_page: 4 }).then((response) => {
+      if (isActive) setRecentProjects(response.data)
+    }).catch((error) => {
+      if (isActive) setProjectsError(messageFor(error, 'Unable to load recent projects.'))
+    }).finally(() => {
+      if (isActive) setIsLoadingProjects(false)
+    })
 
     return () => {
       isActive = false
@@ -95,17 +106,17 @@ export default function AdminDashboard() {
   ]
 
   return (
-    <DashboardLayout title="Admin Dashboard" navItems={navItems} userType="Admin">
+    <DashboardLayout title="Admin Dashboard" userType="Admin">
       <div className="space-y-10">
         <section>
           <p className="font-mono text-sm text-[#64ffda]">Platform overview</p>
           <h2 className="mt-2 text-2xl font-bold sm:text-3xl">Admin Dashboard</h2>
           <p className="mt-3 text-[#8892b0]">Monitor users, companies, jobs, projects, applications, and bids.</p>
 
-          {isLoading ? (
-            <LoadingSpinner label="Loading admin dashboard..." />
-          ) : error ? (
-            <div className="mt-8"><EmptyState title="Unable to load dashboard" description={error} /></div>
+          {isLoadingSummary ? (
+            <LoadingSpinner label="Loading platform totals..." />
+          ) : summaryError ? (
+            <div className="mt-8"><EmptyState title="Unable to load totals" description={summaryError} /></div>
           ) : (
             <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
               {stats.map(([label, value], index) => (
@@ -118,16 +129,14 @@ export default function AdminDashboard() {
           )}
         </section>
 
-        {!isLoading && !error && (
-          <section>
+        <section>
             <h2 className="mb-5 text-xl font-semibold sm:text-2xl">Recent Activity</h2>
             <div className="grid gap-5 lg:grid-cols-3">
-              <div><h3 className="mb-3 text-sm text-[#8892b0]">Recent Users</h3><RecentList items={recentUsers} getTitle={(item) => item.name} getMeta={(item) => `${displayRole(item.role)} - ${item.createdDate}`} href="/admin/users" /></div>
-              <div><h3 className="mb-3 text-sm text-[#8892b0]">Recent Jobs</h3><RecentList items={recentJobs} getTitle={(item) => item.title} getMeta={(item) => `${item.company} - ${item.createdDate}`} href="/admin/jobs" /></div>
-              <div><h3 className="mb-3 text-sm text-[#8892b0]">Recent Projects</h3><RecentList items={recentProjects} getTitle={(item) => item.title} getMeta={(item) => `${item.company} - ${item.createdDate}`} href="/admin/projects" /></div>
+              <div><h3 className="mb-3 text-sm text-[#8892b0]">Recent Users</h3><RecentList items={recentUsers} getTitle={(item) => item.name} getMeta={(item) => `${displayRole(item.role)} - ${item.createdDate}`} href="/admin/users" isLoading={isLoadingUsers} error={usersError} /></div>
+              <div><h3 className="mb-3 text-sm text-[#8892b0]">Recent Jobs</h3><RecentList items={recentJobs} getTitle={(item) => item.title} getMeta={(item) => `${item.company} - ${item.createdDate}`} href="/admin/jobs" isLoading={isLoadingJobs} error={jobsError} /></div>
+              <div><h3 className="mb-3 text-sm text-[#8892b0]">Recent Projects</h3><RecentList items={recentProjects} getTitle={(item) => item.title} getMeta={(item) => `${item.company} - ${item.createdDate}`} href="/admin/projects" isLoading={isLoadingProjects} error={projectsError} /></div>
             </div>
-          </section>
-        )}
+        </section>
       </div>
     </DashboardLayout>
   )

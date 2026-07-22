@@ -4,17 +4,8 @@ import Button from '../components/Button'
 import Card from '../components/Card'
 import EmptyState from '../components/EmptyState'
 import LoadingSpinner from '../components/LoadingSpinner'
+import Modal, { DetailGrid, DetailSection } from '../components/Modal'
 import DashboardLayout from '../layouts/DashboardLayout'
-
-const navItems = [
-  { label: 'Dashboard', href: '/candidate/dashboard' },
-  { label: 'Member Profile', href: '/candidate/profile' },
-  { label: 'Jobs', href: '/jobs' },
-  { label: 'My Applications', href: '/candidate/applications' },
-  { label: 'Projects', href: '/projects' },
-  { label: 'My Bids', href: '/candidate/bids' },
-  { label: 'Logout', href: '/login' },
-]
 
 const statuses = ['All statuses', 'Pending', 'Accepted', 'Rejected']
 const statusClasses = {
@@ -47,6 +38,7 @@ export default function MyBids() {
   })
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
+  const [selectedBid, setSelectedBid] = useState(null)
 
   useEffect(() => {
     let isActive = true
@@ -106,11 +98,10 @@ export default function MyBids() {
     Math.ceil(pagination.total / pagination.per_page),
   )
 
-  const showProposal = (bid) =>
-    window.alert(`${bid.projectTitle} for ${bid.company}\n\n${bid.proposalPreview}`)
+  const showProposal = (bid) => setSelectedBid(bid)
 
   return (
-    <DashboardLayout title="My Bids" navItems={navItems} userType="Member">
+    <DashboardLayout title="My Bids" userType="Member">
       <div className="space-y-8">
         <section>
           <p className="font-mono text-sm text-[#64ffda]">Proposal tracker</p>
@@ -244,6 +235,13 @@ export default function MyBids() {
           )}
         </section>
       </div>
+      <Modal isOpen={Boolean(selectedBid)} onClose={() => setSelectedBid(null)} eyebrow="Bid details" title={selectedBid?.projectTitle ?? 'Bid details'}>
+        {selectedBid && <><DetailGrid items={[
+          { label: 'Company', value: selectedBid.company }, { label: 'Status', value: selectedBid.status },
+          { label: 'Offer', value: selectedBid.offeredPrice }, { label: 'Estimated delivery', value: selectedBid.deliveryDays ? `${selectedBid.deliveryDays} days` : 'Not specified' },
+          { label: 'Submitted', value: selectedBid.dateSubmitted },
+        ]} /><DetailSection label="Proposal">{selectedBid.proposalPreview}</DetailSection></>}
+      </Modal>
     </DashboardLayout>
   )
 }

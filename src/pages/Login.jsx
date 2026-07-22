@@ -83,12 +83,9 @@ export default function Login() {
                 <label htmlFor="password" className="text-sm font-medium text-[#e6f1ff]">
                   Password
                 </label>
-                <a
-                  href="#"
-                  className="text-xs text-[#8892b0] transition-colors hover:text-[#64ffda]"
-                >
-                  Forgot password?
-                </a>
+                <span className="cursor-not-allowed text-xs text-[#64748b]" aria-disabled="true">
+                  Forgot password? Coming soon
+                </span>
               </div>
               <input
                 id="password"

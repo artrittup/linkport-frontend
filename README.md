@@ -1,16 +1,63 @@
-# React + Vite
+# LinkPort Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+LinkPort is a professional networking and opportunities platform for members and companies. This directory contains the React single-page application.
 
-Currently, two official plugins are available:
+## Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- React
+- Vite
+- Tailwind CSS
 
-## React Compiler
+## Requirements
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- Node.js
+- npm
+- The LinkPort API running at `http://127.0.0.1:8000`
 
-## Expanding the ESLint configuration
+## Local setup
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+1. Install dependencies:
+
+   ```bash
+   npm install
+   ```
+
+2. Create a local environment file from `.env.example`:
+
+   ```powershell
+   Copy-Item .env.example .env
+   ```
+
+   On macOS or Linux, use `cp .env.example .env`.
+
+3. Confirm `.env` contains:
+
+   ```env
+   VITE_API_BASE_URL=http://127.0.0.1:8000/api
+   ```
+
+4. Start the development server:
+
+   ```bash
+   npm run dev
+   ```
+
+Open the frontend at [http://localhost:5173](http://localhost:5173). The backend must remain available at `http://127.0.0.1:8000` while using the app.
+
+## Common commands
+
+```bash
+npm run dev
+npm run lint
+npm run build
+npm run preview
+```
+
+## Testing checklist
+
+- Confirm the API health check responds at `http://127.0.0.1:8000/api/health`.
+- Open the landing page and test registration and login.
+- Verify member, company, and admin navigation with the appropriate account.
+- Run `npm run lint` and `npm run build` before committing frontend changes.
+
+Do not commit `.env`; it is intended for local configuration only.

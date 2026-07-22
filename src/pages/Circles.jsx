@@ -19,17 +19,6 @@ import SkillsInput from '../components/SkillsInput'
 import useToast from '../hooks/useToast'
 import DashboardLayout from '../layouts/DashboardLayout'
 
-const navItems = [
-  { label: 'Dashboard', href: '/candidate/dashboard' },
-  { label: 'Member Profile', href: '/candidate/profile' },
-  { label: 'Jobs', href: '/jobs' },
-  { label: 'My Applications', href: '/candidate/applications' },
-  { label: 'Projects', href: '/projects' },
-  { label: 'My Bids', href: '/candidate/bids' },
-  { label: 'Circles', href: '/circles' },
-  { label: 'Logout', href: '/login' },
-]
-
 const emptyForm = {
   name: '',
   description: '',
@@ -297,7 +286,7 @@ export default function Circles() {
   }
 
   return (
-    <DashboardLayout title="Circles" navItems={navItems} userType="Member">
+    <DashboardLayout title="Circles" userType="Member">
       <div className="space-y-12">
         <section className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
           <div>

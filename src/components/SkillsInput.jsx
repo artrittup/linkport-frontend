@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import Button from './Button'
-import skillOptions from './skillOptions'
+import skillGroups from './skillOptions'
 
 export default function SkillsInput({ skills, setSkills, placeholder = 'Add a skill...' }) {
   const [value, setValue] = useState('')
@@ -27,10 +27,15 @@ export default function SkillsInput({ skills, setSkills, placeholder = 'Add a sk
   }
 
   const normalizedValue = value.trim().toLowerCase()
-  const suggestions = skillOptions
-    .filter((option) => !skills.some((skill) => skill.toLowerCase() === option.toLowerCase()))
-    .filter((option) => !normalizedValue || option.toLowerCase().includes(normalizedValue))
-    .slice(0, 8)
+  const filteredGroups = skillGroups
+    .map((group) => ({
+      ...group,
+      skills: group.skills
+        .filter((option) => !skills.some((skill) => skill.toLowerCase() === option.toLowerCase()))
+        .filter((option) => !normalizedValue || option.toLowerCase().includes(normalizedValue)),
+    }))
+    .filter((group) => group.skills.length > 0)
+  const suggestionCount = filteredGroups.reduce((total, group) => total + group.skills.length, 0)
 
   return (
     <div>
@@ -55,26 +60,33 @@ export default function SkillsInput({ skills, setSkills, placeholder = 'Add a sk
             placeholder={placeholder}
             autoComplete="off"
             aria-label="Search or add a skill"
-            aria-expanded={showSuggestions && suggestions.length > 0}
+            aria-expanded={showSuggestions && suggestionCount > 0}
             aria-controls="skill-suggestions"
             className="w-full rounded-md border border-[#233554] bg-[#0a192f]/70 px-4 py-2.5 text-sm text-[#e6f1ff] outline-none transition-colors placeholder:text-[#64748b] focus:border-[#64ffda] focus:ring-1 focus:ring-[#64ffda]"
           />
 
-          {showSuggestions && suggestions.length > 0 && (
+          {showSuggestions && suggestionCount > 0 && (
             <div id="skill-suggestions" role="listbox" className="absolute z-30 mt-2 max-h-64 w-full overflow-y-auto rounded-xl border border-[#233554] bg-[#112240] p-1.5 shadow-2xl shadow-black/40">
-              {suggestions.map((suggestion) => (
-                <button
-                  key={suggestion}
-                  type="button"
-                  role="option"
-                  aria-selected="false"
-                  onMouseDown={(event) => event.preventDefault()}
-                  onClick={() => addSkill(suggestion)}
-                  className="flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-left text-sm text-[#a8b2d1] transition-colors hover:bg-[#64ffda]/10 hover:text-[#64ffda]"
-                >
-                  {suggestion}
-                  <span className="text-xs text-[#64748b]">Add</span>
-                </button>
+              {filteredGroups.map((group) => (
+                <section key={group.category} aria-label={group.category} className="not-last:mb-2">
+                  <p className="sticky top-0 z-10 bg-[#112240] px-3 py-2 text-[11px] font-bold uppercase tracking-[0.14em] text-[#64ffda]">
+                    {group.category}
+                  </p>
+                  {group.skills.map((suggestion) => (
+                    <button
+                      key={suggestion}
+                      type="button"
+                      role="option"
+                      aria-selected="false"
+                      onMouseDown={(event) => event.preventDefault()}
+                      onClick={() => addSkill(suggestion)}
+                      className="flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-left text-sm text-[#a8b2d1] transition-colors hover:bg-[#64ffda]/10 hover:text-[#64ffda]"
+                    >
+                      {suggestion}
+                      <span className="text-xs text-[#64748b]">Add</span>
+                    </button>
+                  ))}
+                </section>
               ))}
             </div>
           )}

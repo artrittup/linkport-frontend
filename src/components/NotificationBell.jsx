@@ -7,18 +7,7 @@ import {
   markAllNotificationsAsRead,
   markNotificationAsRead,
 } from '../api/notificationsApi'
-
-function destinationFor(notification) {
-  const data = notification.data ?? {}
-  if (notification.type === 'connection_request') return '/connections'
-  if (notification.type === 'connection_accepted' && data.receiver_id) return `/members/${data.receiver_id}`
-  if (notification.type.startsWith('circle_') && data.circle_id) return `/circles/${data.circle_id}`
-  if (notification.type === 'job_application_received') return '/company/applications'
-  if (notification.type === 'job_application_status') return '/candidate/applications'
-  if (notification.type === 'project_bid_received') return '/company/bids'
-  if (notification.type === 'project_bid_status') return '/candidate/bids'
-  return '/notifications'
-}
+import { getNotificationDestination } from '../utils/notificationDestination'
 
 function relativeTime(value) {
   const seconds = Math.max(0, Math.floor((Date.now() - new Date(value).getTime()) / 1000))
@@ -37,6 +26,7 @@ export default function NotificationBell() {
   const [unreadCount, setUnreadCount] = useState(0)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
+  const [openingId, setOpeningId] = useState(null)
 
   useEffect(() => {
     let active = true
@@ -79,16 +69,25 @@ export default function NotificationBell() {
   }
 
   const openNotification = async (notification) => {
+    if (openingId !== null) return
+    setOpeningId(notification.id)
+
     if (!notification.read_at) {
       try {
         await markNotificationAsRead(notification.id)
         setUnreadCount((count) => Math.max(0, count - 1))
+        setNotifications((items) => items.map((item) => (
+          item.id === notification.id
+            ? { ...item, read_at: new Date().toISOString() }
+            : item
+        )))
       } catch {
         // Navigation remains available if the read update fails.
       }
     }
     setIsOpen(false)
-    navigate(destinationFor(notification))
+    navigate(getNotificationDestination(notification))
+    setOpeningId(null)
   }
 
   const markAll = async () => {
@@ -116,7 +115,7 @@ export default function NotificationBell() {
             {!isLoading && error && <p role="alert" className="px-3 py-8 text-center text-xs text-[#fca5a5]">{error}</p>}
             {!isLoading && !error && notifications.length === 0 && <p className="px-3 py-8 text-center text-xs text-[#8892b0]">You have no notifications yet.</p>}
             {!isLoading && !error && notifications.map((notification) => (
-              <button key={notification.id} type="button" onClick={() => openNotification(notification)} className={`relative block w-full rounded-lg px-3 py-3 text-left transition-colors hover:bg-[#172a45] ${notification.read_at ? '' : 'bg-[#64ffda]/5'}`}>
+              <button key={notification.id} type="button" disabled={openingId !== null} onClick={() => openNotification(notification)} className={`relative block w-full rounded-lg px-3 py-3 text-left transition-colors hover:bg-[#172a45] disabled:cursor-wait ${notification.read_at ? '' : 'bg-[#64ffda]/5'}`}>
                 {!notification.read_at && <span className="absolute right-3 top-4 h-1.5 w-1.5 rounded-full bg-[#64ffda]" />}
                 <p className="pr-4 text-sm font-medium text-[#e6f1ff]">{notification.title}</p>{notification.message && <p className="mt-1 pr-3 text-xs leading-5 text-[#8892b0]">{notification.message}</p>}<p className="mt-1.5 text-[10px] text-[#64748b]">{relativeTime(notification.created_at)}</p>
               </button>

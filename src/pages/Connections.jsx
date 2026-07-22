@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router'
+import { Link, useSearchParams } from 'react-router'
 import {
   acceptConnection,
   deleteConnection,
@@ -47,7 +47,9 @@ function MemberRow({ member, children }) {
 export default function Connections() {
   const { user } = useAuth()
   const { showToast } = useToast()
-  const [tab, setTab] = useState('network')
+  const [searchParams, setSearchParams] = useSearchParams()
+  const requestedTab = searchParams.get('tab')
+  const tab = tabs.some((item) => item.id === requestedTab) ? requestedTab : 'network'
   const [items, setItems] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
@@ -72,7 +74,9 @@ export default function Connections() {
   }, [tab])
 
   const changeTab = (nextTab) => {
-    setTab(nextTab)
+    const nextParams = new URLSearchParams(searchParams)
+    nextParams.set('tab', nextTab)
+    setSearchParams(nextParams)
     setItems([])
     setError('')
     setIsLoading(true)

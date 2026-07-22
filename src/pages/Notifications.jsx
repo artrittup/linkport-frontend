@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router'
 import {
   deleteNotification,
   getNotificationErrorMessage,
@@ -11,6 +12,7 @@ import LoadingSpinner from '../components/LoadingSpinner'
 import { useAuth } from '../context/AuthContext'
 import useToast from '../hooks/useToast'
 import DashboardLayout from '../layouts/DashboardLayout'
+import { getNotificationDestination } from '../utils/notificationDestination'
 
 function navigationFor(role) {
   if (role === 'candidate') return [{ label: 'Dashboard', href: '/candidate/dashboard' }, { label: 'Profile', href: '/candidate/profile' }, { label: 'My Network', href: '/connections' }, { label: 'Circles', href: '/circles' }, { label: 'Logout', href: '/login' }]
@@ -19,6 +21,7 @@ function navigationFor(role) {
 }
 
 export default function Notifications() {
+  const navigate = useNavigate()
   const { user } = useAuth()
   const { showToast } = useToast()
   const [filter, setFilter] = useState('all')
@@ -63,6 +66,22 @@ export default function Notifications() {
     }
   }
 
+  const openNotification = async (notification) => {
+    if (workingId !== null) return
+    setWorkingId(notification.id)
+
+    if (!notification.read_at) {
+      try {
+        await markNotificationAsRead(notification.id)
+      } catch {
+        // A read-status failure must not block the notification destination.
+      }
+    }
+
+    navigate(getNotificationDestination(notification))
+    setWorkingId(null)
+  }
+
   const markAll = async () => {
     try {
       const response = await markAllNotificationsAsRead()
@@ -94,7 +113,7 @@ export default function Notifications() {
         <div className="inline-flex rounded-lg border border-[#233554] bg-[#071426] p-1">{['all', 'unread'].map((item) => <button key={item} type="button" onClick={() => changeFilter(item)} className={`rounded-md px-4 py-2 text-sm font-medium capitalize ${filter === item ? 'bg-[#112240] text-[#64ffda]' : 'text-[#8892b0]'}`}>{item}</button>)}</div>
         {error && <p role="alert" className="rounded-lg border border-[#ef4444]/30 bg-[#ef4444]/10 px-4 py-3 text-sm text-[#fca5a5]">{error}</p>}
         {isLoading ? <LoadingSpinner label="Loading notifications..." /> : notifications.length === 0 ? <div className="rounded-xl border border-dashed border-[#233554] bg-[#112240]/40 px-6 py-14 text-center text-sm text-[#8892b0]">No {filter === 'unread' ? 'unread ' : ''}notifications.</div> : (
-          <div className="space-y-3">{notifications.map((notification) => <article key={notification.id} className={`relative rounded-xl border p-5 ${notification.read_at ? 'border-[#233554] bg-[#112240]/65' : 'border-[#64ffda]/25 bg-[#112240]'}`}><div className="flex flex-col gap-4 sm:flex-row sm:items-start"><div className="min-w-0 flex-1">{!notification.read_at && <span className="mb-2 inline-flex rounded-full bg-[#64ffda]/10 px-2 py-0.5 text-[10px] font-semibold uppercase text-[#64ffda]">New</span>}<h3 className="font-semibold text-[#e6f1ff]">{notification.title}</h3>{notification.message && <p className="mt-1.5 text-sm leading-6 text-[#8892b0]">{notification.message}</p>}<time className="mt-2 block text-xs text-[#64748b]">{new Date(notification.created_at).toLocaleString()}</time></div><div className="flex shrink-0 gap-2">{!notification.read_at && <Button size="sm" variant="ghost" disabled={workingId === notification.id} onClick={() => markRead(notification)}>Mark read</Button>}<Button size="sm" variant="ghost" disabled={workingId === notification.id} onClick={() => remove(notification.id)}>Delete</Button></div></div></article>)}</div>
+          <div className="space-y-3">{notifications.map((notification) => <article key={notification.id} className={`relative rounded-xl border p-5 ${notification.read_at ? 'border-[#233554] bg-[#112240]/65' : 'border-[#64ffda]/25 bg-[#112240]'}`}><div className="flex flex-col gap-4 sm:flex-row sm:items-start"><button type="button" disabled={workingId !== null} onClick={() => openNotification(notification)} className="min-w-0 flex-1 rounded-md text-left outline-none transition-colors hover:text-[#64ffda] focus-visible:ring-2 focus-visible:ring-[#64ffda] disabled:cursor-wait">{!notification.read_at && <span className="mb-2 inline-flex rounded-full bg-[#64ffda]/10 px-2 py-0.5 text-[10px] font-semibold uppercase text-[#64ffda]">New</span>}<h3 className="font-semibold text-[#e6f1ff]">{notification.title}</h3>{notification.message && <p className="mt-1.5 text-sm leading-6 text-[#8892b0]">{notification.message}</p>}<time className="mt-2 block text-xs text-[#64748b]">{new Date(notification.created_at).toLocaleString()}</time></button><div className="flex shrink-0 gap-2">{!notification.read_at && <Button size="sm" variant="ghost" disabled={workingId === notification.id} onClick={() => markRead(notification)}>Mark read</Button>}<Button size="sm" variant="ghost" disabled={workingId === notification.id} onClick={() => remove(notification.id)}>Delete</Button></div></div></article>)}</div>
         )}
       </div>
     </DashboardLayout>

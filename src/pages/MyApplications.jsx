@@ -4,6 +4,7 @@ import Button from '../components/Button'
 import Card from '../components/Card'
 import EmptyState from '../components/EmptyState'
 import LoadingSpinner from '../components/LoadingSpinner'
+import Modal, { DetailGrid, DetailSection } from '../components/Modal'
 import DashboardLayout from '../layouts/DashboardLayout'
 
 const navItems = [
@@ -47,6 +48,7 @@ export default function MyApplications() {
   })
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
+  const [selectedApplication, setSelectedApplication] = useState(null)
 
   useEffect(() => {
     let isActive = true
@@ -106,8 +108,7 @@ export default function MyApplications() {
     Math.ceil(pagination.total / pagination.per_page),
   )
 
-  const showDetails = (application) =>
-    window.alert(`${application.jobTitle} at ${application.company}\n\n${application.messagePreview}`)
+  const showDetails = (application) => setSelectedApplication(application)
 
   return (
     <DashboardLayout title="My Applications" navItems={navItems} userType="Member">
@@ -248,6 +249,13 @@ export default function MyApplications() {
           )}
         </section>
       </div>
+      <Modal isOpen={Boolean(selectedApplication)} onClose={() => setSelectedApplication(null)} eyebrow="Application details" title={selectedApplication?.jobTitle ?? 'Application details'}>
+        {selectedApplication && <><DetailGrid items={[
+          { label: 'Company', value: selectedApplication.company }, { label: 'Status', value: selectedApplication.status },
+          { label: 'Location', value: selectedApplication.location }, { label: 'Applied', value: selectedApplication.dateApplied },
+          { label: 'Deadline', value: selectedApplication.deadline ? new Date(selectedApplication.deadline).toLocaleDateString() : 'No deadline' },
+        ]} /><DetailSection label="Cover letter">{selectedApplication.coverLetter || selectedApplication.messagePreview}</DetailSection></>}
+      </Modal>
     </DashboardLayout>
   )
 }

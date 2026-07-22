@@ -4,6 +4,7 @@ import Button from '../components/Button'
 import Card from '../components/Card'
 import EmptyState from '../components/EmptyState'
 import LoadingSpinner from '../components/LoadingSpinner'
+import Modal, { DetailGrid, DetailSection, SkillList } from '../components/Modal'
 import useToast from '../hooks/useToast'
 import DashboardLayout from '../layouts/DashboardLayout'
 
@@ -50,6 +51,7 @@ export default function AdminJobs() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
   const [deletingId, setDeletingId] = useState(null)
+  const [selectedJob, setSelectedJob] = useState(null)
 
   useEffect(() => {
     const timeout = window.setTimeout(
@@ -126,9 +128,7 @@ export default function AdminJobs() {
       <Button
         variant="outline"
         size="sm"
-        onClick={() =>
-          window.alert(`${job.title}\n${job.company}\n\n${job.description ?? ''}`)
-        }
+        onClick={() => setSelectedJob(job)}
       >
         View
       </Button>
@@ -282,6 +282,13 @@ export default function AdminJobs() {
           </Button>
         </div>
       )}
+      <Modal isOpen={Boolean(selectedJob)} onClose={() => setSelectedJob(null)} eyebrow="Admin job details" title={selectedJob?.title ?? 'Job details'}>
+        {selectedJob && <><DetailGrid items={[
+          { label: 'Company', value: selectedJob.company }, { label: 'Status', value: selectedJob.status },
+          { label: 'Type', value: selectedJob.type ?? 'Not specified' }, { label: 'Location', value: selectedJob.location },
+          { label: 'Deadline', value: selectedJob.deadline ?? 'No deadline' }, { label: 'Created', value: selectedJob.createdDate },
+        ]} /><SkillList skills={selectedJob.skills} /><DetailSection label="Description">{selectedJob.description}</DetailSection><DetailSection label="Requirements">{selectedJob.requirements}</DetailSection></>}
+      </Modal>
     </DashboardLayout>
   )
 }

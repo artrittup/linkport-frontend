@@ -4,6 +4,7 @@ import Button from '../components/Button'
 import Card from '../components/Card'
 import EmptyState from '../components/EmptyState'
 import LoadingSpinner from '../components/LoadingSpinner'
+import Modal, { DetailGrid, DetailSection, SkillList } from '../components/Modal'
 import useToast from '../hooks/useToast'
 import DashboardLayout from '../layouts/DashboardLayout'
 
@@ -60,6 +61,7 @@ export default function AdminProjects() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
   const [deletingId, setDeletingId] = useState(null)
+  const [selectedProject, setSelectedProject] = useState(null)
 
   useEffect(() => {
     const timeout = window.setTimeout(
@@ -136,11 +138,7 @@ export default function AdminProjects() {
       <Button
         variant="outline"
         size="sm"
-        onClick={() =>
-          window.alert(
-            `${project.title}\n${project.company}\n${formatBudget(project.budget)}\n\n${project.description ?? ''}`,
-          )
-        }
+        onClick={() => setSelectedProject(project)}
       >
         View
       </Button>
@@ -301,6 +299,13 @@ export default function AdminProjects() {
           </Button>
         </div>
       )}
+      <Modal isOpen={Boolean(selectedProject)} onClose={() => setSelectedProject(null)} eyebrow="Admin project details" title={selectedProject?.title ?? 'Project details'}>
+        {selectedProject && <><DetailGrid items={[
+          { label: 'Company', value: selectedProject.company }, { label: 'Status', value: selectedProject.status },
+          { label: 'Category', value: selectedProject.category ?? 'Not specified' }, { label: 'Budget', value: formatBudget(selectedProject.budget) },
+          { label: 'Deadline', value: selectedProject.deadline ?? 'No deadline' }, { label: 'Created', value: selectedProject.createdDate },
+        ]} /><SkillList skills={selectedProject.skills ?? selectedProject.required_skills} /><DetailSection label="Description">{selectedProject.description}</DetailSection></>}
+      </Modal>
     </DashboardLayout>
   )
 }

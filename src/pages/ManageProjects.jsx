@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router'
 import {
   createProject,
   deleteProject as removeProject,
@@ -9,6 +10,7 @@ import Button from '../components/Button'
 import Card from '../components/Card'
 import EmptyState from '../components/EmptyState'
 import LoadingSpinner from '../components/LoadingSpinner'
+import Modal, { DetailGrid, DetailSection, SkillList } from '../components/Modal'
 import SkillsInput from '../components/SkillsInput'
 import useToast from '../hooks/useToast'
 import DashboardLayout from '../layouts/DashboardLayout'
@@ -71,6 +73,7 @@ function StatusBadge({ status }) {
 }
 
 export default function ManageProjects() {
+  const navigate = useNavigate()
   const { showToast } = useToast()
   const [projects, setProjects] = useState([])
   const [search, setSearch] = useState('')
@@ -92,6 +95,7 @@ export default function ManageProjects() {
   const [isSaving, setIsSaving] = useState(false)
   const [formError, setFormError] = useState('')
   const [deletingId, setDeletingId] = useState(null)
+  const [selectedProject, setSelectedProject] = useState(null)
 
   useEffect(() => {
     let isActive = true
@@ -276,16 +280,10 @@ export default function ManageProjects() {
   }
 
   const viewProject = (project) => {
-    window.alert(
-      `${project.title}\n\n${project.description}\n\nRequired skills: ${(project.skills ?? []).join(', ') || 'None listed'}`,
-    )
+    setSelectedProject(project)
   }
 
-  const viewBids = (project) => {
-    window.alert(
-      `${project.title} currently has ${project.bids} bids. The detailed bids page is not connected yet.`,
-    )
-  }
+  const viewBids = () => navigate('/company/bids')
 
   return (
     <DashboardLayout
@@ -551,6 +549,14 @@ export default function ManageProjects() {
           )}
         </section>
       </div>
+
+      <Modal isOpen={Boolean(selectedProject)} onClose={() => setSelectedProject(null)} eyebrow="Project details" title={selectedProject?.title ?? 'Project details'}>
+        {selectedProject && <><DetailGrid items={[
+          { label: 'Status', value: selectedProject.status }, { label: 'Category', value: selectedProject.category ?? 'Not specified' },
+          { label: 'Budget', value: selectedProject.budget }, { label: 'Deadline', value: selectedProject.deadline || 'No deadline' },
+          { label: 'Bids', value: selectedProject.bids },
+        ]} /><SkillList skills={selectedProject.skills} /><DetailSection label="Description">{selectedProject.description}</DetailSection></>}
+      </Modal>
 
       {isFormOpen && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 px-4 py-8 backdrop-blur-sm">

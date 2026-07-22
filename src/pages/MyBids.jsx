@@ -4,6 +4,7 @@ import Button from '../components/Button'
 import Card from '../components/Card'
 import EmptyState from '../components/EmptyState'
 import LoadingSpinner from '../components/LoadingSpinner'
+import Modal, { DetailGrid, DetailSection } from '../components/Modal'
 import DashboardLayout from '../layouts/DashboardLayout'
 
 const navItems = [
@@ -47,6 +48,7 @@ export default function MyBids() {
   })
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
+  const [selectedBid, setSelectedBid] = useState(null)
 
   useEffect(() => {
     let isActive = true
@@ -106,8 +108,7 @@ export default function MyBids() {
     Math.ceil(pagination.total / pagination.per_page),
   )
 
-  const showProposal = (bid) =>
-    window.alert(`${bid.projectTitle} for ${bid.company}\n\n${bid.proposalPreview}`)
+  const showProposal = (bid) => setSelectedBid(bid)
 
   return (
     <DashboardLayout title="My Bids" navItems={navItems} userType="Member">
@@ -244,6 +245,13 @@ export default function MyBids() {
           )}
         </section>
       </div>
+      <Modal isOpen={Boolean(selectedBid)} onClose={() => setSelectedBid(null)} eyebrow="Bid details" title={selectedBid?.projectTitle ?? 'Bid details'}>
+        {selectedBid && <><DetailGrid items={[
+          { label: 'Company', value: selectedBid.company }, { label: 'Status', value: selectedBid.status },
+          { label: 'Offer', value: selectedBid.offeredPrice }, { label: 'Estimated delivery', value: selectedBid.deliveryDays ? `${selectedBid.deliveryDays} days` : 'Not specified' },
+          { label: 'Submitted', value: selectedBid.dateSubmitted },
+        ]} /><DetailSection label="Proposal">{selectedBid.proposalPreview}</DetailSection></>}
+      </Modal>
     </DashboardLayout>
   )
 }

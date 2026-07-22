@@ -348,7 +348,7 @@ export default function LandingPage() {
     return canExploreMemberFeatures ? path : getDashboardPath(user?.role)
   }
   const protectedCtaLabel = (memberLabel) => {
-    if (!isAuthenticated) return 'Sign in to explore'
+    if (!isAuthenticated) return memberLabel
     return canExploreMemberFeatures ? memberLabel : 'Open dashboard'
   }
   const requestProtectedAccess = (path, feature) => {
@@ -551,8 +551,8 @@ export default function LandingPage() {
           <div className="mx-auto max-w-7xl px-6 lg:px-10">
             <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
               <SectionHeader label="Project marketplace" title="Build something real." description="Preview focused briefs from growing companies. Members can sign in to send proposals and turn their skills into delivered work." />
-              <button type="button" onClick={() => requestProtectedAccess('/projects', 'projects')} className="inline-flex items-center gap-2 text-sm font-semibold text-[#64ffda]">
-                {protectedCtaLabel('View projects')} <Icon name="arrow" className="h-4 w-4" />
+              <button type="button" onClick={() => requestProtectedAccess('/projects', 'projects')} className="inline-flex items-center justify-center gap-2 rounded-lg border border-[#64ffda]/60 px-4 py-2.5 text-sm font-semibold text-[#64ffda] transition-all hover:-translate-y-0.5 hover:border-[#64ffda] hover:bg-[#64ffda]/10">
+                {protectedCtaLabel('Explore projects')} <Icon name="arrow" className="h-4 w-4" />
               </button>
             </div>
             {projectsError ? (
@@ -571,8 +571,8 @@ export default function LandingPage() {
           <div className="mx-auto max-w-7xl px-6 lg:px-10">
             <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
               <SectionHeader label="Jobs board" title="Your next role could start here." description="Preview early-career openings from companies looking for fresh thinking. Members can sign in to explore and apply." />
-              <button type="button" onClick={() => requestProtectedAccess('/jobs', 'jobs')} className="inline-flex items-center gap-2 text-sm font-semibold text-[#64ffda]">
-                {protectedCtaLabel('View jobs')} <Icon name="arrow" className="h-4 w-4" />
+              <button type="button" onClick={() => requestProtectedAccess('/jobs', 'jobs')} className="inline-flex items-center justify-center gap-2 rounded-lg border border-[#64ffda]/60 px-4 py-2.5 text-sm font-semibold text-[#64ffda] transition-all hover:-translate-y-0.5 hover:border-[#64ffda] hover:bg-[#64ffda]/10">
+                {protectedCtaLabel('Explore jobs')} <Icon name="arrow" className="h-4 w-4" />
               </button>
             </div>
             {jobsError ? (

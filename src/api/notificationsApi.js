@@ -1,5 +1,11 @@
 import api from './axios'
 
+export const NOTIFICATIONS_CHANGED_EVENT = 'linkport:notifications-changed'
+
+export function announceNotificationsChanged() {
+  window.dispatchEvent(new Event(NOTIFICATIONS_CHANGED_EVENT))
+}
+
 export async function getNotifications(params = {}) {
   const normalizedParams = {
     ...params,

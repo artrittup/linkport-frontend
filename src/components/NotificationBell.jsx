@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 import {
   getNotificationErrorMessage,
@@ -6,7 +6,9 @@ import {
   getUnreadNotificationCount,
   markAllNotificationsAsRead,
   markNotificationAsRead,
+  NOTIFICATIONS_CHANGED_EVENT,
 } from '../api/notificationsApi'
+import { useAuth } from '../context/AuthContext'
 import { getNotificationDestination } from '../utils/notificationDestination'
 
 function relativeTime(value) {
@@ -20,7 +22,9 @@ function relativeTime(value) {
 
 export default function NotificationBell() {
   const navigate = useNavigate()
+  const { isAuthenticated } = useAuth()
   const containerRef = useRef(null)
+  const isRefreshingCountRef = useRef(false)
   const [isOpen, setIsOpen] = useState(false)
   const [notifications, setNotifications] = useState([])
   const [unreadCount, setUnreadCount] = useState(0)
@@ -28,13 +32,35 @@ export default function NotificationBell() {
   const [error, setError] = useState('')
   const [openingId, setOpeningId] = useState(null)
 
+  const refreshUnreadCount = useCallback(async () => {
+    if (!isAuthenticated || isRefreshingCountRef.current) return
+
+    isRefreshingCountRef.current = true
+    try {
+      const data = await getUnreadNotificationCount()
+      setUnreadCount(Number(data.unread_count ?? 0))
+    } catch {
+      // Keep the last known count when a background refresh fails.
+    } finally {
+      isRefreshingCountRef.current = false
+    }
+  }, [isAuthenticated])
+
   useEffect(() => {
-    let active = true
-    getUnreadNotificationCount()
-      .then((data) => active && setUnreadCount(data.unread_count ?? 0))
-      .catch(() => {})
-    return () => { active = false }
-  }, [])
+    if (!isAuthenticated) {
+      return undefined
+    }
+
+    const initialRefreshId = window.setTimeout(refreshUnreadCount, 0)
+    const intervalId = window.setInterval(refreshUnreadCount, 45000)
+    window.addEventListener(NOTIFICATIONS_CHANGED_EVENT, refreshUnreadCount)
+
+    return () => {
+      window.clearTimeout(initialRefreshId)
+      window.clearInterval(intervalId)
+      window.removeEventListener(NOTIFICATIONS_CHANGED_EVENT, refreshUnreadCount)
+    }
+  }, [isAuthenticated, refreshUnreadCount])
 
   useEffect(() => {
     const close = (event) => {
@@ -59,7 +85,10 @@ export default function NotificationBell() {
     setIsLoading(true)
     setError('')
     try {
-      const response = await getNotifications({ per_page: 6 })
+      const [response] = await Promise.all([
+        getNotifications({ per_page: 6, page: 1 }),
+        refreshUnreadCount(),
+      ])
       setNotifications(response.data ?? [])
     } catch (requestError) {
       setError(getNotificationErrorMessage(requestError))
@@ -81,6 +110,7 @@ export default function NotificationBell() {
             ? { ...item, read_at: new Date().toISOString() }
             : item
         )))
+        refreshUnreadCount()
       } catch {
         // Navigation remains available if the read update fails.
       }
@@ -95,6 +125,7 @@ export default function NotificationBell() {
       await markAllNotificationsAsRead()
       setUnreadCount(0)
       setNotifications((items) => items.map((item) => ({ ...item, read_at: item.read_at || new Date().toISOString() })))
+      refreshUnreadCount()
     } catch (requestError) {
       setError(getNotificationErrorMessage(requestError, 'Unable to mark notifications as read.'))
     }

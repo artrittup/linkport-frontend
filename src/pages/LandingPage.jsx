@@ -336,6 +336,7 @@ export default function LandingPage() {
   const [jobsError, setJobsError] = useState('')
   const [projectsError, setProjectsError] = useState('')
   const [isLoadingOpportunities, setIsLoadingOpportunities] = useState(true)
+  const [accessPrompt, setAccessPrompt] = useState(null)
   const goToPrimaryAction = () => {
     if (isLoading) return
     navigate(isAuthenticated ? getDashboardPath(user?.role) : '/register')
@@ -349,6 +350,14 @@ export default function LandingPage() {
   const protectedCtaLabel = (memberLabel) => {
     if (!isAuthenticated) return 'Sign in to explore'
     return canExploreMemberFeatures ? memberLabel : 'Open dashboard'
+  }
+  const requestProtectedAccess = (path, feature) => {
+    if (!isAuthenticated) {
+      setAccessPrompt({ path, feature })
+      return
+    }
+
+    navigate(canExploreMemberFeatures ? path : getDashboardPath(user?.role))
   }
 
   useEffect(() => {
@@ -434,6 +443,48 @@ export default function LandingPage() {
       <Navbar />
       <DesktopSidebar activeSection={activeSection} onSelect={setActiveSection} />
 
+      {accessPrompt && (
+        <div
+          className="fixed inset-0 z-[100] grid place-items-center bg-[#020c1b]/80 px-5 backdrop-blur-sm"
+          role="presentation"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) setAccessPrompt(null)
+          }}
+        >
+          <section
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="access-prompt-title"
+            className="w-full max-w-md rounded-2xl border border-[#233554] bg-[#112240] p-6 shadow-2xl shadow-black/40 sm:p-8"
+          >
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#64ffda]">Members only</p>
+                <h2 id="access-prompt-title" className="mt-3 text-2xl font-bold text-[#e6f1ff]">
+                  Sign in to explore {accessPrompt.feature}
+                </h2>
+              </div>
+              <button
+                type="button"
+                onClick={() => setAccessPrompt(null)}
+                className="rounded-lg px-2 py-1 text-xl text-[#8892b0] transition hover:bg-[#0a192f] hover:text-white"
+                aria-label="Close dialog"
+              >
+                ×
+              </button>
+            </div>
+            <p className="mt-4 leading-7 text-[#a8b2d1]">
+              You need a LinkPort account to view {accessPrompt.feature} and continue.
+            </p>
+            <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+              <Button className="flex-1" onClick={() => navigate('/login', { state: { from: accessPrompt.path } })}>Sign in</Button>
+              <Button variant="outline" className="flex-1" onClick={() => navigate('/register')}>Create account</Button>
+            </div>
+            <button type="button" onClick={() => setAccessPrompt(null)} className="mt-4 w-full text-sm font-medium text-[#8892b0] transition hover:text-white">Cancel</button>
+          </section>
+        </div>
+      )}
+
       <div className="pt-22 lg:pl-20">
         <MobileNavigation activeSection={activeSection} onSelect={setActiveSection} />
 
@@ -500,12 +551,14 @@ export default function LandingPage() {
           <div className="mx-auto max-w-7xl px-6 lg:px-10">
             <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
               <SectionHeader label="Project marketplace" title="Build something real." description="Preview focused briefs from growing companies. Members can sign in to send proposals and turn their skills into delivered work." />
-              <Link to={protectedLandingTarget('/projects')} className="inline-flex items-center gap-2 text-sm font-semibold text-[#64ffda]">
+              <button type="button" onClick={() => requestProtectedAccess('/projects', 'projects')} className="inline-flex items-center gap-2 text-sm font-semibold text-[#64ffda]">
                 {protectedCtaLabel('View projects')} <Icon name="arrow" className="h-4 w-4" />
-              </Link>
+              </button>
             </div>
             {projectsError ? (
-              <p className="mt-10 rounded-xl border border-[#ef4444]/30 bg-[#ef4444]/10 p-4 text-sm text-[#fca5a5]">{projectsError}</p>
+              <p className={`mt-10 rounded-xl border p-4 text-sm ${isAuthenticated ? 'border-[#ef4444]/30 bg-[#ef4444]/10 text-[#fca5a5]' : 'border-[#233554] bg-[#112240]/60 text-[#8892b0]'}`}>
+                {isAuthenticated ? projectsError : 'Sign in or create an account to explore available projects.'}
+              </p>
             ) : !isLoadingOpportunities && projects.length === 0 ? (
               <p className="mt-10 rounded-xl border border-[#233554] bg-[#112240]/60 p-6 text-sm text-[#8892b0]">There are no open projects right now.</p>
             ) : (
@@ -518,12 +571,14 @@ export default function LandingPage() {
           <div className="mx-auto max-w-7xl px-6 lg:px-10">
             <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
               <SectionHeader label="Jobs board" title="Your next role could start here." description="Preview early-career openings from companies looking for fresh thinking. Members can sign in to explore and apply." />
-              <Link to={protectedLandingTarget('/jobs')} className="inline-flex items-center gap-2 text-sm font-semibold text-[#64ffda]">
+              <button type="button" onClick={() => requestProtectedAccess('/jobs', 'jobs')} className="inline-flex items-center gap-2 text-sm font-semibold text-[#64ffda]">
                 {protectedCtaLabel('View jobs')} <Icon name="arrow" className="h-4 w-4" />
-              </Link>
+              </button>
             </div>
             {jobsError ? (
-              <p className="mt-10 rounded-xl border border-[#ef4444]/30 bg-[#ef4444]/10 p-4 text-sm text-[#fca5a5]">{jobsError}</p>
+              <p className={`mt-10 rounded-xl border p-4 text-sm ${isAuthenticated ? 'border-[#ef4444]/30 bg-[#ef4444]/10 text-[#fca5a5]' : 'border-[#233554] bg-[#112240]/60 text-[#8892b0]'}`}>
+                {isAuthenticated ? jobsError : 'Sign in or create an account to explore available jobs.'}
+              </p>
             ) : !isLoadingOpportunities && jobs.length === 0 ? (
               <p className="mt-10 rounded-xl border border-[#233554] bg-[#112240]/60 p-6 text-sm text-[#8892b0]">There are no open jobs right now.</p>
             ) : (

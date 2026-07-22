@@ -10,16 +10,6 @@ import EmptyState from '../components/EmptyState'
 import LoadingSpinner from '../components/LoadingSpinner'
 import DashboardLayout from '../layouts/DashboardLayout'
 
-const navItems = [
-  { label: 'Dashboard', href: '/company/dashboard' },
-  { label: 'Company Profile', href: '/company/profile' },
-  { label: 'Jobs', href: '/company/jobs' },
-  { label: 'Applications', href: '/company/applications' },
-  { label: 'Projects', href: '/company/projects' },
-  { label: 'Bids', href: '/company/bids' },
-  { label: 'Logout', href: '/login' },
-]
-
 const statusClasses = {
   Pending: 'border-[#facc15]/30 bg-[#facc15]/10 text-[#facc15]',
   Accepted: 'border-[#22c55e]/30 bg-[#22c55e]/10 text-[#22c55e]',
@@ -137,7 +127,7 @@ export default function CompanyDashboard() {
   ]
 
   return (
-    <DashboardLayout title="Company Dashboard" navItems={navItems} userType="Company">
+    <DashboardLayout title="Company Dashboard" userType="Company">
       <div className="space-y-10">
         <section>
           <p className="font-mono text-sm text-[#64ffda]">Company workspace</p>

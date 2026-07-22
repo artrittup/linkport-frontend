@@ -12,16 +12,6 @@ import { useAuth } from '../context/AuthContext'
 import useToast from '../hooks/useToast'
 import DashboardLayout from '../layouts/DashboardLayout'
 
-const navItems = [
-  { label: 'Dashboard', href: '/candidate/dashboard' },
-  { label: 'Member Profile', href: '/candidate/profile' },
-  { label: 'Jobs', href: '/jobs' },
-  { label: 'My Applications', href: '/candidate/applications' },
-  { label: 'Projects', href: '/projects' },
-  { label: 'My Bids', href: '/candidate/bids' },
-  { label: 'Logout', href: '/login' },
-]
-
 const initialForm = {
   fullName: '',
   professionalTitle: '',
@@ -159,14 +149,14 @@ export default function CandidateProfile() {
 
   if (isLoading) {
     return (
-      <DashboardLayout title="Member Profile" navItems={navItems} userType="Member">
+      <DashboardLayout title="Member Profile" userType="Member">
         <LoadingSpinner label="Loading your profile..." size="lg" />
       </DashboardLayout>
     )
   }
 
   return (
-    <DashboardLayout title="Member Profile" navItems={navItems} userType="Member">
+    <DashboardLayout title="Member Profile" userType="Member">
       <div className="space-y-10">
         <section>
           <p className="font-mono text-sm text-[#64ffda]">Professional profile</p>

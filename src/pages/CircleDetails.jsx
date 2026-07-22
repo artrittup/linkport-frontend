@@ -18,17 +18,6 @@ import { useAuth } from '../context/AuthContext'
 import useToast from '../hooks/useToast'
 import DashboardLayout from '../layouts/DashboardLayout'
 
-const navItems = [
-  { label: 'Dashboard', href: '/candidate/dashboard' },
-  { label: 'Member Profile', href: '/candidate/profile' },
-  { label: 'Jobs', href: '/jobs' },
-  { label: 'My Applications', href: '/candidate/applications' },
-  { label: 'Projects', href: '/projects' },
-  { label: 'My Bids', href: '/candidate/bids' },
-  { label: 'Circles', href: '/circles' },
-  { label: 'Logout', href: '/login' },
-]
-
 const inputClasses =
   'mt-2 w-full rounded-md border border-[#233554] bg-[#0a192f]/70 px-4 py-3 text-sm text-[#e6f1ff] outline-none transition-colors placeholder:text-[#64748b] focus:border-[#64ffda] focus:ring-1 focus:ring-[#64ffda]'
 
@@ -205,7 +194,7 @@ export default function CircleDetails() {
 
   if (isLoading) {
     return (
-      <DashboardLayout title="Circle Details" navItems={navItems} userType="Member">
+      <DashboardLayout title="Circle Details" userType="Member">
         <LoadingSpinner label="Loading circle details..." size="lg" />
       </DashboardLayout>
     )
@@ -213,7 +202,7 @@ export default function CircleDetails() {
 
   if (loadError || !circle) {
     return (
-      <DashboardLayout title="Circle Details" navItems={navItems} userType="Member">
+      <DashboardLayout title="Circle Details" userType="Member">
         <Card padding="lg" className="mx-auto max-w-2xl text-center">
           <h2 className="text-xl font-semibold">Circle unavailable</h2>
           <p role="alert" className="mt-3 text-sm text-[#fca5a5]">{loadError}</p>
@@ -230,7 +219,7 @@ export default function CircleDetails() {
       : null
 
   return (
-    <DashboardLayout title="Circle Details" navItems={navItems} userType="Member">
+    <DashboardLayout title="Circle Details" userType="Member">
       <div className="space-y-8">
         <button type="button" onClick={() => navigate('/circles')} className="text-sm text-[#8892b0] transition-colors hover:text-[#64ffda]">
           &larr; Back to Circles

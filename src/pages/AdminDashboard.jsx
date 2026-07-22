@@ -7,14 +7,6 @@ import EmptyState from '../components/EmptyState'
 import LoadingSpinner from '../components/LoadingSpinner'
 import DashboardLayout from '../layouts/DashboardLayout'
 
-const navItems = [
-  { label: 'Dashboard', href: '/admin/dashboard' },
-  { label: 'Users', href: '/admin/users' },
-  { label: 'Jobs', href: '/admin/jobs' },
-  { label: 'Projects', href: '/admin/projects' },
-  { label: 'Logout', href: '/login' },
-]
-
 const displayRole = (role) => role === 'Candidate' ? 'Member' : role
 
 function RecentList({ items, getTitle, getMeta, href, isLoading, error }) {
@@ -114,7 +106,7 @@ export default function AdminDashboard() {
   ]
 
   return (
-    <DashboardLayout title="Admin Dashboard" navItems={navItems} userType="Admin">
+    <DashboardLayout title="Admin Dashboard" userType="Admin">
       <div className="space-y-10">
         <section>
           <p className="font-mono text-sm text-[#64ffda]">Platform overview</p>

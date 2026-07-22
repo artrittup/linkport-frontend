@@ -1,9 +1,13 @@
 import { useState } from 'react'
 import Sidebar from '../components/Sidebar'
 import Topbar from '../components/Topbar'
+import { getNavigationForRole } from '../config/navigation'
+import { useAuth } from '../context/AuthContext'
 
-export default function DashboardLayout({ children, title, navItems, userType }) {
+export default function DashboardLayout({ children, title, userType }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+  const { user } = useAuth()
+  const navItems = getNavigationForRole(user?.role)
 
   return (
     <div className="min-h-screen bg-[#0a192f] text-[#e6f1ff]">

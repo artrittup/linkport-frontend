@@ -7,16 +7,6 @@ import LoadingSpinner from '../components/LoadingSpinner'
 import Modal, { DetailGrid, DetailSection } from '../components/Modal'
 import DashboardLayout from '../layouts/DashboardLayout'
 
-const navItems = [
-  { label: 'Dashboard', href: '/candidate/dashboard' },
-  { label: 'Member Profile', href: '/candidate/profile' },
-  { label: 'Jobs', href: '/jobs' },
-  { label: 'My Applications', href: '/candidate/applications' },
-  { label: 'Projects', href: '/projects' },
-  { label: 'My Bids', href: '/candidate/bids' },
-  { label: 'Logout', href: '/login' },
-]
-
 const statuses = ['All statuses', 'Pending', 'Accepted', 'Rejected']
 const statusClasses = {
   Pending: 'border-[#facc15]/30 bg-[#facc15]/10 text-[#facc15]',
@@ -111,7 +101,7 @@ export default function MyBids() {
   const showProposal = (bid) => setSelectedBid(bid)
 
   return (
-    <DashboardLayout title="My Bids" navItems={navItems} userType="Member">
+    <DashboardLayout title="My Bids" userType="Member">
       <div className="space-y-8">
         <section>
           <p className="font-mono text-sm text-[#64ffda]">Proposal tracker</p>

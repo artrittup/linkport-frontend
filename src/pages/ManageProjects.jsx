@@ -15,16 +15,6 @@ import SkillsInput from '../components/SkillsInput'
 import useToast from '../hooks/useToast'
 import DashboardLayout from '../layouts/DashboardLayout'
 
-const navItems = [
-  { label: 'Dashboard', href: '/company/dashboard' },
-  { label: 'Company Profile', href: '/company/profile' },
-  { label: 'Jobs', href: '/company/jobs' },
-  { label: 'Applications', href: '/company/applications' },
-  { label: 'Projects', href: '/company/projects' },
-  { label: 'Bids', href: '/company/bids' },
-  { label: 'Logout', href: '/login' },
-]
-
 const emptyForm = {
   title: '',
   description: '',
@@ -288,7 +278,6 @@ export default function ManageProjects() {
   return (
     <DashboardLayout
       title="Manage Projects"
-      navItems={navItems}
       userType="Company"
     >
       <div className="space-y-8">

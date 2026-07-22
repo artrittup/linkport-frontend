@@ -12,13 +12,6 @@ import Modal, { DetailGrid, DetailSection, SkillList } from '../components/Modal
 import useToast from '../hooks/useToast'
 import DashboardLayout from '../layouts/DashboardLayout'
 
-const navItems = [
-  { label: 'Dashboard', href: '/admin/dashboard' },
-  { label: 'Users', href: '/admin/users' },
-  { label: 'Jobs', href: '/admin/jobs' },
-  { label: 'Projects', href: '/admin/projects' },
-  { label: 'Logout', href: '/login' },
-]
 const control =
   'w-full rounded-md border border-[#233554] bg-[#0a192f]/70 px-4 py-3 text-sm text-[#e6f1ff] outline-none placeholder:text-[#64748b] focus:border-[#64ffda]'
 const roleStyle = {
@@ -208,7 +201,7 @@ export default function AdminUsers() {
   }
 
   return (
-    <DashboardLayout title="Users" navItems={navItems} userType="Admin">
+    <DashboardLayout title="Users" userType="Admin">
       <div className="space-y-8">
         <section>
           <p className="font-mono text-sm text-[#64ffda]">User management</p>

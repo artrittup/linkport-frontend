@@ -14,16 +14,6 @@ import SkillsInput from '../components/SkillsInput'
 import useToast from '../hooks/useToast'
 import DashboardLayout from '../layouts/DashboardLayout'
 
-const navItems = [
-  { label: 'Dashboard', href: '/company/dashboard' },
-  { label: 'Company Profile', href: '/company/profile' },
-  { label: 'Jobs', href: '/company/jobs' },
-  { label: 'Applications', href: '/company/applications' },
-  { label: 'Projects', href: '/company/projects' },
-  { label: 'Bids', href: '/company/bids' },
-  { label: 'Logout', href: '/login' },
-]
-
 const emptyForm = {
   title: '', description: '', requirements: '', location: '',
   type: 'Full-time', deadline: '', status: 'draft',
@@ -182,7 +172,7 @@ export default function ManageJobs() {
   }
 
   return (
-    <DashboardLayout title="Manage Jobs" navItems={navItems} userType="Company">
+    <DashboardLayout title="Manage Jobs" userType="Company">
       <div className="space-y-8">
         <section className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
           <div><p className="font-mono text-sm text-[#64ffda]">Hiring workspace</p><h2 className="mt-2 text-2xl font-bold tracking-tight sm:text-3xl">Manage Jobs</h2><p className="mt-3 text-[#8892b0]">Create, edit, and manage your company job opportunities.</p></div>

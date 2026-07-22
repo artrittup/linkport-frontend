@@ -2,8 +2,8 @@ import { Link, useLocation, useNavigate } from 'react-router'
 import linkPortLogo from '../assets/linkport-logo.svg'
 import { useAuth } from '../context/AuthContext'
 
-function SidebarIcon({ label }) {
-  const key = label.toLowerCase()
+function SidebarIcon({ label, iconKey }) {
+  const key = iconKey ?? label.toLowerCase()
   let content
 
   if (key.includes('dashboard')) {
@@ -20,6 +20,8 @@ function SidebarIcon({ label }) {
     content = <><circle cx="12" cy="12" r="3" /><circle cx="5" cy="6" r="2" /><circle cx="19" cy="6" r="2" /><circle cx="5" cy="18" r="2" /><circle cx="19" cy="18" r="2" /><path d="m7 7.5 2.5 2.5m5 0L17 7.5m-7.5 6.5L7 16.5m7.5-2.5 2.5 2.5" /></>
   } else if (key.includes('bid')) {
     content = <><path d="m22 2-7 20-4-9-9-4 20-7Z" /><path d="M22 2 11 13" /></>
+  } else if (key.includes('notification')) {
+    content = <><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" /><path d="M10 21h4" /></>
   } else if (key.includes('compan')) {
     content = <><rect x="3" y="3" width="18" height="18" rx="2" /><path d="M8 7h2M14 7h2M8 11h2M14 11h2M9 21v-5h6v5" /></>
   } else if (key.includes('report')) {
@@ -48,28 +50,10 @@ function LogoutIcon() {
 export default function Sidebar({ navItems = [], isOpen = false, onClose }) {
   const navigate = useNavigate()
   const location = useLocation()
-  const { logout, user } = useAuth()
+  const { logout } = useAuth()
   const currentPath = location.pathname
-  const hasCircles = navItems.some((item) => item.href === '/circles')
-  const hasConnections = navItems.some((item) => item.href === '/connections')
-  const visibleItems = navItems.filter((item) => !(
-    ['candidate', 'company'].includes(user?.role)
-    && item.label.toLowerCase() === 'settings'
-  ))
-  const firstUtilityIndex = visibleItems.findIndex((item) =>
-    ['settings', 'logout'].includes(item.label.toLowerCase()),
-  )
-  const utilityIndex = firstUtilityIndex === -1 ? visibleItems.length : firstUtilityIndex
-  const candidateItems = user?.role === 'candidate' && !hasConnections
-    ? [...visibleItems.slice(0, utilityIndex), { label: 'My Network', href: '/connections' }, ...visibleItems.slice(utilityIndex)]
-    : visibleItems
-  const nextUtilityIndex = candidateItems.findIndex((item) => ['settings', 'logout'].includes(item.label.toLowerCase()))
-  const circlesIndex = nextUtilityIndex === -1 ? candidateItems.length : nextUtilityIndex
-  const navigationItems = user?.role === 'candidate' && !hasCircles
-    ? [...candidateItems.slice(0, circlesIndex), { label: 'Circles', href: '/circles' }, ...candidateItems.slice(circlesIndex)]
-    : candidateItems
-  const mainItems = navigationItems.filter((item) => item.label.toLowerCase() !== 'logout')
-  const logoutItem = navigationItems.find((item) => item.label.toLowerCase() === 'logout')
+  const mainItems = navItems.filter((item) => item.key !== 'logout')
+  const logoutItem = navItems.find((item) => item.key === 'logout')
 
   const handleLogout = async () => {
     await logout()
@@ -96,13 +80,13 @@ export default function Sidebar({ navItems = [], isOpen = false, onClose }) {
 
         <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4 lg:px-2" aria-label="Dashboard navigation">
           {mainItems.map((item) => {
-            const isActive = currentPath === item.href
-              || (item.href === '/circles' && currentPath.startsWith('/circles/'))
+            const isActive = currentPath === item.path
+              || (item.path === '/circles' && currentPath.startsWith('/circles/'))
 
             return (
               <Link
                 key={item.label}
-                to={item.href}
+                to={item.path}
                 onClick={onClose}
                 aria-current={isActive ? 'page' : undefined}
                 title={item.label}
@@ -112,7 +96,7 @@ export default function Sidebar({ navItems = [], isOpen = false, onClose }) {
                     : 'text-[#64748b] hover:bg-[#112240] hover:text-[#e6f1ff]'
                 }`}
               >
-                <SidebarIcon label={item.label} />
+                <SidebarIcon label={item.label} iconKey={item.key} />
                 <span>{item.label}</span>
               </Link>
             )

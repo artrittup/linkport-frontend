@@ -8,13 +8,6 @@ import Modal, { DetailGrid, DetailSection, SkillList } from '../components/Modal
 import useToast from '../hooks/useToast'
 import DashboardLayout from '../layouts/DashboardLayout'
 
-const navItems = [
-  { label: 'Dashboard', href: '/admin/dashboard' },
-  { label: 'Users', href: '/admin/users' },
-  { label: 'Jobs', href: '/admin/jobs' },
-  { label: 'Projects', href: '/admin/projects' },
-  { label: 'Logout', href: '/login' },
-]
 const control =
   'rounded-md border border-[#233554] bg-[#0a192f]/70 px-4 py-3 text-sm outline-none focus:border-[#64ffda]'
 
@@ -154,7 +147,7 @@ export default function AdminProjects() {
   )
 
   return (
-    <DashboardLayout title="Projects" navItems={navItems} userType="Admin">
+    <DashboardLayout title="Projects" userType="Admin">
       <section className="mb-8">
         <p className="font-mono text-sm text-[#64ffda]">Content moderation</p>
         <h2 className="mt-2 text-2xl font-bold sm:text-3xl">Projects</h2>

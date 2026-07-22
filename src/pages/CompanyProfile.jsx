@@ -13,16 +13,6 @@ import { useAuth } from '../context/AuthContext'
 import useToast from '../hooks/useToast'
 import DashboardLayout from '../layouts/DashboardLayout'
 
-const navItems = [
-  { label: 'Dashboard', href: '/company/dashboard' },
-  { label: 'Company Profile', href: '/company/profile' },
-  { label: 'Jobs', href: '/company/jobs' },
-  { label: 'Applications', href: '/company/applications' },
-  { label: 'Projects', href: '/company/projects' },
-  { label: 'Bids', href: '/company/bids' },
-  { label: 'Logout', href: '/login' },
-]
-
 const initialForm = {
   companyName: '',
   industry: '',
@@ -194,14 +184,14 @@ export default function CompanyProfile() {
 
   if (isLoadingProfile) {
     return (
-      <DashboardLayout title="Company Profile" navItems={navItems} userType="Company">
+      <DashboardLayout title="Company Profile" userType="Company">
         <LoadingSpinner label="Loading your company profile..." size="lg" />
       </DashboardLayout>
     )
   }
 
   return (
-    <DashboardLayout title="Company Profile" navItems={navItems} userType="Company">
+    <DashboardLayout title="Company Profile" userType="Company">
       <div className="space-y-10">
         <section>
           <p className="font-mono text-sm text-[#64ffda]">Public company profile</p>

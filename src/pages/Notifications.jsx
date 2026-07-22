@@ -17,12 +17,6 @@ import { getNotificationDestination } from '../utils/notificationDestination'
 
 const PAGE_SIZE = 15
 
-function navigationFor(role) {
-  if (role === 'candidate') return [{ label: 'Dashboard', href: '/candidate/dashboard' }, { label: 'Profile', href: '/candidate/profile' }, { label: 'My Network', href: '/connections' }, { label: 'Circles', href: '/circles' }, { label: 'Logout', href: '/login' }]
-  if (role === 'company') return [{ label: 'Dashboard', href: '/company/dashboard' }, { label: 'Company Profile', href: '/company/profile' }, { label: 'Applications', href: '/company/applications' }, { label: 'Bids', href: '/company/bids' }, { label: 'Logout', href: '/login' }]
-  return [{ label: 'Dashboard', href: '/admin/dashboard' }, { label: 'Users', href: '/admin/users' }, { label: 'Jobs', href: '/admin/jobs' }, { label: 'Projects', href: '/admin/projects' }, { label: 'Logout', href: '/login' }]
-}
-
 export default function Notifications() {
   const navigate = useNavigate()
   const { user } = useAuth()
@@ -151,7 +145,7 @@ export default function Notifications() {
   }
 
   return (
-    <DashboardLayout title="Notifications" navItems={navigationFor(user?.role)} userType={user?.role === 'candidate' ? 'Member' : user?.role}>
+    <DashboardLayout title="Notifications" userType={user?.role === 'candidate' ? 'Member' : user?.role}>
       <div className="mx-auto max-w-4xl space-y-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"><div><p className="font-mono text-sm text-[#64ffda]">Updates</p><h2 className="mt-2 text-3xl font-bold text-[#e6f1ff]">Notifications</h2><p className="mt-2 text-[#8892b0]">Keep up with connections, opportunities, and circles.</p></div><Button variant="outline" size="sm" onClick={markAll}>Mark all as read</Button></div>
         <div className="inline-flex rounded-lg border border-[#233554] bg-[#071426] p-1">{['all', 'unread'].map((item) => <button key={item} type="button" onClick={() => changeFilter(item)} className={`rounded-md px-4 py-2 text-sm font-medium capitalize ${filter === item ? 'bg-[#112240] text-[#64ffda]' : 'text-[#8892b0]'}`}>{item}</button>)}</div>

@@ -14,7 +14,6 @@ const navItems = [
   { label: 'Applications', href: '/company/applications' },
   { label: 'Projects', href: '/company/projects' },
   { label: 'Bids', href: '/company/bids' },
-  { label: 'Settings', href: '/settings' },
   { label: 'Logout', href: '/login' },
 ]
 
@@ -207,7 +206,7 @@ export default function CompanyBids() {
           </p>
           <h2 className="mt-2 text-2xl font-bold sm:text-3xl">Project Bids</h2>
           <p className="mt-3 text-[#8892b0]">
-            Review offers submitted by candidates.
+            Review offers submitted by members.
           </p>
         </section>
 
@@ -241,7 +240,7 @@ export default function CompanyBids() {
                 type="search"
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
-                placeholder="Candidate or project..."
+                placeholder="Member or project..."
                 className={inputClasses}
               />
             </div>
@@ -317,7 +316,7 @@ export default function CompanyBids() {
                   <table className="w-full min-w-[1100px] text-left">
                     <thead>
                       <tr className="border-b border-[#233554] text-[11px] uppercase tracking-wider text-[#64748b]">
-                        <th className="px-4 py-3">Candidate</th>
+                        <th className="px-4 py-3">Member</th>
                         <th className="px-4 py-3">Project</th>
                         <th className="px-4 py-3">Skills</th>
                         <th className="px-4 py-3">Offer</th>

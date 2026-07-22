@@ -2,6 +2,7 @@ import { useEffect, useId, useRef, useState } from 'react'
 import { Link } from 'react-router'
 import { searchProfiles } from '../api/searchApi'
 import { useAuth } from '../context/AuthContext'
+import skillGroups from './skillOptions'
 
 const emptyResults = {
   members: { data: [], total: 0 },
@@ -157,7 +158,14 @@ export default function GlobalSearch({
       </div>
 
       {isOpen && (
-        <div id={`${inputId}-results`} className={`absolute top-full z-50 mt-2 w-[min(24rem,calc(100vw-2rem))] overflow-hidden rounded-xl border border-[#233554] bg-[#112240] shadow-2xl shadow-black/40 ${dropdownAlign === 'left' ? 'left-0' : 'right-0'}`}>
+        <>
+        <button
+          type="button"
+          aria-label="Close search"
+          onClick={() => setIsOpen(false)}
+          className="fixed inset-x-0 bottom-0 top-[88px] z-40 cursor-default bg-[#020c1b]/35 backdrop-blur-[1px]"
+        />
+        <div id={`${inputId}-results`} className={`absolute top-full z-50 mt-2 w-[min(24rem,calc(100vw-2rem))] overflow-hidden rounded-xl border border-[#233554] bg-[#112240] shadow-2xl shadow-black/50 ${dropdownAlign === 'left' ? 'left-0' : 'right-0'}`}>
           <div className="flex items-center justify-between border-b border-[#233554] px-3 py-2">
             <span className="text-xs text-[#8892b0]">Search people and companies</span>
             <button type="button" onClick={() => setFiltersOpen((open) => !open)} aria-expanded={filtersOpen} className={`flex items-center gap-1.5 rounded-md px-2 py-1 text-xs transition-colors ${filtersOpen || filtersApplied ? 'bg-[#64ffda]/10 text-[#64ffda]' : 'text-[#8892b0] hover:bg-[#172a45] hover:text-[#e6f1ff]'}`}>
@@ -168,7 +176,14 @@ export default function GlobalSearch({
           {filtersOpen && (
             <div className="grid grid-cols-2 gap-2 border-b border-[#233554] bg-[#071426]/55 p-3">
               <select aria-label="Result type" value={type} onChange={(event) => setType(event.target.value)} className={filterInput}><option value="all">All</option><option value="members">Members</option><option value="companies">Companies</option></select>
-              <input aria-label="Skill filter" value={skill} onChange={(event) => setSkill(event.target.value)} placeholder="Skill" className={filterInput} />
+              <select aria-label="Skill filter" value={skill} onChange={(event) => setSkill(event.target.value)} className={filterInput}>
+                <option value="">Any skill</option>
+                {skillGroups.map((group) => (
+                  <optgroup key={group.category} label={group.category}>
+                    {group.skills.map((option) => <option key={option} value={option}>{option}</option>)}
+                  </optgroup>
+                ))}
+              </select>
               <input aria-label="Location filter" value={location} onChange={(event) => setLocation(event.target.value)} placeholder="Location" className={filterInput} />
               <input aria-label="Industry filter" value={industry} onChange={(event) => setIndustry(event.target.value)} placeholder="Industry" className={filterInput} />
             </div>
@@ -187,6 +202,7 @@ export default function GlobalSearch({
             )}
           </div>
         </div>
+        </>
       )}
     </div>
   )

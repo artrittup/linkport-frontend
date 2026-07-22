@@ -22,6 +22,7 @@ import CircleDetails from "../pages/CircleDetails"
 import CompanyDashboard from "../pages/CompanyDashboard"
 import AdminDashboard from "../pages/AdminDashboard"
 import ProtectedRoute from "./ProtectedRoute"
+import InfoPage from "../pages/InfoPage"
 import MemberPublicProfile from "../pages/MemberPublicProfile"
 import CompanyPublicProfile from "../pages/CompanyPublicProfile"
 import Connections from "../pages/Connections"
@@ -40,6 +41,7 @@ export default function AppRoutes() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/:page" element={<InfoPage />} />
         <Route path="/members/:id" element={<ProtectedRoute allowedRoles={authenticatedRoles}><MemberPublicProfile /></ProtectedRoute>} />
         <Route path="/companies/:id" element={<ProtectedRoute allowedRoles={authenticatedRoles}><CompanyPublicProfile /></ProtectedRoute>} />
         <Route path="/notifications" element={<ProtectedRoute allowedRoles={authenticatedRoles}><Notifications /></ProtectedRoute>} />

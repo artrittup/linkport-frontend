@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router'
+import { Link, useNavigate } from 'react-router'
 import Button from '../components/Button'
 import Card from '../components/Card'
 import { getAuthErrorMessage } from '../api/authApi'
@@ -41,13 +41,13 @@ export default function Login() {
       <div className="pointer-events-none absolute left-1/2 top-1/2 h-96 w-96 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#64ffda]/5 blur-3xl" />
 
       <div className="relative w-full max-w-md">
-        <a
-          href="/"
+        <Link
+          to="/"
           className="mb-8 block text-center text-2xl font-bold tracking-tight text-[#e6f1ff] transition-opacity hover:opacity-80"
           aria-label="LinkPort home"
         >
           Link<span className="text-[#64ffda]">Port</span>
-        </a>
+        </Link>
 
         <Card padding="lg" className="shadow-2xl shadow-black/20">
           <div className="mb-8 text-center">
@@ -119,12 +119,12 @@ export default function Login() {
 
           <p className="mt-7 text-center text-sm text-[#8892b0]">
             Don’t have an account?{' '}
-            <a
-              href="/register"
+            <Link
+              to="/register"
               className="font-medium text-[#64ffda] transition-opacity hover:opacity-80"
             >
               Create one
-            </a>
+            </Link>
           </p>
         </Card>
       </div>

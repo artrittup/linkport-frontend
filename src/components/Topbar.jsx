@@ -1,4 +1,6 @@
 import { useAuth } from '../context/AuthContext'
+import GlobalSearch from './GlobalSearch'
+import NotificationBell from './NotificationBell'
 
 export default function Topbar({ title, userType, onMenuClick }) {
   const { user } = useAuth()
@@ -29,17 +31,8 @@ export default function Topbar({ title, userType, onMenuClick }) {
           {title}
         </h1>
 
-        <div className="hidden w-full max-w-xs sm:block">
-          <label htmlFor="dashboard-search" className="sr-only">
-            Search
-          </label>
-          <input
-            id="dashboard-search"
-            type="search"
-            placeholder="Search..."
-            className="w-full rounded-md border border-[#233554] bg-[#112240] px-4 py-2.5 text-sm text-[#e6f1ff] outline-none transition-colors placeholder:text-[#64748b] focus:border-[#64ffda] focus:ring-1 focus:ring-[#64ffda]"
-          />
-        </div>
+        <GlobalSearch className="w-10 transition-[width] duration-200 focus-within:w-52 sm:w-40 sm:focus-within:w-64" />
+        <NotificationBell />
 
         <div className="flex items-center gap-3 border-l border-[#233554] pl-4">
           <div className="flex h-10 w-10 items-center justify-center rounded-full border border-[#64ffda]/40 bg-[#172a45] font-mono text-xs font-semibold text-[#64ffda]">

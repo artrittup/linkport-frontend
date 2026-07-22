@@ -14,11 +14,8 @@ import DashboardLayout from '../layouts/DashboardLayout'
 const navItems = [
   { label: 'Dashboard', href: '/admin/dashboard' },
   { label: 'Users', href: '/admin/users' },
-  { label: 'Candidates', href: '/admin/candidates' },
-  { label: 'Companies', href: '/admin/companies' },
   { label: 'Jobs', href: '/admin/jobs' },
   { label: 'Projects', href: '/admin/projects' },
-  { label: 'Reports', href: '/admin/reports' },
   { label: 'Logout', href: '/login' },
 ]
 const control =
@@ -28,6 +25,7 @@ const roleStyle = {
   Candidate: 'bg-blue-500/10 text-blue-300',
   Company: 'bg-violet-500/10 text-violet-300',
 }
+const displayRole = (role) => role === 'Candidate' ? 'Member' : role
 
 const getErrorMessage = (error, fallback) => {
   const errors = error.response?.data?.errors
@@ -43,7 +41,7 @@ function UserBadges({ user }) {
       <span
         className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${roleStyle[user.role] ?? 'bg-[#233554] text-[#8892b0]'}`}
       >
-        {user.role}
+        {displayRole(user.role)}
       </span>
       <span
         className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${user.status === 'Active' ? 'bg-[#22c55e]/10 text-[#22c55e]' : 'bg-[#ef4444]/10 text-[#ef4444]'}`}
@@ -89,6 +87,8 @@ export default function AdminUsers() {
       try {
         const response = await getAdminUsers({
           search: debouncedSearch || undefined,
+          role: role === 'All' ? undefined : role.toLowerCase(),
+          status: status === 'All' ? undefined : status.toLowerCase(),
           per_page: 15,
           page,
         })
@@ -108,13 +108,8 @@ export default function AdminUsers() {
     return () => {
       isActive = false
     }
-  }, [debouncedSearch, page, refreshKey])
+  }, [debouncedSearch, page, refreshKey, role, status])
 
-  const filtered = users.filter(
-    (item) =>
-      (role === 'All' || item.role === role) &&
-      (status === 'All' || item.status === status),
-  )
   const lastPage = Math.max(
     1,
     Math.ceil(
@@ -132,7 +127,11 @@ export default function AdminUsers() {
         response.message ?? `${user.name}'s status was updated.`,
         nextStatus === 'active' ? 'success' : 'warning',
       )
-      setRefreshKey((current) => current + 1)
+      if (page === 1) {
+        setRefreshKey((current) => current + 1)
+      } else {
+        setPage(1)
+      }
     } catch (requestError) {
       showToast(
         getErrorMessage(requestError, 'Unable to update this user.'),
@@ -170,7 +169,7 @@ export default function AdminUsers() {
     const profileDetail =
       profile?.headline ?? profile?.company_name ?? 'No profile details available'
     window.alert(
-      `${user.name}\n${user.email}\n${user.role} · ${user.status}\n${profileDetail}`,
+      `${user.name}\n${user.email}\n${displayRole(user.role)} · ${user.status}\n${profileDetail}`,
     )
   }
 
@@ -229,17 +228,23 @@ export default function AdminUsers() {
             />
             <select
               value={role}
-              onChange={(event) => setRole(event.target.value)}
+              onChange={(event) => {
+                setRole(event.target.value)
+                setPage(1)
+              }}
               aria-label="Filter role"
               className={control}
             >
               {['All', 'Candidate', 'Company', 'Admin'].map((item) => (
-                <option key={item}>{item}</option>
+                <option key={item} value={item}>{displayRole(item)}</option>
               ))}
             </select>
             <select
               value={status}
-              onChange={(event) => setStatus(event.target.value)}
+              onChange={(event) => {
+                setStatus(event.target.value)
+                setPage(1)
+              }}
               aria-label="Filter status"
               className={control}
             >
@@ -252,20 +257,16 @@ export default function AdminUsers() {
 
         <section>
           <p className="mb-4 text-sm text-[#8892b0]">
-            Showing {filtered.length} of {pagination.total} users
+            Showing {users.length} of {pagination.total} users
           </p>
           {isLoading ? (
             <LoadingSpinner label="Loading users..." size="lg" />
           ) : error ? (
             <EmptyState title="Unable to load users" description={error} />
-          ) : filtered.length === 0 ? (
+          ) : users.length === 0 ? (
             <EmptyState
               title="No users found"
-              description={
-                users.length
-                  ? 'Try changing your role or status filters.'
-                  : 'No users match your search.'
-              }
+              description="No users match the current search and filters."
             />
           ) : (
             <>
@@ -283,7 +284,7 @@ export default function AdminUsers() {
                       </tr>
                     </thead>
                     <tbody>
-                      {filtered.map((user) => (
+                      {users.map((user) => (
                         <tr
                           key={user.id}
                           className="border-b border-[#233554]/70 last:border-0"
@@ -298,7 +299,7 @@ export default function AdminUsers() {
                             <span
                               className={`rounded-full px-2.5 py-1 text-[10px] ${roleStyle[user.role] ?? 'bg-[#233554] text-[#8892b0]'}`}
                             >
-                              {user.role}
+                              {displayRole(user.role)}
                             </span>
                           </td>
                           <td className="p-4">
@@ -326,7 +327,7 @@ export default function AdminUsers() {
               </Card>
 
               <div className="space-y-4 md:hidden">
-                {filtered.map((user) => (
+                {users.map((user) => (
                   <Card key={user.id} hover>
                     <h3 className="font-semibold">{user.name}</h3>
                     <p className="mt-1 text-sm text-[#8892b0]">

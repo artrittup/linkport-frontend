@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router'
+import { Link, useLocation, useNavigate } from 'react-router'
 import linkPortLogo from '../assets/linkport-logo.svg'
 import { useAuth } from '../context/AuthContext'
 
@@ -16,6 +16,8 @@ function SidebarIcon({ label }) {
     content = <><rect x="3" y="7" width="18" height="13" rx="2" /><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 12h18" /></>
   } else if (key.includes('project')) {
     content = <><path d="m12 2 9 5-9 5-9-5 9-5Z" /><path d="m3 12 9 5 9-5M3 17l9 5 9-5" /></>
+  } else if (key.includes('circle')) {
+    content = <><circle cx="12" cy="12" r="3" /><circle cx="5" cy="6" r="2" /><circle cx="19" cy="6" r="2" /><circle cx="5" cy="18" r="2" /><circle cx="19" cy="18" r="2" /><path d="m7 7.5 2.5 2.5m5 0L17 7.5m-7.5 6.5L7 16.5m7.5-2.5 2.5 2.5" /></>
   } else if (key.includes('bid')) {
     content = <><path d="m22 2-7 20-4-9-9-4 20-7Z" /><path d="M22 2 11 13" /></>
   } else if (key.includes('compan')) {
@@ -45,10 +47,29 @@ function LogoutIcon() {
 
 export default function Sidebar({ navItems = [], isOpen = false, onClose }) {
   const navigate = useNavigate()
-  const { logout } = useAuth()
-  const currentPath = window.location.pathname
-  const mainItems = navItems.filter((item) => item.label.toLowerCase() !== 'logout')
-  const logoutItem = navItems.find((item) => item.label.toLowerCase() === 'logout')
+  const location = useLocation()
+  const { logout, user } = useAuth()
+  const currentPath = location.pathname
+  const hasCircles = navItems.some((item) => item.href === '/circles')
+  const hasConnections = navItems.some((item) => item.href === '/connections')
+  const visibleItems = navItems.filter((item) => !(
+    ['candidate', 'company'].includes(user?.role)
+    && item.label.toLowerCase() === 'settings'
+  ))
+  const firstUtilityIndex = visibleItems.findIndex((item) =>
+    ['settings', 'logout'].includes(item.label.toLowerCase()),
+  )
+  const utilityIndex = firstUtilityIndex === -1 ? visibleItems.length : firstUtilityIndex
+  const candidateItems = user?.role === 'candidate' && !hasConnections
+    ? [...visibleItems.slice(0, utilityIndex), { label: 'My Network', href: '/connections' }, ...visibleItems.slice(utilityIndex)]
+    : visibleItems
+  const nextUtilityIndex = candidateItems.findIndex((item) => ['settings', 'logout'].includes(item.label.toLowerCase()))
+  const circlesIndex = nextUtilityIndex === -1 ? candidateItems.length : nextUtilityIndex
+  const navigationItems = user?.role === 'candidate' && !hasCircles
+    ? [...candidateItems.slice(0, circlesIndex), { label: 'Circles', href: '/circles' }, ...candidateItems.slice(circlesIndex)]
+    : candidateItems
+  const mainItems = navigationItems.filter((item) => item.label.toLowerCase() !== 'logout')
+  const logoutItem = navigationItems.find((item) => item.label.toLowerCase() === 'logout')
 
   const handleLogout = async () => {
     await logout()
@@ -64,10 +85,10 @@ export default function Sidebar({ navItems = [], isOpen = false, onClose }) {
 
       <aside className={`fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-[#233554]/80 bg-[#071426]/95 shadow-2xl shadow-black/20 backdrop-blur-lg transition-transform duration-300 lg:w-20 lg:translate-x-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="flex h-20 shrink-0 items-center justify-between border-b border-[#233554]/80 px-5 lg:justify-center lg:px-2">
-          <a href="/" className="flex items-center gap-2.5 font-bold text-[#e6f1ff]" aria-label="LinkPort home">
+          <Link to="/" className="flex items-center gap-2.5 font-bold text-[#e6f1ff]" aria-label="LinkPort home">
             <img src={linkPortLogo} alt="LinkPort logo" className="h-8 w-auto" />
             <span className="text-xl lg:hidden">Link<span className="text-[#64ffda]">Port</span></span>
-          </a>
+          </Link>
           <button type="button" onClick={onClose} className="flex h-9 w-9 items-center justify-center rounded-lg text-xl text-[#8892b0] hover:bg-[#112240] hover:text-[#64ffda] lg:hidden" aria-label="Close menu">
             &times;
           </button>
@@ -76,11 +97,12 @@ export default function Sidebar({ navItems = [], isOpen = false, onClose }) {
         <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4 lg:px-2" aria-label="Dashboard navigation">
           {mainItems.map((item) => {
             const isActive = currentPath === item.href
+              || (item.href === '/circles' && currentPath.startsWith('/circles/'))
 
             return (
-              <a
+              <Link
                 key={item.label}
-                href={item.href}
+                to={item.href}
                 onClick={onClose}
                 aria-current={isActive ? 'page' : undefined}
                 title={item.label}
@@ -92,7 +114,7 @@ export default function Sidebar({ navItems = [], isOpen = false, onClose }) {
               >
                 <SidebarIcon label={item.label} />
                 <span>{item.label}</span>
-              </a>
+              </Link>
             )
           })}
         </nav>

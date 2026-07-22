@@ -10,11 +10,8 @@ import DashboardLayout from '../layouts/DashboardLayout'
 const navItems = [
   { label: 'Dashboard', href: '/admin/dashboard' },
   { label: 'Users', href: '/admin/users' },
-  { label: 'Candidates', href: '/admin/candidates' },
-  { label: 'Companies', href: '/admin/companies' },
   { label: 'Jobs', href: '/admin/jobs' },
   { label: 'Projects', href: '/admin/projects' },
-  { label: 'Reports', href: '/admin/reports' },
   { label: 'Logout', href: '/login' },
 ]
 const control =

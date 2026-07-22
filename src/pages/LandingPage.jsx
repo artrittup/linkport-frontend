@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router'
+import { Link, useNavigate } from 'react-router'
 import { getJobs } from '../api/jobsApi'
 import { getProjects } from '../api/projectsApi'
 import Button from '../components/Button'
@@ -8,11 +9,11 @@ import { useAuth } from '../context/AuthContext'
 
 const navigation = [
   { id: 'home', label: 'Home', icon: 'home' },
-  { id: 'candidates', label: 'Candidates', icon: 'users' },
+  { id: 'candidates', label: 'Members', icon: 'users' },
   { id: 'companies', label: 'Companies', icon: 'building' },
   { id: 'projects', label: 'Projects', icon: 'layers' },
   { id: 'jobs', label: 'Jobs', icon: 'briefcase' },
-  { id: 'community', label: 'Community', icon: 'network' },
+  { id: 'community', label: 'Circles', icon: 'network' },
 ]
 
 const candidateFeatures = [
@@ -59,6 +60,7 @@ function Icon({ name, className = 'h-5 w-5' }) {
     layers: <><path d="m12 2 9 5-9 5-9-5 9-5Z" /><path d="m3 12 9 5 9-5M3 17l9 5 9-5" /></>,
     briefcase: <><rect x="3" y="7" width="18" height="13" rx="2" /><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 12h18M10 12v2h4v-2" /></>,
     network: <><circle cx="12" cy="12" r="3" /><circle cx="5" cy="5" r="2" /><circle cx="19" cy="5" r="2" /><circle cx="5" cy="19" r="2" /><circle cx="19" cy="19" r="2" /><path d="m7 7 3 3m4 0 3-3m-7 7-3 3m7-3 3 3" /></>,
+    discord: <><path d="M8.5 8.5a8 8 0 0 1 7 0M7 18.5c3.3 1.5 6.7 1.5 10 0" /><path d="M6.5 6.5C4.8 9.2 4 12.5 4 16c1.3 1.2 2.6 2 4 2.6l1-1.4M17.5 6.5c1.7 2.7 2.5 6 2.5 9.5-1.3 1.2-2.6 2-4 2.6l-1-1.4" /><circle cx="9" cy="13" r="1" fill="currentColor" stroke="none" /><circle cx="15" cy="13" r="1" fill="currentColor" stroke="none" /></>,
     profile: <><circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0 1 16 0" /></>,
     send: <><path d="m22 2-7 20-4-9-9-4 20-7Z" /><path d="M22 2 11 13" /></>,
     spark: <><path d="m12 3-1.4 4.2a5 5 0 0 1-3.2 3.2L3 12l4.4 1.6a5 5 0 0 1 3.2 3.2L12 21l1.4-4.2a5 5 0 0 1 3.2-3.2L21 12l-4.4-1.6a5 5 0 0 1-3.2-3.2L12 3Z" /></>,
@@ -128,8 +130,8 @@ function DesktopSidebar({ activeSection, onSelect }) {
           <div className="mx-auto my-3 h-8 w-8 animate-pulse rounded-full bg-[#112240]" />
         ) : isAuthenticated ? (
           <div className="space-y-1">
-            <a
-              href={getDashboardPath(user?.role)}
+            <Link
+              to={getDashboardPath(user?.role)}
               title={user?.name || 'Open dashboard'}
               className="flex w-full flex-col items-center gap-1 rounded-xl px-1 py-2 text-[9px] text-[#64ffda] transition-colors hover:bg-[#112240]"
             >
@@ -137,7 +139,7 @@ function DesktopSidebar({ activeSection, onSelect }) {
                 {(user?.name || 'U').split(' ').filter(Boolean).slice(0, 2).map((part) => part[0]).join('').toUpperCase()}
               </span>
               Account
-            </a>
+            </Link>
             <button
               type="button"
               onClick={logout}
@@ -148,8 +150,8 @@ function DesktopSidebar({ activeSection, onSelect }) {
             </button>
           </div>
         ) : (
-          <a
-            href="/login"
+          <Link
+            to="/login"
             title="Not signed in"
             className="flex w-full flex-col items-center gap-1.5 rounded-xl px-1 py-3 text-center text-[9px] leading-tight text-[#64748b] transition-colors hover:bg-[#112240] hover:text-[#e6f1ff]"
           >
@@ -158,7 +160,7 @@ function DesktopSidebar({ activeSection, onSelect }) {
               <span className="absolute -bottom-0.5 -right-0.5 h-2 w-2 rounded-full border border-[#071426] bg-[#64748b]" />
             </span>
             Not signed in
-          </a>
+          </Link>
         )}
       </div>
     </aside>
@@ -314,33 +316,8 @@ function JobRow({ job }) {
   )
 }
 
-function CommunityVisual() {
-  const nodes = [
-    ['Developers', 'left-3 top-8'],
-    ['Designers', 'right-2 top-12'],
-    ['Students', 'bottom-5 left-8'],
-    ['Companies', 'bottom-8 right-5'],
-  ]
-
-  return (
-    <div className="relative mx-auto h-72 max-w-lg overflow-hidden rounded-3xl border border-[#233554] bg-[#071426]/80">
-      <div className="absolute inset-1/4 rounded-full bg-[#64ffda]/10 blur-3xl" />
-      <div className="absolute left-1/2 top-1/2 z-10 flex h-24 w-24 -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center rounded-full border border-[#64ffda]/40 bg-[#112240] text-[#64ffda] shadow-[0_0_40px_rgba(100,255,218,0.12)]">
-        <Icon name="network" />
-        <span className="mt-1 text-xs font-semibold">LinkPort</span>
-      </div>
-      <div className="absolute left-[23%] right-[23%] top-1/2 h-px bg-gradient-to-r from-transparent via-[#64ffda]/30 to-transparent" />
-      <div className="absolute bottom-[24%] top-[24%] left-1/2 w-px bg-gradient-to-b from-transparent via-[#64ffda]/30 to-transparent" />
-      {nodes.map(([label, position]) => (
-        <span key={label} className={`absolute ${position} rounded-full border border-[#233554] bg-[#112240] px-3 py-2 text-xs text-[#8892b0]`}>
-          {label}
-        </span>
-      ))}
-    </div>
-  )
-}
-
 const sectionClass = 'scroll-mt-40 py-20 sm:py-24 lg:scroll-mt-24'
+const audienceSectionClass = 'scroll-mt-40 py-24 sm:py-28 lg:scroll-mt-24 lg:py-32'
 
 const formatCurrency = (value) => {
   const amount = Number(value)
@@ -350,6 +327,7 @@ const formatCurrency = (value) => {
 }
 
 export default function LandingPage() {
+  const navigate = useNavigate()
   const { user, isLoading, isAuthenticated, getDashboardPath } = useAuth()
   const [activeSection, setActiveSection] = useState('home')
   const [jobs, setJobs] = useState([])
@@ -361,11 +339,18 @@ export default function LandingPage() {
   const [isLoadingOpportunities, setIsLoadingOpportunities] = useState(true)
   const goToPrimaryAction = () => {
     if (isLoading) return
-    window.location.assign(
-      isAuthenticated ? getDashboardPath(user?.role) : '/register',
-    )
+    navigate(isAuthenticated ? getDashboardPath(user?.role) : '/register')
   }
   const primaryActionLabel = isAuthenticated ? 'Open Dashboard' : 'Get Started'
+  const canExploreMemberFeatures = isAuthenticated && user?.role === 'candidate'
+  const protectedLandingTarget = (path) => {
+    if (!isAuthenticated) return '/login'
+    return canExploreMemberFeatures ? path : getDashboardPath(user?.role)
+  }
+  const protectedCtaLabel = (memberLabel) => {
+    if (!isAuthenticated) return 'Sign in to explore'
+    return canExploreMemberFeatures ? memberLabel : 'Open dashboard'
+  }
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -498,14 +483,14 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section id="candidates" className={`${sectionClass} border-b border-[#233554]/70`}>
+        <section id="candidates" className={`${audienceSectionClass} border-b border-[#233554]/70`}>
           <div className="mx-auto max-w-7xl px-6 lg:px-10">
-            <SectionHeader label="For candidates" title="Turn potential into proof." description="Create a profile that works for you, then move from discovery to real experience." />
+            <SectionHeader label="For members" title="Turn potential into proof." description="Create a profile that works for you, then move from discovery to real experience." />
             <div className="mt-10 grid gap-4 md:grid-cols-3">{candidateFeatures.map((feature) => <FeatureCard key={feature.title} feature={feature} />)}</div>
           </div>
         </section>
 
-        <section id="companies" className={`${sectionClass} border-b border-[#233554]/70 bg-[#071426]/35`}>
+        <section id="companies" className={`${audienceSectionClass} border-b border-[#233554]/70 bg-[#071426]/35`}>
           <div className="mx-auto max-w-7xl px-6 lg:px-10">
             <SectionHeader label="For companies" title="Find the signal in emerging talent." description="Publish opportunities, review strong matches, and build the team or solution you need." />
             <div className="mt-10 grid gap-4 md:grid-cols-3">{companyFeatures.map((feature) => <FeatureCard key={feature.title} feature={feature} />)}</div>
@@ -515,8 +500,10 @@ export default function LandingPage() {
         <section id="projects" className={`${sectionClass} border-b border-[#233554]/70`}>
           <div className="mx-auto max-w-7xl px-6 lg:px-10">
             <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
-              <SectionHeader label="Project marketplace" title="Build something real." description="Browse focused briefs, send a clear proposal, and turn your skills into delivered work." />
-              <a href="/projects" className="inline-flex items-center gap-2 text-sm font-semibold text-[#64ffda]">View projects <Icon name="arrow" className="h-4 w-4" /></a>
+              <SectionHeader label="Project marketplace" title="Build something real." description="Preview focused briefs from growing companies. Members can sign in to send proposals and turn their skills into delivered work." />
+              <Link to={protectedLandingTarget('/projects')} className="inline-flex items-center gap-2 text-sm font-semibold text-[#64ffda]">
+                {protectedCtaLabel('View projects')} <Icon name="arrow" className="h-4 w-4" />
+              </Link>
             </div>
             {projectsError ? (
               <p className="mt-10 rounded-xl border border-[#ef4444]/30 bg-[#ef4444]/10 p-4 text-sm text-[#fca5a5]">{projectsError}</p>
@@ -531,8 +518,10 @@ export default function LandingPage() {
         <section id="jobs" className={`${sectionClass} border-b border-[#233554]/70 bg-[#071426]/35`}>
           <div className="mx-auto max-w-7xl px-6 lg:px-10">
             <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
-              <SectionHeader label="Jobs board" title="Your next role could start here." description="Discover early-career openings from companies looking for fresh thinking and real potential." />
-              <a href="/jobs" className="inline-flex items-center gap-2 text-sm font-semibold text-[#64ffda]">View jobs <Icon name="arrow" className="h-4 w-4" /></a>
+              <SectionHeader label="Jobs board" title="Your next role could start here." description="Preview early-career openings from companies looking for fresh thinking. Members can sign in to explore and apply." />
+              <Link to={protectedLandingTarget('/jobs')} className="inline-flex items-center gap-2 text-sm font-semibold text-[#64ffda]">
+                {protectedCtaLabel('View jobs')} <Icon name="arrow" className="h-4 w-4" />
+              </Link>
             </div>
             {jobsError ? (
               <p className="mt-10 rounded-xl border border-[#ef4444]/30 bg-[#ef4444]/10 p-4 text-sm text-[#fca5a5]">{jobsError}</p>
@@ -547,16 +536,36 @@ export default function LandingPage() {
         <section id="community" className={sectionClass}>
           <div className="mx-auto grid max-w-7xl gap-12 px-6 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:px-10">
             <div>
-              <SectionHeader label="Community" title="Connections that compound." description="A growing network for learning, collaboration, shared resources, and the conversations that shape better careers." />
+              <SectionHeader label="Circles" title="Build better, together." description="Members can create circles, invite others, and collaborate as a team. A LinkPort member account is required to join or participate." />
               <div className="mt-8 grid grid-cols-2 gap-3">
-                {['Learn together', 'Meet collaborators', 'Share experience', 'Grow your network'].map((item) => (
+                {['Create a circle', 'Invite members', 'Collaborate as a team', 'Deliver projects together'].map((item) => (
                   <div key={item} className="flex items-center gap-2 rounded-xl border border-[#233554] bg-[#112240]/55 p-3 text-sm text-[#e6f1ff]">
                     <span className="text-[#64ffda]"><Icon name="check" className="h-4 w-4" /></span>{item}
                   </div>
                 ))}
               </div>
+              <Link to={protectedLandingTarget('/circles')} className="mt-7 inline-flex items-center gap-2 text-sm font-semibold text-[#64ffda] transition-opacity hover:opacity-80">
+                {protectedCtaLabel('Explore Circles')} <Icon name="arrow" className="h-4 w-4" />
+              </Link>
             </div>
-            <CommunityVisual />
+            <div className="overflow-hidden rounded-3xl border border-[#233554] bg-[#112240]/65 p-7 shadow-xl shadow-black/10 sm:p-9">
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-[#64ffda]/25 bg-[#64ffda]/10 text-[#64ffda]">
+                <Icon name="discord" className="h-7 w-7" />
+              </div>
+              <p className="mt-7 text-xs font-semibold uppercase tracking-[0.18em] text-[#64ffda]">Discord Community</p>
+              <h2 className="mt-3 text-3xl font-bold tracking-tight text-[#e6f1ff]">terminal_0</h2>
+              <p className="mt-4 max-w-xl text-sm leading-7 text-[#8892b0]">
+                Join the terminal_0 community on Discord. More information about the community will be added soon.
+              </p>
+              <a
+                href="https://discord.gg/8NemkkpJj"
+                target="_blank"
+                rel="noreferrer"
+                className="mt-7 inline-flex items-center justify-center gap-2 rounded-lg border border-[#64ffda] bg-[#64ffda] px-6 py-3.5 text-sm font-semibold text-[#0a192f] transition-all hover:-translate-y-0.5 hover:bg-[#7dffe1]"
+              >
+                Join Discord <Icon name="arrow" className="h-4 w-4" />
+              </a>
+            </div>
           </div>
         </section>
 

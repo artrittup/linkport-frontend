@@ -18,7 +18,6 @@ const navItems = [
   { label: 'Applications', href: '/company/applications' },
   { label: 'Projects', href: '/company/projects' },
   { label: 'Bids', href: '/company/bids' },
-  { label: 'Settings', href: '/settings' },
   { label: 'Logout', href: '/login' },
 ]
 
@@ -212,7 +211,7 @@ export default function CompanyApplications() {
           <p className="font-mono text-sm text-[#64ffda]">Hiring pipeline</p>
           <h2 className="mt-2 text-2xl font-bold sm:text-3xl">Applications</h2>
           <p className="mt-3 text-[#8892b0]">
-            Review candidates who applied for your job opportunities.
+            Review members who applied for your job opportunities.
           </p>
         </section>
 
@@ -246,7 +245,7 @@ export default function CompanyApplications() {
                 type="search"
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
-                placeholder="Candidate or job title..."
+                placeholder="Member or job title..."
                 className={inputClasses}
               />
             </div>
@@ -325,7 +324,7 @@ export default function CompanyApplications() {
                   <table className="w-full min-w-[1050px] text-left">
                     <thead>
                       <tr className="border-b border-[#233554] text-[11px] uppercase tracking-wider text-[#64748b]">
-                        <th className="px-4 py-3">Candidate</th>
+                        <th className="px-4 py-3">Member</th>
                         <th className="px-4 py-3">Job</th>
                         <th className="px-4 py-3">Skills</th>
                         <th className="px-4 py-3">Applied</th>
@@ -442,7 +441,7 @@ export default function CompanyApplications() {
               aria-labelledby="candidate-profile-title"
             >
               <p className="font-mono text-xs uppercase text-[#64ffda]">
-                Candidate profile
+                Member profile
               </p>
               <h2
                 id="candidate-profile-title"

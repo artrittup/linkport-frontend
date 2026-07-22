@@ -8,12 +8,11 @@ import DashboardLayout from '../layouts/DashboardLayout'
 
 const navItems = [
   { label: 'Dashboard', href: '/candidate/dashboard' },
-  { label: 'My Profile', href: '/candidate/profile' },
+  { label: 'Member Profile', href: '/candidate/profile' },
   { label: 'Jobs', href: '/jobs' },
   { label: 'My Applications', href: '/candidate/applications' },
   { label: 'Projects', href: '/projects' },
   { label: 'My Bids', href: '/candidate/bids' },
-  { label: 'Settings', href: '/settings' },
   { label: 'Logout', href: '/login' },
 ]
 
@@ -111,7 +110,7 @@ export default function MyBids() {
     window.alert(`${bid.projectTitle} for ${bid.company}\n\n${bid.proposalPreview}`)
 
   return (
-    <DashboardLayout title="My Bids" navItems={navItems} userType="Candidate">
+    <DashboardLayout title="My Bids" navItems={navItems} userType="Member">
       <div className="space-y-8">
         <section>
           <p className="font-mono text-sm text-[#64ffda]">Proposal tracker</p>

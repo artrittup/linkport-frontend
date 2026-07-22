@@ -17,14 +17,22 @@ import AdminUsers from "../pages/AdminUsers"
 import AdminJobs from "../pages/AdminJobs"
 import AdminProjects from "../pages/AdminProjects"
 import CandidateDashboard from "../pages/CandidateDashboard"
+import Circles from "../pages/Circles"
+import CircleDetails from "../pages/CircleDetails"
 import CompanyDashboard from "../pages/CompanyDashboard"
 import AdminDashboard from "../pages/AdminDashboard"
 import ProtectedRoute from "./ProtectedRoute"
 import InfoPage from "../pages/InfoPage"
+import MemberPublicProfile from "../pages/MemberPublicProfile"
+import CompanyPublicProfile from "../pages/CompanyPublicProfile"
+import Connections from "../pages/Connections"
+import Notifications from "../pages/Notifications"
+import NotFound from "../pages/NotFound"
 
 const candidateRoles = ["candidate"]
 const companyRoles = ["company"]
 const adminRoles = ["admin"]
+const authenticatedRoles = ["candidate", "company", "admin"]
 
 export default function AppRoutes() {
   return (
@@ -34,11 +42,17 @@ export default function AppRoutes() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/:page" element={<InfoPage />} />
+        <Route path="/members/:id" element={<ProtectedRoute allowedRoles={authenticatedRoles}><MemberPublicProfile /></ProtectedRoute>} />
+        <Route path="/companies/:id" element={<ProtectedRoute allowedRoles={authenticatedRoles}><CompanyPublicProfile /></ProtectedRoute>} />
+        <Route path="/notifications" element={<ProtectedRoute allowedRoles={authenticatedRoles}><Notifications /></ProtectedRoute>} />
         <Route path="/jobs" element={<ProtectedRoute allowedRoles={candidateRoles}><Jobs /></ProtectedRoute>} />
         <Route path="/projects" element={<ProtectedRoute allowedRoles={candidateRoles}><Projects /></ProtectedRoute>} />
         <Route path="/candidate/applications" element={<ProtectedRoute allowedRoles={candidateRoles}><MyApplications /></ProtectedRoute>} />
         <Route path="/candidate/bids" element={<ProtectedRoute allowedRoles={candidateRoles}><MyBids /></ProtectedRoute>} />
         <Route path="/candidate/profile" element={<ProtectedRoute allowedRoles={candidateRoles}><CandidateProfile /></ProtectedRoute>} />
+        <Route path="/connections" element={<ProtectedRoute allowedRoles={candidateRoles}><Connections /></ProtectedRoute>} />
+        <Route path="/circles" element={<ProtectedRoute allowedRoles={candidateRoles}><Circles /></ProtectedRoute>} />
+        <Route path="/circles/:id" element={<ProtectedRoute allowedRoles={candidateRoles}><CircleDetails /></ProtectedRoute>} />
         <Route path="/company/profile" element={<ProtectedRoute allowedRoles={companyRoles}><CompanyProfile /></ProtectedRoute>} />
         <Route path="/company/jobs" element={<ProtectedRoute allowedRoles={companyRoles}><ManageJobs /></ProtectedRoute>} />
         <Route path="/company/projects" element={<ProtectedRoute allowedRoles={companyRoles}><ManageProjects /></ProtectedRoute>} />
@@ -50,6 +64,7 @@ export default function AppRoutes() {
         <Route path="/admin/users" element={<ProtectedRoute allowedRoles={adminRoles}><AdminUsers /></ProtectedRoute>} />
         <Route path="/admin/jobs" element={<ProtectedRoute allowedRoles={adminRoles}><AdminJobs /></ProtectedRoute>} />
         <Route path="/admin/projects" element={<ProtectedRoute allowedRoles={adminRoles}><AdminProjects /></ProtectedRoute>} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
   )

@@ -51,7 +51,15 @@ function InformationCard({ number, title, children, className = '' }) {
   )
 }
 
-function ItemList({ items, badge }) {
+function ItemList({ items, badge, isLoading, error }) {
+  if (isLoading) {
+    return <p className="text-sm text-[#8892b0]">Loading records...</p>
+  }
+
+  if (error) {
+    return <p role="alert" className="rounded-lg border border-[#ef4444]/30 bg-[#ef4444]/10 px-3 py-2 text-sm text-[#fca5a5]">{error}</p>
+  }
+
   if (items.length === 0) {
     return <p className="text-sm text-[#8892b0]">No records available.</p>
   }
@@ -80,25 +88,20 @@ export default function CompanyProfile() {
   const [openJobs, setOpenJobs] = useState([])
   const [activeProjects, setActiveProjects] = useState([])
   const [saved, setSaved] = useState(false)
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoadingProfile, setIsLoadingProfile] = useState(true)
+  const [isLoadingJobs, setIsLoadingJobs] = useState(true)
+  const [isLoadingProjects, setIsLoadingProjects] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
   const [loadError, setLoadError] = useState('')
+  const [jobsError, setJobsError] = useState('')
+  const [projectsError, setProjectsError] = useState('')
   const [saveError, setSaveError] = useState('')
 
   useEffect(() => {
     let isActive = true
 
-    async function loadProfile() {
-      try {
-        const [profileResponse, jobsResponse, projectsResponse] = await Promise.all([
-          getCompanyProfile(),
-          getCompanyJobs({ status: 'open', per_page: 5 }),
-          getCompanyProjects({ status: 'open', per_page: 5 }),
-        ])
-        const { profile } = profileResponse
-
-        if (!isActive) return
-
+    getCompanyProfile().then(({ profile }) => {
+      if (isActive) {
         setForm({
           companyName: profile?.company_name ?? '',
           industry: profile?.industry ?? '',
@@ -111,23 +114,28 @@ export default function CompanyProfile() {
           logoUrl: profile?.logo_url ?? '',
           employeeCount: profile?.employee_count?.toString() ?? '',
         })
-        setOpenJobs(jobsResponse.data.map((job) => job.title))
-        setActiveProjects(projectsResponse.data.map((project) => project.title))
-      } catch (requestError) {
-        if (isActive) {
-          setLoadError(
-            getProfileErrorMessage(
-              requestError,
-              'Unable to load your company profile.',
-            ),
-          )
-        }
-      } finally {
-        if (isActive) setIsLoading(false)
       }
-    }
+    }).catch((requestError) => {
+      if (isActive) setLoadError(getProfileErrorMessage(requestError, 'Unable to load your company profile.'))
+    }).finally(() => {
+      if (isActive) setIsLoadingProfile(false)
+    })
 
-    loadProfile()
+    getCompanyJobs({ status: 'open', per_page: 5 }).then((response) => {
+      if (isActive) setOpenJobs(response.data.map((job) => job.title))
+    }).catch((requestError) => {
+      if (isActive) setJobsError(getProfileErrorMessage(requestError, 'Unable to load open jobs.'))
+    }).finally(() => {
+      if (isActive) setIsLoadingJobs(false)
+    })
+
+    getCompanyProjects({ status: 'open', per_page: 5 }).then((response) => {
+      if (isActive) setActiveProjects(response.data.map((project) => project.title))
+    }).catch((requestError) => {
+      if (isActive) setProjectsError(getProfileErrorMessage(requestError, 'Unable to load active projects.'))
+    }).finally(() => {
+      if (isActive) setIsLoadingProjects(false)
+    })
 
     return () => {
       isActive = false
@@ -184,7 +192,7 @@ export default function CompanyProfile() {
     })
   }
 
-  if (isLoading) {
+  if (isLoadingProfile) {
     return (
       <DashboardLayout title="Company Profile" navItems={navItems} userType="Company">
         <LoadingSpinner label="Loading your company profile..." size="lg" />
@@ -272,11 +280,11 @@ export default function CompanyProfile() {
             </InformationCard>
 
             <InformationCard number="06" title="Open Jobs">
-              <ItemList items={openJobs} badge="Open" />
+              <ItemList items={openJobs} badge="Open" isLoading={isLoadingJobs} error={jobsError} />
             </InformationCard>
 
             <InformationCard number="07" title="Active Projects" className="md:col-span-2">
-              <ItemList items={activeProjects} badge="Active" />
+              <ItemList items={activeProjects} badge="Active" isLoading={isLoadingProjects} error={projectsError} />
             </InformationCard>
           </div>
         </section>

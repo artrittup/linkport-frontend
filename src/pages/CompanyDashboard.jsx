@@ -59,42 +59,61 @@ function SectionHeading({ title, description, href, action }) {
   )
 }
 
+function SectionError({ message }) {
+  return <p role="alert" className="mt-5 rounded-lg border border-[#ef4444]/30 bg-[#ef4444]/10 px-4 py-3 text-sm text-[#fca5a5]">{message}</p>
+}
+
 export default function CompanyDashboard() {
   const navigate = useNavigate()
   const [summary, setSummary] = useState({})
   const [applications, setApplications] = useState([])
   const [projects, setProjects] = useState([])
   const [bids, setBids] = useState([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState('')
+  const [isLoadingSummary, setIsLoadingSummary] = useState(true)
+  const [isLoadingApplications, setIsLoadingApplications] = useState(true)
+  const [isLoadingProjects, setIsLoadingProjects] = useState(true)
+  const [isLoadingBids, setIsLoadingBids] = useState(true)
+  const [summaryError, setSummaryError] = useState('')
+  const [applicationsError, setApplicationsError] = useState('')
+  const [projectsError, setProjectsError] = useState('')
+  const [bidsError, setBidsError] = useState('')
 
   useEffect(() => {
     let isActive = true
 
-    Promise.all([
-      getDashboardSummary(),
-      getCompanyApplications({ per_page: 5 }),
-      getCompanyProjects({ status: 'open', per_page: 4 }),
-      getCompanyBids({ per_page: 4 }),
-    ])
-      .then(([summaryResponse, applicationResponse, projectResponse, bidResponse]) => {
-        if (!isActive) return
-        setSummary(summaryResponse ?? {})
-        setApplications(applicationResponse.data)
-        setProjects(projectResponse.data)
-        setBids(bidResponse.data)
-      })
-      .catch((requestError) => {
-        if (isActive) {
-          setError(
-            requestError.response?.data?.message ||
-              'Unable to load the company dashboard.',
-          )
-        }
-      })
-      .finally(() => {
-        if (isActive) setIsLoading(false)
-      })
+    const errorMessage = (error, fallback) => error?.response?.data?.message || fallback
+
+    getDashboardSummary().then((response) => {
+      if (isActive) setSummary(response ?? {})
+    }).catch((error) => {
+      if (isActive) setSummaryError(errorMessage(error, 'Unable to load dashboard totals.'))
+    }).finally(() => {
+      if (isActive) setIsLoadingSummary(false)
+    })
+
+    getCompanyApplications({ per_page: 5 }).then((response) => {
+      if (isActive) setApplications(response.data)
+    }).catch((error) => {
+      if (isActive) setApplicationsError(errorMessage(error, 'Unable to load recent applications.'))
+    }).finally(() => {
+      if (isActive) setIsLoadingApplications(false)
+    })
+
+    getCompanyProjects({ status: 'open', per_page: 4 }).then((response) => {
+      if (isActive) setProjects(response.data)
+    }).catch((error) => {
+      if (isActive) setProjectsError(errorMessage(error, 'Unable to load active projects.'))
+    }).finally(() => {
+      if (isActive) setIsLoadingProjects(false)
+    })
+
+    getCompanyBids({ per_page: 4 }).then((response) => {
+      if (isActive) setBids(response.data)
+    }).catch((error) => {
+      if (isActive) setBidsError(errorMessage(error, 'Unable to load recent project bids.'))
+    }).finally(() => {
+      if (isActive) setIsLoadingBids(false)
+    })
 
     return () => {
       isActive = false
@@ -125,10 +144,10 @@ export default function CompanyDashboard() {
           <h2 className="mt-2 text-2xl font-bold tracking-tight sm:text-3xl">Company Dashboard</h2>
           <p className="mt-3 max-w-2xl text-[#8892b0]">Manage your jobs, projects, applications, and member offers.</p>
 
-          {isLoading ? (
-            <LoadingSpinner label="Loading company dashboard..." />
-          ) : error ? (
-            <div className="mt-8"><EmptyState title="Unable to load dashboard" description={error} /></div>
+          {isLoadingSummary ? (
+            <LoadingSpinner label="Loading dashboard totals..." />
+          ) : summaryError ? (
+            <SectionError message={summaryError} />
           ) : (
             <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
               {stats.map((stat, index) => (
@@ -143,11 +162,13 @@ export default function CompanyDashboard() {
           )}
         </section>
 
-        {!isLoading && !error && (
-          <>
             <section>
               <SectionHeading title="Recent Applications" description="Latest members interested in your roles." href="/company/applications" action="View all applications" />
-              {applications.length === 0 ? (
+              {isLoadingApplications ? (
+                <LoadingSpinner label="Loading recent applications..." />
+              ) : applicationsError ? (
+                <SectionError message={applicationsError} />
+              ) : applications.length === 0 ? (
                 <div className="mt-5"><EmptyState title="No applications yet" description="Applications to your jobs will appear here." /></div>
               ) : (
                 <Card padding="sm" className="mt-5 overflow-hidden">
@@ -171,7 +192,11 @@ export default function CompanyDashboard() {
 
             <section>
               <SectionHeading title="Active Projects" description="Open briefs currently receiving member bids." href="/company/projects" action="Manage projects" />
-              {projects.length === 0 ? (
+              {isLoadingProjects ? (
+                <LoadingSpinner label="Loading active projects..." />
+              ) : projectsError ? (
+                <SectionError message={projectsError} />
+              ) : projects.length === 0 ? (
                 <div className="mt-5"><EmptyState title="No active projects" description="Publish a project to start receiving bids." /></div>
               ) : (
                 <div className="mt-5 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
@@ -192,7 +217,11 @@ export default function CompanyDashboard() {
 
             <section>
               <SectionHeading title="Recent Project Bids" description="Latest proposals submitted to your projects." href="/company/bids" action="View all bids" />
-              {bids.length === 0 ? (
+              {isLoadingBids ? (
+                <LoadingSpinner label="Loading recent project bids..." />
+              ) : bidsError ? (
+                <SectionError message={bidsError} />
+              ) : bids.length === 0 ? (
                 <div className="mt-5"><EmptyState title="No project bids yet" description="Member proposals will appear here." /></div>
               ) : (
                 <div className="mt-5 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
@@ -206,8 +235,6 @@ export default function CompanyDashboard() {
                 </div>
               )}
             </section>
-          </>
-        )}
       </div>
     </DashboardLayout>
   )

@@ -1,14 +1,12 @@
 export const ROLE_NAVIGATION = {
   candidate: [
     { key: 'dashboard', label: 'Dashboard', path: '/candidate/dashboard' },
-    { key: 'profile', label: 'Member Profile', path: '/candidate/profile' },
+    { key: 'profile', label: 'Profile', path: '/candidate/profile' },
     { key: 'jobs', label: 'Jobs', path: '/jobs' },
     { key: 'applications', label: 'My Applications', path: '/candidate/applications' },
     { key: 'projects', label: 'Projects', path: '/projects' },
     { key: 'bids', label: 'My Bids', path: '/candidate/bids' },
-    { key: 'connections', label: 'My Network', path: '/connections' },
     { key: 'circles', label: 'Circles', path: '/circles' },
-    { key: 'notifications', label: 'Notifications', path: '/notifications' },
     { key: 'logout', label: 'Logout', path: '/login' },
   ],
   company: [
@@ -18,7 +16,6 @@ export const ROLE_NAVIGATION = {
     { key: 'applications', label: 'Applications', path: '/company/applications' },
     { key: 'projects', label: 'Projects', path: '/company/projects' },
     { key: 'bids', label: 'Bids', path: '/company/bids' },
-    { key: 'notifications', label: 'Notifications', path: '/notifications' },
     { key: 'logout', label: 'Logout', path: '/login' },
   ],
   admin: [
@@ -26,7 +23,6 @@ export const ROLE_NAVIGATION = {
     { key: 'users', label: 'Users', path: '/admin/users' },
     { key: 'jobs', label: 'Jobs', path: '/admin/jobs' },
     { key: 'projects', label: 'Projects', path: '/admin/projects' },
-    { key: 'notifications', label: 'Notifications', path: '/notifications' },
     { key: 'logout', label: 'Logout', path: '/login' },
   ],
 }

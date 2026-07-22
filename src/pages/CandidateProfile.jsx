@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router'
 import {
   getCandidateProfile,
   getProfileErrorMessage,
@@ -127,7 +128,7 @@ export default function CandidateProfile() {
       })
 
       setSaved(true)
-      showToast('Member profile saved successfully.', 'success')
+      showToast('Profile saved successfully.', 'success')
     } catch (requestError) {
       setSaveError(
         getProfileErrorMessage(
@@ -149,18 +150,18 @@ export default function CandidateProfile() {
 
   if (isLoading) {
     return (
-      <DashboardLayout title="Member Profile" userType="Member">
+      <DashboardLayout title="Profile" userType="Member">
         <LoadingSpinner label="Loading your profile..." size="lg" />
       </DashboardLayout>
     )
   }
 
   return (
-    <DashboardLayout title="Member Profile" userType="Member">
+    <DashboardLayout title="Profile" userType="Member">
       <div className="space-y-10">
         <section>
           <p className="font-mono text-sm text-[#64ffda]">Professional profile</p>
-          <h2 className="mt-2 text-2xl font-bold tracking-tight sm:text-3xl">Member Profile</h2>
+          <h2 className="mt-2 text-2xl font-bold tracking-tight sm:text-3xl">Profile</h2>
           <p className="mt-3 text-[#8892b0]">
             Manage your professional profile and portfolio.
           </p>
@@ -189,9 +190,17 @@ export default function CandidateProfile() {
               <p className="mt-1 text-[#64ffda]">{form.professionalTitle}</p>
               <p className="mt-2 text-sm text-[#8892b0]">{form.location}</p>
             </div>
-            <Button variant="outline" onClick={scrollToEdit}>
-              Edit Profile
-            </Button>
+            <div className="flex flex-wrap gap-3">
+              <Link
+                to="/connections"
+                className="inline-flex items-center justify-center rounded-lg border border-[#233554] px-5 py-2.5 text-sm font-semibold text-[#e6f1ff] transition-all hover:-translate-y-0.5 hover:border-[#64ffda] hover:text-[#64ffda] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#64ffda]"
+              >
+                My Network
+              </Link>
+              <Button variant="outline" onClick={scrollToEdit}>
+                Edit Profile
+              </Button>
+            </div>
           </div>
         </Card>
 

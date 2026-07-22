@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router'
 import { getDashboardSummary } from '../api/dashboardApi'
 import { getJobs } from '../api/jobsApi'
 import { getCandidateProfile } from '../api/profileApi'
@@ -141,13 +142,23 @@ export default function CandidateDashboard() {
     >
       <div className="space-y-10">
         <section>
-          <p className="font-mono text-sm text-[#64ffda]">Member workspace</p>
-          <h2 className="mt-2 text-2xl font-bold tracking-tight sm:text-3xl">
-            Welcome back{user?.name ? `, ${user.name}` : ''}
-          </h2>
-          <p className="mt-3 max-w-2xl text-[#8892b0]">
-            Track your applications, discover jobs, and find project opportunities.
-          </p>
+          <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="font-mono text-sm text-[#64ffda]">Member workspace</p>
+              <h2 className="mt-2 text-2xl font-bold tracking-tight sm:text-3xl">
+                Welcome back{user?.name ? `, ${user.name}` : ''}
+              </h2>
+              <p className="mt-3 max-w-2xl text-[#8892b0]">
+                Track your applications, discover jobs, and find project opportunities.
+              </p>
+            </div>
+            <Link
+              to="/connections"
+              className="inline-flex w-fit items-center justify-center rounded-lg border border-[#64ffda] px-4 py-2 text-sm font-semibold text-[#64ffda] transition-all hover:-translate-y-0.5 hover:bg-[#64ffda]/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#64ffda]"
+            >
+              View My Network
+            </Link>
+          </div>
 
           {isLoadingSummary ? (
             <LoadingSpinner label="Loading dashboard summary..." />

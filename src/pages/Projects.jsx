@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router'
+import { useCallback, useEffect, useState } from 'react'
+import { useNavigate, useSearchParams } from 'react-router'
 import { getProjectById, getProjects } from '../api/projectsApi'
 import Button from '../components/Button'
 import Card from '../components/Card'
@@ -26,6 +26,8 @@ const getDeadlineMonth = (deadline) =>
 
 export default function Projects() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const requestedProjectId = searchParams.get('open')
   const { isAuthenticated, user } = useAuth()
   const { showToast } = useToast()
   const [projects, setProjects] = useState([])
@@ -97,7 +99,7 @@ export default function Projects() {
     return matchesBudget && matchesDeadline
   })
 
-  const openDetails = async (project) => {
+  const openDetails = useCallback(async (project) => {
     setModal({ type: 'details', project, isLoading: true, error: '' })
 
     try {
@@ -121,7 +123,17 @@ export default function Projects() {
           : current,
       )
     }
-  }
+  }, [])
+
+  useEffect(() => {
+    if (!requestedProjectId) return
+
+    openDetails({
+      id: requestedProjectId,
+      title: 'Loading project...',
+      company: '',
+    })
+  }, [openDetails, requestedProjectId])
 
   const clearFilters = () => {
     setSearch('')

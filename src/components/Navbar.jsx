@@ -33,10 +33,7 @@ export default function Navbar() {
           </span>
         </Link>
 
-        <GlobalSearch
-          placeholder="Search members or companies..."
-          className="mx-2 w-10 transition-[width] duration-200 focus-within:w-48 sm:w-full sm:max-w-xs"
-        />
+        <GlobalSearch className="w-10 transition-[width] duration-200 focus-within:w-52 sm:w-40 sm:focus-within:w-64" />
 
         {isLoading ? (
           <div className="h-9 w-32 animate-pulse rounded-lg bg-[#112240]" aria-label="Checking account" />

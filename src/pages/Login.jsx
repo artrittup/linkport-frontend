@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router'
+import { Link, useLocation, useNavigate } from 'react-router'
 import Button from '../components/Button'
 import Card from '../components/Card'
 import { getAuthErrorMessage } from '../api/authApi'
@@ -9,6 +9,7 @@ const inputClasses =
   'mt-2 w-full rounded-md border border-[#233554] bg-[#0a192f]/70 px-4 py-3 text-sm text-[#e6f1ff] outline-none transition-colors placeholder:text-[#64748b] hover:border-[#8892b0] focus:border-[#64ffda] focus:ring-1 focus:ring-[#64ffda]'
 
 export default function Login() {
+  const location = useLocation()
   const navigate = useNavigate()
   const { getDashboardPath, login } = useAuth()
   const [email, setEmail] = useState('')
@@ -23,7 +24,16 @@ export default function Login() {
 
     try {
       const authenticatedUser = await login({ email, password })
-      navigate(getDashboardPath(authenticatedUser.role), { replace: true })
+      const requestedPath =
+        typeof location.state?.from === 'string' &&
+        location.state.from.startsWith('/') &&
+        !location.state.from.startsWith('//')
+          ? location.state.from
+          : null
+
+      navigate(requestedPath || getDashboardPath(authenticatedUser.role), {
+        replace: true,
+      })
     } catch (requestError) {
       setError(
         getAuthErrorMessage(

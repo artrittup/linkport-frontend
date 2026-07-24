@@ -279,9 +279,14 @@ function OpportunityVisual({ job, project, isLoading }) {
   )
 }
 
-function ProjectCard({ project }) {
+function ProjectCard({ project, onClick }) {
   return (
-    <article className="group rounded-2xl border border-[#233554] bg-[#112240]/65 p-5 transition-all duration-200 hover:-translate-y-1 hover:border-[#64ffda]/40 hover:shadow-xl hover:shadow-black/20">
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={`Open project: ${project.title}`}
+      className="group flex h-full w-full flex-col rounded-2xl border border-[#233554] bg-[#112240]/65 p-5 text-left transition-all duration-200 hover:-translate-y-1 hover:border-[#64ffda]/40 hover:shadow-xl hover:shadow-black/20 focus:outline-none focus-visible:border-[#64ffda] focus-visible:ring-2 focus-visible:ring-[#64ffda]/30"
+    >
       <div className="flex items-center justify-between gap-3">
         <span className="rounded-full bg-[#64ffda]/10 px-3 py-1 text-xs font-medium text-[#64ffda]">{project.category || 'Project'}</span>
         <span className="text-xs text-[#64748b]">{project.company}</span>
@@ -290,28 +295,42 @@ function ProjectCard({ project }) {
       <div className="mt-4 flex flex-wrap gap-2">
         {project.skills.map((tag) => <span key={tag} className="rounded-md border border-[#233554] px-2.5 py-1 text-xs text-[#8892b0]">{tag}</span>)}
       </div>
-      <div className="mt-6 flex items-end justify-between border-t border-[#233554] pt-4">
+      <div className="mt-auto flex w-full items-end justify-between border-t border-[#233554] pt-4">
         <div><p className="text-[10px] uppercase tracking-wide text-[#64748b]">Budget</p><p className="mt-1 font-semibold text-[#e6f1ff]">{formatCurrency(project.budget)}</p></div>
         <span className="text-[#64ffda] transition-transform group-hover:translate-x-1"><Icon name="arrow" /></span>
       </div>
-    </article>
+    </button>
   )
 }
 
-function JobRow({ job }) {
+function JobCard({ job, onClick }) {
   return (
-    <article className="group flex flex-col gap-4 rounded-2xl border border-[#233554] bg-[#112240]/65 p-5 transition-all duration-200 hover:border-[#64ffda]/35 hover:bg-[#112240] sm:flex-row sm:items-center">
-      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#64ffda]/10 text-[#64ffda]"><Icon name="briefcase" /></div>
-      <div className="min-w-0 flex-1">
-        <h3 className="font-semibold text-[#e6f1ff]">{job.title}</h3>
-        <p className="mt-1 text-sm text-[#8892b0]">{job.company}</p>
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={`Open job: ${job.title}`}
+      className="group flex h-full w-full flex-col rounded-2xl border border-[#233554] bg-[#112240]/65 p-5 text-left transition-all duration-200 hover:-translate-y-1 hover:border-[#64ffda]/40 hover:shadow-xl hover:shadow-black/20 focus:outline-none focus-visible:border-[#64ffda] focus-visible:ring-2 focus-visible:ring-[#64ffda]/30"
+    >
+      <div className="flex w-full items-center justify-between gap-3">
+        <span className="rounded-full bg-[#64ffda]/10 px-3 py-1 text-xs font-medium text-[#64ffda]">{job.type || 'Job'}</span>
+        <span className="truncate text-xs text-[#64748b]">{job.company}</span>
       </div>
-      <div className="flex flex-wrap gap-2">
-        <span className="rounded-full border border-[#233554] px-3 py-1.5 text-xs text-[#8892b0]">{job.location}</span>
-        <span className="rounded-full border border-[#233554] px-3 py-1.5 text-xs text-[#8892b0]">{job.type}</span>
+      <h3 className="mt-5 text-lg font-semibold text-[#e6f1ff]">{job.title}</h3>
+      <div className="mt-4 flex flex-wrap gap-2">
+        {job.skills?.map((skill) => (
+          <span key={skill} className="rounded-md border border-[#233554] px-2.5 py-1 text-xs text-[#8892b0]">
+            {skill}
+          </span>
+        ))}
       </div>
-      <span className="hidden text-[#64ffda] transition-transform group-hover:translate-x-1 sm:block"><Icon name="arrow" /></span>
-    </article>
+      <div className="mt-auto flex w-full items-end justify-between border-t border-[#233554] pt-4">
+        <div>
+          <p className="text-[10px] uppercase tracking-wide text-[#64748b]">Location</p>
+          <p className="mt-1 font-semibold text-[#e6f1ff]">{job.location || 'Remote'}</p>
+        </div>
+        <span className="text-[#64ffda] transition-transform group-hover:translate-x-1"><Icon name="arrow" /></span>
+      </div>
+    </button>
   )
 }
 
@@ -562,7 +581,15 @@ export default function LandingPage() {
             ) : !isLoadingOpportunities && projects.length === 0 ? (
               <p className="mt-10 rounded-xl border border-[#233554] bg-[#112240]/60 p-6 text-sm text-[#8892b0]">There are no open projects right now.</p>
             ) : (
-              <div className="mt-10 grid gap-5 md:grid-cols-2 xl:grid-cols-3">{projects.map((project) => <ProjectCard key={project.id} project={project} />)}</div>
+              <div className="mt-10 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+                {projects.map((project) => (
+                  <ProjectCard
+                    key={project.id}
+                    project={project}
+                    onClick={() => requestProtectedAccess(`/projects?open=${project.id}`, 'this project')}
+                  />
+                ))}
+              </div>
             )}
           </div>
         </section>
@@ -582,7 +609,15 @@ export default function LandingPage() {
             ) : !isLoadingOpportunities && jobs.length === 0 ? (
               <p className="mt-10 rounded-xl border border-[#233554] bg-[#112240]/60 p-6 text-sm text-[#8892b0]">There are no open jobs right now.</p>
             ) : (
-              <div className="mt-10 grid gap-4">{jobs.map((job) => <JobRow key={job.id} job={job} />)}</div>
+              <div className="mt-10 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+                {jobs.map((job) => (
+                  <JobCard
+                    key={job.id}
+                    job={job}
+                    onClick={() => requestProtectedAccess(`/jobs?open=${job.id}`, 'this job')}
+                  />
+                ))}
+              </div>
             )}
           </div>
         </section>

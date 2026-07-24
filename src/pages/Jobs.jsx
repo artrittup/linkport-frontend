@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router'
+import { useCallback, useEffect, useState } from 'react'
+import { useNavigate, useSearchParams } from 'react-router'
 import { getJobById, getJobs } from '../api/jobsApi'
 import ApplyJobModal from '../components/ApplyJobModal'
 import Button from '../components/Button'
@@ -16,6 +16,8 @@ const controlClasses =
 
 export default function Jobs() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const requestedJobId = searchParams.get('open')
   const { isAuthenticated, user } = useAuth()
   const { showToast } = useToast()
   const [jobs, setJobs] = useState([])
@@ -68,7 +70,7 @@ export default function Jobs() {
     }
   }, [location, page, search])
 
-  const openDetails = async (job) => {
+  const openDetails = useCallback(async (job) => {
     setModal({ type: 'details', job, isLoading: true, error: '' })
 
     try {
@@ -92,7 +94,17 @@ export default function Jobs() {
           : current,
       )
     }
-  }
+  }, [])
+
+  useEffect(() => {
+    if (!requestedJobId) return
+
+    openDetails({
+      id: requestedJobId,
+      title: 'Loading job...',
+      company: '',
+    })
+  }, [openDetails, requestedJobId])
 
   const clearFilters = () => {
     setSearch('')

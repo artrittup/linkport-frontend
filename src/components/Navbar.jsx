@@ -33,37 +33,39 @@ export default function Navbar() {
           </span>
         </Link>
 
-        <GlobalSearch className="w-10 transition-[width] duration-200 focus-within:w-52 sm:w-40 sm:focus-within:w-64" />
+        <div className="ml-auto flex items-center gap-2 sm:gap-4">
+          <GlobalSearch className="w-10 transition-[width] duration-200 focus-within:w-52 sm:w-40 sm:focus-within:w-64" />
 
-        {isLoading ? (
-          <div className="h-9 w-32 animate-pulse rounded-lg bg-[#112240]" aria-label="Checking account" />
-        ) : isAuthenticated ? (
-          <div className="flex items-center gap-2 sm:gap-3">
-            <NotificationBell />
-            <span className="hidden max-w-40 truncate text-sm text-[#8892b0] sm:block">
-              {user?.name}
-            </span>
-            <Button variant="outline" size="sm" onClick={() => navigate(dashboardPath)}>
-              Dashboard
-            </Button>
-            <button
-              type="button"
-              onClick={logout}
-              className="rounded-lg px-2 py-2 text-xs font-semibold text-[#ef4444] transition-colors hover:bg-[#ef4444]/10 lg:hidden"
-            >
-              Logout
-            </button>
-          </div>
-        ) : (
-          <div className="flex items-center gap-2 sm:gap-4">
-            <Link to="/login" className="rounded-lg px-3 py-2 text-sm font-semibold text-[#8892b0] transition-colors duration-200 hover:text-[#e6f1ff]">
-              Login
-            </Link>
-            <Button variant="outline" size="sm" onClick={() => navigate('/register')}>
-              Sign Up
-            </Button>
-          </div>
-        )}
+          {isLoading ? (
+            <div className="h-9 w-32 animate-pulse rounded-lg bg-[#112240]" aria-label="Checking account" />
+          ) : isAuthenticated ? (
+            <div className="flex items-center gap-2 sm:gap-3">
+              <NotificationBell />
+              <span className="hidden max-w-40 truncate text-sm text-[#8892b0] sm:block">
+                {user?.name}
+              </span>
+              <Button variant="outline" size="sm" onClick={() => navigate(dashboardPath)}>
+                Dashboard
+              </Button>
+              <button
+                type="button"
+                onClick={logout}
+                className="rounded-lg px-2 py-2 text-xs font-semibold text-[#ef4444] transition-colors hover:bg-[#ef4444]/10 lg:hidden"
+              >
+                Logout
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 sm:gap-4">
+              <Link to="/login" className="rounded-lg px-3 py-2 text-sm font-semibold text-[#8892b0] transition-colors duration-200 hover:text-[#e6f1ff]">
+                Login
+              </Link>
+              <Button variant="outline" size="sm" onClick={() => navigate('/register')}>
+                Sign Up
+              </Button>
+            </div>
+          )}
+        </div>
       </nav>
     </header>
   )

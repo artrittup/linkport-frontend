@@ -334,8 +334,8 @@ function JobCard({ job, onClick }) {
   )
 }
 
-const sectionClass = 'scroll-mt-40 py-20 sm:py-24 lg:scroll-mt-24'
-const audienceSectionClass = 'scroll-mt-40 py-24 sm:py-28 lg:scroll-mt-24 lg:py-32'
+const sectionClass = 'scroll-mt-40 py-32 sm:py-36 lg:scroll-mt-24 lg:py-40'
+const audienceSectionClass = 'scroll-mt-40 py-36 sm:py-40 lg:scroll-mt-24 lg:py-44'
 
 const formatCurrency = (value) => {
   const amount = Number(value)

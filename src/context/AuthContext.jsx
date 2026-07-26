@@ -10,7 +10,7 @@ import {
 const AuthContext = createContext(null)
 
 const dashboardPaths = {
-  candidate: '/candidate/dashboard',
+  candidate: '/candidate/home',
   company: '/company/dashboard',
   admin: '/admin/dashboard',
 }

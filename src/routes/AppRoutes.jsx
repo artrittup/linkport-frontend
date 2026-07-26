@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react'
-import { BrowserRouter, Route, Routes } from 'react-router'
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router'
 import LoadingSpinner from '../components/LoadingSpinner'
 import ProtectedRoute from './ProtectedRoute'
 
@@ -12,7 +12,8 @@ const Projects = lazy(() => import('../pages/Projects'))
 const MyApplications = lazy(() => import('../pages/MyApplications'))
 const MyBids = lazy(() => import('../pages/MyBids'))
 const CandidateProfile = lazy(() => import('../pages/CandidateProfile'))
-const CandidateDashboard = lazy(() => import('../pages/CandidateDashboard'))
+const CandidateHome = lazy(() => import('../pages/CandidateHome'))
+const Community = lazy(() => import('../pages/Community'))
 const Connections = lazy(() => import('../pages/Connections'))
 const Circles = lazy(() => import('../pages/Circles'))
 const CircleDetails = lazy(() => import('../pages/CircleDetails'))
@@ -62,6 +63,8 @@ export default function AppRoutes() {
         <Route path="/projects" element={<ProtectedRoute allowedRoles={candidateRoles}><Projects /></ProtectedRoute>} />
         <Route path="/candidate/applications" element={<ProtectedRoute allowedRoles={candidateRoles}><MyApplications /></ProtectedRoute>} />
         <Route path="/candidate/bids" element={<ProtectedRoute allowedRoles={candidateRoles}><MyBids /></ProtectedRoute>} />
+        <Route path="/candidate/home" element={<ProtectedRoute allowedRoles={candidateRoles}><CandidateHome /></ProtectedRoute>} />
+        <Route path="/candidate/community" element={<ProtectedRoute allowedRoles={candidateRoles}><Community /></ProtectedRoute>} />
         <Route path="/candidate/profile" element={<ProtectedRoute allowedRoles={candidateRoles}><CandidateProfile /></ProtectedRoute>} />
         <Route path="/connections" element={<ProtectedRoute allowedRoles={candidateRoles}><Connections /></ProtectedRoute>} />
         <Route path="/circles" element={<ProtectedRoute allowedRoles={candidateRoles}><Circles /></ProtectedRoute>} />
@@ -71,7 +74,7 @@ export default function AppRoutes() {
         <Route path="/company/projects" element={<ProtectedRoute allowedRoles={companyRoles}><ManageProjects /></ProtectedRoute>} />
         <Route path="/company/applications" element={<ProtectedRoute allowedRoles={companyRoles}><CompanyApplications /></ProtectedRoute>} />
         <Route path="/company/bids" element={<ProtectedRoute allowedRoles={companyRoles}><CompanyBids /></ProtectedRoute>} />
-        <Route path="/candidate/dashboard" element={<ProtectedRoute allowedRoles={candidateRoles}><CandidateDashboard /></ProtectedRoute>} />
+        <Route path="/candidate/dashboard" element={<ProtectedRoute allowedRoles={candidateRoles}><Navigate to="/candidate/home" replace /></ProtectedRoute>} />
         <Route path="/company/dashboard" element={<ProtectedRoute allowedRoles={companyRoles}><CompanyDashboard /></ProtectedRoute>} />
         <Route path="/admin/dashboard" element={<ProtectedRoute allowedRoles={adminRoles}><AdminDashboard /></ProtectedRoute>} />
         <Route path="/admin/users" element={<ProtectedRoute allowedRoles={adminRoles}><AdminUsers /></ProtectedRoute>} />

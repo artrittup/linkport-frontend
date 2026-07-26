@@ -1,13 +1,10 @@
 export const ROLE_NAVIGATION = {
   candidate: [
-    { key: 'dashboard', label: 'Dashboard', path: '/candidate/dashboard' },
-    { key: 'profile', label: 'Profile', path: '/candidate/profile' },
-    { key: 'jobs', label: 'Jobs', path: '/jobs' },
-    { key: 'applications', label: 'My Applications', path: '/candidate/applications' },
+    { key: 'home', label: 'Home', path: '/candidate/home' },
     { key: 'projects', label: 'Projects', path: '/projects' },
-    { key: 'bids', label: 'My Bids', path: '/candidate/bids' },
-    { key: 'circles', label: 'Circles', path: '/circles' },
-    { key: 'logout', label: 'Logout', path: '/login' },
+    { key: 'opportunities', label: 'Opportunities', path: '/jobs' },
+    { key: 'community', label: 'Community', path: '/candidate/community' },
+    { key: 'profile', label: 'Profile', path: '/candidate/profile' },
   ],
   company: [
     { key: 'dashboard', label: 'Dashboard', path: '/company/dashboard' },

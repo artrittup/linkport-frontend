@@ -44,6 +44,7 @@ export default function CandidateLayout({ children, title }) {
   const isActive = (path) => (
     location.pathname === path
     || (path === '/candidate/projects' && location.pathname.startsWith('/candidate/projects/'))
+    || (path === '/candidate/opportunities' && location.pathname.startsWith('/candidate/opportunities/'))
     || (path === '/candidate/community' && location.pathname.startsWith('/circles'))
   )
 

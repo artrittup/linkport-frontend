@@ -15,6 +15,8 @@ const CandidateProfile = lazy(() => import('../pages/CandidateProfile'))
 const CandidateHome = lazy(() => import('../pages/CandidateHome'))
 const CandidateProjects = lazy(() => import('../pages/CandidateProjects'))
 const CandidateProjectDetails = lazy(() => import('../pages/CandidateProjectDetails'))
+const CandidateOpportunities = lazy(() => import('../pages/CandidateOpportunities'))
+const CandidateOpportunityDetails = lazy(() => import('../pages/CandidateOpportunityDetails'))
 const Community = lazy(() => import('../pages/Community'))
 const Connections = lazy(() => import('../pages/Connections'))
 const Circles = lazy(() => import('../pages/Circles'))
@@ -68,6 +70,8 @@ export default function AppRoutes() {
         <Route path="/candidate/home" element={<ProtectedRoute allowedRoles={candidateRoles}><CandidateHome /></ProtectedRoute>} />
         <Route path="/candidate/projects" element={<ProtectedRoute allowedRoles={candidateRoles}><CandidateProjects /></ProtectedRoute>} />
         <Route path="/candidate/projects/:projectId" element={<ProtectedRoute allowedRoles={candidateRoles}><CandidateProjectDetails /></ProtectedRoute>} />
+        <Route path="/candidate/opportunities" element={<ProtectedRoute allowedRoles={candidateRoles}><CandidateOpportunities /></ProtectedRoute>} />
+        <Route path="/candidate/opportunities/:opportunityId" element={<ProtectedRoute allowedRoles={candidateRoles}><CandidateOpportunityDetails /></ProtectedRoute>} />
         <Route path="/candidate/community" element={<ProtectedRoute allowedRoles={candidateRoles}><Community /></ProtectedRoute>} />
         <Route path="/candidate/profile" element={<ProtectedRoute allowedRoles={candidateRoles}><CandidateProfile /></ProtectedRoute>} />
         <Route path="/connections" element={<ProtectedRoute allowedRoles={candidateRoles}><Connections /></ProtectedRoute>} />

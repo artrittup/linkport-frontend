@@ -2,7 +2,7 @@ export const ROLE_NAVIGATION = {
   candidate: [
     { key: 'home', label: 'Home', path: '/candidate/home' },
     { key: 'projects', label: 'Projects', path: '/candidate/projects' },
-    { key: 'opportunities', label: 'Opportunities', path: '/jobs' },
+    { key: 'opportunities', label: 'Opportunities', path: '/candidate/opportunities' },
     { key: 'community', label: 'Community', path: '/candidate/community' },
     { key: 'profile', label: 'Profile', path: '/candidate/profile' },
   ],

@@ -27,7 +27,7 @@ const feedItems = [
     tags: ['JavaScript', 'UI', 'Internship'],
     meta: 'Prishtina · Apply by August 18',
     action: 'View opportunity',
-    path: '/jobs',
+    path: '/candidate/opportunities/internship-northstar-frontend',
   },
   {
     id: 3,

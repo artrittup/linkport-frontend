@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router'
-import useToast from '../hooks/useToast'
 
-const createActions = ['Share a project', 'Create a post', 'Find teammates']
+const createActions = [
+  { label: 'Share a project', path: '/candidate/create/project' },
+  { label: 'Create a post', path: '/candidate/create/post' },
+  { label: 'Find teammates', path: '/candidate/create/team' },
+]
 
 export default function CandidateCreateMenu({ onActionComplete }) {
   const navigate = useNavigate()
-  const { showToast } = useToast()
   const menuRef = useRef(null)
   const [isOpen, setIsOpen] = useState(false)
 
@@ -28,16 +30,10 @@ export default function CandidateCreateMenu({ onActionComplete }) {
     }
   }, [isOpen])
 
-  const handleAction = (label) => {
+  const handleAction = (path) => {
     setIsOpen(false)
     onActionComplete?.()
-
-    if (label === 'Share a project') {
-      navigate('/candidate/projects?share=true')
-      return
-    }
-
-    showToast(`${label} will be available in the next community update.`, 'info')
+    navigate(path)
   }
 
   return (
@@ -54,15 +50,15 @@ export default function CandidateCreateMenu({ onActionComplete }) {
 
       {isOpen && (
         <div role="menu" className="absolute bottom-full left-0 z-[70] mb-2 w-full min-w-52 rounded-xl border border-[#233554] bg-[#112240] p-1.5 shadow-2xl shadow-black/40">
-          {createActions.map((label) => (
+          {createActions.map((action) => (
             <button
-              key={label}
+              key={action.path}
               type="button"
               role="menuitem"
-              onClick={() => handleAction(label)}
+              onClick={() => handleAction(action.path)}
               className="block w-full rounded-lg px-3 py-2.5 text-left text-sm text-[#e6f1ff] transition-colors hover:bg-[#172a45] hover:text-[#64ffda] focus:outline-none focus-visible:bg-[#172a45] focus-visible:text-[#64ffda]"
             >
-              {label}
+              {action.label}
             </button>
           ))}
         </div>

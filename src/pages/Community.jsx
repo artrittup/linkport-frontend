@@ -7,6 +7,7 @@ import {
   communityInterests,
   communityMembers,
 } from '../data/mockCommunity'
+import { useLocalContent } from '../context/LocalContentContext'
 import { mockProjects, PROJECT_STATUSES } from '../data/mockProjects'
 import useToast from '../hooks/useToast'
 import CandidateLayout from '../layouts/CandidateLayout'
@@ -15,11 +16,14 @@ const discordUrl = 'https://discord.gg/8NemkkpJj'
 
 export default function Community() {
   const { showToast } = useToast()
+  const { projects: localProjects, teamRequests, storageError } = useLocalContent()
   const [selectedEvent, setSelectedEvent] = useState(null)
+  const [selectedRequest, setSelectedRequest] = useState(null)
   const [selectedInterest, setSelectedInterest] = useState('')
-  const teammateProjects = mockProjects
+  const teammateProjects = [...localProjects, ...mockProjects]
     .filter((project) => project.status === PROJECT_STATUSES.LOOKING_FOR_TEAM)
     .slice(0, 3)
+  const collaborationRequests = teamRequests.slice(0, 3)
 
   const visibleMembers = useMemo(
     () => selectedInterest
@@ -56,6 +60,10 @@ export default function Community() {
           </a>
         </section>
 
+        {storageError && (
+          <p role="status" className="mt-6 rounded-lg border border-[#facc15]/25 bg-[#facc15]/5 px-4 py-3 text-sm text-[#fde68a]">{storageError}</p>
+        )}
+
         <section className="mt-10 grid min-w-0 gap-3 sm:grid-cols-2 xl:grid-cols-4" aria-label="Community overview">
           {overview.map((item) => (
             <article key={item.label} className="min-w-0 rounded-xl border border-[#233554] bg-[#112240]/55 p-4">
@@ -64,6 +72,32 @@ export default function Community() {
             </article>
           ))}
         </section>
+
+        {collaborationRequests.length > 0 && (
+          <section id="collaboration" className="mt-12 min-w-0 scroll-mt-20">
+            <div className="flex flex-wrap items-end justify-between gap-3">
+              <div>
+                <h3 className="text-2xl font-semibold text-[#e6f1ff]">Collaboration requests</h3>
+                <p className="mt-2 text-sm text-[#8892b0]">Recent member requests for project teammates.</p>
+              </div>
+              <Link to="/candidate/create/team" className="text-sm font-medium text-[#64ffda] hover:underline">Create a request</Link>
+            </div>
+            <div className="mt-5 grid min-w-0 gap-4 md:grid-cols-2 xl:grid-cols-3">
+              {collaborationRequests.map((request) => (
+                <article key={request.id} className="flex min-w-0 flex-col rounded-2xl border border-[#233554] bg-[#112240]/65 p-5">
+                  <span className="font-mono text-[10px] font-semibold tracking-wide text-[#64ffda]">LOOKING FOR TEAM</span>
+                  <h4 className="mt-3 break-words text-lg font-semibold text-[#e6f1ff]">{request.title}</h4>
+                  <p className="mt-2 line-clamp-3 break-words text-sm leading-6 text-[#8892b0]">{request.context}</p>
+                  <p className="mt-4 text-xs text-[#a8b2d1]">{request.roles.join(' · ')}</p>
+                  <p className="mt-2 text-xs text-[#64748b]">{request.commitment} · {request.workStyle}</p>
+                  <div className="mt-auto pt-5">
+                    <Button variant="outline" size="sm" className="w-full" onClick={() => setSelectedRequest(request)}>View request</Button>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </section>
+        )}
 
         <section className="mt-12 min-w-0">
           <div>
@@ -230,6 +264,40 @@ export default function Community() {
             </dl>
             <p className="mt-5 text-sm leading-6 text-[#8892b0]">{selectedEvent.details}</p>
             <p className="mt-4 text-xs text-[#64748b]">Event registration will be shared through the LinkPort Discord community.</p>
+          </div>
+        )}
+      </Modal>
+
+      <Modal
+        isOpen={Boolean(selectedRequest)}
+        onClose={() => setSelectedRequest(null)}
+        eyebrow="Looking for team"
+        title={selectedRequest?.title ?? 'Collaboration request'}
+        maxWidth="max-w-xl"
+      >
+        {selectedRequest && (
+          <div>
+            <p className="whitespace-pre-line break-words text-sm leading-6 text-[#8892b0]">{selectedRequest.context}</p>
+            <dl className="mt-5 grid gap-4 rounded-xl border border-[#233554] bg-[#0a192f]/45 p-4 sm:grid-cols-2">
+              <div>
+                <dt className="text-xs uppercase tracking-wide text-[#64748b]">Roles needed</dt>
+                <dd className="mt-1 break-words text-sm text-[#e6f1ff]">{selectedRequest.roles.join(', ')}</dd>
+              </div>
+              <div>
+                <dt className="text-xs uppercase tracking-wide text-[#64748b]">Relevant skills</dt>
+                <dd className="mt-1 break-words text-sm text-[#e6f1ff]">{selectedRequest.skills.join(', ')}</dd>
+              </div>
+              <div>
+                <dt className="text-xs uppercase tracking-wide text-[#64748b]">Commitment</dt>
+                <dd className="mt-1 text-sm text-[#e6f1ff]">{selectedRequest.commitment}</dd>
+              </div>
+              <div>
+                <dt className="text-xs uppercase tracking-wide text-[#64748b]">Collaboration style</dt>
+                <dd className="mt-1 text-sm text-[#e6f1ff]">{selectedRequest.workStyle}</dd>
+              </div>
+            </dl>
+            {selectedRequest.preferredLocation && <p className="mt-4 text-sm text-[#a8b2d1]">Preferred location: {selectedRequest.preferredLocation}</p>}
+            <p className="mt-4 text-xs text-[#64748b]">Messaging and real join requests are not available yet.</p>
           </div>
         )}
       </Modal>

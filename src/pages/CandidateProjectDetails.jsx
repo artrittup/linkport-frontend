@@ -1,5 +1,6 @@
 import { Link, useParams } from 'react-router'
 import Button from '../components/Button'
+import { useLocalContent } from '../context/LocalContentContext'
 import { getMockProject, PROJECT_STATUSES } from '../data/mockProjects'
 import useToast from '../hooks/useToast'
 import CandidateLayout from '../layouts/CandidateLayout'
@@ -13,7 +14,8 @@ const statusClasses = {
 export default function CandidateProjectDetails() {
   const { projectId } = useParams()
   const { showToast } = useToast()
-  const project = getMockProject(projectId)
+  const { getProject } = useLocalContent()
+  const project = getProject(projectId) ?? getMockProject(projectId)
 
   if (!project) {
     return (
@@ -46,12 +48,12 @@ export default function CandidateProjectDetails() {
         ← Back to projects
       </Link>
 
-      <article className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
-        <div className="rounded-2xl border border-[#233554] bg-[#112240]/65 p-6 sm:p-8">
+      <article className="mt-6 grid min-w-0 gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
+        <div className="min-w-0 rounded-2xl border border-[#233554] bg-[#112240]/65 p-6 sm:p-8">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
               <p className="font-mono text-xs uppercase tracking-[0.14em] text-[#64ffda]">Member project</p>
-              <h2 className="mt-3 text-3xl font-bold tracking-tight text-[#e6f1ff]">{project.title}</h2>
+              <h2 className="mt-3 break-words text-3xl font-bold tracking-tight text-[#e6f1ff]">{project.title}</h2>
             </div>
             <span className={`rounded-full border px-3 py-1.5 font-mono text-[10px] font-semibold tracking-wide ${statusClasses[project.status]}`}>
               {project.status}
@@ -60,14 +62,14 @@ export default function CandidateProjectDetails() {
 
           <section className="mt-8">
             <h3 className="text-sm font-semibold uppercase tracking-wide text-[#a8b2d1]">About the project</h3>
-            <p className="mt-3 leading-7 text-[#8892b0]">{project.fullDescription}</p>
+            <p className="mt-3 whitespace-pre-line break-words leading-7 text-[#8892b0]">{project.fullDescription}</p>
           </section>
 
           <section className="mt-8">
             <h3 className="text-sm font-semibold uppercase tracking-wide text-[#a8b2d1]">Skills and technologies</h3>
             <div className="mt-3 flex flex-wrap gap-2">
               {project.skills.map((skill) => (
-                <span key={skill} className="rounded-md border border-[#233554] bg-[#0a192f]/45 px-3 py-1.5 text-sm text-[#a8b2d1]">{skill}</span>
+                <span key={skill} className="max-w-full break-words rounded-md border border-[#233554] bg-[#0a192f]/45 px-3 py-1.5 text-sm text-[#a8b2d1]">{skill}</span>
               ))}
             </div>
           </section>
@@ -76,13 +78,13 @@ export default function CandidateProjectDetails() {
             <section className="mt-8 rounded-xl border border-[#64ffda]/20 bg-[#64ffda]/5 p-5">
               <h3 className="text-sm font-semibold uppercase tracking-wide text-[#64ffda]">Looking for</h3>
               <ul className="mt-3 space-y-2 text-sm text-[#a8b2d1]">
-                {project.lookingForRoles.map((role) => <li key={role}>• {role}</li>)}
+                {project.lookingForRoles.map((role) => <li key={role} className="break-words">• {role}</li>)}
               </ul>
             </section>
           )}
         </div>
 
-        <aside className="h-fit rounded-2xl border border-[#233554] bg-[#112240]/65 p-6">
+        <aside className="h-fit min-w-0 rounded-2xl border border-[#233554] bg-[#112240]/65 p-6">
           <h3 className="text-sm font-semibold uppercase tracking-wide text-[#a8b2d1]">Created by</h3>
           <p className="mt-3 font-semibold text-[#e6f1ff]">{project.creator}</p>
           <p className="mt-1 text-sm text-[#8892b0]">{project.creatorHeadline}</p>

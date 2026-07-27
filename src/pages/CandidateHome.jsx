@@ -1,10 +1,11 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Link } from 'react-router'
+import { useLocalContent } from '../context/LocalContentContext'
 import CandidateLayout from '../layouts/CandidateLayout'
 
-const filters = ['All', 'Projects', 'Opportunities', 'Events']
+const filters = ['All', 'Projects', 'Posts', 'Team', 'Opportunities', 'Events']
 
-const feedItems = [
+const defaultFeedItems = [
   {
     id: 1,
     filter: 'Projects',
@@ -78,19 +79,64 @@ function FeedCard({ item }) {
       </div>
 
       <div className="mt-auto pt-6">
-        <Link
-          to={item.path}
-          className="inline-flex items-center justify-center rounded-lg border border-[#64ffda]/70 px-4 py-2 text-sm font-semibold text-[#64ffda] transition-colors hover:border-[#64ffda] hover:bg-[#64ffda]/10"
-        >
-          {item.action}
-        </Link>
+        {item.action && item.path && (
+          <Link
+            to={item.path}
+            className="inline-flex items-center justify-center rounded-lg border border-[#64ffda]/70 px-4 py-2 text-sm font-semibold text-[#64ffda] transition-colors hover:border-[#64ffda] hover:bg-[#64ffda]/10"
+          >
+            {item.action}
+          </Link>
+        )}
       </div>
     </article>
   )
 }
 
 export default function CandidateHome() {
+  const { projects, posts, teamRequests, storageError } = useLocalContent()
   const [activeFilter, setActiveFilter] = useState('All')
+  const localFeedItems = useMemo(() => [
+    ...projects.map((project) => ({
+      id: project.id,
+      filter: 'Projects',
+      type: 'PROJECT',
+      title: project.title,
+      description: project.description,
+      author: project.creator,
+      tags: project.skills,
+      meta: project.status,
+      action: 'View project',
+      path: `/candidate/projects/${project.id}`,
+      createdAt: project.createdAt,
+    })),
+    ...posts.map((post) => ({
+      id: post.id,
+      filter: 'Posts',
+      type: 'POST',
+      title: post.category,
+      description: post.text,
+      author: post.author,
+      tags: post.tags,
+      meta: new Date(post.createdAt).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }),
+      action: null,
+      path: null,
+      createdAt: post.createdAt,
+    })),
+    ...teamRequests.map((request) => ({
+      id: request.id,
+      filter: 'Team',
+      type: 'LOOKING FOR TEAM',
+      title: request.title,
+      description: request.context,
+      author: request.author,
+      tags: request.skills,
+      meta: `${request.roles.length} ${request.roles.length === 1 ? 'role' : 'roles'} · ${request.workStyle}`,
+      action: 'View request',
+      path: '/candidate/community#collaboration',
+      createdAt: request.createdAt,
+    })),
+  ].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)), [posts, projects, teamRequests])
+  const feedItems = [...localFeedItems, ...defaultFeedItems]
   const visibleItems = activeFilter === 'All'
     ? feedItems
     : feedItems.filter((item) => item.filter === activeFilter)
@@ -106,6 +152,10 @@ export default function CandidateHome() {
           Discover projects, opportunities, events, and people building their next step.
         </p>
       </section>
+
+      {storageError && (
+        <p role="status" className="mt-6 rounded-lg border border-[#facc15]/25 bg-[#facc15]/5 px-4 py-3 text-sm text-[#fde68a]">{storageError}</p>
+      )}
 
       <div className="mt-8 flex gap-2 overflow-x-auto pb-1" role="tablist" aria-label="Filter community feed">
         {filters.map((filter) => (

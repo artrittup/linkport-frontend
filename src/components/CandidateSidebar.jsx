@@ -32,7 +32,11 @@ function LogoutIcon() {
 
 function isNavigationItemActive(item, pathname) {
   if (pathname === item.path) return true
-  if (item.key === 'projects') return pathname.startsWith('/candidate/projects/')
+  if (item.key === 'home') return pathname === '/candidate/create/post'
+  if (item.key === 'projects') {
+    return pathname.startsWith('/candidate/projects/')
+      || pathname === '/candidate/create/project'
+  }
   if (item.key === 'opportunities') {
     return pathname.startsWith('/candidate/opportunities/')
       || pathname === '/candidate/applications'
@@ -40,7 +44,10 @@ function isNavigationItemActive(item, pathname) {
       || pathname === '/jobs'
       || pathname === '/projects'
   }
-  if (item.key === 'community') return pathname.startsWith('/circles')
+  if (item.key === 'community') {
+    return pathname.startsWith('/circles')
+      || pathname === '/candidate/create/team'
+  }
   return false
 }
 

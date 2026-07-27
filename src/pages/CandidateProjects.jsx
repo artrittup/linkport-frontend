@@ -1,8 +1,8 @@
 import { useMemo, useState } from 'react'
-import { useSearchParams } from 'react-router'
+import { Link } from 'react-router'
 import EmptyState from '../components/EmptyState'
 import ProjectShowcaseCard from '../components/ProjectShowcaseCard'
-import ShareProjectModal from '../components/ShareProjectModal'
+import { useLocalContent } from '../context/LocalContentContext'
 import { mockProjects, PROJECT_STATUSES } from '../data/mockProjects'
 import CandidateLayout from '../layouts/CandidateLayout'
 
@@ -14,15 +14,14 @@ const filters = [
 ]
 
 export default function CandidateProjects() {
-  const [searchParams, setSearchParams] = useSearchParams()
+  const { projects: localProjects, storageError } = useLocalContent()
   const [search, setSearch] = useState('')
   const [activeFilter, setActiveFilter] = useState('ALL')
-  const isShareOpen = searchParams.get('share') === 'true'
 
   const visibleProjects = useMemo(() => {
     const query = search.trim().toLowerCase()
 
-    return mockProjects.filter((project) => {
+    return [...localProjects, ...mockProjects].filter((project) => {
       const matchesFilter = activeFilter === 'ALL' || project.status === activeFilter
       const matchesSearch = !query || [
         project.title,
@@ -35,10 +34,7 @@ export default function CandidateProjects() {
 
       return matchesFilter && matchesSearch
     })
-  }, [activeFilter, search])
-
-  const openShareModal = () => setSearchParams({ share: 'true' })
-  const closeShareModal = () => setSearchParams({})
+  }, [activeFilter, localProjects, search])
   const clearFilters = () => {
     setSearch('')
     setActiveFilter('ALL')
@@ -57,14 +53,17 @@ export default function CandidateProjects() {
             Discover work from LinkPort members, share what you are building, and find projects looking for collaborators.
           </p>
         </div>
-        <button
-          type="button"
-          onClick={openShareModal}
+        <Link
+          to="/candidate/create/project"
           className="inline-flex shrink-0 items-center justify-center rounded-lg border border-[#64ffda] bg-[#64ffda] px-5 py-2.5 text-sm font-semibold text-[#071426] transition-colors hover:bg-[#7dffe1]"
         >
           Share a project
-        </button>
+        </Link>
       </section>
+
+      {storageError && (
+        <p role="status" className="mt-6 rounded-lg border border-[#facc15]/25 bg-[#facc15]/5 px-4 py-3 text-sm text-[#fde68a]">{storageError}</p>
+      )}
 
       <section className="mt-8 min-w-0 max-w-full" aria-label="Find projects">
         <label htmlFor="showcase-search" className="sr-only">Search projects</label>
@@ -116,8 +115,6 @@ export default function CandidateProjects() {
           />
         )}
       </section>
-
-      <ShareProjectModal isOpen={isShareOpen} onClose={closeShareModal} />
     </CandidateLayout>
   )
 }

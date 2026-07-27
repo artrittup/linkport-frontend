@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router'
 import { getProjectById, getProjects } from '../api/projectsApi'
+import ActivityToastMessage from '../components/ActivityToastMessage'
 import Button from '../components/Button'
 import Card from '../components/Card'
 import EmptyState from '../components/EmptyState'
@@ -165,7 +166,7 @@ export default function Projects() {
 
   const handleBidSuccess = (response) => {
     setBidProject(null)
-    showToast(response.message ?? 'Bid submitted successfully.', 'success')
+    showToast(<ActivityToastMessage message={response.message ?? 'Proposal submitted successfully.'} tab="proposals" />, 'success', 6000)
   }
 
   return (

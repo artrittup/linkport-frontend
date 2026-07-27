@@ -5,6 +5,7 @@ import { getProjects } from '../api/projectsApi'
 import EmptyState from '../components/EmptyState'
 import LoadingSpinner from '../components/LoadingSpinner'
 import OpportunityCard from '../components/OpportunityCard'
+import { getCandidateActivityPath } from '../config/candidateActivity'
 import { mockOpportunities } from '../data/mockOpportunities'
 import { jobToOpportunity, projectToOpportunity } from '../data/opportunityAdapters'
 import CandidateLayout from '../layouts/CandidateLayout'
@@ -100,8 +101,8 @@ export default function CandidateOpportunities() {
           </p>
         </div>
         <div className="flex shrink-0 flex-wrap gap-4 text-sm">
-          <Link to="/candidate/applications" className="text-[#a8b2d1] hover:text-[#64ffda]">My applications</Link>
-          <Link to="/candidate/bids" className="text-[#a8b2d1] hover:text-[#64ffda]">My proposals</Link>
+          <Link to={getCandidateActivityPath('applications')} className="text-[#a8b2d1] hover:text-[#64ffda]">My applications</Link>
+          <Link to={getCandidateActivityPath('proposals')} className="text-[#a8b2d1] hover:text-[#64ffda]">My proposals</Link>
         </div>
       </section>
 

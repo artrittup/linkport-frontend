@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router'
+import ActivityToastMessage from '../components/ActivityToastMessage'
 import Button from '../components/Button'
 import Card from '../components/Card'
 import SkillsInput from '../components/SkillsInput'
@@ -112,7 +113,7 @@ function ProjectForm({ onCancel }) {
       repositoryUrl: form.repositoryUrl.trim(),
       liveUrl: form.liveUrl.trim(),
     })
-    showToast('Project created and added to the showcase.', 'success')
+    showToast(<ActivityToastMessage message="Project created and added to the showcase." tab="content" />, 'success', 6000)
     navigate(`/candidate/projects/${project.id}`, { replace: true })
   }
 
@@ -205,7 +206,7 @@ function PostForm({ onCancel }) {
       tags: splitList(form.tags),
       author: user?.name || 'LinkPort Member',
     })
-    showToast('Post published to your Home feed.', 'success')
+    showToast(<ActivityToastMessage message="Post published to your Home feed." tab="content" />, 'success', 6000)
     navigate('/candidate/home', { replace: true })
   }
 
@@ -290,7 +291,7 @@ function TeamRequestForm({ onCancel }) {
       preferredLocation: form.preferredLocation.trim(),
       author: user?.name || 'LinkPort Member',
     })
-    showToast('Collaboration request published.', 'success')
+    showToast(<ActivityToastMessage message="Collaboration request published." tab="content" />, 'success', 6000)
     navigate('/candidate/community#collaboration', { replace: true })
   }
 

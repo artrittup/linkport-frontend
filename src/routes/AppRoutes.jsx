@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router'
 import LoadingSpinner from '../components/LoadingSpinner'
+import { getCandidateActivityPath } from '../config/candidateActivity'
 import ProtectedRoute from './ProtectedRoute'
 
 const LandingPage = lazy(() => import('../pages/LandingPage'))
@@ -9,9 +10,8 @@ const Register = lazy(() => import('../pages/Register'))
 const InfoPage = lazy(() => import('../pages/InfoPage'))
 const Jobs = lazy(() => import('../pages/Jobs'))
 const Projects = lazy(() => import('../pages/Projects'))
-const MyApplications = lazy(() => import('../pages/MyApplications'))
-const MyBids = lazy(() => import('../pages/MyBids'))
 const CandidateProfile = lazy(() => import('../pages/CandidateProfile'))
+const CandidateActivity = lazy(() => import('../pages/CandidateActivity'))
 const CandidateHome = lazy(() => import('../pages/CandidateHome'))
 const CandidateProjects = lazy(() => import('../pages/CandidateProjects'))
 const CandidateProjectDetails = lazy(() => import('../pages/CandidateProjectDetails'))
@@ -70,8 +70,8 @@ export default function AppRoutes() {
         <Route path="/notifications" element={<ProtectedRoute allowedRoles={authenticatedRoles}><Notifications /></ProtectedRoute>} />
         <Route path="/jobs" element={<ProtectedRoute allowedRoles={candidateRoles}><Jobs /></ProtectedRoute>} />
         <Route path="/projects" element={<ProtectedRoute allowedRoles={candidateRoles}><Projects /></ProtectedRoute>} />
-        <Route path="/candidate/applications" element={<ProtectedRoute allowedRoles={candidateRoles}><MyApplications /></ProtectedRoute>} />
-        <Route path="/candidate/bids" element={<ProtectedRoute allowedRoles={candidateRoles}><MyBids /></ProtectedRoute>} />
+        <Route path="/candidate/applications" element={<ProtectedRoute allowedRoles={candidateRoles}><Navigate to={getCandidateActivityPath('applications')} replace /></ProtectedRoute>} />
+        <Route path="/candidate/bids" element={<ProtectedRoute allowedRoles={candidateRoles}><Navigate to={getCandidateActivityPath('proposals')} replace /></ProtectedRoute>} />
         <Route path="/candidate/home" element={<ProtectedRoute allowedRoles={candidateRoles}><CandidateHome /></ProtectedRoute>} />
         <Route path="/candidate/projects" element={<ProtectedRoute allowedRoles={candidateRoles}><CandidateProjects /></ProtectedRoute>} />
         <Route path="/candidate/projects/:projectId" element={<ProtectedRoute allowedRoles={candidateRoles}><CandidateProjectDetails /></ProtectedRoute>} />
@@ -86,6 +86,7 @@ export default function AppRoutes() {
         <Route path="/candidate/community/events" element={<ProtectedRoute allowedRoles={candidateRoles}><CandidateEvents /></ProtectedRoute>} />
         <Route path="/candidate/community/events/:eventId" element={<ProtectedRoute allowedRoles={candidateRoles}><CandidateEventDetails /></ProtectedRoute>} />
         <Route path="/candidate/profile" element={<ProtectedRoute allowedRoles={candidateRoles}><CandidateProfile /></ProtectedRoute>} />
+        <Route path="/candidate/activity" element={<ProtectedRoute allowedRoles={candidateRoles}><CandidateActivity /></ProtectedRoute>} />
         <Route path="/connections" element={<ProtectedRoute allowedRoles={candidateRoles}><Connections /></ProtectedRoute>} />
         <Route path="/circles" element={<ProtectedRoute allowedRoles={candidateRoles}><Circles /></ProtectedRoute>} />
         <Route path="/circles/:id" element={<ProtectedRoute allowedRoles={candidateRoles}><CircleDetails /></ProtectedRoute>} />

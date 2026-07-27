@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router'
 import { getJobById, getJobs } from '../api/jobsApi'
+import ActivityToastMessage from '../components/ActivityToastMessage'
 import ApplyJobModal from '../components/ApplyJobModal'
 import Button from '../components/Button'
 import Card from '../components/Card'
@@ -128,7 +129,7 @@ export default function Jobs() {
 
   const handleApplicationSuccess = (response) => {
     setApplicationJob(null)
-    showToast(response.message ?? 'Application submitted successfully.', 'success')
+    showToast(<ActivityToastMessage message={response.message ?? 'Application submitted successfully.'} tab="applications" />, 'success', 6000)
   }
 
   return (

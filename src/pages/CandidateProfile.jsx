@@ -12,6 +12,7 @@ import Card from '../components/Card'
 import LoadingSpinner from '../components/LoadingSpinner'
 import ProjectShowcaseCard from '../components/ProjectShowcaseCard'
 import SkillsInput from '../components/SkillsInput'
+import { getCandidateActivityPath } from '../config/candidateActivity'
 import { useAuth } from '../context/AuthContext'
 import { mockProjects } from '../data/mockProjects'
 import useToast from '../hooks/useToast'
@@ -444,11 +445,14 @@ export default function CandidateProfile() {
         </div>
 
         <ProfileSection title="Activity" description="Quick links to your private Candidate activity.">
-          <div className="grid min-w-0 gap-3 sm:grid-cols-3">
+          <Link to={getCandidateActivityPath()} className="inline-flex w-full items-center justify-center rounded-xl border border-[#64ffda] bg-[#64ffda] px-5 py-3 text-sm font-semibold text-[#071426] transition-colors hover:bg-[#7dffe1]">
+            View all activity
+          </Link>
+          <div className="mt-3 grid min-w-0 gap-3 sm:grid-cols-3">
             {[
-              { label: 'My applications', path: '/candidate/applications' },
-              { label: 'My proposals', path: '/candidate/bids' },
-              { label: 'Shared projects', path: '/candidate/projects' },
+              { label: 'Applications', path: getCandidateActivityPath('applications') },
+              { label: 'Proposals', path: getCandidateActivityPath('proposals') },
+              { label: 'Shared content', path: getCandidateActivityPath('content') },
             ].map((item) => (
               <Link key={item.path} to={item.path} className="rounded-xl border border-[#233554] bg-[#0a192f]/45 px-4 py-3 text-sm font-medium text-[#a8b2d1] transition-colors hover:border-[#64ffda]/40 hover:text-[#64ffda]">
                 {item.label}

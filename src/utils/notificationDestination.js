@@ -1,3 +1,5 @@
+import { getCandidateActivityPath } from '../config/candidateActivity'
+
 export function getNotificationDestination(notification) {
   const data = notification?.data ?? {}
 
@@ -6,9 +8,9 @@ export function getNotificationDestination(notification) {
   if (notification?.type === 'circle_invitation') return '/circles?tab=invitations'
   if (notification?.type?.startsWith('circle_') && data.circle_id) return `/circles/${data.circle_id}`
   if (notification?.type === 'job_application_received') return '/company/applications'
-  if (notification?.type === 'job_application_status') return '/candidate/applications'
+  if (notification?.type === 'job_application_status') return getCandidateActivityPath('applications')
   if (notification?.type === 'project_bid_received') return '/company/bids'
-  if (notification?.type === 'project_bid_status') return '/candidate/bids'
+  if (notification?.type === 'project_bid_status') return getCandidateActivityPath('proposals')
 
   return '/notifications'
 }

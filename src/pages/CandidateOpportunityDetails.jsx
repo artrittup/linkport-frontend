@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router'
 import { getJobById } from '../api/jobsApi'
 import { getProjectById } from '../api/projectsApi'
+import ActivityToastMessage from '../components/ActivityToastMessage'
 import ApplyJobModal from '../components/ApplyJobModal'
 import Button from '../components/Button'
 import LoadingSpinner from '../components/LoadingSpinner'
@@ -180,7 +181,7 @@ export default function CandidateOpportunityDetails() {
           onClose={() => setApplicationJob(null)}
           onSuccess={(response) => {
             setApplicationJob(null)
-            showToast(response.message ?? 'Application submitted successfully.', 'success')
+            showToast(<ActivityToastMessage message={response.message ?? 'Application submitted successfully.'} tab="applications" />, 'success', 6000)
           }}
         />
       )}
@@ -191,7 +192,7 @@ export default function CandidateOpportunityDetails() {
           onClose={() => setBidProject(null)}
           onSuccess={(response) => {
             setBidProject(null)
-            showToast(response.message ?? 'Proposal submitted successfully.', 'success')
+            showToast(<ActivityToastMessage message={response.message ?? 'Proposal submitted successfully.'} tab="proposals" />, 'success', 6000)
           }}
         />
       )}

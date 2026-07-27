@@ -1,21 +1,20 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router'
 import Button from '../components/Button'
+import MemberCard from '../components/MemberCard'
 import Modal from '../components/Modal'
 import {
   communityEvents,
   communityInterests,
-  communityMembers,
 } from '../data/mockCommunity'
 import { useLocalContent } from '../context/LocalContentContext'
+import { mockMembers } from '../data/mockMembers'
 import { mockProjects, PROJECT_STATUSES } from '../data/mockProjects'
-import useToast from '../hooks/useToast'
 import CandidateLayout from '../layouts/CandidateLayout'
 
 const discordUrl = 'https://discord.gg/8NemkkpJj'
 
 export default function Community() {
-  const { showToast } = useToast()
   const { projects: localProjects, teamRequests, storageError } = useLocalContent()
   const [selectedEvent, setSelectedEvent] = useState(null)
   const [selectedRequest, setSelectedRequest] = useState(null)
@@ -25,12 +24,15 @@ export default function Community() {
     .slice(0, 3)
   const collaborationRequests = teamRequests.slice(0, 3)
 
-  const visibleMembers = useMemo(
-    () => selectedInterest
-      ? communityMembers.filter((member) => member.interests.includes(selectedInterest))
-      : communityMembers,
-    [selectedInterest],
-  )
+  const visibleMembers = useMemo(() => {
+    const directoryInterest = communityInterests
+      .find((interest) => interest.name === selectedInterest)
+      ?.directoryInterest
+
+    return mockMembers
+      .filter((member) => !directoryInterest || member.interests.includes(directoryInterest))
+      .slice(0, 6)
+  }, [selectedInterest])
 
   const overview = [
     { label: 'Active members', value: '240+' },
@@ -160,45 +162,19 @@ export default function Community() {
                 {selectedInterest ? `Members interested in ${selectedInterest}.` : 'A few people building and learning on LinkPort.'}
               </p>
             </div>
-            {selectedInterest && (
-              <button type="button" onClick={() => setSelectedInterest('')} className="text-sm text-[#64ffda] hover:underline">
-                Show all members
-              </button>
-            )}
+            <div className="flex flex-wrap items-center gap-4">
+              {selectedInterest && (
+                <button type="button" onClick={() => setSelectedInterest('')} className="text-sm text-[#a8b2d1] hover:text-[#64ffda] hover:underline">
+                  Show all
+                </button>
+              )}
+              <Link to="/candidate/community/members" className="text-sm font-medium text-[#64ffda] hover:underline">
+                View all members
+              </Link>
+            </div>
           </div>
           <div className="mt-5 grid min-w-0 gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {visibleMembers.map((member) => {
-              const initials = member.name.split(' ').map((part) => part[0]).slice(0, 2).join('')
-              return (
-                <article key={member.id} className="flex min-w-0 flex-col rounded-2xl border border-[#233554] bg-[#112240]/65 p-5">
-                  <div className="flex min-w-0 items-start gap-3">
-                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-[#64ffda]/30 bg-[#0a192f] font-mono text-xs font-semibold text-[#64ffda]">
-                      {initials}
-                    </div>
-                    <div className="min-w-0">
-                      <h4 className="truncate font-semibold text-[#e6f1ff]">{member.name}</h4>
-                      <p className="mt-1 break-words text-sm text-[#a8b2d1]">{member.headline}</p>
-                      <p className="mt-1 break-words text-xs text-[#64748b]">{member.organization}</p>
-                    </div>
-                  </div>
-                  <div className="mt-4 flex min-w-0 flex-wrap gap-2">
-                    {member.skills.map((skill) => (
-                      <span key={skill} className="max-w-full break-words rounded-md border border-[#233554] px-2.5 py-1 text-xs text-[#8892b0]">{skill}</span>
-                    ))}
-                  </div>
-                  <div className="mt-auto pt-5">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="w-full"
-                      onClick={() => showToast('Public profiles for preview members will be connected later.', 'info')}
-                    >
-                      View profile
-                    </Button>
-                  </div>
-                </article>
-              )
-            })}
+            {visibleMembers.map((member) => <MemberCard key={member.id} member={member} />)}
           </div>
         </section>
 

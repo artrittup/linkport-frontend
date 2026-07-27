@@ -45,7 +45,8 @@ function isNavigationItemActive(item, pathname) {
       || pathname === '/projects'
   }
   if (item.key === 'community') {
-    return pathname.startsWith('/circles')
+    return pathname.startsWith('/candidate/community/')
+      || pathname.startsWith('/circles')
       || pathname === '/candidate/create/team'
   }
   return false

@@ -32,61 +32,10 @@ export const communityEvents = [
 ]
 
 export const communityInterests = [
-  { name: 'Web Development', memberCount: 86 },
-  { name: 'Mobile Development', memberCount: 54 },
-  { name: 'AI and Data', memberCount: 63 },
-  { name: 'Embedded Systems', memberCount: 31 },
-  { name: 'UI/UX Design', memberCount: 48 },
-  { name: 'Business and Startups', memberCount: 42 },
-]
-
-export const communityMembers = [
-  {
-    id: 'arta-k',
-    name: 'Arta Krasniqi',
-    headline: 'Frontend developer',
-    organization: 'University of Prishtina',
-    skills: ['React', 'Accessibility', 'Data Visualization'],
-    interests: ['Web Development', 'UI/UX Design'],
-  },
-  {
-    id: 'leon-m',
-    name: 'Leon Morina',
-    headline: 'Mobile developer',
-    organization: 'RIT Kosovo',
-    skills: ['React Native', 'Node.js', 'Product'],
-    interests: ['Mobile Development', 'Business and Startups'],
-  },
-  {
-    id: 'rina-z',
-    name: 'Rina Zeneli',
-    headline: 'Computer science researcher',
-    organization: 'University of Prizren',
-    skills: ['Python', 'NLP', 'Research'],
-    interests: ['AI and Data', 'Web Development'],
-  },
-  {
-    id: 'bleron-d',
-    name: 'Bleron Dema',
-    headline: 'Mechatronics student',
-    organization: 'UBT',
-    skills: ['Arduino', 'IoT', 'CAD'],
-    interests: ['Embedded Systems', 'AI and Data'],
-  },
-  {
-    id: 'era-h',
-    name: 'Era Halili',
-    headline: 'UX/UI designer',
-    organization: 'AAB College',
-    skills: ['Figma', 'User Research', 'Service Design'],
-    interests: ['UI/UX Design', 'Business and Startups'],
-  },
-  {
-    id: 'luan-h',
-    name: 'Luan Hyseni',
-    headline: 'Full-stack developer',
-    organization: 'Independent',
-    skills: ['Laravel', 'React', 'OpenStreetMap'],
-    interests: ['Web Development', 'Business and Startups'],
-  },
+  { name: 'Web Development', memberCount: 86, directoryInterest: 'Web Development' },
+  { name: 'Mobile Development', memberCount: 54, directoryInterest: 'Mobile' },
+  { name: 'AI and Data', memberCount: 63, directoryInterest: 'AI and Data' },
+  { name: 'Embedded Systems', memberCount: 31, directoryInterest: 'Embedded Systems' },
+  { name: 'UI/UX Design', memberCount: 48, directoryInterest: 'Design' },
+  { name: 'Business and Startups', memberCount: 42, directoryInterest: 'Business' },
 ]

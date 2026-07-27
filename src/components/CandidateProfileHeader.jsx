@@ -41,6 +41,11 @@ export default function CandidateProfileHeader({ profile, isOwner = false, onEdi
             <div className="min-w-0">
               <h2 className="break-words text-2xl font-bold text-[#e6f1ff] sm:text-3xl">{displayName}</h2>
               {profile.professionalTitle && <p className="mt-1 break-words text-[#64ffda]">{profile.professionalTitle}</p>}
+              {profile.collaborationStatus && (
+                <span className="mt-3 inline-flex max-w-full break-words rounded-full border border-[#64ffda]/25 bg-[#64ffda]/5 px-3 py-1 text-xs font-medium text-[#64ffda]">
+                  {profile.collaborationStatus}
+                </span>
+              )}
               {(organization || profile.location) && (
                 <p className="mt-2 break-words text-sm text-[#8892b0]">
                   {[organization, profile.location].filter(Boolean).join(' · ')}

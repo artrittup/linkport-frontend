@@ -9,6 +9,7 @@ import {
   CANDIDATE_ACTIVITY_TABS,
   normalizeCandidateActivityTab,
 } from '../config/candidateActivity'
+import { useAuth } from '../context/AuthContext'
 import { useLocalContent } from '../context/LocalContentContext'
 import { getCandidateContentItems } from '../data/candidateActivityAdapters'
 import { mockEvents } from '../data/mockEvents'
@@ -16,6 +17,7 @@ import {
   useCandidateApplications,
   useCandidateProposals,
 } from '../hooks/useCandidateActivityData'
+import useCommunityProjects from '../hooks/useCommunityProjects'
 import CandidateLayout from '../layouts/CandidateLayout'
 
 export default function CandidateActivity() {
@@ -24,14 +26,23 @@ export default function CandidateActivity() {
   const activeTab = normalizeCandidateActivityTab(requestedTab)
   const applications = useCandidateApplications()
   const proposals = useCandidateProposals()
+  const { user } = useAuth()
   const {
-    projects,
     posts,
     teamRequests,
     attendingEventIds,
     setEventAttendance,
     storageError,
   } = useLocalContent()
+  const {
+    projects,
+    isLoading: projectsLoading,
+    error: projectsError,
+  } = useCommunityProjects({
+    userId: user?.id,
+    perPage: 50,
+    enabled: Boolean(user?.id),
+  })
 
   const contentItems = useMemo(
     () => getCandidateContentItems({ projects, posts, teamRequests }),
@@ -66,6 +77,14 @@ export default function CandidateActivity() {
 
         {storageError && (
           <p role="status" className="mt-6 rounded-lg border border-[#facc15]/25 bg-[#facc15]/5 px-4 py-3 text-sm text-[#fde68a]">{storageError}</p>
+        )}
+        {projectsError && (
+          <p role="status" className="mt-4 rounded-lg border border-[#233554] bg-[#112240]/45 px-4 py-3 text-sm text-[#8892b0]">
+            Shared projects are temporarily unavailable. Your posts and teammate requests remain available.
+          </p>
+        )}
+        {projectsLoading && (
+          <p role="status" className="mt-4 text-sm text-[#64748b]">Loading shared projects...</p>
         )}
 
         <nav className="mt-8 flex min-w-0 max-w-full gap-2 overflow-x-auto border-b border-[#233554] pb-3" aria-label="Activity sections">

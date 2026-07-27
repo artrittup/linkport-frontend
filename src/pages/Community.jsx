@@ -8,18 +8,21 @@ import { communityInterests } from '../data/mockCommunity'
 import { useLocalContent } from '../context/LocalContentContext'
 import { mockEvents } from '../data/mockEvents'
 import { mockMembers } from '../data/mockMembers'
-import { mockProjects, PROJECT_STATUSES } from '../data/mockProjects'
+import useCommunityProjects from '../hooks/useCommunityProjects'
 import CandidateLayout from '../layouts/CandidateLayout'
 
 const discordUrl = 'https://discord.gg/8NemkkpJj'
 
 export default function Community() {
-  const { attendingEventIds, projects: localProjects, teamRequests, storageError } = useLocalContent()
+  const { attendingEventIds, teamRequests, storageError } = useLocalContent()
+  const {
+    projects: teammateProjects,
+    isLoading: projectsLoading,
+    error: projectsError,
+    retry: retryProjects,
+  } = useCommunityProjects({ lookingForTeammates: 'true', perPage: 3 })
   const [selectedRequest, setSelectedRequest] = useState(null)
   const [selectedInterest, setSelectedInterest] = useState('')
-  const teammateProjects = [...localProjects, ...mockProjects]
-    .filter((project) => project.status === PROJECT_STATUSES.LOOKING_FOR_TEAM)
-    .slice(0, 3)
   const collaborationRequests = teamRequests.slice(0, 3)
 
   const visibleMembers = useMemo(() => {
@@ -167,8 +170,18 @@ export default function Community() {
         <section className="mt-12 min-w-0">
           <h3 className="text-2xl font-semibold text-[#e6f1ff]">Projects looking for teammates</h3>
           <p className="mt-2 text-sm text-[#8892b0]">Join a member project that needs your skills.</p>
-          <div className="mt-5 grid min-w-0 gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {teammateProjects.map((project) => (
+          {projectsLoading ? (
+            <p className="mt-5 rounded-xl border border-[#233554] bg-[#112240]/45 p-5 text-sm text-[#8892b0]">Loading projects looking for teammates...</p>
+          ) : projectsError ? (
+            <div className="mt-5 rounded-xl border border-[#233554] bg-[#112240]/45 p-5">
+              <p className="text-sm text-[#8892b0]">Projects are temporarily unavailable. The rest of Community remains available.</p>
+              <button type="button" onClick={retryProjects} className="mt-3 text-sm font-medium text-[#64ffda] hover:underline">Try again</button>
+            </div>
+          ) : teammateProjects.length === 0 ? (
+            <p className="mt-5 rounded-xl border border-[#233554] bg-[#112240]/45 p-5 text-sm text-[#8892b0]">No community projects are currently looking for teammates.</p>
+          ) : (
+            <div className="mt-5 grid min-w-0 gap-4 md:grid-cols-2 xl:grid-cols-3">
+              {teammateProjects.map((project) => (
               <article key={project.id} className="flex min-w-0 flex-col rounded-2xl border border-[#233554] bg-[#112240]/65 p-5">
                 <span className="font-mono text-[10px] font-semibold tracking-wide text-[#64ffda]">LOOKING FOR TEAM</span>
                 <h4 className="mt-3 break-words text-lg font-semibold text-[#e6f1ff]">{project.title}</h4>
@@ -183,8 +196,9 @@ export default function Community() {
                   </Link>
                 </div>
               </article>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </section>
 
         <section className="mt-12 rounded-2xl border border-[#64ffda]/20 bg-[#64ffda]/5 p-6 sm:flex sm:items-center sm:justify-between sm:gap-8 sm:p-8">

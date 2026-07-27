@@ -1,25 +1,15 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router'
 import { useLocalContent } from '../context/LocalContentContext'
+import { getCommunityProjectStatusLabel } from '../data/communityProjectMapper'
 import { formatEventDate, formatEventTime, mockEvents } from '../data/mockEvents'
+import useCommunityProjects from '../hooks/useCommunityProjects'
 import CandidateLayout from '../layouts/CandidateLayout'
 
 const filters = ['All', 'Projects', 'Posts', 'Team', 'Opportunities', 'Events']
 const featuredEvent = mockEvents[0]
 
 const defaultFeedItems = [
-  {
-    id: 1,
-    filter: 'Projects',
-    type: 'PROJECT',
-    title: 'Campus Sustainability Tracker',
-    description: 'A student-led dashboard helping universities measure waste, energy use, and practical sustainability goals.',
-    author: 'Arta K. and GreenLab',
-    tags: ['React', 'Data', 'Sustainability'],
-    meta: 'Remote collaboration',
-    action: 'View project',
-    path: '/candidate/projects',
-  },
   {
     id: 2,
     filter: 'Opportunities',
@@ -44,18 +34,6 @@ const defaultFeedItems = [
     meta: `${formatEventDate(featuredEvent.date)} · ${formatEventTime(featuredEvent)} · ${featuredEvent.location}`,
     action: 'View event',
     path: `/candidate/community/events/${featuredEvent.id}`,
-  },
-  {
-    id: 4,
-    filter: 'Team',
-    type: 'LOOKING FOR TEAM',
-    title: 'Looking for teammates for a study planner',
-    description: 'A simple mobile-first planner for students. We are looking for one designer and one backend developer.',
-    author: 'Leon M.',
-    tags: ['Product Design', 'Laravel', 'Students'],
-    meta: '2 open teammate roles',
-    action: 'Join project',
-    path: '/candidate/projects/focusmate-mobile',
   },
 ]
 
@@ -99,18 +77,22 @@ function FeedCard({ item }) {
 }
 
 export default function CandidateHome() {
-  const { attendingEventIds, projects, posts, teamRequests, storageError } = useLocalContent()
+  const { attendingEventIds, posts, teamRequests, storageError } = useLocalContent()
+  const {
+    projects: communityProjects,
+    error: projectsError,
+  } = useCommunityProjects({ perPage: 3 })
   const [activeFilter, setActiveFilter] = useState('All')
   const localFeedItems = useMemo(() => [
-    ...projects.map((project) => ({
-      id: project.id,
+    ...communityProjects.map((project) => ({
+      id: `project-${project.id}`,
       filter: 'Projects',
       type: 'PROJECT',
       title: project.title,
       description: project.description,
       author: project.creator,
       tags: project.skills,
-      meta: project.status,
+      meta: getCommunityProjectStatusLabel(project.status),
       action: 'View project',
       path: `/candidate/projects/${project.id}`,
       createdAt: project.createdAt,
@@ -141,7 +123,7 @@ export default function CandidateHome() {
       path: '/candidate/community#collaboration',
       createdAt: request.createdAt,
     })),
-  ].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)), [posts, projects, teamRequests])
+  ].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)), [communityProjects, posts, teamRequests])
   const feedItems = [
     ...localFeedItems,
     ...defaultFeedItems.map((item) => ({
@@ -167,6 +149,11 @@ export default function CandidateHome() {
 
       {storageError && (
         <p role="status" className="mt-6 rounded-lg border border-[#facc15]/25 bg-[#facc15]/5 px-4 py-3 text-sm text-[#fde68a]">{storageError}</p>
+      )}
+      {projectsError && (
+        <p role="status" className="mt-4 rounded-lg border border-[#233554] bg-[#112240]/45 px-4 py-3 text-sm text-[#8892b0]">
+          Community projects are temporarily unavailable. Other Home updates are still available.
+        </p>
       )}
 
       <div className="mt-8 flex gap-2 overflow-x-auto pb-1" role="tablist" aria-label="Filter community feed">

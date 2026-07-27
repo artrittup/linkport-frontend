@@ -1,3 +1,5 @@
+import { getCommunityProjectStatusLabel } from './communityProjectMapper'
+
 export function formatActivityDate(value) {
   if (!value) return 'Date unavailable'
   const date = new Date(value)
@@ -14,7 +16,7 @@ export function getCandidateContentItems({ projects, posts, teamRequests }) {
       label: 'Project',
       title: project.title,
       description: project.description,
-      status: project.status,
+      status: getCommunityProjectStatusLabel(project.status),
       createdAt: project.createdAt,
       path: `/candidate/projects/${project.id}`,
       action: 'View project',

@@ -1,12 +1,20 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router'
+import {
+  createCommunityProject,
+  getCommunityProjectErrorMessage,
+  getCommunityProjectValidationErrors,
+} from '../api/communityProjectsApi'
 import ActivityToastMessage from '../components/ActivityToastMessage'
 import Button from '../components/Button'
 import Card from '../components/Card'
 import SkillsInput from '../components/SkillsInput'
 import { useAuth } from '../context/AuthContext'
 import { useLocalContent } from '../context/LocalContentContext'
-import { PROJECT_STATUSES } from '../data/mockProjects'
+import {
+  COMMUNITY_PROJECT_STATUSES,
+  toCommunityProjectPayload,
+} from '../data/communityProjectMapper'
 import useToast from '../hooks/useToast'
 import CandidateLayout from '../layouts/CandidateLayout'
 
@@ -44,13 +52,12 @@ function FormActions({ onCancel, isSubmitting, submitLabel }) {
 
 function ProjectForm({ onCancel }) {
   const navigate = useNavigate()
-  const { user } = useAuth()
-  const { addProject } = useLocalContent()
   const { showToast } = useToast()
   const [form, setForm] = useState({
     title: '',
     description: '',
-    status: PROJECT_STATUSES.IN_PROGRESS,
+    fullDescription: '',
+    status: COMMUNITY_PROJECT_STATUSES.IN_PROGRESS,
     skills: [],
     lookingForTeam: false,
     roles: '',
@@ -58,12 +65,14 @@ function ProjectForm({ onCancel }) {
     liveUrl: '',
   })
   const [errors, setErrors] = useState({})
+  const [submitError, setSubmitError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const updateField = (event) => {
     const { name, value, checked, type } = event.target
     setForm((current) => ({ ...current, [name]: type === 'checkbox' ? checked : value }))
     setErrors((current) => ({ ...current, [name]: '' }))
+    setSubmitError('')
   }
 
   const handleStatus = (event) => {
@@ -71,7 +80,7 @@ function ProjectForm({ onCancel }) {
     setForm((current) => ({
       ...current,
       status,
-      lookingForTeam: status === PROJECT_STATUSES.LOOKING_FOR_TEAM,
+      lookingForTeam: status === COMMUNITY_PROJECT_STATUSES.LOOKING_FOR_TEAM,
     }))
   }
 
@@ -81,13 +90,14 @@ function ProjectForm({ onCancel }) {
       ...current,
       lookingForTeam,
       status: lookingForTeam
-        ? PROJECT_STATUSES.LOOKING_FOR_TEAM
-        : (current.status === PROJECT_STATUSES.LOOKING_FOR_TEAM ? PROJECT_STATUSES.IN_PROGRESS : current.status),
+        ? COMMUNITY_PROJECT_STATUSES.LOOKING_FOR_TEAM
+        : (current.status === COMMUNITY_PROJECT_STATUSES.LOOKING_FOR_TEAM ? COMMUNITY_PROJECT_STATUSES.IN_PROGRESS : current.status),
     }))
   }
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault()
+    if (isSubmitting) return
     const nextErrors = {}
     if (!form.title.trim()) nextErrors.title = 'Project title is required.'
     if (!form.description.trim()) nextErrors.description = 'Short description is required.'
@@ -99,32 +109,43 @@ function ProjectForm({ onCancel }) {
     if (Object.keys(nextErrors).length > 0) return
 
     setIsSubmitting(true)
-    const project = addProject({
-      title: form.title.trim(),
-      description: form.description.trim(),
-      fullDescription: form.description.trim(),
-      creator: user?.name || 'LinkPort Member',
-      creatorHeadline: 'LinkPort member',
-      university: '',
-      status: form.lookingForTeam ? PROJECT_STATUSES.LOOKING_FOR_TEAM : form.status,
-      skills: form.skills,
-      teamMembers: [user?.name || 'LinkPort Member'],
-      lookingForRoles: form.lookingForTeam ? splitList(form.roles) : [],
-      repositoryUrl: form.repositoryUrl.trim(),
-      liveUrl: form.liveUrl.trim(),
-    })
-    showToast(<ActivityToastMessage message="Project created and added to the showcase." tab="content" />, 'success', 6000)
-    navigate(`/candidate/projects/${project.id}`, { replace: true })
+    setSubmitError('')
+
+    try {
+      const response = await createCommunityProject(toCommunityProjectPayload({
+        ...form,
+        roles: splitList(form.roles),
+      }))
+      showToast(<ActivityToastMessage message="Project published to the showcase." tab="content" />, 'success', 6000)
+      navigate(`/candidate/projects/${response.data.id}`, { replace: true })
+    } catch (requestError) {
+      const apiErrors = getCommunityProjectValidationErrors(requestError)
+      setErrors({
+        title: apiErrors.title,
+        description: apiErrors.short_description,
+        fullDescription: apiErrors.full_description,
+        status: apiErrors.status,
+        skills: apiErrors.skills || apiErrors['skills.0'],
+        lookingForTeam: apiErrors.looking_for_teammates,
+        roles: apiErrors.roles_needed || apiErrors['roles_needed.0'],
+        repositoryUrl: apiErrors.repository_url,
+        liveUrl: apiErrors.live_url,
+      })
+      setSubmitError(getCommunityProjectErrorMessage(requestError, 'Unable to publish this project. Please try again.'))
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const isDirty = form.title
     || form.description
+    || form.fullDescription
     || form.skills.length
     || form.roles
     || form.repositoryUrl
     || form.liveUrl
     || form.lookingForTeam
-    || form.status !== PROJECT_STATUSES.IN_PROGRESS
+    || form.status !== COMMUNITY_PROJECT_STATUSES.IN_PROGRESS
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -138,19 +159,28 @@ function ProjectForm({ onCancel }) {
         <textarea name="description" rows="4" value={form.description} onChange={updateField} maxLength="500" placeholder="Explain the project and why it matters." className={`${inputClasses} resize-y`} />
         <FieldError message={errors.description} />
       </label>
+      <label className="block min-w-0 text-sm font-medium">
+        Full description <span className="text-[#64748b]">(optional)</span>
+        <textarea name="fullDescription" rows="7" value={form.fullDescription} onChange={updateField} maxLength="20000" placeholder="Share more context, progress, goals, and decisions." className={`${inputClasses} resize-y`} />
+        <FieldError message={errors.fullDescription} />
+      </label>
       <div className="grid min-w-0 gap-5 sm:grid-cols-2">
         <label className="block min-w-0 text-sm font-medium">
           Status
           <select name="status" value={form.status} onChange={handleStatus} className={inputClasses}>
-            <option value={PROJECT_STATUSES.LOOKING_FOR_TEAM}>Looking for team</option>
-            <option value={PROJECT_STATUSES.IN_PROGRESS}>In progress</option>
-            <option value={PROJECT_STATUSES.COMPLETED}>Completed</option>
+            <option value={COMMUNITY_PROJECT_STATUSES.LOOKING_FOR_TEAM}>Looking for team</option>
+            <option value={COMMUNITY_PROJECT_STATUSES.IN_PROGRESS}>In progress</option>
+            <option value={COMMUNITY_PROJECT_STATUSES.COMPLETED}>Completed</option>
           </select>
+          <FieldError message={errors.status} />
         </label>
-        <label className="mt-7 flex min-w-0 items-center gap-3 rounded-lg border border-[#233554] bg-[#0a192f]/45 px-4 py-3 text-sm text-[#a8b2d1]">
-          <input type="checkbox" checked={form.lookingForTeam} onChange={handleTeamToggle} className="h-4 w-4 shrink-0 accent-[#64ffda]" />
-          Looking for teammates
-        </label>
+        <div>
+          <label className="mt-7 flex min-w-0 items-center gap-3 rounded-lg border border-[#233554] bg-[#0a192f]/45 px-4 py-3 text-sm text-[#a8b2d1]">
+            <input type="checkbox" checked={form.lookingForTeam} onChange={handleTeamToggle} className="h-4 w-4 shrink-0 accent-[#64ffda]" />
+            Looking for teammates
+          </label>
+          <FieldError message={errors.lookingForTeam} />
+        </div>
       </div>
       <div className="min-w-0">
         <p className="text-sm font-medium">Skills or technologies <span className="text-[#64ffda]">*</span></p>
@@ -179,6 +209,7 @@ function ProjectForm({ onCancel }) {
           <FieldError message={errors.liveUrl} />
         </label>
       </div>
+      {submitError && <p role="alert" className="rounded-lg border border-[#ef4444]/35 bg-[#ef4444]/10 px-4 py-3 text-sm text-[#fca5a5]">{submitError}</p>}
       <FormActions onCancel={() => onCancel(isDirty)} isSubmitting={isSubmitting} submitLabel="Publish project" />
     </form>
   )
@@ -351,7 +382,7 @@ const pageConfig = {
   project: {
     eyebrow: 'Project showcase',
     title: 'Share a project',
-    description: 'Add your work to the local Project Showcase. It will be saved only in this browser.',
+    description: 'Publish your work to the LinkPort Project Showcase so members can discover it across the community.',
     cancelPath: '/candidate/projects',
     Form: ProjectForm,
   },

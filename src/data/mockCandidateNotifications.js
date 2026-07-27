@@ -31,7 +31,7 @@ const notifications = [
     message: 'The project is looking for product design and backend support.',
     createdAt: hoursAgo(6),
     isRead: false,
-    targetRoute: '/candidate/projects/focusmate-mobile',
+    targetRoute: '/candidate/projects',
   },
   {
     id: 'application-status-update',
@@ -67,7 +67,7 @@ const notifications = [
     message: 'Campus Sustainability Tracker shared its latest project update.',
     createdAt: daysAgo(5),
     isRead: true,
-    targetRoute: '/candidate/projects/campus-sustainability-tracker',
+    targetRoute: '/candidate/projects',
   },
 ]
 

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router'
 import {
   getCandidateProfile,
@@ -14,7 +14,7 @@ import ProjectShowcaseCard from '../components/ProjectShowcaseCard'
 import SkillsInput from '../components/SkillsInput'
 import { getCandidateActivityPath } from '../config/candidateActivity'
 import { useAuth } from '../context/AuthContext'
-import { mockProjects } from '../data/mockProjects'
+import useCommunityProjects from '../hooks/useCommunityProjects'
 import useToast from '../hooks/useToast'
 import DashboardLayout from '../layouts/DashboardLayout'
 
@@ -97,6 +97,16 @@ export default function CandidateProfile() {
   const [saveError, setSaveError] = useState('')
   const [fieldErrors, setFieldErrors] = useState({})
   const [saveSuccess, setSaveSuccess] = useState(false)
+  const {
+    projects: profileProjects,
+    isLoading: projectsLoading,
+    error: projectsError,
+    retry: retryProjects,
+  } = useCommunityProjects({
+    userId: user?.id,
+    perPage: 3,
+    enabled: Boolean(user?.id),
+  })
 
   useEffect(() => {
     let isActive = true
@@ -127,18 +137,6 @@ export default function CandidateProfile() {
       isActive = false
     }
   }, [user])
-
-  const profileProjects = useMemo(() => {
-    const normalizedName = profile.fullName.trim().toLowerCase()
-    const matchingProjects = normalizedName
-      ? mockProjects.filter((project) => project.creator.toLowerCase() === normalizedName)
-      : []
-
-    return {
-      items: (matchingProjects.length > 0 ? matchingProjects : mockProjects.slice(0, 2)).slice(0, 3),
-      isPreview: matchingProjects.length === 0,
-    }
-  }, [profile.fullName])
 
   const openEdit = () => {
     setDraft(profile)
@@ -417,17 +415,22 @@ export default function CandidateProfile() {
             </div>
             <Link to="/candidate/projects" className="text-sm font-medium text-[#64ffda] hover:underline">View all projects</Link>
           </div>
-          {profileProjects.items.length > 0 ? (
-            <>
-              {profileProjects.isPreview && (
-                <p className="mt-4 text-xs leading-5 text-[#64748b]">Portfolio associations are a frontend preview and will be connected to member projects in a later version.</p>
-              )}
-              <div className="mt-5 grid min-w-0 gap-5 md:grid-cols-2 xl:grid-cols-3">
-                {profileProjects.items.map((project) => <ProjectShowcaseCard key={project.id} project={project} />)}
-              </div>
-            </>
+          {projectsLoading ? (
+            <Card className="mt-5"><p className="text-sm text-[#8892b0]">Loading your projects...</p></Card>
+          ) : projectsError ? (
+            <Card className="mt-5">
+              <p className="text-sm text-[#8892b0]">Your projects are temporarily unavailable.</p>
+              <button type="button" onClick={retryProjects} className="mt-3 text-sm font-medium text-[#64ffda] hover:underline">Try again</button>
+            </Card>
+          ) : profileProjects.length > 0 ? (
+            <div className="mt-5 grid min-w-0 gap-5 md:grid-cols-2 xl:grid-cols-3">
+              {profileProjects.map((project) => <ProjectShowcaseCard key={project.id} project={project} />)}
+            </div>
           ) : (
-            <Card className="mt-5"><EmptyProfileText>No projects have been shared yet.</EmptyProfileText></Card>
+            <Card className="mt-5">
+              <EmptyProfileText>You have not shared a community project yet.</EmptyProfileText>
+              <Link to="/candidate/create/project" className="mt-3 inline-flex text-sm font-medium text-[#64ffda] hover:underline">Share a project</Link>
+            </Card>
           )}
         </section>
 

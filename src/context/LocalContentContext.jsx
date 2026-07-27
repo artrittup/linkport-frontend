@@ -3,7 +3,6 @@ import { createContext, useCallback, useContext, useRef, useState } from 'react'
 
 const STORAGE_KEY = 'linkport_candidate_content_v1'
 const emptyContent = {
-  projects: [],
   posts: [],
   teamRequests: [],
   attendingEventIds: [],
@@ -26,16 +25,6 @@ function readStoredContent() {
     const parsed = JSON.parse(raw)
     if (!parsed || typeof parsed !== 'object') throw new Error('Invalid local content')
 
-    const projects = sanitizeArray(parsed.projects, (project) => (
-      typeof project.id === 'string' && typeof project.title === 'string'
-        ? {
-            ...project,
-            skills: Array.isArray(project.skills) ? project.skills.filter((item) => typeof item === 'string') : [],
-            teamMembers: Array.isArray(project.teamMembers) ? project.teamMembers.filter((item) => typeof item === 'string') : [],
-            lookingForRoles: Array.isArray(project.lookingForRoles) ? project.lookingForRoles.filter((item) => typeof item === 'string') : [],
-          }
-        : null
-    ))
     const posts = sanitizeArray(parsed.posts, (post) => (
       typeof post.id === 'string' && typeof post.text === 'string'
         ? { ...post, tags: Array.isArray(post.tags) ? post.tags.filter((item) => typeof item === 'string') : [] }
@@ -62,7 +51,6 @@ function readStoredContent() {
 
     return {
       content: {
-        projects,
         posts,
         teamRequests,
         attendingEventIds,
@@ -115,12 +103,6 @@ export function LocalContentProvider({ children }) {
     })
   }, [persistContent])
 
-  const addProject = useCallback((project) => {
-    const item = { ...project, id: createId('local-project'), createdAt: new Date().toISOString(), local: true }
-    storeItem('projects', item)
-    return item
-  }, [storeItem])
-
   const addPost = useCallback((post) => {
     const item = { ...post, id: createId('local-post'), createdAt: new Date().toISOString(), local: true }
     storeItem('posts', item)
@@ -132,11 +114,6 @@ export function LocalContentProvider({ children }) {
     storeItem('teamRequests', item)
     return item
   }, [storeItem])
-
-  const getProject = useCallback(
-    (projectId) => content.projects.find((project) => project.id === projectId),
-    [content.projects],
-  )
 
   const setEventAttendance = useCallback((eventId, isAttending) => {
     if (typeof eventId !== 'string' || !eventId.trim()) return
@@ -196,17 +173,14 @@ export function LocalContentProvider({ children }) {
 
   return (
     <LocalContentContext.Provider value={{
-      projects: content.projects,
       posts: content.posts,
       teamRequests: content.teamRequests,
       attendingEventIds: content.attendingEventIds,
       readNotificationIds: content.readNotificationIds,
       deletedNotificationIds: content.deletedNotificationIds,
       storageError,
-      addProject,
       addPost,
       addTeamRequest,
-      getProject,
       setEventAttendance,
       markCandidateNotificationRead,
       markAllCandidateNotificationsRead,

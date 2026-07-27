@@ -10,6 +10,7 @@ import {
 } from '../api/notificationsApi'
 import { useAuth } from '../context/AuthContext'
 import { getNotificationDestination } from '../utils/notificationDestination'
+import NotificationRow from './NotificationRow'
 
 function relativeTime(value) {
   const seconds = Math.max(0, Math.floor((Date.now() - new Date(value).getTime()) / 1000))
@@ -146,10 +147,14 @@ export default function NotificationBell() {
             {!isLoading && error && <p role="alert" className="px-3 py-8 text-center text-xs text-[#fca5a5]">{error}</p>}
             {!isLoading && !error && notifications.length === 0 && <p className="px-3 py-8 text-center text-xs text-[#8892b0]">You have no notifications yet.</p>}
             {!isLoading && !error && notifications.map((notification) => (
-              <button key={notification.id} type="button" disabled={openingId !== null} onClick={() => openNotification(notification)} className={`relative block w-full rounded-lg px-3 py-3 text-left transition-colors hover:bg-[#172a45] disabled:cursor-wait ${notification.read_at ? '' : 'bg-[#64ffda]/5'}`}>
-                {!notification.read_at && <span className="absolute right-3 top-4 h-1.5 w-1.5 rounded-full bg-[#64ffda]" />}
-                <p className="pr-4 text-sm font-medium text-[#e6f1ff]">{notification.title}</p>{notification.message && <p className="mt-1 pr-3 text-xs leading-5 text-[#8892b0]">{notification.message}</p>}<p className="mt-1.5 text-[10px] text-[#64748b]">{relativeTime(notification.created_at)}</p>
-              </button>
+              <NotificationRow
+                key={notification.id}
+                notification={notification}
+                onOpen={openNotification}
+                formattedTime={relativeTime(notification.created_at)}
+                compact
+                disabled={openingId !== null}
+              />
             ))}
           </div>
           <Link to="/notifications" onClick={() => setIsOpen(false)} className="block border-t border-[#233554] px-4 py-3 text-center text-xs font-semibold text-[#64ffda] transition-colors hover:bg-[#172a45]">View all notifications</Link>

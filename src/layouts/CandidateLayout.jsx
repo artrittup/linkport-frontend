@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import linkPortLogo from '../assets/linkport-logo.svg'
+import CandidateNotificationBell from '../components/CandidateNotificationBell'
 import CandidateSidebar from '../components/CandidateSidebar'
-import NotificationBell from '../components/NotificationBell'
 
 export default function CandidateLayout({ children, title }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
@@ -44,7 +44,7 @@ export default function CandidateLayout({ children, title }) {
             <img src={linkPortLogo} alt="" className="h-7 w-auto" />
             <span className="truncate text-sm font-semibold text-[#e6f1ff]">{title}</span>
           </div>
-          <NotificationBell />
+          <CandidateNotificationBell placement="mobile" />
         </header>
 
         <main className="mx-auto w-full min-w-0 max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">

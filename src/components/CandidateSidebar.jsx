@@ -3,8 +3,8 @@ import linkPortLogo from '../assets/linkport-logo.svg'
 import { getNavigationForRole } from '../config/navigation'
 import { useAuth } from '../context/AuthContext'
 import CandidateCreateMenu from './CandidateCreateMenu'
+import CandidateNotificationBell from './CandidateNotificationBell'
 import GlobalSearch from './GlobalSearch'
-import NotificationBell from './NotificationBell'
 
 function NavigationIcon({ iconKey }) {
   const paths = {
@@ -32,7 +32,10 @@ function LogoutIcon() {
 
 function isNavigationItemActive(item, pathname) {
   if (pathname === item.path) return true
-  if (item.key === 'home') return pathname === '/candidate/create/post'
+  if (item.key === 'home') {
+    return pathname === '/candidate/create/post'
+      || pathname === '/candidate/notifications'
+  }
   if (item.key === 'projects') {
     return pathname.startsWith('/candidate/projects/')
       || pathname === '/candidate/create/project'
@@ -96,7 +99,7 @@ export default function CandidateSidebar({ isOpen, onClose }) {
             <span className="text-xl">Link<span className="text-[#64ffda]">Port</span></span>
           </Link>
           <div className="flex items-center gap-1">
-            <NotificationBell />
+            <CandidateNotificationBell placement="sidebar" className="hidden lg:block" />
             <button type="button" onClick={onClose} className="flex h-9 w-9 items-center justify-center rounded-lg text-xl text-[#8892b0] hover:bg-[#112240] hover:text-[#64ffda] lg:hidden" aria-label="Close menu">
               &times;
             </button>

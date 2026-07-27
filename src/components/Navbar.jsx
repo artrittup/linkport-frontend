@@ -4,6 +4,7 @@ import linkPortLogo from '../assets/linkport-logo.svg'
 import { useAuth } from '../context/AuthContext'
 import GlobalSearch from './GlobalSearch'
 import NotificationBell from './NotificationBell'
+import CandidateNotificationBell from './CandidateNotificationBell'
 
 export default function Navbar() {
   const navigate = useNavigate()
@@ -40,7 +41,9 @@ export default function Navbar() {
             <div className="h-9 w-32 animate-pulse rounded-lg bg-[#112240]" aria-label="Checking account" />
           ) : isAuthenticated ? (
             <div className="flex items-center gap-2 sm:gap-3">
-              <NotificationBell />
+              {user?.role === 'candidate'
+                ? <CandidateNotificationBell placement="mobile" />
+                : <NotificationBell />}
               <span className="hidden max-w-40 truncate text-sm text-[#8892b0] sm:block">
                 {user?.name}
               </span>

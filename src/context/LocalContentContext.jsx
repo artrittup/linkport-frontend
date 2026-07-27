@@ -2,7 +2,14 @@
 import { createContext, useCallback, useContext, useRef, useState } from 'react'
 
 const STORAGE_KEY = 'linkport_candidate_content_v1'
-const emptyContent = { projects: [], posts: [], teamRequests: [], attendingEventIds: [] }
+const emptyContent = {
+  projects: [],
+  posts: [],
+  teamRequests: [],
+  attendingEventIds: [],
+  readNotificationIds: [],
+  deletedNotificationIds: [],
+}
 const LocalContentContext = createContext(null)
 
 function sanitizeArray(value, normalize) {
@@ -46,9 +53,22 @@ function readStoredContent() {
     const attendingEventIds = Array.isArray(parsed.attendingEventIds)
       ? [...new Set(parsed.attendingEventIds.filter((eventId) => typeof eventId === 'string' && eventId.trim()))]
       : []
+    const readNotificationIds = Array.isArray(parsed.readNotificationIds)
+      ? [...new Set(parsed.readNotificationIds.filter((notificationId) => typeof notificationId === 'string' && notificationId.trim()))]
+      : []
+    const deletedNotificationIds = Array.isArray(parsed.deletedNotificationIds)
+      ? [...new Set(parsed.deletedNotificationIds.filter((notificationId) => typeof notificationId === 'string' && notificationId.trim()))]
+      : []
 
     return {
-      content: { projects, posts, teamRequests, attendingEventIds },
+      content: {
+        projects,
+        posts,
+        teamRequests,
+        attendingEventIds,
+        readNotificationIds,
+        deletedNotificationIds,
+      },
       error: '',
     }
   } catch {
@@ -132,18 +152,65 @@ export function LocalContentProvider({ children }) {
     })
   }, [persistContent])
 
+  const markCandidateNotificationRead = useCallback((notificationId) => {
+    if (typeof notificationId !== 'string' || !notificationId.trim()) return
+
+    persistContent({
+      ...contentRef.current,
+      readNotificationIds: [...new Set([
+        ...contentRef.current.readNotificationIds,
+        notificationId,
+      ])],
+    })
+  }, [persistContent])
+
+  const markAllCandidateNotificationsRead = useCallback((notificationIds) => {
+    const validIds = Array.isArray(notificationIds)
+      ? notificationIds.filter((notificationId) => typeof notificationId === 'string' && notificationId.trim())
+      : []
+
+    persistContent({
+      ...contentRef.current,
+      readNotificationIds: [...new Set([
+        ...contentRef.current.readNotificationIds,
+        ...validIds,
+      ])],
+    })
+  }, [persistContent])
+
+  const deleteCandidateNotifications = useCallback((notificationIds) => {
+    const ids = Array.isArray(notificationIds) ? notificationIds : [notificationIds]
+    const validIds = ids.filter((notificationId) => (
+      typeof notificationId === 'string' && notificationId.trim()
+    ))
+    if (validIds.length === 0) return
+
+    persistContent({
+      ...contentRef.current,
+      deletedNotificationIds: [...new Set([
+        ...contentRef.current.deletedNotificationIds,
+        ...validIds,
+      ])],
+    })
+  }, [persistContent])
+
   return (
     <LocalContentContext.Provider value={{
       projects: content.projects,
       posts: content.posts,
       teamRequests: content.teamRequests,
       attendingEventIds: content.attendingEventIds,
+      readNotificationIds: content.readNotificationIds,
+      deletedNotificationIds: content.deletedNotificationIds,
       storageError,
       addProject,
       addPost,
       addTeamRequest,
       getProject,
       setEventAttendance,
+      markCandidateNotificationRead,
+      markAllCandidateNotificationsRead,
+      deleteCandidateNotifications,
     }}>
       {children}
     </LocalContentContext.Provider>

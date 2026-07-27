@@ -1,4 +1,4 @@
-import { useEffect, useId } from 'react'
+import { useEffect, useId, useRef } from 'react'
 import Button from './Button'
 
 export default function Modal({
@@ -8,24 +8,56 @@ export default function Modal({
   eyebrow,
   children,
   footer,
+  showCloseButton = true,
   maxWidth = 'max-w-2xl',
 }) {
   const titleId = useId()
+  const dialogRef = useRef(null)
 
   useEffect(() => {
     if (!isOpen) return undefined
 
     const previousOverflow = document.body.style.overflow
-    const closeOnEscape = (event) => {
-      if (event.key === 'Escape') onClose()
+    const previouslyFocused = document.activeElement
+    const focusableSelector = 'button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+    const focusTimer = window.setTimeout(() => {
+      const firstFocusable = dialogRef.current?.querySelector(focusableSelector)
+      if (firstFocusable) firstFocusable.focus()
+      else dialogRef.current?.focus()
+    }, 0)
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        onClose()
+        return
+      }
+      if (event.key !== 'Tab' || !dialogRef.current) return
+
+      const focusable = [...dialogRef.current.querySelectorAll(focusableSelector)]
+      if (focusable.length === 0) {
+        event.preventDefault()
+        dialogRef.current.focus()
+        return
+      }
+
+      const first = focusable[0]
+      const last = focusable[focusable.length - 1]
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault()
+        last.focus()
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault()
+        first.focus()
+      }
     }
 
     document.body.style.overflow = 'hidden'
-    document.addEventListener('keydown', closeOnEscape)
+    document.addEventListener('keydown', handleKeyDown)
 
     return () => {
+      window.clearTimeout(focusTimer)
       document.body.style.overflow = previousOverflow
-      document.removeEventListener('keydown', closeOnEscape)
+      document.removeEventListener('keydown', handleKeyDown)
+      previouslyFocused?.focus?.()
     }
   }, [isOpen, onClose])
 
@@ -39,9 +71,11 @@ export default function Modal({
       }}
     >
       <section
+        ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
+        tabIndex={-1}
         className={`max-h-[calc(100vh-4rem)] w-full ${maxWidth} overflow-y-auto rounded-2xl border border-[#233554] bg-[#112240] shadow-2xl shadow-black/40`}
       >
         <header className="sticky top-0 z-10 flex items-start justify-between gap-4 border-b border-[#233554] bg-[#112240] px-5 py-4 sm:px-6">
@@ -56,7 +90,7 @@ export default function Modal({
 
         <footer className="sticky bottom-0 flex justify-end gap-3 border-t border-[#233554] bg-[#112240] px-5 py-4 sm:px-6">
           {footer}
-          <Button variant="outline" onClick={onClose}>Close</Button>
+          {showCloseButton && <Button variant="outline" onClick={onClose}>Close</Button>}
         </footer>
       </section>
     </div>

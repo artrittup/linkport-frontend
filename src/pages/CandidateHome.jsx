@@ -15,7 +15,7 @@ const feedItems = [
     tags: ['React', 'Data', 'Sustainability'],
     meta: 'Remote collaboration',
     action: 'View project',
-    path: '/projects',
+    path: '/candidate/projects',
   },
   {
     id: 2,
@@ -51,7 +51,7 @@ const feedItems = [
     tags: ['Product Design', 'Laravel', 'Students'],
     meta: '2 open teammate roles',
     action: 'Join project',
-    path: '/candidate/community',
+    path: '/candidate/projects/focusmate-mobile',
   },
 ]
 

@@ -43,12 +43,16 @@ export default function CandidateLayout({ children, title }) {
 
   const isActive = (path) => (
     location.pathname === path
-    || (path === '/projects' && location.pathname.startsWith('/projects/'))
+    || (path === '/candidate/projects' && location.pathname.startsWith('/candidate/projects/'))
     || (path === '/candidate/community' && location.pathname.startsWith('/circles'))
   )
 
   const handleCreateAction = (label) => {
     setIsCreateOpen(false)
+    if (label === 'Share a project') {
+      navigate('/candidate/projects?share=true')
+      return
+    }
     showToast(`${label} will be available in the next community update.`, 'info')
   }
 

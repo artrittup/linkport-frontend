@@ -30,3 +30,16 @@ export function getProfileErrorMessage(error, fallbackMessage) {
     ? messages.join(' ')
     : error.response?.data?.message || error.message || fallbackMessage
 }
+
+export function getProfileValidationErrors(error) {
+  const validationErrors = error.response?.data?.errors
+
+  if (!validationErrors || typeof validationErrors !== 'object') return {}
+
+  return Object.fromEntries(
+    Object.entries(validationErrors).map(([field, messages]) => [
+      field,
+      Array.isArray(messages) ? messages.filter(Boolean).join(' ') : String(messages),
+    ]),
+  )
+}

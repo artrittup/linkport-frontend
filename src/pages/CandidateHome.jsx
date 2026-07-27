@@ -1,9 +1,11 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router'
 import { useLocalContent } from '../context/LocalContentContext'
+import { formatEventDate, formatEventTime, mockEvents } from '../data/mockEvents'
 import CandidateLayout from '../layouts/CandidateLayout'
 
 const filters = ['All', 'Projects', 'Posts', 'Team', 'Opportunities', 'Events']
+const featuredEvent = mockEvents[0]
 
 const defaultFeedItems = [
   {
@@ -34,13 +36,14 @@ const defaultFeedItems = [
     id: 3,
     filter: 'Events',
     type: 'EVENT',
-    title: 'Portfolio Review Evening',
-    description: 'Bring one project and get practical feedback from designers, developers, and recent graduates.',
-    author: 'LinkPort Community',
-    tags: ['Portfolio', 'Networking'],
-    meta: 'August 24 · 18:00 · Online',
+    eventId: featuredEvent.id,
+    title: featuredEvent.title,
+    description: featuredEvent.shortDescription,
+    author: featuredEvent.organizer,
+    tags: featuredEvent.topics,
+    meta: `${formatEventDate(featuredEvent.date)} · ${formatEventTime(featuredEvent)} · ${featuredEvent.location}`,
     action: 'View event',
-    path: '/candidate/community',
+    path: `/candidate/community/events/${featuredEvent.id}`,
   },
   {
     id: 4,
@@ -59,10 +62,13 @@ const defaultFeedItems = [
 function FeedCard({ item }) {
   return (
     <article className="flex h-full flex-col rounded-2xl border border-[#233554] bg-[#112240]/65 p-5 sm:p-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <span className="rounded-full bg-[#64ffda]/10 px-3 py-1 font-mono text-[10px] font-semibold tracking-[0.12em] text-[#64ffda]">
-          {item.type}
-        </span>
+      <div className="flex min-w-0 flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="rounded-full bg-[#64ffda]/10 px-3 py-1 font-mono text-[10px] font-semibold tracking-[0.12em] text-[#64ffda]">
+            {item.type}
+          </span>
+          {item.attending && <span className="rounded-full border border-[#22c55e]/30 bg-[#22c55e]/10 px-2.5 py-1 text-xs font-medium text-[#86efac]">Attending</span>}
+        </div>
         <span className="text-xs text-[#64748b]">{item.meta}</span>
       </div>
 
@@ -93,7 +99,7 @@ function FeedCard({ item }) {
 }
 
 export default function CandidateHome() {
-  const { projects, posts, teamRequests, storageError } = useLocalContent()
+  const { attendingEventIds, projects, posts, teamRequests, storageError } = useLocalContent()
   const [activeFilter, setActiveFilter] = useState('All')
   const localFeedItems = useMemo(() => [
     ...projects.map((project) => ({
@@ -136,7 +142,13 @@ export default function CandidateHome() {
       createdAt: request.createdAt,
     })),
   ].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)), [posts, projects, teamRequests])
-  const feedItems = [...localFeedItems, ...defaultFeedItems]
+  const feedItems = [
+    ...localFeedItems,
+    ...defaultFeedItems.map((item) => ({
+      ...item,
+      attending: Boolean(item.eventId && attendingEventIds.includes(item.eventId)),
+    })),
+  ]
   const visibleItems = activeFilter === 'All'
     ? feedItems
     : feedItems.filter((item) => item.filter === activeFilter)

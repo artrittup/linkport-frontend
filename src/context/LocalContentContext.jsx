@@ -2,7 +2,7 @@
 import { createContext, useCallback, useContext, useRef, useState } from 'react'
 
 const STORAGE_KEY = 'linkport_candidate_content_v1'
-const emptyContent = { projects: [], posts: [], teamRequests: [] }
+const emptyContent = { projects: [], posts: [], teamRequests: [], attendingEventIds: [] }
 const LocalContentContext = createContext(null)
 
 function sanitizeArray(value, normalize) {
@@ -43,9 +43,12 @@ function readStoredContent() {
           }
         : null
     ))
+    const attendingEventIds = Array.isArray(parsed.attendingEventIds)
+      ? [...new Set(parsed.attendingEventIds.filter((eventId) => typeof eventId === 'string' && eventId.trim()))]
+      : []
 
     return {
-      content: { projects, posts, teamRequests },
+      content: { projects, posts, teamRequests, attendingEventIds },
       error: '',
     }
   } catch {
@@ -73,11 +76,7 @@ export function LocalContentProvider({ children }) {
   const [storageError, setStorageError] = useState(initialContent.error)
   const contentRef = useRef(initialContent.content)
 
-  const storeItem = useCallback((collection, item) => {
-    const nextContent = {
-      ...contentRef.current,
-      [collection]: [item, ...contentRef.current[collection]],
-    }
+  const persistContent = useCallback((nextContent) => {
     contentRef.current = nextContent
     setContent(nextContent)
 
@@ -88,6 +87,13 @@ export function LocalContentProvider({ children }) {
       setStorageError('Content is available for this session, but this browser could not save it for refresh.')
     }
   }, [])
+
+  const storeItem = useCallback((collection, item) => {
+    persistContent({
+      ...contentRef.current,
+      [collection]: [item, ...contentRef.current[collection]],
+    })
+  }, [persistContent])
 
   const addProject = useCallback((project) => {
     const item = { ...project, id: createId('local-project'), createdAt: new Date().toISOString(), local: true }
@@ -112,16 +118,32 @@ export function LocalContentProvider({ children }) {
     [content.projects],
   )
 
+  const setEventAttendance = useCallback((eventId, isAttending) => {
+    if (typeof eventId !== 'string' || !eventId.trim()) return
+
+    const currentIds = contentRef.current.attendingEventIds
+    const nextIds = isAttending
+      ? [...new Set([...currentIds, eventId])]
+      : currentIds.filter((savedEventId) => savedEventId !== eventId)
+
+    persistContent({
+      ...contentRef.current,
+      attendingEventIds: nextIds,
+    })
+  }, [persistContent])
+
   return (
     <LocalContentContext.Provider value={{
       projects: content.projects,
       posts: content.posts,
       teamRequests: content.teamRequests,
+      attendingEventIds: content.attendingEventIds,
       storageError,
       addProject,
       addPost,
       addTeamRequest,
       getProject,
+      setEventAttendance,
     }}>
       {children}
     </LocalContentContext.Provider>

@@ -5,6 +5,11 @@ import {
   getCommunityProjectErrorMessage,
   getCommunityProjectValidationErrors,
 } from '../api/communityProjectsApi'
+import {
+  createCommunityPost,
+  getCommunityPostErrorMessage,
+  getCommunityPostValidationErrors,
+} from '../api/communityPostsApi'
 import ActivityToastMessage from '../components/ActivityToastMessage'
 import Button from '../components/Button'
 import Card from '../components/Card'
@@ -15,11 +20,15 @@ import {
   COMMUNITY_PROJECT_STATUSES,
   toCommunityProjectPayload,
 } from '../data/communityProjectMapper'
+import {
+  COMMUNITY_POST_CATEGORIES,
+  COMMUNITY_POST_CATEGORY_OPTIONS,
+  toCommunityPostPayload,
+} from '../data/communityPostMapper'
 import useToast from '../hooks/useToast'
 import CandidateLayout from '../layouts/CandidateLayout'
 
 const inputClasses = 'mt-2 w-full min-w-0 max-w-full rounded-lg border border-[#233554] bg-[#0a192f]/70 px-4 py-3 text-sm text-[#e6f1ff] outline-none placeholder:text-[#64748b] focus:border-[#64ffda] focus:ring-1 focus:ring-[#64ffda]'
-const postCategories = ['General', 'Project update', 'Question', 'Achievement', 'Opportunity tip']
 const commitments = ['A few hours per week', 'Part-time collaboration', 'Weekend project', 'Short-term challenge', 'Flexible']
 const workStyles = ['Remote', 'In-person', 'Flexible']
 
@@ -217,31 +226,48 @@ function ProjectForm({ onCancel }) {
 
 function PostForm({ onCancel }) {
   const navigate = useNavigate()
-  const { user } = useAuth()
-  const { addPost } = useLocalContent()
   const { showToast } = useToast()
-  const [form, setForm] = useState({ text: '', category: 'General', tags: '' })
+  const [form, setForm] = useState({ text: '', category: COMMUNITY_POST_CATEGORIES.GENERAL, tags: '' })
   const [errors, setErrors] = useState({})
+  const [submitError, setSubmitError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault()
-    if (!form.text.trim()) {
-      setErrors({ text: 'Post text is required.' })
+    if (isSubmitting) return
+
+    const tags = splitList(form.tags)
+    const nextErrors = {}
+    if (!form.text.trim()) nextErrors.text = 'Post text is required.'
+    if (tags.length > 10) nextErrors.tags = 'Add no more than 10 tags.'
+    if (tags.some((tag) => tag.length > 50)) nextErrors.tags = 'Each tag must be 50 characters or fewer.'
+    if (Object.keys(nextErrors).length) {
+      setErrors(nextErrors)
       return
     }
+
     setIsSubmitting(true)
-    addPost({
-      text: form.text.trim(),
-      category: form.category,
-      tags: splitList(form.tags),
-      author: user?.name || 'LinkPort Member',
-    })
-    showToast(<ActivityToastMessage message="Post published to your Home feed." tab="content" />, 'success', 6000)
-    navigate('/candidate/home', { replace: true })
+    setErrors({})
+    setSubmitError('')
+
+    try {
+      await createCommunityPost(toCommunityPostPayload({ ...form, tags }))
+      showToast(<ActivityToastMessage message="Post published to your Home feed." tab="content" />, 'success', 6000)
+      navigate('/candidate/home', { replace: true })
+    } catch (error) {
+      const validationErrors = getCommunityPostValidationErrors(error)
+      setErrors({
+        text: validationErrors.content,
+        category: validationErrors.category,
+        tags: validationErrors.tags || validationErrors['tags.0'],
+      })
+      setSubmitError(getCommunityPostErrorMessage(error, 'We could not publish your post. Please try again.'))
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
-  const isDirty = form.text || form.tags || form.category !== 'General'
+  const isDirty = form.text || form.tags || form.category !== COMMUNITY_POST_CATEGORIES.GENERAL
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -251,7 +277,7 @@ function PostForm({ onCancel }) {
           rows="7"
           value={form.text}
           maxLength="1000"
-          onChange={(event) => { setForm((current) => ({ ...current, text: event.target.value })); setErrors({}) }}
+          onChange={(event) => { setForm((current) => ({ ...current, text: event.target.value })); setErrors((current) => ({ ...current, text: '' })); setSubmitError('') }}
           placeholder="Share an update, question, or useful idea with the community."
           className={`${inputClasses} resize-y`}
         />
@@ -263,16 +289,19 @@ function PostForm({ onCancel }) {
       <div className="grid min-w-0 gap-5 sm:grid-cols-2">
         <label className="block min-w-0 text-sm font-medium">
           Category
-          <select value={form.category} onChange={(event) => setForm((current) => ({ ...current, category: event.target.value }))} className={inputClasses}>
-            {postCategories.map((category) => <option key={category}>{category}</option>)}
+          <select value={form.category} onChange={(event) => { setForm((current) => ({ ...current, category: event.target.value })); setErrors((current) => ({ ...current, category: '' })); setSubmitError('') }} className={inputClasses}>
+            {COMMUNITY_POST_CATEGORY_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
           </select>
+          <FieldError message={errors.category} />
         </label>
         <label className="block min-w-0 text-sm font-medium">
           Related skills or tags <span className="text-[#64748b]">(optional)</span>
-          <input value={form.tags} onChange={(event) => setForm((current) => ({ ...current, tags: event.target.value }))} placeholder="React, Career, Design" className={inputClasses} />
+          <input value={form.tags} onChange={(event) => { setForm((current) => ({ ...current, tags: event.target.value })); setErrors((current) => ({ ...current, tags: '' })); setSubmitError('') }} placeholder="React, Career, Design" className={inputClasses} />
           <p className="mt-1.5 text-xs text-[#64748b]">Separate tags with commas.</p>
+          <FieldError message={errors.tags} />
         </label>
       </div>
+      {submitError && <p role="alert" className="rounded-lg border border-[#ef4444]/35 bg-[#ef4444]/10 px-4 py-3 text-sm text-[#fca5a5]">{submitError}</p>}
       <FormActions onCancel={() => onCancel(isDirty)} isSubmitting={isSubmitting} submitLabel="Publish post" />
     </form>
   )

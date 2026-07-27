@@ -18,6 +18,7 @@ import {
   useCandidateProposals,
 } from '../hooks/useCandidateActivityData'
 import useCommunityProjects from '../hooks/useCommunityProjects'
+import useCommunityPosts from '../hooks/useCommunityPosts'
 import CandidateLayout from '../layouts/CandidateLayout'
 
 export default function CandidateActivity() {
@@ -28,7 +29,6 @@ export default function CandidateActivity() {
   const proposals = useCandidateProposals()
   const { user } = useAuth()
   const {
-    posts,
     teamRequests,
     attendingEventIds,
     setEventAttendance,
@@ -39,6 +39,15 @@ export default function CandidateActivity() {
     isLoading: projectsLoading,
     error: projectsError,
   } = useCommunityProjects({
+    userId: user?.id,
+    perPage: 50,
+    enabled: Boolean(user?.id),
+  })
+  const {
+    posts,
+    isLoading: postsLoading,
+    error: postsError,
+  } = useCommunityPosts({
     userId: user?.id,
     perPage: 50,
     enabled: Boolean(user?.id),
@@ -80,11 +89,19 @@ export default function CandidateActivity() {
         )}
         {projectsError && (
           <p role="status" className="mt-4 rounded-lg border border-[#233554] bg-[#112240]/45 px-4 py-3 text-sm text-[#8892b0]">
-            Shared projects are temporarily unavailable. Your posts and teammate requests remain available.
+            Shared projects are temporarily unavailable. Other shared content remains available.
           </p>
         )}
         {projectsLoading && (
           <p role="status" className="mt-4 text-sm text-[#64748b]">Loading shared projects...</p>
+        )}
+        {postsError && (
+          <p role="status" className="mt-4 rounded-lg border border-[#233554] bg-[#112240]/45 px-4 py-3 text-sm text-[#8892b0]">
+            Your posts are temporarily unavailable. Shared projects and teammate requests remain available.
+          </p>
+        )}
+        {postsLoading && (
+          <p role="status" className="mt-4 text-sm text-[#64748b]">Loading your posts...</p>
         )}
 
         <nav className="mt-8 flex min-w-0 max-w-full gap-2 overflow-x-auto border-b border-[#233554] pb-3" aria-label="Activity sections">

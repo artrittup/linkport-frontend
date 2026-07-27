@@ -3,7 +3,6 @@ import { createContext, useCallback, useContext, useRef, useState } from 'react'
 
 const STORAGE_KEY = 'linkport_candidate_content_v1'
 const emptyContent = {
-  posts: [],
   teamRequests: [],
   attendingEventIds: [],
   readNotificationIds: [],
@@ -25,11 +24,6 @@ function readStoredContent() {
     const parsed = JSON.parse(raw)
     if (!parsed || typeof parsed !== 'object') throw new Error('Invalid local content')
 
-    const posts = sanitizeArray(parsed.posts, (post) => (
-      typeof post.id === 'string' && typeof post.text === 'string'
-        ? { ...post, tags: Array.isArray(post.tags) ? post.tags.filter((item) => typeof item === 'string') : [] }
-        : null
-    ))
     const teamRequests = sanitizeArray(parsed.teamRequests, (request) => (
       typeof request.id === 'string' && typeof request.title === 'string'
         ? {
@@ -51,7 +45,6 @@ function readStoredContent() {
 
     return {
       content: {
-        posts,
         teamRequests,
         attendingEventIds,
         readNotificationIds,
@@ -102,12 +95,6 @@ export function LocalContentProvider({ children }) {
       [collection]: [item, ...contentRef.current[collection]],
     })
   }, [persistContent])
-
-  const addPost = useCallback((post) => {
-    const item = { ...post, id: createId('local-post'), createdAt: new Date().toISOString(), local: true }
-    storeItem('posts', item)
-    return item
-  }, [storeItem])
 
   const addTeamRequest = useCallback((request) => {
     const item = { ...request, id: createId('local-team'), createdAt: new Date().toISOString(), local: true }
@@ -173,13 +160,11 @@ export function LocalContentProvider({ children }) {
 
   return (
     <LocalContentContext.Provider value={{
-      posts: content.posts,
       teamRequests: content.teamRequests,
       attendingEventIds: content.attendingEventIds,
       readNotificationIds: content.readNotificationIds,
       deletedNotificationIds: content.deletedNotificationIds,
       storageError,
-      addPost,
       addTeamRequest,
       setEventAttendance,
       markCandidateNotificationRead,

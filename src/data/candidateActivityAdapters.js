@@ -1,4 +1,5 @@
 import { getCommunityProjectStatusLabel } from './communityProjectMapper'
+import { getCommunityPostCategoryLabel } from './communityPostMapper'
 
 export function formatActivityDate(value) {
   if (!value) return 'Date unavailable'
@@ -26,7 +27,7 @@ export function getCandidateContentItems({ projects, posts, teamRequests }) {
       sourceId: post.id,
       type: 'Posts',
       label: 'Post',
-      title: post.category || 'Community post',
+      title: getCommunityPostCategoryLabel(post.category),
       description: post.text,
       status: 'Published',
       createdAt: post.createdAt,

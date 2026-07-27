@@ -2,12 +2,21 @@ import { useMemo, useState } from 'react'
 import { Link } from 'react-router'
 import { useLocalContent } from '../context/LocalContentContext'
 import { getCommunityProjectStatusLabel } from '../data/communityProjectMapper'
+import { getCommunityPostCategoryLabel } from '../data/communityPostMapper'
 import { formatEventDate, formatEventTime, mockEvents } from '../data/mockEvents'
 import useCommunityProjects from '../hooks/useCommunityProjects'
+import useCommunityPosts from '../hooks/useCommunityPosts'
 import CandidateLayout from '../layouts/CandidateLayout'
 
 const filters = ['All', 'Projects', 'Posts', 'Team', 'Opportunities', 'Events']
 const featuredEvent = mockEvents[0]
+
+function formatFeedTimestamp(value) {
+  const date = new Date(value)
+  return Number.isNaN(date.getTime())
+    ? 'Recently'
+    : date.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })
+}
 
 const defaultFeedItems = [
   {
@@ -39,7 +48,7 @@ const defaultFeedItems = [
 
 function FeedCard({ item }) {
   return (
-    <article className="flex h-full flex-col rounded-2xl border border-[#233554] bg-[#112240]/65 p-5 sm:p-6">
+    <article className="flex h-full min-w-0 max-w-full flex-col rounded-2xl border border-[#233554] bg-[#112240]/65 p-5 sm:p-6">
       <div className="flex min-w-0 flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap items-center gap-2">
           <span className="rounded-full bg-[#64ffda]/10 px-3 py-1 font-mono text-[10px] font-semibold tracking-[0.12em] text-[#64ffda]">
@@ -50,13 +59,13 @@ function FeedCard({ item }) {
         <span className="text-xs text-[#64748b]">{item.meta}</span>
       </div>
 
-      <h2 className="mt-5 text-xl font-semibold text-[#e6f1ff]">{item.title}</h2>
-      <p className="mt-3 text-sm leading-6 text-[#8892b0]">{item.description}</p>
-      <p className="mt-4 text-xs font-medium text-[#a8b2d1]">{item.author}</p>
+      <h2 className="mt-5 break-words text-xl font-semibold text-[#e6f1ff]">{item.title}</h2>
+      <p className="mt-3 break-words text-sm leading-6 text-[#8892b0]">{item.description}</p>
+      <p className="mt-4 break-words text-xs font-medium text-[#a8b2d1]">{item.author}</p>
 
       <div className="mt-5 flex flex-wrap gap-2">
         {item.tags.map((tag) => (
-          <span key={tag} className="rounded-md border border-[#233554] px-2.5 py-1 text-xs text-[#8892b0]">
+          <span key={tag} className="max-w-full break-words rounded-md border border-[#233554] px-2.5 py-1 text-xs text-[#8892b0]">
             {tag}
           </span>
         ))}
@@ -77,11 +86,16 @@ function FeedCard({ item }) {
 }
 
 export default function CandidateHome() {
-  const { attendingEventIds, posts, teamRequests, storageError } = useLocalContent()
+  const { attendingEventIds, teamRequests, storageError } = useLocalContent()
   const {
     projects: communityProjects,
     error: projectsError,
   } = useCommunityProjects({ perPage: 3 })
+  const {
+    posts: communityPosts,
+    isLoading: postsLoading,
+    error: postsError,
+  } = useCommunityPosts({ perPage: 3 })
   const [activeFilter, setActiveFilter] = useState('All')
   const localFeedItems = useMemo(() => [
     ...communityProjects.map((project) => ({
@@ -97,15 +111,15 @@ export default function CandidateHome() {
       path: `/candidate/projects/${project.id}`,
       createdAt: project.createdAt,
     })),
-    ...posts.map((post) => ({
-      id: post.id,
+    ...communityPosts.map((post) => ({
+      id: `post-${post.id}`,
       filter: 'Posts',
       type: 'POST',
-      title: post.category,
+      title: getCommunityPostCategoryLabel(post.category),
       description: post.text,
-      author: post.author,
+      author: post.authorName,
       tags: post.tags,
-      meta: new Date(post.createdAt).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }),
+      meta: formatFeedTimestamp(post.createdAt),
       action: null,
       path: null,
       createdAt: post.createdAt,
@@ -123,7 +137,7 @@ export default function CandidateHome() {
       path: '/candidate/community#collaboration',
       createdAt: request.createdAt,
     })),
-  ].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)), [communityProjects, posts, teamRequests])
+  ].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)), [communityPosts, communityProjects, teamRequests])
   const feedItems = [
     ...localFeedItems,
     ...defaultFeedItems.map((item) => ({
@@ -153,6 +167,14 @@ export default function CandidateHome() {
       {projectsError && (
         <p role="status" className="mt-4 rounded-lg border border-[#233554] bg-[#112240]/45 px-4 py-3 text-sm text-[#8892b0]">
           Community projects are temporarily unavailable. Other Home updates are still available.
+        </p>
+      )}
+      {postsLoading && (
+        <p role="status" className="mt-4 text-sm text-[#8892b0]">Loading community posts...</p>
+      )}
+      {postsError && (
+        <p role="status" className="mt-4 rounded-lg border border-[#233554] bg-[#112240]/45 px-4 py-3 text-sm text-[#8892b0]">
+          Community posts are temporarily unavailable. Other Home updates are still available.
         </p>
       )}
 

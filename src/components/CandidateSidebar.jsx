@@ -95,7 +95,7 @@ export default function CandidateSidebar({ isOpen, onClose }) {
         </div>
 
         <div className="border-b border-[#233554]/80 px-4 py-4">
-          <GlobalSearch className="w-full" />
+          <GlobalSearch className="w-full min-w-0 max-w-full" dropdownAlign="left" />
         </div>
 
         <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4" aria-label="Candidate navigation">

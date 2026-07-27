@@ -23,10 +23,10 @@ export default function CandidateLayout({ children, title }) {
   }, [isSidebarOpen])
 
   return (
-    <div className="min-h-screen bg-[#0a192f] text-[#e6f1ff]">
+    <div className="min-h-screen min-w-0 bg-[#0a192f] text-[#e6f1ff]">
       <CandidateSidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
 
-      <div className="min-h-screen lg:ml-64">
+      <div className="min-h-screen min-w-0 max-w-full lg:pl-64">
         <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-[#233554]/80 bg-[#0a192f]/95 px-4 backdrop-blur-lg lg:hidden">
           <button
             type="button"
@@ -47,7 +47,7 @@ export default function CandidateLayout({ children, title }) {
           <NotificationBell />
         </header>
 
-        <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
+        <main className="mx-auto w-full min-w-0 max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
           <h1 className="sr-only">{title}</h1>
           {children}
         </main>

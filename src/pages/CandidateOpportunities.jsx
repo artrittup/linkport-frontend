@@ -91,23 +91,23 @@ export default function CandidateOpportunities() {
 
   return (
     <CandidateLayout title="Opportunities">
-      <section className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
-        <div>
+      <section className="flex min-w-0 max-w-full flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+        <div className="min-w-0">
           <p className="font-mono text-sm text-[#64ffda]">Candidate opportunities</p>
           <h2 className="mt-2 text-3xl font-bold tracking-tight text-[#e6f1ff] sm:text-4xl">Opportunities</h2>
           <p className="mt-4 max-w-2xl leading-7 text-[#8892b0]">
             Find jobs, internships, company projects, and challenges that match your next step.
           </p>
         </div>
-        <div className="flex shrink-0 gap-4 text-sm">
+        <div className="flex shrink-0 flex-wrap gap-4 text-sm">
           <Link to="/candidate/applications" className="text-[#a8b2d1] hover:text-[#64ffda]">My applications</Link>
           <Link to="/candidate/bids" className="text-[#a8b2d1] hover:text-[#64ffda]">My proposals</Link>
         </div>
       </section>
 
-      <section className="mt-8" aria-label="Find opportunities">
-        <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_12rem]">
-          <div>
+      <section className="mt-8 min-w-0 max-w-full" aria-label="Find opportunities">
+        <div className="grid min-w-0 max-w-full gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,12rem)]">
+          <div className="min-w-0">
             <label htmlFor="opportunity-search" className="sr-only">Search opportunities</label>
             <input
               id="opportunity-search"
@@ -115,16 +115,16 @@ export default function CandidateOpportunities() {
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               placeholder="Search by title, company, or skill..."
-              className="w-full rounded-xl border border-[#233554] bg-[#112240]/70 px-4 py-3 text-sm text-[#e6f1ff] outline-none placeholder:text-[#64748b] focus:border-[#64ffda] focus:ring-1 focus:ring-[#64ffda]"
+              className="w-full min-w-0 max-w-full rounded-xl border border-[#233554] bg-[#112240]/70 px-4 py-3 text-sm text-[#e6f1ff] outline-none placeholder:text-[#64748b] focus:border-[#64ffda] focus:ring-1 focus:ring-[#64ffda]"
             />
           </div>
-          <div>
+          <div className="min-w-0">
             <label htmlFor="work-style-filter" className="sr-only">Work style</label>
             <select
               id="work-style-filter"
               value={workStyle}
               onChange={(event) => setWorkStyle(event.target.value)}
-              className="w-full rounded-xl border border-[#233554] bg-[#112240]/70 px-4 py-3 text-sm text-[#e6f1ff] outline-none focus:border-[#64ffda] focus:ring-1 focus:ring-[#64ffda]"
+              className="w-full min-w-0 max-w-full rounded-xl border border-[#233554] bg-[#112240]/70 px-4 py-3 text-sm text-[#e6f1ff] outline-none focus:border-[#64ffda] focus:ring-1 focus:ring-[#64ffda]"
             >
               {workStyleFilters.map((item) => <option key={item}>{item}</option>)}
             </select>
@@ -151,7 +151,7 @@ export default function CandidateOpportunities() {
         </div>
       </section>
 
-      <section className="mt-8" aria-live="polite">
+      <section className="mt-8 min-w-0 max-w-full" aria-live="polite">
         {jobsLoading && (
           <div className="mb-5 rounded-xl border border-[#233554] bg-[#112240]/50 px-4 py-3">
             <LoadingSpinner label="Loading jobs..." />
@@ -180,7 +180,7 @@ export default function CandidateOpportunities() {
         </div>
 
         {visibleOpportunities.length > 0 ? (
-          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+          <div className="grid min-w-0 max-w-full gap-5 md:grid-cols-2 xl:grid-cols-3">
             {visibleOpportunities.map((opportunity) => (
               <OpportunityCard key={opportunity.id} opportunity={opportunity} />
             ))}

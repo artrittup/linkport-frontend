@@ -139,7 +139,7 @@ export default function GlobalSearch({
   const filterInput = 'h-9 min-w-0 rounded-md border border-[#233554] bg-[#071426] px-2.5 text-xs text-[#e6f1ff] outline-none placeholder:text-[#64748b] focus:border-[#64ffda]'
 
   return (
-    <div ref={containerRef} className={`relative ${className}`}>
+    <div ref={containerRef} className={`relative min-w-0 max-w-full ${className}`}>
       <label htmlFor={inputId} className="sr-only">Search LinkPort</label>
       <div className="group flex h-10 items-center rounded-lg border border-[#233554] bg-[#112240] transition-colors focus-within:border-[#64ffda]/70 focus-within:ring-1 focus-within:ring-[#64ffda]/30">
         <span className="pointer-events-none pl-3 text-[#8892b0] group-focus-within:text-[#64ffda]"><SearchIcon /></span>
@@ -165,7 +165,7 @@ export default function GlobalSearch({
           onClick={() => setIsOpen(false)}
           className="fixed inset-x-0 bottom-0 top-[88px] z-40 cursor-default bg-[#020c1b]/35 backdrop-blur-[1px]"
         />
-        <div id={`${inputId}-results`} className={`absolute top-full z-50 mt-2 w-[min(24rem,calc(100vw-2rem))] overflow-hidden rounded-xl border border-[#233554] bg-[#112240] shadow-2xl shadow-black/50 ${dropdownAlign === 'left' ? 'left-0' : 'right-0'}`}>
+        <div id={`${inputId}-results`} className={`absolute top-full z-50 mt-2 w-[min(24rem,calc(100vw-2rem))] max-w-[calc(100vw-2rem)] overflow-hidden rounded-xl border border-[#233554] bg-[#112240] shadow-2xl shadow-black/50 ${dropdownAlign === 'left' ? 'left-0' : 'right-0'}`}>
           <div className="flex items-center justify-between border-b border-[#233554] px-3 py-2">
             <span className="text-xs text-[#8892b0]">Search people and companies</span>
             <button type="button" onClick={() => setFiltersOpen((open) => !open)} aria-expanded={filtersOpen} className={`flex items-center gap-1.5 rounded-md px-2 py-1 text-xs transition-colors ${filtersOpen || filtersApplied ? 'bg-[#64ffda]/10 text-[#64ffda]' : 'text-[#8892b0] hover:bg-[#172a45] hover:text-[#e6f1ff]'}`}>

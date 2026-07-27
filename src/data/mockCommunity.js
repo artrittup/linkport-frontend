@@ -1,0 +1,92 @@
+export const communityEvents = [
+  {
+    id: 'project-showcase-august',
+    type: 'SHOWCASE',
+    title: 'Community Project Showcase',
+    description: 'See what members are building and exchange practical feedback with project teams.',
+    details: 'Four LinkPort teams will share short demos, current challenges, and the next skills they need. The session ends with open networking and project feedback.',
+    date: 'August 24, 2026',
+    time: '18:00',
+    location: 'Online',
+  },
+  {
+    id: 'portfolio-workshop',
+    type: 'WORKSHOP',
+    title: 'CV and Portfolio Workshop',
+    description: 'Improve how you present your experience, projects, and skills to potential collaborators.',
+    details: 'Bring a CV or portfolio draft for a guided review covering structure, project descriptions, accessibility, and clear evidence of your contribution.',
+    date: 'September 2, 2026',
+    time: '17:30',
+    location: 'Prishtina',
+  },
+  {
+    id: 'community-build-night',
+    type: 'MEETUP',
+    title: 'Community Build Night',
+    description: 'An informal coding and design meetup for focused work, questions, and peer support.',
+    details: 'Work on your own project or join a small table focused on frontend development, product design, or hardware prototyping. Beginners are welcome.',
+    date: 'September 10, 2026',
+    time: '18:30',
+    location: 'Prizren',
+  },
+]
+
+export const communityInterests = [
+  { name: 'Web Development', memberCount: 86 },
+  { name: 'Mobile Development', memberCount: 54 },
+  { name: 'AI and Data', memberCount: 63 },
+  { name: 'Embedded Systems', memberCount: 31 },
+  { name: 'UI/UX Design', memberCount: 48 },
+  { name: 'Business and Startups', memberCount: 42 },
+]
+
+export const communityMembers = [
+  {
+    id: 'arta-k',
+    name: 'Arta Krasniqi',
+    headline: 'Frontend developer',
+    organization: 'University of Prishtina',
+    skills: ['React', 'Accessibility', 'Data Visualization'],
+    interests: ['Web Development', 'UI/UX Design'],
+  },
+  {
+    id: 'leon-m',
+    name: 'Leon Morina',
+    headline: 'Mobile developer',
+    organization: 'RIT Kosovo',
+    skills: ['React Native', 'Node.js', 'Product'],
+    interests: ['Mobile Development', 'Business and Startups'],
+  },
+  {
+    id: 'rina-z',
+    name: 'Rina Zeneli',
+    headline: 'Computer science researcher',
+    organization: 'University of Prizren',
+    skills: ['Python', 'NLP', 'Research'],
+    interests: ['AI and Data', 'Web Development'],
+  },
+  {
+    id: 'bleron-d',
+    name: 'Bleron Dema',
+    headline: 'Mechatronics student',
+    organization: 'UBT',
+    skills: ['Arduino', 'IoT', 'CAD'],
+    interests: ['Embedded Systems', 'AI and Data'],
+  },
+  {
+    id: 'era-h',
+    name: 'Era Halili',
+    headline: 'UX/UI designer',
+    organization: 'AAB College',
+    skills: ['Figma', 'User Research', 'Service Design'],
+    interests: ['UI/UX Design', 'Business and Startups'],
+  },
+  {
+    id: 'luan-h',
+    name: 'Luan Hyseni',
+    headline: 'Full-stack developer',
+    organization: 'Independent',
+    skills: ['Laravel', 'React', 'OpenStreetMap'],
+    interests: ['Web Development', 'Business and Startups'],
+  },
+]

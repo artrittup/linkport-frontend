@@ -49,8 +49,8 @@ export default function CandidateProjects() {
 
   return (
     <CandidateLayout title="Projects">
-      <section className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
-        <div>
+      <section className="flex min-w-0 max-w-full flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+        <div className="min-w-0">
           <p className="font-mono text-sm text-[#64ffda]">Project showcase</p>
           <h2 className="mt-2 text-3xl font-bold tracking-tight text-[#e6f1ff] sm:text-4xl">Projects</h2>
           <p className="mt-4 max-w-2xl leading-7 text-[#8892b0]">
@@ -66,7 +66,7 @@ export default function CandidateProjects() {
         </button>
       </section>
 
-      <section className="mt-8" aria-label="Find projects">
+      <section className="mt-8 min-w-0 max-w-full" aria-label="Find projects">
         <label htmlFor="showcase-search" className="sr-only">Search projects</label>
         <input
           id="showcase-search"
@@ -74,7 +74,7 @@ export default function CandidateProjects() {
           value={search}
           onChange={(event) => setSearch(event.target.value)}
           placeholder="Search by project, creator, or skill..."
-          className="w-full rounded-xl border border-[#233554] bg-[#112240]/70 px-4 py-3 text-sm text-[#e6f1ff] outline-none placeholder:text-[#64748b] focus:border-[#64ffda] focus:ring-1 focus:ring-[#64ffda]"
+          className="w-full min-w-0 max-w-full rounded-xl border border-[#233554] bg-[#112240]/70 px-4 py-3 text-sm text-[#e6f1ff] outline-none placeholder:text-[#64748b] focus:border-[#64ffda] focus:ring-1 focus:ring-[#64ffda]"
         />
 
         <div className="mt-4 flex gap-2 overflow-x-auto pb-1" role="tablist" aria-label="Filter projects by status">
@@ -97,12 +97,12 @@ export default function CandidateProjects() {
         </div>
       </section>
 
-      <section className="mt-8" aria-live="polite">
+      <section className="mt-8 min-w-0 max-w-full" aria-live="polite">
         <p className="mb-4 text-sm text-[#64748b]">
           {visibleProjects.length} {visibleProjects.length === 1 ? 'project' : 'projects'}
         </p>
         {visibleProjects.length > 0 ? (
-          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+          <div className="grid min-w-0 max-w-full gap-5 md:grid-cols-2 xl:grid-cols-3">
             {visibleProjects.map((project) => <ProjectShowcaseCard key={project.id} project={project} />)}
           </div>
         ) : (

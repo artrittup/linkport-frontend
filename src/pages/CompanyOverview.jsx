@@ -75,10 +75,10 @@ export default function CompanyOverview() {
   })
   const attention = []
   if (!summary.loading && !summary.error && count('pending_applications_count') > 0) {
-    attention.push({ text: `${count('pending_applications_count')} application${count('pending_applications_count') === 1 ? '' : 's'} awaiting review`, path: '/company/applications' })
+    attention.push({ text: `${count('pending_applications_count')} application${count('pending_applications_count') === 1 ? '' : 's'} awaiting review`, path: '/company/applications?type=applications&status=pending' })
   }
   if (!summary.loading && !summary.error && count('pending_bids_count') > 0) {
-    attention.push({ text: `${count('pending_bids_count')} proposal${count('pending_bids_count') === 1 ? '' : 's'} awaiting review`, path: '/company/bids' })
+    attention.push({ text: `${count('pending_bids_count')} proposal${count('pending_bids_count') === 1 ? '' : 's'} awaiting review`, path: '/company/applications?type=proposals&status=pending' })
   }
   if (!profile.loading && !profile.error && (!profile.data?.company_name || !profile.data?.industry || !profile.data?.description)) {
     attention.push({ text: 'Complete your company profile', path: '/company/profile' })
@@ -102,8 +102,8 @@ export default function CompanyOverview() {
 
         <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <StatCard label="Active opportunities" value={count('open_jobs_count') + count('open_projects_count')} href="/company/opportunities" loading={summary.loading} unavailable={summary.error} />
-          <StatCard label="New applications" value={count('pending_applications_count')} href="/company/applications" loading={summary.loading} unavailable={summary.error} />
-          <StatCard label="New proposals" value={count('pending_bids_count')} href="/company/bids" loading={summary.loading} unavailable={summary.error} />
+          <StatCard label="New applications" value={count('pending_applications_count')} href="/company/applications?type=applications&status=pending" loading={summary.loading} unavailable={summary.error} />
+          <StatCard label="New proposals" value={count('pending_bids_count')} href="/company/applications?type=proposals&status=pending" loading={summary.loading} unavailable={summary.error} />
           <StatCard label="Upcoming deadlines" value={upcoming.length} href="/company/opportunities" loading={jobs.loading || projects.loading} unavailable={jobs.error && projects.error} />
         </section>
 
@@ -154,8 +154,8 @@ export default function CompanyOverview() {
                 {[
                   ['Post a job', '/company/jobs/create'],
                   ['Post a project', '/company/projects/create'],
-                  ['Review applications', '/company/applications'],
-                  ['Review proposals', '/company/bids'],
+                  ['Review applications', '/company/applications?type=applications'],
+                  ['Review proposals', '/company/applications?type=proposals'],
                   ['Update company profile', '/company/profile'],
                 ].map(([label, path]) => <Link key={path} to={path} className="rounded-lg bg-[#0a192f]/70 px-3 py-2.5 text-sm text-[#a8b2d1] hover:text-[#64ffda]">{label}</Link>)}
               </div>

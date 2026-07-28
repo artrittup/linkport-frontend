@@ -69,7 +69,7 @@ export function mapJobOpportunity(job) {
       : null,
     responseLabel: 'applications',
     managementRoute: '/company/jobs',
-    applicationsRoute: '/company/applications?type=applications',
+    applicationsRoute: `/company/applications?type=applications&job_id=${job.id}`,
     rawData: job,
     ...mapStatus(job.status, jobStatusGroups, deadline),
   }
@@ -94,7 +94,7 @@ export function mapProjectOpportunity(project) {
       : null,
     responseLabel: 'proposals',
     managementRoute: '/company/projects',
-    applicationsRoute: '/company/bids?type=proposals',
+    applicationsRoute: `/company/applications?type=proposals&project_id=${project.id}`,
     rawData: project,
     ...mapStatus(project.status, projectStatusGroups, deadline),
   }

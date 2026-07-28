@@ -1,17 +1,18 @@
-import { Link, useLocation } from 'react-router'
+import { Link, useSearchParams } from 'react-router'
 
 const tabs = [
-  { label: 'Applications', path: '/company/applications?type=applications', pathname: '/company/applications' },
-  { label: 'Proposals', path: '/company/bids?type=proposals', pathname: '/company/bids' },
+  { label: 'Applications', path: '/company/applications?type=applications', value: 'applications' },
+  { label: 'Proposals', path: '/company/applications?type=proposals', value: 'proposals' },
 ]
 
 export default function CompanyApplicationTabs() {
-  const { pathname } = useLocation()
+  const [searchParams] = useSearchParams()
+  const type = searchParams.get('type') === 'proposals' ? 'proposals' : 'applications'
 
   return (
     <nav className="flex gap-1 overflow-x-auto border-b border-[#233554]" aria-label="Application pipeline">
       {tabs.map((tab) => {
-        const active = pathname === tab.pathname
+        const active = type === tab.value
         return (
           <Link
             key={tab.path}

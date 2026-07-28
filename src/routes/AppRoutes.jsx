@@ -35,7 +35,6 @@ const CompanyTalent = lazy(() => import('../pages/CompanyTalent'))
 const ManageJobs = lazy(() => import('../pages/ManageJobs'))
 const ManageProjects = lazy(() => import('../pages/ManageProjects'))
 const CompanyApplications = lazy(() => import('../pages/CompanyApplications'))
-const CompanyBids = lazy(() => import('../pages/CompanyBids'))
 const AdminDashboard = lazy(() => import('../pages/AdminDashboard'))
 const AdminUsers = lazy(() => import('../pages/AdminUsers'))
 const AdminJobs = lazy(() => import('../pages/AdminJobs'))
@@ -105,7 +104,7 @@ export default function AppRoutes() {
         <Route path="/company/projects" element={<ProtectedRoute allowedRoles={companyRoles}><ManageProjects /></ProtectedRoute>} />
         <Route path="/company/projects/create" element={<ProtectedRoute allowedRoles={companyRoles}><ManageProjects key="create-project" initialCreate /></ProtectedRoute>} />
         <Route path="/company/applications" element={<ProtectedRoute allowedRoles={companyRoles}><CompanyApplications /></ProtectedRoute>} />
-        <Route path="/company/bids" element={<ProtectedRoute allowedRoles={companyRoles}><CompanyBids /></ProtectedRoute>} />
+        <Route path="/company/bids" element={<ProtectedRoute allowedRoles={companyRoles}><Navigate to="/company/applications?type=proposals" replace /></ProtectedRoute>} />
         <Route path="/candidate/dashboard" element={<ProtectedRoute allowedRoles={candidateRoles}><Navigate to="/candidate/home" replace /></ProtectedRoute>} />
         <Route path="/company/dashboard" element={<ProtectedRoute allowedRoles={companyRoles}><Navigate to="/company/overview" replace /></ProtectedRoute>} />
         <Route path="/admin/dashboard" element={<ProtectedRoute allowedRoles={adminRoles}><AdminDashboard /></ProtectedRoute>} />

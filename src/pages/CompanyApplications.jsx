@@ -1,489 +1,255 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { Link, useNavigate, useSearchParams } from 'react-router'
 import {
   acceptApplication,
   getCompanyApplications,
   rejectApplication,
 } from '../api/applicationsApi'
+import { acceptBid, getCompanyBids, rejectBid } from '../api/bidsApi'
 import Button from '../components/Button'
 import Card from '../components/Card'
+import CompanyApplicationTabs from '../components/CompanyApplicationTabs'
+import CompanyResponseCard from '../components/CompanyResponseCard'
+import CompanyResponseReviewModal from '../components/CompanyResponseReviewModal'
 import EmptyState from '../components/EmptyState'
 import LoadingSpinner from '../components/LoadingSpinner'
 import useToast from '../hooks/useToast'
 import DashboardLayout from '../layouts/DashboardLayout'
-import CompanyApplicationTabs from '../components/CompanyApplicationTabs'
+import {
+  APPLICATION_FILTER_STATUSES,
+  mapCompanyApplication,
+  mapCompanyProposal,
+  PROPOSAL_FILTER_STATUSES,
+  responseMatchesSearch,
+} from '../utils/companyResponse'
 
-const statusClasses = {
-  Pending: 'border-[#facc15]/30 bg-[#facc15]/10 text-[#facc15]',
-  Accepted: 'border-[#22c55e]/30 bg-[#22c55e]/10 text-[#22c55e]',
-  Rejected: 'border-[#ef4444]/30 bg-[#ef4444]/10 text-[#ef4444]',
+const initialSource = {
+  items: [],
+  loading: true,
+  error: false,
+  currentPage: 1,
+  lastPage: 1,
+  total: 0,
 }
-const inputClasses =
-  'w-full rounded-md border border-[#233554] bg-[#0a192f]/70 px-4 py-3 text-sm text-[#e6f1ff] outline-none placeholder:text-[#64748b] focus:border-[#64ffda] focus:ring-1 focus:ring-[#64ffda]'
-
-const getErrorMessage = (error, fallback) => {
-  const errors = error.response?.data?.errors
-  const messages = errors ? Object.values(errors).flat().filter(Boolean) : []
-  return messages.length
-    ? messages.join(' ')
-    : error.response?.data?.message || fallback
-}
-
-function StatusBadge({ status }) {
-  return (
-    <span
-      className={`inline-flex rounded-full border px-2.5 py-1 text-[10px] font-semibold ${statusClasses[status] ?? 'border-[#233554] text-[#8892b0]'}`}
-    >
-      {status}
-    </span>
-  )
-}
-
-function Skills({ items = [] }) {
-  if (!items.length) {
-    return <span className="text-xs text-[#64748b]">No skills listed</span>
-  }
-
-  return (
-    <div className="flex flex-wrap gap-1.5">
-      {items.map((skill) => (
-        <span
-          key={skill}
-          className="rounded-full border border-[#233554] bg-[#0a192f]/70 px-2 py-1 font-mono text-[10px] text-[#64ffda]"
-        >
-          {skill}
-        </span>
-      ))}
-    </div>
-  )
-}
+const controlClasses = 'w-full rounded-lg border border-[#233554] bg-[#112240] px-4 py-3 text-sm text-[#e6f1ff] outline-none placeholder:text-[#64748b] focus:border-[#64ffda] focus:ring-1 focus:ring-[#64ffda]'
 
 export default function CompanyApplications() {
   const { showToast } = useToast()
-  const [applications, setApplications] = useState([])
+  const navigate = useNavigate()
+  const [searchParams, setSearchParams] = useSearchParams()
+  const requestedType = searchParams.get('type')
+  const type = requestedType === 'proposals' ? 'proposals' : 'applications'
+  const validStatuses = type === 'applications'
+    ? APPLICATION_FILTER_STATUSES
+    : PROPOSAL_FILTER_STATUSES
+  const requestedStatus = searchParams.get('status')?.toLowerCase()
+  const status = validStatuses.includes(requestedStatus) ? requestedStatus : 'all'
+  const applicationStatus = type === 'applications' ? status : 'all'
+  const proposalStatus = type === 'proposals' ? status : 'all'
   const [search, setSearch] = useState('')
-  const [status, setStatus] = useState('All statuses')
-  const [job, setJob] = useState('All jobs')
+  const [applicationPage, setApplicationPage] = useState(1)
+  const [proposalPage, setProposalPage] = useState(1)
+  const [applicationRefresh, setApplicationRefresh] = useState(0)
+  const [proposalRefresh, setProposalRefresh] = useState(0)
+  const [applications, setApplications] = useState(initialSource)
+  const [proposals, setProposals] = useState(initialSource)
   const [selected, setSelected] = useState(null)
-  const [page, setPage] = useState(1)
-  const [pagination, setPagination] = useState({
-    current_page: 1,
-    total: 0,
-    per_page: 15,
-  })
-  const [refreshKey, setRefreshKey] = useState(0)
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState('')
-  const [reviewing, setReviewing] = useState(null)
+  const [reviewing, setReviewing] = useState('')
 
   useEffect(() => {
-    let isActive = true
+    let active = true
+    getCompanyApplications({
+      status: applicationStatus !== 'all' ? applicationStatus : undefined,
+      page: applicationPage,
+      per_page: 15,
+    }).then((response) => {
+      if (!active) return
+      setApplications({
+        items: response.data.map(mapCompanyApplication),
+        loading: false,
+        error: false,
+        currentPage: response.current_page,
+        lastPage: response.last_page,
+        total: response.total,
+      })
+    }).catch(() => {
+      if (active) setApplications((current) => ({ ...current, items: [], loading: false, error: true }))
+    })
+    return () => { active = false }
+  }, [applicationPage, applicationRefresh, applicationStatus])
 
-    async function loadApplications() {
-      setIsLoading(true)
-      setError('')
-      try {
-        const response = await getCompanyApplications({
-          status:
-            status === 'All statuses' ? undefined : status.toLowerCase(),
-          per_page: 15,
-          page,
-        })
-        if (!isActive) return
-        setApplications(response.data)
-        setPagination(response)
-      } catch (requestError) {
-        if (!isActive) return
-        setApplications([])
-        setError(
-          getErrorMessage(
-            requestError,
-            'Unable to load company applications.',
-          ),
-        )
-      } finally {
-        if (isActive) setIsLoading(false)
-      }
-    }
+  useEffect(() => {
+    let active = true
+    getCompanyBids({
+      status: proposalStatus !== 'all' ? proposalStatus : undefined,
+      page: proposalPage,
+      per_page: 15,
+    }).then((response) => {
+      if (!active) return
+      setProposals({
+        items: response.data.map(mapCompanyProposal),
+        loading: false,
+        error: false,
+        currentPage: response.current_page,
+        lastPage: response.last_page,
+        total: response.total,
+      })
+    }).catch(() => {
+      if (active) setProposals((current) => ({ ...current, items: [], loading: false, error: true }))
+    })
+    return () => { active = false }
+  }, [proposalPage, proposalRefresh, proposalStatus])
 
-    loadApplications()
-    return () => {
-      isActive = false
-    }
-  }, [page, refreshKey, status])
-
-  const jobs = [...new Set(applications.map((item) => item.jobTitle))].sort()
+  const activeSource = type === 'applications' ? applications : proposals
+  const opportunityFilterKey = type === 'applications' ? 'job_id' : 'project_id'
+  const opportunityId = searchParams.get(opportunityFilterKey)
   const query = search.trim().toLowerCase()
-  const filtered = applications.filter(
-    (item) =>
-      (!query ||
-        item.candidateName.toLowerCase().includes(query) ||
-        item.jobTitle.toLowerCase().includes(query) ||
-        item.candidateEmail.toLowerCase().includes(query)) &&
-      (job === 'All jobs' || item.jobTitle === job),
-  )
-  const stats = ['Pending', 'Accepted', 'Rejected'].map((label) => ({
-    label,
-    value: applications.filter((item) => item.status === label).length,
-  }))
-  stats.unshift({ label: 'Total Applications', value: pagination.total })
-  const lastPage = Math.max(
-    1,
-    Math.ceil(
-      Number(pagination.total ?? 0) / Number(pagination.per_page ?? 15),
-    ),
-  )
+  const visibleResponses = useMemo(() => activeSource.items.filter((response) =>
+    responseMatchesSearch(response, query)
+    && (status === 'all' || response.statusValue === status)
+    && (!opportunityId || String(response.opportunityId) === opportunityId),
+  ), [activeSource.items, opportunityId, query, status])
 
-  const reviewApplication = async (application, decision) => {
-    if (application.status !== 'Pending') return
+  const updateParams = (updates) => {
+    const next = new URLSearchParams(searchParams)
+    Object.entries(updates).forEach(([key, value]) => {
+      if (!value || value === 'all') next.delete(key)
+      else next.set(key, value)
+    })
+    setSearchParams(next)
+  }
 
-    setReviewing(`${application.id}:${decision}`)
+  const changeStatus = (nextStatus) => {
+    setApplications((current) => ({ ...current, loading: true, error: false }))
+    setProposals((current) => ({ ...current, loading: true, error: false }))
+    setApplicationPage(1)
+    setProposalPage(1)
+    updateParams({ status: nextStatus })
+  }
+
+  const closeReview = useCallback(() => {
+    if (!reviewing) setSelected(null)
+  }, [reviewing])
+
+  const reviewResponse = async (response, decision) => {
+    if (response.statusValue !== 'pending' || reviewing) return
+    setReviewing(decision)
     try {
-      const response =
-        decision === 'accept'
-          ? await acceptApplication(application.id)
-          : await rejectApplication(application.id)
-      showToast(
-        response.message ??
-          `Application ${decision === 'accept' ? 'accepted' : 'rejected'} successfully.`,
-        decision === 'accept' ? 'success' : 'error',
-      )
+      const request = response.type === 'application'
+        ? decision === 'accept' ? acceptApplication : rejectApplication
+        : decision === 'accept' ? acceptBid : rejectBid
+      const result = await request(response.id)
+      showToast(result.message ?? `${response.typeLabel} ${decision === 'accept' ? 'accepted' : 'rejected'} successfully.`, 'success')
       setSelected(null)
-      setRefreshKey((current) => current + 1)
-    } catch (requestError) {
-      const message = getErrorMessage(
-        requestError,
-        'Unable to review this application.',
-      )
-      showToast(message, 'error')
-      if (requestError.response?.status === 409) {
+      if (response.type === 'application') {
+        setApplications((current) => ({ ...current, loading: true, error: false }))
+        setApplicationRefresh((current) => current + 1)
+      } else {
+        setProposals((current) => ({ ...current, loading: true, error: false }))
+        setProposalRefresh((current) => current + 1)
+      }
+    } catch (error) {
+      showToast(`Unable to ${decision} this ${response.type}. Please try again.`, 'error')
+      if (error.response?.status === 409) {
         setSelected(null)
-        setRefreshKey((current) => current + 1)
+        if (response.type === 'application') setApplicationRefresh((current) => current + 1)
+        else setProposalRefresh((current) => current + 1)
       }
     } finally {
-      setReviewing(null)
+      setReviewing('')
     }
   }
 
-  const Actions = ({ application }) => {
-    const isPending = application.status === 'Pending'
+  const pendingApplications = applications.items.filter((item) => item.statusValue === 'pending').length
+  const pendingProposals = proposals.items.filter((item) => item.statusValue === 'pending').length
+  const summary = [
+    { label: type === 'applications' && status !== 'all' ? 'Matching applications' : 'Applications', value: applications.loading || applications.error ? '—' : applications.total, path: '/company/applications?type=applications' },
+    { label: type === 'proposals' && status !== 'all' ? 'Matching proposals' : 'Proposals', value: proposals.loading || proposals.error ? '—' : proposals.total, path: '/company/applications?type=proposals' },
+    { label: 'Pending applications on page', value: applications.loading || applications.error ? '—' : pendingApplications, path: '/company/applications?type=applications&status=pending' },
+    { label: 'Pending proposals on page', value: proposals.loading || proposals.error ? '—' : pendingProposals, path: '/company/applications?type=proposals&status=pending' },
+  ]
 
-    return (
-      <div className="flex flex-wrap justify-end gap-2">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setSelected(application)}
-        >
-          View Profile
-        </Button>
-        <Button
-          size="sm"
-          disabled={!isPending || reviewing !== null}
-          onClick={() => reviewApplication(application, 'accept')}
-        >
-          {reviewing === `${application.id}:accept` ? 'Accepting...' : 'Accept'}
-        </Button>
-        <Button
-          variant="danger"
-          size="sm"
-          disabled={!isPending || reviewing !== null}
-          onClick={() => reviewApplication(application, 'reject')}
-        >
-          {reviewing === `${application.id}:reject` ? 'Rejecting...' : 'Reject'}
-        </Button>
-      </div>
-    )
+  const clearLocalFilters = () => {
+    setSearch('')
+    setApplicationPage(1)
+    setProposalPage(1)
+    updateParams({ status: null, job_id: null, project_id: null })
   }
 
   return (
     <DashboardLayout title="Applications" userType="Company">
-      <div className="space-y-8">
+      <div className="min-w-0 space-y-7">
+        <section>
+          <p className="font-mono text-sm text-[#64ffda]">Response workspace</p>
+          <h2 className="mt-2 text-3xl font-bold">Applications</h2>
+          <p className="mt-2 max-w-2xl text-[#8892b0]">Review job applications and company project proposals in one place.</p>
+        </section>
+
+        <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          {summary.map((item) => <Link key={item.label} to={item.path} onClick={() => {
+            setApplicationPage(1)
+            setProposalPage(1)
+          }} className="rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#64ffda]"><Card hover className="h-full"><p className="text-sm text-[#8892b0]">{item.label}</p><p className="mt-3 text-3xl font-bold">{item.value}</p></Card></Link>)}
+        </section>
+
         <CompanyApplicationTabs />
-        <section>
-          <p className="font-mono text-sm text-[#64ffda]">Hiring pipeline</p>
-          <h2 className="mt-2 text-2xl font-bold sm:text-3xl">Applications</h2>
-          <p className="mt-3 text-[#8892b0]">
-            Review members who applied for your job opportunities.
-          </p>
-        </section>
 
-        <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          {stats.map((item, index) => (
-            <Card key={item.label} hover>
-              <div className="flex justify-between">
-                <div>
-                  <p className="text-sm text-[#8892b0]">{item.label}</p>
-                  <p className="mt-3 text-3xl font-bold">{item.value}</p>
-                </div>
-                <span className="font-mono text-xs text-[#64ffda]">
-                  0{index + 1}
-                </span>
-              </div>
-            </Card>
-          ))}
-        </section>
-
-        <Card>
-          <div className="grid gap-4 md:grid-cols-3">
-            <div>
-              <label
-                htmlFor="company-application-search"
-                className="mb-2 block text-xs text-[#8892b0]"
-              >
-                Search
-              </label>
-              <input
-                id="company-application-search"
-                type="search"
-                value={search}
-                onChange={(event) => setSearch(event.target.value)}
-                placeholder="Member or job title..."
-                className={inputClasses}
-              />
-            </div>
-            <div>
-              <label
-                htmlFor="company-application-status"
-                className="mb-2 block text-xs text-[#8892b0]"
-              >
-                Status
-              </label>
-              <select
-                id="company-application-status"
-                value={status}
-                onChange={(event) => {
-                  setStatus(event.target.value)
-                  setPage(1)
-                  setJob('All jobs')
-                }}
-                className={inputClasses}
-              >
-                {['All statuses', 'Pending', 'Accepted', 'Rejected'].map(
-                  (item) => (
-                    <option key={item}>{item}</option>
-                  ),
-                )}
-              </select>
-            </div>
-            <div>
-              <label
-                htmlFor="company-application-job"
-                className="mb-2 block text-xs text-[#8892b0]"
-              >
-                Job
-              </label>
-              <select
-                id="company-application-job"
-                value={job}
-                onChange={(event) => setJob(event.target.value)}
-                className={inputClasses}
-              >
-                <option>All jobs</option>
-                {jobs.map((item) => (
-                  <option key={item}>{item}</option>
-                ))}
-              </select>
-            </div>
+        <section className="grid min-w-0 gap-3 sm:grid-cols-[minmax(0,1fr)_12rem]">
+          <div className="min-w-0">
+            <label htmlFor="company-response-search" className="sr-only">Search responses</label>
+            <input id="company-response-search" type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder={type === 'applications' ? 'Search candidates, jobs, or skills...' : 'Search candidates, projects, or proposals...'} className={controlClasses} />
           </div>
-        </Card>
-
-        <section>
-          <p className="mb-4 text-sm text-[#8892b0]">
-            Showing <span className="text-[#e6f1ff]">{filtered.length}</span>{' '}
-            applications
-          </p>
-
-          {isLoading ? (
-            <LoadingSpinner label="Loading company applications..." size="lg" />
-          ) : error ? (
-            <EmptyState
-              title="Unable to load applications"
-              description={error}
-            />
-          ) : filtered.length === 0 ? (
-            <EmptyState
-              title="No applications found"
-              description={
-                applications.length
-                  ? 'Try changing your search or job filter.'
-                  : 'No applications match the selected status.'
-              }
-            />
-          ) : (
-            <>
-              <Card padding="sm" className="hidden overflow-hidden md:block">
-                <div className="overflow-x-auto">
-                  <table className="w-full min-w-[1050px] text-left">
-                    <thead>
-                      <tr className="border-b border-[#233554] text-[11px] uppercase tracking-wider text-[#64748b]">
-                        <th className="px-4 py-3">Member</th>
-                        <th className="px-4 py-3">Job</th>
-                        <th className="px-4 py-3">Skills</th>
-                        <th className="px-4 py-3">Applied</th>
-                        <th className="px-4 py-3">Status</th>
-                        <th className="px-4 py-3 text-right">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filtered.map((item) => (
-                        <tr
-                          key={item.id}
-                          className="border-b border-[#233554]/70 last:border-0 hover:bg-[#172a45]/60"
-                        >
-                          <td className="px-4 py-4">
-                            <p className="text-sm font-medium">
-                              {item.candidateName}
-                            </p>
-                            <p className="mt-1 text-xs text-[#8892b0]">
-                              {item.location}
-                            </p>
-                          </td>
-                          <td className="px-4 py-4 text-sm text-[#8892b0]">
-                            {item.jobTitle}
-                          </td>
-                          <td className="px-4 py-4">
-                            <Skills items={item.skills} />
-                          </td>
-                          <td className="px-4 py-4 text-xs text-[#8892b0]">
-                            {item.dateApplied}
-                          </td>
-                          <td className="px-4 py-4">
-                            <StatusBadge status={item.status} />
-                          </td>
-                          <td className="px-4 py-4">
-                            <Actions application={item} />
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </Card>
-
-              <div className="space-y-4 md:hidden">
-                {filtered.map((item) => (
-                  <Card key={item.id} hover>
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <h3 className="font-semibold">{item.candidateName}</h3>
-                        <p className="mt-1 text-sm text-[#64ffda]">
-                          {item.jobTitle}
-                        </p>
-                      </div>
-                      <StatusBadge status={item.status} />
-                    </div>
-                    <p className="mt-3 text-xs text-[#8892b0]">
-                      {item.location} &middot; {item.dateApplied}
-                    </p>
-                    <div className="mt-4">
-                      <Skills items={item.skills} />
-                    </div>
-                    <div className="mt-5">
-                      <Actions application={item} />
-                    </div>
-                  </Card>
-                ))}
-              </div>
-            </>
-          )}
-
-          {!isLoading && !error && lastPage > 1 && (
-            <div className="mt-6 flex items-center justify-center gap-4">
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={page <= 1}
-                onClick={() => {
-                  setJob('All jobs')
-                  setPage((current) => current - 1)
-                }}
-              >
-                Previous
-              </Button>
-              <span className="text-sm text-[#8892b0]">
-                Page {pagination.current_page} of {lastPage}
-              </span>
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={page >= lastPage}
-                onClick={() => {
-                  setJob('All jobs')
-                  setPage((current) => current + 1)
-                }}
-              >
-                Next
-              </Button>
-            </div>
-          )}
+          <div>
+            <label htmlFor="company-response-status" className="sr-only">Filter response status</label>
+            <select id="company-response-status" value={status} onChange={(event) => changeStatus(event.target.value)} className={controlClasses}>
+              <option value="all">All statuses</option>
+              {validStatuses.map((value) => <option key={value} value={value}>{value.charAt(0).toUpperCase() + value.slice(1)}</option>)}
+            </select>
+          </div>
         </section>
+
+        {opportunityId && <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-[#64ffda]/30 bg-[#64ffda]/10 px-4 py-3 text-sm"><span>Filtering by {type === 'applications' ? 'job' : 'project'} ID {opportunityId}</span><button type="button" onClick={() => updateParams({ [opportunityFilterKey]: null })} className="font-semibold text-[#64ffda]">Clear opportunity filter</button></div>}
+
+        {type === 'applications' && applications.error && <p role="alert" className="rounded-lg border border-[#ef4444]/30 bg-[#ef4444]/10 px-4 py-3 text-sm text-[#fca5a5]">Applications could not be loaded right now. Proposals remain available.</p>}
+        {type === 'proposals' && proposals.error && <p role="alert" className="rounded-lg border border-[#ef4444]/30 bg-[#ef4444]/10 px-4 py-3 text-sm text-[#fca5a5]">Proposals could not be loaded right now. Applications remain available.</p>}
+
+        {activeSource.loading ? <LoadingSpinner label={`Loading ${type}...`} /> : !activeSource.error && visibleResponses.length > 0 ? (
+          <section className="grid min-w-0 gap-5 lg:grid-cols-2">{visibleResponses.map((response) => <CompanyResponseCard key={response.key} response={response} onReview={setSelected} />)}</section>
+        ) : !activeSource.error ? (
+          <EmptyState
+            title={search || opportunityId || status !== 'all' ? (status !== 'all' && !search && !opportunityId ? 'No responses have this status.' : 'No responses match your search.') : type === 'applications' ? 'No applications have been received yet.' : 'No project proposals have been received yet.'}
+            description={search || opportunityId || status !== 'all' ? 'Clear the current filters to see other responses.' : `New ${type} will appear here.`}
+            actionLabel={search || opportunityId || status !== 'all' ? 'Clear filters' : type === 'applications' ? 'View jobs' : 'View projects'}
+            onAction={search || opportunityId || status !== 'all' ? clearLocalFilters : () => navigate(type === 'applications' ? '/company/jobs' : '/company/projects')}
+          />
+        ) : null}
+
+        {!activeSource.loading && !activeSource.error && activeSource.lastPage > 1 && (
+          <div className="flex items-center justify-center gap-4">
+            <Button variant="outline" size="sm" disabled={activeSource.currentPage <= 1} onClick={() => {
+              if (type === 'applications') {
+                setApplications((current) => ({ ...current, loading: true, error: false }))
+                setApplicationPage((page) => page - 1)
+              } else {
+                setProposals((current) => ({ ...current, loading: true, error: false }))
+                setProposalPage((page) => page - 1)
+              }
+            }}>Previous</Button>
+            <span className="text-sm text-[#8892b0]">Page {activeSource.currentPage} of {activeSource.lastPage}</span>
+            <Button variant="outline" size="sm" disabled={activeSource.currentPage >= activeSource.lastPage} onClick={() => {
+              if (type === 'applications') {
+                setApplications((current) => ({ ...current, loading: true, error: false }))
+                setApplicationPage((page) => page + 1)
+              } else {
+                setProposals((current) => ({ ...current, loading: true, error: false }))
+                setProposalPage((page) => page + 1)
+              }
+            }}>Next</Button>
+          </div>
+        )}
       </div>
 
-      {selected && (
-        <div
-          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 px-4 backdrop-blur-sm"
-          onMouseDown={(event) => {
-            if (event.target === event.currentTarget) setSelected(null)
-          }}
-        >
-          <Card padding="lg" className="w-full max-w-lg shadow-2xl">
-            <div
-              role="dialog"
-              aria-modal="true"
-              aria-labelledby="candidate-profile-title"
-            >
-              <p className="font-mono text-xs uppercase text-[#64ffda]">
-                Member profile
-              </p>
-              <h2
-                id="candidate-profile-title"
-                className="mt-2 text-2xl font-bold"
-              >
-                {selected.candidateName}
-              </h2>
-              <p className="mt-1 text-sm text-[#64ffda]">
-                {selected.headline}
-              </p>
-              <div className="mt-5 grid gap-4 border-y border-[#233554] py-5 sm:grid-cols-2">
-                <div>
-                  <p className="text-xs text-[#64748b]">Job</p>
-                  <p className="mt-1 text-sm text-[#e6f1ff]">
-                    {selected.jobTitle}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-xs text-[#64748b]">Location</p>
-                  <p className="mt-1 text-sm text-[#e6f1ff]">
-                    {selected.location}
-                  </p>
-                </div>
-                {selected.candidateEmail && (
-                  <div className="sm:col-span-2">
-                    <p className="text-xs text-[#64748b]">Email</p>
-                    <p className="mt-1 text-sm text-[#e6f1ff]">
-                      {selected.candidateEmail}
-                    </p>
-                  </div>
-                )}
-              </div>
-              <div className="mt-5">
-                <Skills items={selected.skills} />
-              </div>
-              <div className="mt-5">
-                <p className="text-xs text-[#64748b]">Cover letter</p>
-                <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-[#8892b0]">
-                  {selected.coverLetter || 'No cover letter provided.'}
-                </p>
-              </div>
-              <div className="mt-6 flex justify-end">
-                <Button variant="outline" onClick={() => setSelected(null)}>
-                  Close
-                </Button>
-              </div>
-            </div>
-          </Card>
-        </div>
-      )}
+      <CompanyResponseReviewModal response={selected} reviewing={reviewing} onClose={closeReview} onDecision={reviewResponse} />
     </DashboardLayout>
   )
 }

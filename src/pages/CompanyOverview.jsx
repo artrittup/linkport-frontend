@@ -8,6 +8,7 @@ import Card from '../components/Card'
 import LoadingSpinner from '../components/LoadingSpinner'
 import PostOpportunityMenu from '../components/PostOpportunityMenu'
 import CompanyLayout from '../layouts/CompanyLayout'
+import { getCompanyProfileCompleteness } from '../utils/companyProfile'
 
 const initialSource = { data: null, loading: true, error: false }
 
@@ -80,8 +81,11 @@ export default function CompanyOverview() {
   if (!summary.loading && !summary.error && count('pending_bids_count') > 0) {
     attention.push({ text: `${count('pending_bids_count')} proposal${count('pending_bids_count') === 1 ? '' : 's'} awaiting review`, path: '/company/applications?type=proposals&status=pending' })
   }
-  if (!profile.loading && !profile.error && (!profile.data?.company_name || !profile.data?.industry || !profile.data?.description)) {
+  if (!profile.loading && !profile.error && getCompanyProfileCompleteness(profile.data).percentage < 100) {
     attention.push({ text: 'Complete your company profile', path: '/company/profile' })
+  }
+  if (!profile.loading && profile.error) {
+    attention.push({ text: 'Profile completeness could not be checked', path: '/company/profile' })
   }
   if (!jobs.loading && !projects.loading && !jobs.error && !projects.error && opportunities.length === 0) {
     attention.push({ text: 'Publish your first active opportunity', path: '/company/opportunities' })

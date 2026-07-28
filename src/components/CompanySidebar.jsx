@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router'
 import linkPortLogo from '../assets/linkport-logo.svg'
 import { getNavigationForRole } from '../config/navigation'
@@ -5,6 +6,8 @@ import { useAuth } from '../context/AuthContext'
 import GlobalSearch from './GlobalSearch'
 import NotificationBell from './NotificationBell'
 import PostOpportunityMenu from './PostOpportunityMenu'
+import CompanyBrandMark from './CompanyBrandMark'
+import { COMPANY_PROFILE_UPDATED_EVENT } from '../utils/companyProfile'
 
 function Icon({ name }) {
   const paths = {
@@ -45,14 +48,20 @@ export default function CompanySidebar({ isOpen, onClose }) {
   const navigate = useNavigate()
   const { logout, user } = useAuth()
   const items = getNavigationForRole('company')
-  const companyName = user?.name || 'Company'
-  const initials = companyName
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0])
-    .join('')
-    .toUpperCase()
+  const [brand, setBrand] = useState(() => ({
+    companyName: user?.company_profile?.company_name || user?.name || 'Company',
+    logoUrl: user?.company_profile?.logo_url || '',
+  }))
+  const companyName = brand.companyName
+
+  useEffect(() => {
+    const updateBrand = (event) => setBrand({
+      companyName: event.detail?.companyName || user?.name || 'Company',
+      logoUrl: event.detail?.logoUrl || '',
+    })
+    window.addEventListener(COMPANY_PROFILE_UPDATED_EVENT, updateBrand)
+    return () => window.removeEventListener(COMPANY_PROFILE_UPDATED_EVENT, updateBrand)
+  }, [user?.name])
 
   const handleLogout = async () => {
     await logout()
@@ -112,7 +121,7 @@ export default function CompanySidebar({ isOpen, onClose }) {
             Explore LinkPort
           </Link>
           <div className="mt-3 flex items-center gap-3 rounded-xl px-2 py-2">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[#64ffda]/35 bg-[#112240] font-mono text-xs font-semibold text-[#64ffda]">{initials || 'CO'}</div>
+            <CompanyBrandMark name={companyName} logoUrl={brand.logoUrl} size="sm" />
             <p className="min-w-0 flex-1 truncate text-sm font-medium text-[#e6f1ff]">{companyName}</p>
           </div>
           <button type="button" onClick={handleLogout} className="mt-1 flex w-full items-center justify-center rounded-lg px-3 py-2.5 text-sm font-medium text-[#f87171] hover:bg-[#ef4444]/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ef4444]">

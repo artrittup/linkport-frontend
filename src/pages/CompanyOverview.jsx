@@ -65,8 +65,8 @@ export default function CompanyOverview() {
     return Number.isFinite(value) ? value : 0
   }
   const opportunities = useMemo(() => [
-    ...(jobs.data ?? []).map((item) => ({ ...item, kind: 'Job', responses: item.applications, managePath: '/company/jobs' })),
-    ...(projects.data ?? []).map((item) => ({ ...item, kind: 'Project', responses: item.bids, managePath: '/company/projects' })),
+    ...(jobs.data ?? []).map((item) => ({ ...item, kind: 'Job', responses: item.applications, managePath: '/company/jobs', listPath: '/company/opportunities?type=jobs' })),
+    ...(projects.data ?? []).map((item) => ({ ...item, kind: 'Project', responses: item.bids, managePath: '/company/projects', listPath: '/company/opportunities?type=projects' })),
   ].slice(0, 5), [jobs.data, projects.data])
   const upcoming = opportunities.filter((item) => {
     if (!item.deadline) return false
@@ -152,8 +152,8 @@ export default function CompanyOverview() {
               <h3 className="text-lg font-semibold">Quick actions</h3>
               <div className="mt-4 grid gap-2">
                 {[
-                  ['Post a job', '/company/jobs'],
-                  ['Post a project', '/company/projects'],
+                  ['Post a job', '/company/jobs/create'],
+                  ['Post a project', '/company/projects/create'],
                   ['Review applications', '/company/applications'],
                   ['Review proposals', '/company/bids'],
                   ['Update company profile', '/company/profile'],

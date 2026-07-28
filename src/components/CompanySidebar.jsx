@@ -28,8 +28,8 @@ function isActive(item, pathname) {
   }
   if (item.key === 'opportunities') {
     return pathname === '/company/opportunities'
-      || pathname === '/company/jobs'
-      || pathname === '/company/projects'
+      || pathname.startsWith('/company/jobs')
+      || pathname.startsWith('/company/projects')
   }
   if (item.key === 'applications') {
     return pathname === '/company/applications' || pathname === '/company/bids'

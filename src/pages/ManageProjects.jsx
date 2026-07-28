@@ -62,7 +62,7 @@ function StatusBadge({ status }) {
   )
 }
 
-export default function ManageProjects() {
+export default function ManageProjects({ initialCreate = false }) {
   const navigate = useNavigate()
   const { showToast } = useToast()
   const [projects, setProjects] = useState([])
@@ -77,7 +77,7 @@ export default function ManageProjects() {
   const [refreshKey, setRefreshKey] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
-  const [isFormOpen, setIsFormOpen] = useState(false)
+  const [isFormOpen, setIsFormOpen] = useState(initialCreate)
   const [editingId, setEditingId] = useState(null)
   const [form, setForm] = useState(emptyForm)
   const [skills, setSkills] = useState([])
@@ -162,6 +162,7 @@ export default function ManageProjects() {
       setIsFormOpen(false)
       setEditingId(null)
       setFormError('')
+      if (initialCreate) navigate('/company/projects', { replace: true })
     }
   }
 
@@ -229,6 +230,7 @@ export default function ManageProjects() {
       setIsFormOpen(false)
       setEditingId(null)
       setRefreshKey((current) => current + 1)
+      if (initialCreate) navigate('/company/projects', { replace: true })
     } catch (requestError) {
       setFormError(
         getErrorMessage(requestError, 'Unable to save this project.'),

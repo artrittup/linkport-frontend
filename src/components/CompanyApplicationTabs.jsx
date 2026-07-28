@@ -1,8 +1,8 @@
 import { Link, useLocation } from 'react-router'
 
 const tabs = [
-  { label: 'Applications', path: '/company/applications' },
-  { label: 'Proposals', path: '/company/bids' },
+  { label: 'Applications', path: '/company/applications?type=applications', pathname: '/company/applications' },
+  { label: 'Proposals', path: '/company/bids?type=proposals', pathname: '/company/bids' },
 ]
 
 export default function CompanyApplicationTabs() {
@@ -11,7 +11,7 @@ export default function CompanyApplicationTabs() {
   return (
     <nav className="flex gap-1 overflow-x-auto border-b border-[#233554]" aria-label="Application pipeline">
       {tabs.map((tab) => {
-        const active = pathname === tab.path
+        const active = pathname === tab.pathname
         return (
           <Link
             key={tab.path}

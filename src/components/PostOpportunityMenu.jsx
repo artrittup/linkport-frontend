@@ -5,7 +5,7 @@ const opportunityTypes = [
   {
     label: 'Post a job',
     description: 'Publish a role for candidates.',
-    path: '/company/jobs',
+    path: '/company/jobs/create',
   },
   {
     label: 'Post an internship',
@@ -14,7 +14,7 @@ const opportunityTypes = [
   {
     label: 'Post a company project',
     description: 'Publish a brief and receive proposals.',
-    path: '/company/projects',
+    path: '/company/projects/create',
   },
   {
     label: 'Create a challenge',

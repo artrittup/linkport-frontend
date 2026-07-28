@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router'
 import {
   createJob,
   deleteJob as removeJob,
@@ -40,7 +41,8 @@ function StatusBadge({ status }) {
   return <span className={`inline-flex rounded-full border px-2.5 py-1 text-[10px] font-semibold ${classes}`}>{status}</span>
 }
 
-export default function ManageJobs() {
+export default function ManageJobs({ initialCreate = false }) {
+  const navigate = useNavigate()
   const { showToast } = useToast()
   const [jobs, setJobs] = useState([])
   const [search, setSearch] = useState('')
@@ -50,7 +52,7 @@ export default function ManageJobs() {
   const [refreshKey, setRefreshKey] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
-  const [isFormOpen, setIsFormOpen] = useState(false)
+  const [isFormOpen, setIsFormOpen] = useState(initialCreate)
   const [editingId, setEditingId] = useState(null)
   const [form, setForm] = useState(emptyForm)
   const [skills, setSkills] = useState([])
@@ -103,7 +105,14 @@ export default function ManageJobs() {
   const lastPage = Math.max(1, Math.ceil(Number(pagination.total ?? 0) / Number(pagination.per_page ?? 15)))
 
   const updateField = (event) => setForm((current) => ({ ...current, [event.target.name]: event.target.value }))
-  const closeForm = () => { if (!isSaving) { setIsFormOpen(false); setEditingId(null); setFormError('') } }
+  const closeForm = () => {
+    if (!isSaving) {
+      setIsFormOpen(false)
+      setEditingId(null)
+      setFormError('')
+      if (initialCreate) navigate('/company/jobs', { replace: true })
+    }
+  }
   const openCreateForm = () => { setEditingId(null); setForm(emptyForm); setSkills([]); setOriginalDeadline(''); setFormError(''); setIsFormOpen(true) }
   const openEditForm = (job) => {
     setEditingId(job.id)
@@ -149,6 +158,7 @@ export default function ManageJobs() {
       setIsFormOpen(false)
       setEditingId(null)
       setRefreshKey((current) => current + 1)
+      if (initialCreate) navigate('/company/jobs', { replace: true })
     } catch (requestError) {
       setFormError(getErrorMessage(requestError, 'Unable to save this job.'))
     } finally {

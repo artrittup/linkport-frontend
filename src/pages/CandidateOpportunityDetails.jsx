@@ -7,7 +7,6 @@ import ApplyJobModal from '../components/ApplyJobModal'
 import Button from '../components/Button'
 import LoadingSpinner from '../components/LoadingSpinner'
 import SendBidModal from '../components/SendBidModal'
-import { getMockOpportunity, OPPORTUNITY_TYPES } from '../data/mockOpportunities'
 import { jobToOpportunity, projectToOpportunity } from '../data/opportunityAdapters'
 import useToast from '../hooks/useToast'
 import CandidateLayout from '../layouts/CandidateLayout'
@@ -16,7 +15,6 @@ const typeClasses = {
   JOB: 'border-[#60a5fa]/30 bg-[#60a5fa]/10 text-[#93c5fd]',
   INTERNSHIP: 'border-[#a78bfa]/30 bg-[#a78bfa]/10 text-[#c4b5fd]',
   'COMPANY PROJECT': 'border-[#64ffda]/30 bg-[#64ffda]/10 text-[#64ffda]',
-  CHALLENGE: 'border-[#facc15]/30 bg-[#facc15]/10 text-[#fde047]',
 }
 
 function formatDeadline(deadline) {
@@ -51,9 +49,7 @@ export default function CandidateOpportunityDetails() {
         } else if (opportunityId.startsWith('project-')) {
           const response = await getProjectById(opportunityId.slice(8))
           result = projectToOpportunity(response.project)
-        } else {
-          result = getMockOpportunity(opportunityId)
-        }
+        } else result = null
 
         if (!isActive) return
         if (result) setOpportunity(result)
@@ -81,10 +77,6 @@ export default function CandidateOpportunityDetails() {
       return
     }
 
-    const message = opportunity.type === OPPORTUNITY_TYPES.CHALLENGE
-      ? 'Challenge submissions will be available in a future update.'
-      : 'Applications for this preview internship are not open yet.'
-    showToast(message, 'info')
   }
 
   if (isLoading) {
@@ -167,11 +159,8 @@ export default function CandidateOpportunityDetails() {
           </dl>
 
           <Button className="mt-7 w-full" onClick={handlePrimaryAction}>
-            {opportunity.type === OPPORTUNITY_TYPES.CHALLENGE ? 'View challenge details' : opportunity.actionLabel}
+            {opportunity.actionLabel}
           </Button>
-          {opportunity.source === 'mock' && (
-            <p className="mt-3 text-center text-xs text-[#64748b]">Preview only; no information will be sent.</p>
-          )}
         </aside>
       </article>
 

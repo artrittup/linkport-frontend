@@ -1,4 +1,8 @@
-import { OPPORTUNITY_TYPES } from './mockOpportunities'
+export const OPPORTUNITY_TYPES = {
+  JOB: 'JOB',
+  INTERNSHIP: 'INTERNSHIP',
+  PROJECT: 'COMPANY PROJECT',
+}
 
 function inferWorkStyle(location = '') {
   const value = location.toLowerCase()

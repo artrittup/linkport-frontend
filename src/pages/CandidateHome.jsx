@@ -29,22 +29,6 @@ function formatFeedTimestamp(value) {
     : date.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })
 }
 
-const defaultFeedItems = [
-  {
-    id: 2,
-    filter: 'Opportunities',
-    type: 'OPPORTUNITY',
-    title: 'Frontend Developer Internship',
-    description: 'Join a small product team and help build accessible tools for local businesses.',
-    author: 'Northstar Studio',
-    tags: ['JavaScript', 'UI', 'Internship'],
-    meta: 'Prishtina · Apply by August 18',
-    action: 'View opportunity',
-    path: '/candidate/opportunities/internship-northstar-frontend',
-    createdAt: null,
-  },
-]
-
 function FeedCard({ item }) {
   return (
     <article className="flex h-full min-w-0 max-w-full flex-col rounded-2xl border border-[#233554] bg-[#112240]/65 p-5 sm:p-6">
@@ -209,7 +193,6 @@ export default function CandidateHome() {
       path: `/candidate/opportunities/${opportunity.id}`,
       createdAt: opportunity.sourceData?.created_at ?? null,
     })),
-    ...defaultFeedItems,
   ].sort((first, second) => {
     const firstTimestamp = Date.parse(first.createdAt)
     const secondTimestamp = Date.parse(second.createdAt)

@@ -20,6 +20,10 @@ const roleStyle = {
   Company: 'bg-violet-500/10 text-violet-300',
 }
 const displayRole = (role) => role === 'Candidate' ? 'Member' : role
+const statusStyle = {
+  Active: 'bg-[#22c55e]/10 text-[#22c55e]',
+  Disabled: 'bg-[#ef4444]/10 text-[#fca5a5]',
+}
 
 const getErrorMessage = (error, fallback) => {
   const errors = error.response?.data?.errors
@@ -38,7 +42,7 @@ function UserBadges({ user }) {
         {displayRole(user.role)}
       </span>
       <span
-        className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${user.status === 'Active' ? 'bg-[#22c55e]/10 text-[#22c55e]' : 'bg-[#ef4444]/10 text-[#ef4444]'}`}
+        className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${statusStyle[user.status] ?? 'bg-[#233554] text-[#a8b2d1]'}`}
       >
         {user.status}
       </span>
@@ -113,8 +117,12 @@ export default function AdminUsers() {
   )
 
   const toggleStatus = async (user) => {
-    if (user.role === 'Admin') return
+    if (user.role === 'Admin' || updatingId !== null || deletingId !== null) return
     const nextStatus = user.status === 'Active' ? 'disabled' : 'active'
+    if (
+      nextStatus === 'disabled'
+      && !window.confirm(`Disable “${user.name}”? Their active sessions will be ended.`)
+    ) return
     setUpdatingId(user.id)
     try {
       const response = await updateUserStatus(user.id, nextStatus)
@@ -138,7 +146,12 @@ export default function AdminUsers() {
   }
 
   const removeUser = async (user) => {
-    if (user.role === 'Admin' || !window.confirm(`Delete ${user.name}?`)) return
+    if (
+      user.role === 'Admin'
+      || updatingId !== null
+      || deletingId !== null
+      || !window.confirm(`Delete “${user.name}”? This action may not be reversible.`)
+    ) return
 
     setDeletingId(user.id)
     try {
@@ -161,12 +174,6 @@ export default function AdminUsers() {
 
   const viewUser = (user) => {
     setSelectedUser(user)
-    const profile = user.candidateProfile ?? user.companyProfile
-    const profileDetail =
-      profile?.headline ?? profile?.company_name ?? 'No profile details available'
-    void [
-      `${user.name}\n${user.email}\n${displayRole(user.role)} · ${user.status}\n${profileDetail}`,
-    ]
   }
 
   const Actions = ({ user }) => {
@@ -288,7 +295,7 @@ export default function AdminUsers() {
                           <td className="p-4 text-sm font-medium">
                             {user.name}
                           </td>
-                          <td className="p-4 text-sm text-[#8892b0]">
+                          <td className="break-all p-4 text-sm text-[#8892b0]">
                             {user.email}
                           </td>
                           <td className="p-4">
@@ -300,11 +307,7 @@ export default function AdminUsers() {
                           </td>
                           <td className="p-4">
                             <span
-                              className={
-                                user.status === 'Active'
-                                  ? 'text-[#22c55e]'
-                                  : 'text-[#ef4444]'
-                              }
+                              className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${statusStyle[user.status] ?? 'bg-[#233554] text-[#a8b2d1]'}`}
                             >
                               {user.status}
                             </span>
@@ -326,7 +329,7 @@ export default function AdminUsers() {
                 {users.map((user) => (
                   <Card key={user.id} hover>
                     <h3 className="font-semibold">{user.name}</h3>
-                    <p className="mt-1 text-sm text-[#8892b0]">
+                    <p className="mt-1 break-all text-sm text-[#8892b0]">
                       {user.email}
                     </p>
                     <div className="mt-4 flex gap-2">

@@ -40,6 +40,8 @@ const AdminDashboard = lazy(() => import('../pages/AdminDashboard'))
 const AdminUsers = lazy(() => import('../pages/AdminUsers'))
 const AdminJobs = lazy(() => import('../pages/AdminJobs'))
 const AdminProjects = lazy(() => import('../pages/AdminProjects'))
+const AdminOpportunities = lazy(() => import('../pages/AdminOpportunities'))
+const AdminCommunity = lazy(() => import('../pages/AdminCommunity'))
 const MemberPublicProfile = lazy(() => import('../pages/MemberPublicProfile'))
 const CompanyPublicProfile = lazy(() => import('../pages/CompanyPublicProfile'))
 const Notifications = lazy(() => import('../pages/Notifications'))
@@ -109,8 +111,11 @@ export default function AppRoutes() {
         <Route path="/company/bids" element={<ProtectedRoute allowedRoles={companyRoles}><Navigate to="/company/applications?type=proposals" replace /></ProtectedRoute>} />
         <Route path="/candidate/dashboard" element={<ProtectedRoute allowedRoles={candidateRoles}><Navigate to="/candidate/home" replace /></ProtectedRoute>} />
         <Route path="/company/dashboard" element={<ProtectedRoute allowedRoles={companyRoles}><Navigate to="/company/overview" replace /></ProtectedRoute>} />
-        <Route path="/admin/dashboard" element={<ProtectedRoute allowedRoles={adminRoles}><AdminDashboard /></ProtectedRoute>} />
+        <Route path="/admin/overview" element={<ProtectedRoute allowedRoles={adminRoles}><AdminDashboard /></ProtectedRoute>} />
+        <Route path="/admin/dashboard" element={<ProtectedRoute allowedRoles={adminRoles}><Navigate to="/admin/overview" replace /></ProtectedRoute>} />
         <Route path="/admin/users" element={<ProtectedRoute allowedRoles={adminRoles}><AdminUsers /></ProtectedRoute>} />
+        <Route path="/admin/opportunities" element={<ProtectedRoute allowedRoles={adminRoles}><AdminOpportunities /></ProtectedRoute>} />
+        <Route path="/admin/community" element={<ProtectedRoute allowedRoles={adminRoles}><AdminCommunity /></ProtectedRoute>} />
         <Route path="/admin/jobs" element={<ProtectedRoute allowedRoles={adminRoles}><AdminJobs /></ProtectedRoute>} />
         <Route path="/admin/projects" element={<ProtectedRoute allowedRoles={adminRoles}><AdminProjects /></ProtectedRoute>} />
         <Route path="*" element={<NotFound />} />

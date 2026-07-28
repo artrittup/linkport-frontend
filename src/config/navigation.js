@@ -14,11 +14,10 @@ export const ROLE_NAVIGATION = {
     { key: 'profile', label: 'Company Profile', path: '/company/profile' },
   ],
   admin: [
-    { key: 'dashboard', label: 'Dashboard', path: '/admin/dashboard' },
+    { key: 'overview', label: 'Overview', path: '/admin/overview' },
     { key: 'users', label: 'Users', path: '/admin/users' },
-    { key: 'jobs', label: 'Jobs', path: '/admin/jobs' },
-    { key: 'projects', label: 'Projects', path: '/admin/projects' },
-    { key: 'logout', label: 'Logout', path: '/login' },
+    { key: 'opportunities', label: 'Opportunities', path: '/admin/opportunities' },
+    { key: 'community', label: 'Community', path: '/admin/community' },
   ],
 }
 

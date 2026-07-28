@@ -9,7 +9,7 @@ import useToast from '../hooks/useToast'
 import DashboardLayout from '../layouts/DashboardLayout'
 
 const control =
-  'rounded-md border border-[#233554] bg-[#0a192f]/70 px-4 py-3 text-sm outline-none focus:border-[#64ffda]'
+  'w-full rounded-md border border-[#233554] bg-[#0a192f]/70 px-4 py-3 text-sm text-[#e6f1ff] outline-none focus:border-[#64ffda]'
 
 const getErrorMessage = (error, fallback) =>
   error.response?.data?.message || fallback
@@ -95,7 +95,10 @@ export default function AdminJobs() {
   )
 
   const removeJob = async (job) => {
-    if (!window.confirm(`Delete “${job.title}”?`)) return
+    if (
+      deletingId !== null
+      || !window.confirm(`Delete “${job.title}”? This action may not be reversible.`)
+    ) return
 
     setDeletingId(job.id)
     try {
@@ -207,7 +210,7 @@ export default function AdminJobs() {
                       key={job.id}
                       className="border-b border-[#233554]/70 last:border-0"
                     >
-                      <td className="p-4 text-sm font-medium">{job.title}</td>
+                      <td className="break-words p-4 text-sm font-medium">{job.title}</td>
                       <td className="p-4 text-sm text-[#64ffda]">
                         {job.company}
                       </td>
@@ -235,7 +238,7 @@ export default function AdminJobs() {
               <Card key={job.id} hover>
                 <div className="flex justify-between gap-3">
                   <div>
-                    <h3 className="font-semibold">{job.title}</h3>
+                    <h3 className="break-words font-semibold">{job.title}</h3>
                     <p className="mt-1 text-sm text-[#64ffda]">
                       {job.company}
                     </p>

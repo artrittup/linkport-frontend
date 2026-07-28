@@ -1,4 +1,5 @@
 import api from './axios'
+import { normalizeFlatPaginatedResponse } from '../utils/apiResponse'
 
 const capitalize = (value) =>
   value ? value.charAt(0).toUpperCase() + value.slice(1) : 'Unknown'
@@ -10,13 +11,11 @@ const formatDate = (value) =>
       )
     : 'Unknown date'
 
-const normalizePagination = (payload, params, normalizeItem) => ({
-  ...(payload ?? {}),
-  data: Array.isArray(payload?.data) ? payload.data.map(normalizeItem) : [],
-  current_page: Number(payload?.current_page ?? 1),
-  total: Number(payload?.total ?? 0),
-  per_page: Number(payload?.per_page ?? params?.per_page ?? 15),
-})
+const normalizePagination = (payload, params, normalizeItem) =>
+  normalizeFlatPaginatedResponse(payload, {
+    mapItem: normalizeItem,
+    perPage: params?.per_page ?? 15,
+  })
 
 const normalizeUser = (user) => ({
   ...user,

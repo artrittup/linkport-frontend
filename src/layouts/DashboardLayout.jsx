@@ -3,6 +3,7 @@ import Sidebar from '../components/Sidebar'
 import Topbar from '../components/Topbar'
 import { getNavigationForRole } from '../config/navigation'
 import { useAuth } from '../context/AuthContext'
+import AdminLayout from './AdminLayout'
 import CandidateLayout from './CandidateLayout'
 import CompanyLayout from './CompanyLayout'
 
@@ -24,6 +25,14 @@ export default function DashboardLayout({ children, title, userType }) {
       <CompanyLayout title={title}>
         {children}
       </CompanyLayout>
+    )
+  }
+
+  if (user?.role === 'admin') {
+    return (
+      <AdminLayout title={title}>
+        {children}
+      </AdminLayout>
     )
   }
 

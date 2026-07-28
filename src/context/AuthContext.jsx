@@ -12,7 +12,7 @@ const AuthContext = createContext(null)
 const dashboardPaths = {
   candidate: '/candidate/home',
   company: '/company/overview',
-  admin: '/admin/dashboard',
+  admin: '/admin/overview',
 }
 
 export function getDashboardPath(role) {

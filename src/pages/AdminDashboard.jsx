@@ -1,141 +1,246 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router'
 import { getAdminJobs, getAdminProjects, getAdminUsers } from '../api/adminApi'
 import { getDashboardSummary } from '../api/dashboardApi'
 import Card from '../components/Card'
-import EmptyState from '../components/EmptyState'
 import LoadingSpinner from '../components/LoadingSpinner'
 import DashboardLayout from '../layouts/DashboardLayout'
 
-const displayRole = (role) => role === 'Candidate' ? 'Member' : role
+const initialSource = {
+  data: [],
+  total: 0,
+  loading: true,
+  error: '',
+}
 
-function RecentList({ items, getTitle, getMeta, href, isLoading, error }) {
+const sourceError = (fallback) => ({
+  data: [],
+  total: 0,
+  loading: false,
+  error: fallback,
+})
+
+function SummaryCard({ label, value, path }) {
   return (
-    <Card className="h-full">
-      {isLoading ? (
-        <p className="text-sm text-[#8892b0]">Loading records...</p>
-      ) : error ? (
-        <p role="alert" className="rounded-lg border border-[#ef4444]/30 bg-[#ef4444]/10 px-3 py-2 text-sm text-[#fca5a5]">{error}</p>
-      ) : items.length === 0 ? (
-        <p className="text-sm text-[#8892b0]">No records available.</p>
-      ) : (
-        <div className="space-y-1">
-          {items.map((item) => (
-            <div key={item.id} className="flex items-center justify-between gap-3 border-b border-[#233554]/70 py-3 first:pt-0 last:border-0 last:pb-0">
-              <div className="min-w-0">
-                <p className="truncate text-sm font-medium text-[#e6f1ff]">{getTitle(item)}</p>
-                <p className="mt-1 truncate text-xs text-[#8892b0]">{getMeta(item)}</p>
-              </div>
-              <span className="shrink-0 text-[10px] text-[#64ffda]">{item.status}</span>
-            </div>
-          ))}
-        </div>
-      )}
-      <Link to={href} className="mt-5 inline-block text-xs text-[#64ffda] hover:opacity-80">View all</Link>
-    </Card>
+    <Link to={path} className="rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#64ffda]">
+      <Card hover className="h-full">
+        <p className="text-sm text-[#8892b0]">{label}</p>
+        <p className="mt-3 text-3xl font-bold text-[#e6f1ff]">{value}</p>
+      </Card>
+    </Link>
+  )
+}
+
+function ActionLink({ to, title, description }) {
+  return (
+    <Link to={to} className="rounded-lg border border-[#233554] bg-[#112240] p-4 transition-colors hover:border-[#64ffda]/50 hover:bg-[#172a45] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#64ffda]">
+      <p className="font-semibold text-[#e6f1ff]">{title}</p>
+      <p className="mt-1 text-sm text-[#8892b0]">{description}</p>
+    </Link>
   )
 }
 
 export default function AdminDashboard() {
-  const [summary, setSummary] = useState({})
-  const [recentUsers, setRecentUsers] = useState([])
-  const [recentJobs, setRecentJobs] = useState([])
-  const [recentProjects, setRecentProjects] = useState([])
-  const [isLoadingSummary, setIsLoadingSummary] = useState(true)
-  const [isLoadingUsers, setIsLoadingUsers] = useState(true)
-  const [isLoadingJobs, setIsLoadingJobs] = useState(true)
-  const [isLoadingProjects, setIsLoadingProjects] = useState(true)
-  const [summaryError, setSummaryError] = useState('')
-  const [usersError, setUsersError] = useState('')
-  const [jobsError, setJobsError] = useState('')
-  const [projectsError, setProjectsError] = useState('')
+  const [summary, setSummary] = useState({
+    data: null,
+    loading: true,
+    error: '',
+  })
+  const [users, setUsers] = useState(initialSource)
+  const [jobs, setJobs] = useState(initialSource)
+  const [projects, setProjects] = useState(initialSource)
+  const [disabledUsers, setDisabledUsers] = useState(initialSource)
 
   useEffect(() => {
-    let isActive = true
+    let active = true
 
-    const messageFor = (error, fallback) => error?.response?.data?.message || fallback
+    getDashboardSummary()
+      .then((data) => {
+        if (active) setSummary({ data, loading: false, error: '' })
+      })
+      .catch(() => {
+        if (active) setSummary({ data: null, loading: false, error: 'Platform totals could not be loaded.' })
+      })
 
-    getDashboardSummary().then((response) => {
-      if (isActive) setSummary(response ?? {})
-    }).catch((error) => {
-      if (isActive) setSummaryError(messageFor(error, 'Unable to load platform totals.'))
-    }).finally(() => {
-      if (isActive) setIsLoadingSummary(false)
-    })
+    getAdminUsers({ per_page: 4 })
+      .then((response) => {
+        if (active) setUsers({ data: response.data, total: response.total, loading: false, error: '' })
+      })
+      .catch(() => {
+        if (active) setUsers(sourceError('Recent users could not be loaded.'))
+      })
 
-    getAdminUsers({ per_page: 4 }).then((response) => {
-      if (isActive) setRecentUsers(response.data)
-    }).catch((error) => {
-      if (isActive) setUsersError(messageFor(error, 'Unable to load recent users.'))
-    }).finally(() => {
-      if (isActive) setIsLoadingUsers(false)
-    })
+    getAdminJobs({ per_page: 4 })
+      .then((response) => {
+        if (active) setJobs({ data: response.data, total: response.total, loading: false, error: '' })
+      })
+      .catch(() => {
+        if (active) setJobs(sourceError('Recent jobs could not be loaded.'))
+      })
 
-    getAdminJobs({ per_page: 4 }).then((response) => {
-      if (isActive) setRecentJobs(response.data)
-    }).catch((error) => {
-      if (isActive) setJobsError(messageFor(error, 'Unable to load recent jobs.'))
-    }).finally(() => {
-      if (isActive) setIsLoadingJobs(false)
-    })
+    getAdminProjects({ per_page: 4 })
+      .then((response) => {
+        if (active) setProjects({ data: response.data, total: response.total, loading: false, error: '' })
+      })
+      .catch(() => {
+        if (active) setProjects(sourceError('Recent projects could not be loaded.'))
+      })
 
-    getAdminProjects({ per_page: 4 }).then((response) => {
-      if (isActive) setRecentProjects(response.data)
-    }).catch((error) => {
-      if (isActive) setProjectsError(messageFor(error, 'Unable to load recent projects.'))
-    }).finally(() => {
-      if (isActive) setIsLoadingProjects(false)
-    })
+    getAdminUsers({ status: 'disabled', per_page: 1 })
+      .then((response) => {
+        if (active) setDisabledUsers({ data: response.data, total: response.total, loading: false, error: '' })
+      })
+      .catch(() => {
+        if (active) setDisabledUsers(sourceError('Disabled-account status could not be checked.'))
+      })
 
     return () => {
-      isActive = false
+      active = false
     }
   }, [])
 
-  const count = (key) => {
-    const value = Number(summary[key])
-    return Number.isFinite(value) ? value : 0
-  }
+  const stats = summary.data ? [
+    { label: 'Total users', value: summary.data.users_count, path: '/admin/users' },
+    { label: 'Candidate accounts', value: summary.data.candidates_count, path: '/admin/users' },
+    { label: 'Company accounts', value: summary.data.companies_count, path: '/admin/users' },
+    { label: 'Jobs', value: summary.data.jobs_count, path: '/admin/jobs' },
+    { label: 'Company projects', value: summary.data.projects_count, path: '/admin/projects' },
+  ].filter((item) => Number.isFinite(Number(item.value))) : []
 
-  const stats = [
-    ['Total Users', count('users_count')],
-    ['Members', count('candidates_count')],
-    ['Companies', count('companies_count')],
-    ['Jobs', count('jobs_count')],
-    ['Projects', count('projects_count')],
-  ]
+  const attention = []
+  if (!disabledUsers.loading && !disabledUsers.error && disabledUsers.total > 0) {
+    attention.push({
+      key: 'disabled-users',
+      message: `${disabledUsers.total} disabled ${disabledUsers.total === 1 ? 'account requires' : 'accounts require'} visibility.`,
+      path: '/admin/users',
+      action: 'Manage users',
+    })
+  }
+  if (summary.data && Number(summary.data.jobs_count) === 0) {
+    attention.push({ key: 'no-jobs', message: 'No Jobs are currently available on the platform.', path: '/admin/jobs', action: 'Review Jobs' })
+  }
+  if (summary.data && Number(summary.data.projects_count) === 0) {
+    attention.push({ key: 'no-projects', message: 'No Company Projects are currently available.', path: '/admin/projects', action: 'Review Projects' })
+  }
+  ;[
+    summary.error,
+    disabledUsers.error,
+    users.error,
+    jobs.error,
+    projects.error,
+  ].filter(Boolean).forEach((message, index) => {
+    attention.push({ key: `load-error-${index}`, message, path: '/admin/overview', action: 'Try again later' })
+  })
+
+  const activity = useMemo(() => [
+    ...users.data.map((item) => ({
+      key: `user-${item.id}`,
+      title: item.name,
+      meta: `${item.role === 'Candidate' ? 'Member' : item.role} account`,
+      date: item.createdDate,
+      timestamp: item.created_at,
+      path: '/admin/users',
+    })),
+    ...jobs.data.map((item) => ({
+      key: `job-${item.id}`,
+      title: item.title,
+      meta: `Job · ${item.company}`,
+      date: item.createdDate,
+      timestamp: item.created_at,
+      path: '/admin/jobs',
+    })),
+    ...projects.data.map((item) => ({
+      key: `project-${item.id}`,
+      title: item.title,
+      meta: `Company Project · ${item.company}`,
+      date: item.createdDate,
+      timestamp: item.created_at,
+      path: '/admin/projects',
+    })),
+  ].sort((a, b) => {
+    const first = new Date(a.timestamp ?? 0).getTime()
+    const second = new Date(b.timestamp ?? 0).getTime()
+    return second - first
+  }).slice(0, 6), [jobs.data, projects.data, users.data])
+
+  const activityLoading = users.loading || jobs.loading || projects.loading
 
   return (
-    <DashboardLayout title="Admin Dashboard" userType="Admin">
-      <div className="space-y-10">
+    <DashboardLayout title="Admin Overview" userType="Admin">
+      <div className="min-w-0 space-y-10">
         <section>
-          <p className="font-mono text-sm text-[#64ffda]">Platform overview</p>
-          <h2 className="mt-2 text-2xl font-bold sm:text-3xl">Admin Dashboard</h2>
-          <p className="mt-3 text-[#8892b0]">Monitor users, companies, jobs, projects, applications, and bids.</p>
+          <p className="font-mono text-sm text-[#64ffda]">Platform operations</p>
+          <h2 className="mt-2 text-2xl font-bold sm:text-3xl">Admin Overview</h2>
+          <p className="mt-3 max-w-2xl text-[#8892b0]">Monitor platform participation and open the management area that needs attention next.</p>
 
-          {isLoadingSummary ? (
-            <LoadingSpinner label="Loading platform totals..." />
-          ) : summaryError ? (
-            <div className="mt-8"><EmptyState title="Unable to load totals" description={summaryError} /></div>
+          {summary.loading ? (
+            <div className="mt-8"><LoadingSpinner label="Loading platform totals..." /></div>
+          ) : summary.error ? (
+            <p role="alert" className="mt-8 rounded-lg border border-[#ef4444]/30 bg-[#ef4444]/10 px-4 py-3 text-sm text-[#fca5a5]">{summary.error}</p>
           ) : (
             <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-              {stats.map(([label, value], index) => (
-                <Card key={label} hover>
-                  <p className="text-sm text-[#8892b0]">{label}</p>
-                  <div className="mt-3 flex items-end justify-between"><p className="text-3xl font-bold">{value}</p><span className="font-mono text-xs text-[#64ffda]">0{index + 1}</span></div>
-                </Card>
-              ))}
+              {stats.map((item) => <SummaryCard key={item.label} {...item} />)}
             </div>
           )}
         </section>
 
         <section>
-            <h2 className="mb-5 text-xl font-semibold sm:text-2xl">Recent Activity</h2>
-            <div className="grid gap-5 lg:grid-cols-3">
-              <div><h3 className="mb-3 text-sm text-[#8892b0]">Recent Users</h3><RecentList items={recentUsers} getTitle={(item) => item.name} getMeta={(item) => `${displayRole(item.role)} - ${item.createdDate}`} href="/admin/users" isLoading={isLoadingUsers} error={usersError} /></div>
-              <div><h3 className="mb-3 text-sm text-[#8892b0]">Recent Jobs</h3><RecentList items={recentJobs} getTitle={(item) => item.title} getMeta={(item) => `${item.company} - ${item.createdDate}`} href="/admin/jobs" isLoading={isLoadingJobs} error={jobsError} /></div>
-              <div><h3 className="mb-3 text-sm text-[#8892b0]">Recent Projects</h3><RecentList items={recentProjects} getTitle={(item) => item.title} getMeta={(item) => `${item.company} - ${item.createdDate}`} href="/admin/projects" isLoading={isLoadingProjects} error={projectsError} /></div>
+          <h2 className="text-xl font-semibold sm:text-2xl">Needs your attention</h2>
+          <div className="mt-5">
+            {disabledUsers.loading && summary.loading ? (
+              <LoadingSpinner label="Checking platform status..." />
+            ) : attention.length === 0 ? (
+              <Card><p className="text-sm text-[#8892b0]">No urgent Admin actions were found.</p></Card>
+            ) : (
+              <Card padding="sm">
+                <div className="divide-y divide-[#233554]">
+                  {attention.slice(0, 5).map((item) => (
+                    <div key={item.key} className="flex flex-col gap-3 px-2 py-4 first:pt-2 last:pb-2 sm:flex-row sm:items-center sm:justify-between">
+                      <p className="text-sm text-[#a8b2d1]">{item.message}</p>
+                      <Link to={item.path} className="shrink-0 text-sm font-semibold text-[#64ffda] hover:opacity-80">{item.action}</Link>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+            )}
+          </div>
+        </section>
+
+        <section className="grid min-w-0 gap-6 lg:grid-cols-[minmax(0,1.3fr)_minmax(18rem,0.7fr)]">
+          <div className="min-w-0">
+            <h2 className="text-xl font-semibold sm:text-2xl">Recent platform activity</h2>
+            <div className="mt-5">
+              <Card>
+                {activityLoading && activity.length === 0 ? (
+                  <LoadingSpinner label="Loading recent activity..." />
+                ) : activity.length === 0 ? (
+                  <p className="text-sm text-[#8892b0]">No recent records are available.</p>
+                ) : (
+                  <div className="divide-y divide-[#233554]">
+                    {activity.map((item) => (
+                      <Link key={item.key} to={item.path} className="flex min-w-0 items-center justify-between gap-4 py-3 first:pt-0 last:pb-0 hover:text-[#64ffda]">
+                        <div className="min-w-0">
+                          <p className="break-words text-sm font-medium">{item.title}</p>
+                          <p className="mt-1 break-words text-xs text-[#8892b0]">{item.meta}</p>
+                        </div>
+                        <span className="shrink-0 text-xs text-[#64748b]">{item.date}</span>
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </Card>
             </div>
+          </div>
+
+          <div className="min-w-0">
+            <h2 className="text-xl font-semibold sm:text-2xl">Quick Actions</h2>
+            <div className="mt-5 grid gap-3">
+              <ActionLink to="/admin/users" title="Manage users" description="Search accounts and review access status." />
+              <ActionLink to="/admin/jobs" title="Review Jobs" description="Open existing Job management." />
+              <ActionLink to="/admin/projects" title="Review Projects" description="Open Company Project management." />
+              <ActionLink to="/admin/community" title="Community moderation" description="Review the currently connected moderation scope." />
+            </div>
+          </div>
         </section>
       </div>
     </DashboardLayout>

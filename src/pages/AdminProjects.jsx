@@ -9,7 +9,7 @@ import useToast from '../hooks/useToast'
 import DashboardLayout from '../layouts/DashboardLayout'
 
 const control =
-  'rounded-md border border-[#233554] bg-[#0a192f]/70 px-4 py-3 text-sm outline-none focus:border-[#64ffda]'
+  'w-full rounded-md border border-[#233554] bg-[#0a192f]/70 px-4 py-3 text-sm text-[#e6f1ff] outline-none focus:border-[#64ffda]'
 
 const getErrorMessage = (error, fallback) =>
   error.response?.data?.message || fallback
@@ -105,7 +105,10 @@ export default function AdminProjects() {
   )
 
   const removeProject = async (project) => {
-    if (!window.confirm(`Delete “${project.title}”?`)) return
+    if (
+      deletingId !== null
+      || !window.confirm(`Delete “${project.title}”? This action may not be reversible.`)
+    ) return
 
     setDeletingId(project.id)
     try {
@@ -219,7 +222,7 @@ export default function AdminProjects() {
                       key={project.id}
                       className="border-b border-[#233554]/70 last:border-0"
                     >
-                      <td className="p-4 text-sm font-medium">
+                      <td className="break-words p-4 text-sm font-medium">
                         {project.title}
                       </td>
                       <td className="p-4 text-sm text-[#64ffda]">
@@ -249,7 +252,7 @@ export default function AdminProjects() {
               <Card key={project.id} hover>
                 <div className="flex justify-between gap-3">
                   <div>
-                    <h3 className="font-semibold">{project.title}</h3>
+                    <h3 className="break-words font-semibold">{project.title}</h3>
                     <p className="mt-1 text-sm text-[#64ffda]">
                       {project.company}
                     </p>

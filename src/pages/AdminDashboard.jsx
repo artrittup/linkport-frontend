@@ -101,10 +101,10 @@ export default function AdminDashboard() {
 
   const stats = summary.data ? [
     { label: 'Total users', value: summary.data.users_count, path: '/admin/users' },
-    { label: 'Candidate accounts', value: summary.data.candidates_count, path: '/admin/users' },
-    { label: 'Company accounts', value: summary.data.companies_count, path: '/admin/users' },
-    { label: 'Jobs', value: summary.data.jobs_count, path: '/admin/jobs' },
-    { label: 'Company projects', value: summary.data.projects_count, path: '/admin/projects' },
+    { label: 'Candidate accounts', value: summary.data.candidates_count, path: '/admin/users?role=candidate' },
+    { label: 'Company accounts', value: summary.data.companies_count, path: '/admin/users?role=company' },
+    { label: 'Jobs', value: summary.data.jobs_count, path: '/admin/opportunities?type=jobs' },
+    { label: 'Company projects', value: summary.data.projects_count, path: '/admin/opportunities?type=projects' },
   ].filter((item) => Number.isFinite(Number(item.value))) : []
 
   const attention = []
@@ -112,15 +112,15 @@ export default function AdminDashboard() {
     attention.push({
       key: 'disabled-users',
       message: `${disabledUsers.total} disabled ${disabledUsers.total === 1 ? 'account requires' : 'accounts require'} visibility.`,
-      path: '/admin/users',
+      path: '/admin/users?status=disabled',
       action: 'Manage users',
     })
   }
   if (summary.data && Number(summary.data.jobs_count) === 0) {
-    attention.push({ key: 'no-jobs', message: 'No Jobs are currently available on the platform.', path: '/admin/jobs', action: 'Review Jobs' })
+    attention.push({ key: 'no-jobs', message: 'No Jobs are currently available on the platform.', path: '/admin/opportunities?type=jobs', action: 'Review Jobs' })
   }
   if (summary.data && Number(summary.data.projects_count) === 0) {
-    attention.push({ key: 'no-projects', message: 'No Company Projects are currently available.', path: '/admin/projects', action: 'Review Projects' })
+    attention.push({ key: 'no-projects', message: 'No Company Projects are currently available.', path: '/admin/opportunities?type=projects', action: 'Review Projects' })
   }
   ;[
     summary.error,
@@ -147,7 +147,7 @@ export default function AdminDashboard() {
       meta: `Job · ${item.company}`,
       date: item.createdDate,
       timestamp: item.created_at,
-      path: '/admin/jobs',
+      path: '/admin/opportunities?type=jobs',
     })),
     ...projects.data.map((item) => ({
       key: `project-${item.id}`,
@@ -155,7 +155,7 @@ export default function AdminDashboard() {
       meta: `Company Project · ${item.company}`,
       date: item.createdDate,
       timestamp: item.created_at,
-      path: '/admin/projects',
+      path: '/admin/opportunities?type=projects',
     })),
   ].sort((a, b) => {
     const first = new Date(a.timestamp ?? 0).getTime()
@@ -236,8 +236,8 @@ export default function AdminDashboard() {
             <h2 className="text-xl font-semibold sm:text-2xl">Quick Actions</h2>
             <div className="mt-5 grid gap-3">
               <ActionLink to="/admin/users" title="Manage users" description="Search accounts and review access status." />
-              <ActionLink to="/admin/jobs" title="Review Jobs" description="Open existing Job management." />
-              <ActionLink to="/admin/projects" title="Review Projects" description="Open Company Project management." />
+              <ActionLink to="/admin/opportunities?type=jobs" title="Review Jobs" description="Open Job management." />
+              <ActionLink to="/admin/opportunities?type=projects" title="Review Projects" description="Open Company Project management." />
               <ActionLink to="/admin/community" title="Community moderation" description="Review the currently connected moderation scope." />
             </div>
           </div>

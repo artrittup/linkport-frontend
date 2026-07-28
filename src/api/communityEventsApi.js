@@ -41,6 +41,11 @@ export async function getMyCommunityEvents(params = {}) {
   return mapPaginatedEvents(response.data, params.per_page ?? 15)
 }
 
+export async function deleteCommunityEvent(id) {
+  const response = await api.delete(`/community-events/${id}`)
+  return response.data
+}
+
 export function getCommunityEventErrorMessage(error, fallback = 'Community events are temporarily unavailable. Please try again.') {
   const status = error.response?.status
   return status && status < 500

@@ -1,8 +1,12 @@
 import api from './axios'
 import { normalizeFlatPaginatedResponse } from '../utils/apiResponse'
 
-const capitalize = (value) =>
-  value ? value.charAt(0).toUpperCase() + value.slice(1) : 'Unknown'
+const readableLabel = (value) => {
+  const normalized = String(value ?? '').trim().replace(/[_-]+/g, ' ')
+  return normalized
+    ? normalized.replace(/\b\w/g, (character) => character.toUpperCase())
+    : 'Unknown'
+}
 
 const formatDate = (value) =>
   value
@@ -21,8 +25,8 @@ const normalizeUser = (user) => ({
   ...user,
   name: user?.name ?? 'Unknown user',
   email: user?.email ?? 'Email unavailable',
-  role: capitalize(user?.role),
-  status: capitalize(user?.status),
+  role: readableLabel(user?.role),
+  status: readableLabel(user?.status),
   createdDate: formatDate(user?.created_at),
   candidateProfile: user?.candidate_profile ?? null,
   companyProfile: user?.company_profile ?? null,
@@ -36,7 +40,7 @@ const normalizeJob = (job) => ({
     job?.company?.name ??
     'Unknown company',
   location: job?.location ?? 'Location unavailable',
-  status: capitalize(job?.status),
+  status: readableLabel(job?.status),
   createdDate: formatDate(job?.created_at),
 })
 
@@ -47,7 +51,7 @@ const normalizeProject = (project) => ({
     project?.company?.company_profile?.company_name ??
     project?.company?.name ??
     'Unknown company',
-  status: capitalize(project?.status),
+  status: readableLabel(project?.status),
   createdDate: formatDate(project?.created_at),
 })
 

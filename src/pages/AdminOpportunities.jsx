@@ -1,21 +1,13 @@
 import { Link, useSearchParams } from 'react-router'
-import Card from '../components/Card'
+import AdminOpportunityList from '../components/AdminOpportunityList'
 import DashboardLayout from '../layouts/DashboardLayout'
 
 const types = {
   jobs: {
     label: 'Jobs',
-    title: 'Job management',
-    description: 'Review Job details, search existing records, and remove unsupported or invalid posts through the existing Admin flow.',
-    path: '/admin/jobs',
-    action: 'Open Jobs',
   },
   projects: {
     label: 'Projects',
-    title: 'Company Project management',
-    description: 'Review Company bidding Projects without mixing them with Candidate Community Projects.',
-    path: '/admin/projects',
-    action: 'Open Projects',
   },
 }
 
@@ -23,7 +15,6 @@ export default function AdminOpportunities() {
   const [searchParams] = useSearchParams()
   const requestedType = searchParams.get('type')
   const selectedType = requestedType === 'projects' ? 'projects' : 'jobs'
-  const selected = types[selectedType]
 
   return (
     <DashboardLayout title="Opportunities" userType="Admin">
@@ -51,14 +42,7 @@ export default function AdminOpportunities() {
           ))}
         </nav>
 
-        <Card className="max-w-3xl">
-          <p className="text-xs uppercase tracking-[0.14em] text-[#64748b]">{selected.label}</p>
-          <h3 className="mt-3 text-xl font-semibold">{selected.title}</h3>
-          <p className="mt-3 max-w-2xl text-sm leading-6 text-[#8892b0]">{selected.description}</p>
-          <Link to={selected.path} className="mt-6 inline-flex rounded-lg border border-[#64ffda] bg-[#64ffda] px-5 py-2.5 text-sm font-semibold text-[#0a192f] hover:bg-[#7dffe1] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#64ffda] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a192f]">
-            {selected.action}
-          </Link>
-        </Card>
+        <AdminOpportunityList key={selectedType} type={selectedType} />
       </div>
     </DashboardLayout>
   )

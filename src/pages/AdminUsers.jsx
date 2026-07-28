@@ -1,10 +1,12 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { useSearchParams } from 'react-router'
 import {
   deleteUser,
   getAdminUsers,
   updateUserStatus,
 } from '../api/adminApi'
 import Button from '../components/Button'
+import AdminConfirmDialog from '../components/AdminConfirmDialog'
 import Card from '../components/Card'
 import EmptyState from '../components/EmptyState'
 import LoadingSpinner from '../components/LoadingSpinner'
@@ -19,7 +21,7 @@ const roleStyle = {
   Candidate: 'bg-blue-500/10 text-blue-300',
   Company: 'bg-violet-500/10 text-violet-300',
 }
-const displayRole = (role) => role === 'Candidate' ? 'Member' : role
+const displayRole = (role) => role || 'Unknown'
 const statusStyle = {
   Active: 'bg-[#22c55e]/10 text-[#22c55e]',
   Disabled: 'bg-[#ef4444]/10 text-[#fca5a5]',
@@ -28,9 +30,12 @@ const statusStyle = {
 const getErrorMessage = (error, fallback) => {
   const errors = error.response?.data?.errors
   const messages = errors ? Object.values(errors).flat().filter(Boolean) : []
+  const status = error.response?.status
   return messages.length
     ? messages.join(' ')
-    : error.response?.data?.message || fallback
+    : status && status < 500
+      ? error.response?.data?.message || fallback
+      : fallback
 }
 
 function UserBadges({ user }) {
@@ -52,12 +57,23 @@ function UserBadges({ user }) {
 
 export default function AdminUsers() {
   const { showToast } = useToast()
+  const [searchParams, setSearchParams] = useSearchParams()
+  const requestedRole = searchParams.get('role')
+  const role = ['candidate', 'company', 'admin'].includes(requestedRole)
+    ? requestedRole
+    : 'all'
+  const requestedStatus = searchParams.get('status')
+  const status = ['active', 'disabled'].includes(requestedStatus)
+    ? requestedStatus
+    : 'all'
+  const requestedPage = Number(searchParams.get('page'))
+  const page = Number.isInteger(requestedPage) && requestedPage > 0
+    ? requestedPage
+    : 1
+  const urlSearch = searchParams.get('search') ?? ''
   const [users, setUsers] = useState([])
-  const [search, setSearch] = useState('')
-  const [debouncedSearch, setDebouncedSearch] = useState('')
-  const [role, setRole] = useState('All')
-  const [status, setStatus] = useState('All')
-  const [page, setPage] = useState(1)
+  const searchInputRef = useRef(null)
+  const searchTimeoutRef = useRef(null)
   const [pagination, setPagination] = useState({
     current_page: 1,
     total: 0,
@@ -69,13 +85,39 @@ export default function AdminUsers() {
   const [updatingId, setUpdatingId] = useState(null)
   const [deletingId, setDeletingId] = useState(null)
   const [selectedUser, setSelectedUser] = useState(null)
+  const [pendingAction, setPendingAction] = useState(null)
+  const [confirmationError, setConfirmationError] = useState('')
+
+  const updateParams = (updates, options) => {
+    setSearchParams((current) => {
+      const next = new URLSearchParams(current)
+      Object.entries(updates).forEach(([key, value]) => {
+        if (!value || value === 'all' || (key === 'page' && value === 1)) {
+          next.delete(key)
+        } else {
+          next.set(key, String(value))
+        }
+      })
+      return next
+    }, options)
+  }
 
   useEffect(() => {
-    const timeout = window.setTimeout(() => {
-      setDebouncedSearch(search.trim())
+    return () => window.clearTimeout(searchTimeoutRef.current)
+  }, [])
+
+  useEffect(() => {
+    const input = searchInputRef.current
+    if (input && input.value.trim() !== urlSearch) input.value = urlSearch
+  }, [urlSearch])
+
+  const handleSearchChange = (event) => {
+    const value = event.target.value
+    window.clearTimeout(searchTimeoutRef.current)
+    searchTimeoutRef.current = window.setTimeout(() => {
+      updateParams({ search: value.trim(), page: null }, { replace: true })
     }, 350)
-    return () => window.clearTimeout(timeout)
-  }, [search])
+  }
 
   useEffect(() => {
     let isActive = true
@@ -85,9 +127,9 @@ export default function AdminUsers() {
       setError('')
       try {
         const response = await getAdminUsers({
-          search: debouncedSearch || undefined,
-          role: role === 'All' ? undefined : role.toLowerCase(),
-          status: status === 'All' ? undefined : status.toLowerCase(),
+          search: urlSearch || undefined,
+          role: role === 'all' ? undefined : role,
+          status: status === 'all' ? undefined : status,
           per_page: 15,
           page,
         })
@@ -107,7 +149,7 @@ export default function AdminUsers() {
     return () => {
       isActive = false
     }
-  }, [debouncedSearch, page, refreshKey, role, status])
+  }, [page, refreshKey, role, status, urlSearch])
 
   const lastPage = Math.max(
     1,
@@ -116,13 +158,8 @@ export default function AdminUsers() {
     ),
   )
 
-  const toggleStatus = async (user) => {
+  const updateStatus = async (user, nextStatus, fromConfirmation = false) => {
     if (user.role === 'Admin' || updatingId !== null || deletingId !== null) return
-    const nextStatus = user.status === 'Active' ? 'disabled' : 'active'
-    if (
-      nextStatus === 'disabled'
-      && !window.confirm(`Disable “${user.name}”? Their active sessions will be ended.`)
-    ) return
     setUpdatingId(user.id)
     try {
       const response = await updateUserStatus(user.id, nextStatus)
@@ -133,39 +170,48 @@ export default function AdminUsers() {
       if (page === 1) {
         setRefreshKey((current) => current + 1)
       } else {
-        setPage(1)
+        updateParams({ page: null })
       }
+      if (fromConfirmation) setPendingAction(null)
     } catch (requestError) {
-      showToast(
-        getErrorMessage(requestError, 'Unable to update this user.'),
-        'error',
-      )
+      const message = getErrorMessage(requestError, 'Unable to update this user.')
+      if (fromConfirmation) setConfirmationError(message)
+      else showToast(message, 'error')
     } finally {
       setUpdatingId(null)
     }
   }
 
-  const removeUser = async (user) => {
-    if (
-      user.role === 'Admin'
-      || updatingId !== null
-      || deletingId !== null
-      || !window.confirm(`Delete “${user.name}”? This action may not be reversible.`)
-    ) return
+  const toggleStatus = (user) => {
+    if (user.role === 'Admin' || updatingId !== null || deletingId !== null) return
+    if (user.status === 'Active') {
+      setConfirmationError('')
+      setPendingAction({ type: 'disable', user })
+    } else {
+      updateStatus(user, 'active')
+    }
+  }
 
+  const confirmAction = async () => {
+    const user = pendingAction?.user
+    if (!user || updatingId !== null || deletingId !== null) return
+    if (pendingAction.type === 'disable') {
+      await updateStatus(user, 'disabled', true)
+      return
+    }
     setDeletingId(user.id)
     try {
       const response = await deleteUser(user.id)
       showToast(response.message ?? `${user.name} was deleted.`, 'success')
       if (users.length === 1 && page > 1) {
-        setPage((current) => current - 1)
+        updateParams({ page: page - 1 })
       } else {
         setRefreshKey((current) => current + 1)
       }
+      setPendingAction(null)
     } catch (requestError) {
-      showToast(
+      setConfirmationError(
         getErrorMessage(requestError, 'Unable to delete this user.'),
-        'error',
       )
     } finally {
       setDeletingId(null)
@@ -179,9 +225,9 @@ export default function AdminUsers() {
   const Actions = ({ user }) => {
     const isAdmin = user.role === 'Admin'
     return (
-      <div className="flex flex-wrap justify-end gap-2">
+      <div className="flex flex-wrap items-center justify-end gap-2">
         <Button variant="ghost" size="sm" onClick={() => viewUser(user)}>
-          View
+          Review
         </Button>
         <Button
           variant="outline"
@@ -199,10 +245,14 @@ export default function AdminUsers() {
           variant="danger"
           size="sm"
           disabled={isAdmin || deletingId !== null || updatingId !== null}
-          onClick={() => removeUser(user)}
+          onClick={() => {
+            setConfirmationError('')
+            setPendingAction({ type: 'delete', user })
+          }}
         >
           {deletingId === user.id ? 'Deleting...' : 'Delete'}
         </Button>
+        {isAdmin && <span className="w-full text-right text-[10px] text-[#64748b]">Admin accounts are protected.</span>}
       </div>
     )
   }
@@ -220,11 +270,10 @@ export default function AdminUsers() {
           <div className="grid gap-4 md:grid-cols-3">
             <input
               type="search"
-              value={search}
-              onChange={(event) => {
-                setSearch(event.target.value)
-                setPage(1)
-              }}
+              ref={searchInputRef}
+              defaultValue={urlSearch}
+              onChange={handleSearchChange}
+              maxLength={100}
               placeholder="Search name or email..."
               aria-label="Search users"
               className={control}
@@ -232,28 +281,27 @@ export default function AdminUsers() {
             <select
               value={role}
               onChange={(event) => {
-                setRole(event.target.value)
-                setPage(1)
+                updateParams({ role: event.target.value, page: null })
               }}
               aria-label="Filter role"
               className={control}
             >
-              {['All', 'Candidate', 'Company', 'Admin'].map((item) => (
-                <option key={item} value={item}>{displayRole(item)}</option>
-              ))}
+              <option value="all">All users</option>
+              <option value="candidate">Candidates</option>
+              <option value="company">Companies</option>
+              <option value="admin">Administrators</option>
             </select>
             <select
               value={status}
               onChange={(event) => {
-                setStatus(event.target.value)
-                setPage(1)
+                updateParams({ status: event.target.value, page: null })
               }}
               aria-label="Filter status"
               className={control}
             >
-              {['All', 'Active', 'Disabled'].map((item) => (
-                <option key={item}>{item}</option>
-              ))}
+              <option value="all">All statuses</option>
+              <option value="active">Active</option>
+              <option value="disabled">Disabled</option>
             </select>
           </div>
         </Card>
@@ -351,7 +399,7 @@ export default function AdminUsers() {
                 variant="outline"
                 size="sm"
                 disabled={page <= 1}
-                onClick={() => setPage((current) => current - 1)}
+                onClick={() => updateParams({ page: page - 1 })}
               >
                 Previous
               </Button>
@@ -362,7 +410,7 @@ export default function AdminUsers() {
                 variant="outline"
                 size="sm"
                 disabled={page >= lastPage}
-                onClick={() => setPage((current) => current + 1)}
+                onClick={() => updateParams({ page: page + 1 })}
               >
                 Next
               </Button>
@@ -379,6 +427,22 @@ export default function AdminUsers() {
           { label: 'Location', value: (selectedUser.candidateProfile ?? selectedUser.companyProfile)?.location },
         ]} /><DetailSection label="Profile summary">{(selectedUser.candidateProfile ?? selectedUser.companyProfile)?.headline ?? (selectedUser.candidateProfile ?? selectedUser.companyProfile)?.company_name ?? (selectedUser.candidateProfile ?? selectedUser.companyProfile)?.bio ?? (selectedUser.candidateProfile ?? selectedUser.companyProfile)?.description}</DetailSection><SkillList skills={(selectedUser.candidateProfile ?? selectedUser.companyProfile)?.skills} /></>}
       </Modal>
+      <AdminConfirmDialog
+        isOpen={Boolean(pendingAction)}
+        title={pendingAction?.type === 'disable' ? 'Disable account?' : 'Delete user?'}
+        entityName={pendingAction?.user?.name ?? 'Selected user'}
+        description={pendingAction?.type === 'disable'
+          ? 'The account will be disabled and its active sessions will end.'
+          : 'The user account and associated records may be affected. This action may not be reversible.'}
+        confirmLabel={pendingAction?.type === 'disable' ? 'Disable account' : 'Delete user'}
+        isSubmitting={updatingId !== null || deletingId !== null}
+        error={confirmationError}
+        onCancel={() => {
+          setPendingAction(null)
+          setConfirmationError('')
+        }}
+        onConfirm={confirmAction}
+      />
     </DashboardLayout>
   )
 }

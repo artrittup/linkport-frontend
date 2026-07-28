@@ -4,6 +4,7 @@ import Topbar from '../components/Topbar'
 import { getNavigationForRole } from '../config/navigation'
 import { useAuth } from '../context/AuthContext'
 import CandidateLayout from './CandidateLayout'
+import CompanyLayout from './CompanyLayout'
 
 export default function DashboardLayout({ children, title, userType }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
@@ -15,6 +16,14 @@ export default function DashboardLayout({ children, title, userType }) {
       <CandidateLayout title={title}>
         {children}
       </CandidateLayout>
+    )
+  }
+
+  if (user?.role === 'company') {
+    return (
+      <CompanyLayout title={title}>
+        {children}
+      </CompanyLayout>
     )
   }
 

@@ -13,7 +13,7 @@ import { getNotificationDestination } from '../utils/notificationDestination'
 import { formatNotificationTime } from '../utils/notificationMapper'
 import NotificationRow from './NotificationRow'
 
-export default function NotificationBell() {
+export default function NotificationBell({ align = 'right' }) {
   const navigate = useNavigate()
   const { isAuthenticated } = useAuth()
   const containerRef = useRef(null)
@@ -137,7 +137,7 @@ export default function NotificationBell() {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 top-full z-50 mt-2 w-[min(23rem,calc(100vw-2rem))] overflow-hidden rounded-xl border border-[#233554] bg-[#112240] shadow-2xl shadow-black/40">
+        <div className={`absolute top-full z-50 mt-2 w-[min(23rem,calc(100vw-2rem))] overflow-hidden rounded-xl border border-[#233554] bg-[#112240] shadow-2xl shadow-black/40 ${align === 'left' ? 'left-0' : 'right-0'}`}>
           <div className="flex items-center justify-between border-b border-[#233554] px-4 py-3"><div><h2 className="font-semibold text-[#e6f1ff]">Notifications</h2><p className="text-[11px] text-[#8892b0]">{unreadCount} unread</p></div>{unreadCount > 0 && <button type="button" onClick={markAll} className="text-xs font-medium text-[#64ffda] hover:underline">Mark all read</button>}</div>
           <div className="max-h-96 overflow-y-auto p-1.5">
             {isLoading && <p className="px-3 py-8 text-center text-xs text-[#8892b0]">Loading notifications...</p>}

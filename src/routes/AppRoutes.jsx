@@ -29,7 +29,9 @@ const Connections = lazy(() => import('../pages/Connections'))
 const Circles = lazy(() => import('../pages/Circles'))
 const CircleDetails = lazy(() => import('../pages/CircleDetails'))
 const CompanyProfile = lazy(() => import('../pages/CompanyProfile'))
-const CompanyDashboard = lazy(() => import('../pages/CompanyDashboard'))
+const CompanyOverview = lazy(() => import('../pages/CompanyOverview'))
+const CompanyOpportunities = lazy(() => import('../pages/CompanyOpportunities'))
+const CompanyTalent = lazy(() => import('../pages/CompanyTalent'))
 const ManageJobs = lazy(() => import('../pages/ManageJobs'))
 const ManageProjects = lazy(() => import('../pages/ManageProjects'))
 const CompanyApplications = lazy(() => import('../pages/CompanyApplications'))
@@ -95,12 +97,15 @@ export default function AppRoutes() {
         <Route path="/circles" element={<ProtectedRoute allowedRoles={candidateRoles}><Circles /></ProtectedRoute>} />
         <Route path="/circles/:id" element={<ProtectedRoute allowedRoles={candidateRoles}><CircleDetails /></ProtectedRoute>} />
         <Route path="/company/profile" element={<ProtectedRoute allowedRoles={companyRoles}><CompanyProfile /></ProtectedRoute>} />
+        <Route path="/company/overview" element={<ProtectedRoute allowedRoles={companyRoles}><CompanyOverview /></ProtectedRoute>} />
+        <Route path="/company/opportunities" element={<ProtectedRoute allowedRoles={companyRoles}><CompanyOpportunities /></ProtectedRoute>} />
+        <Route path="/company/talent" element={<ProtectedRoute allowedRoles={companyRoles}><CompanyTalent /></ProtectedRoute>} />
         <Route path="/company/jobs" element={<ProtectedRoute allowedRoles={companyRoles}><ManageJobs /></ProtectedRoute>} />
         <Route path="/company/projects" element={<ProtectedRoute allowedRoles={companyRoles}><ManageProjects /></ProtectedRoute>} />
         <Route path="/company/applications" element={<ProtectedRoute allowedRoles={companyRoles}><CompanyApplications /></ProtectedRoute>} />
         <Route path="/company/bids" element={<ProtectedRoute allowedRoles={companyRoles}><CompanyBids /></ProtectedRoute>} />
         <Route path="/candidate/dashboard" element={<ProtectedRoute allowedRoles={candidateRoles}><Navigate to="/candidate/home" replace /></ProtectedRoute>} />
-        <Route path="/company/dashboard" element={<ProtectedRoute allowedRoles={companyRoles}><CompanyDashboard /></ProtectedRoute>} />
+        <Route path="/company/dashboard" element={<ProtectedRoute allowedRoles={companyRoles}><Navigate to="/company/overview" replace /></ProtectedRoute>} />
         <Route path="/admin/dashboard" element={<ProtectedRoute allowedRoles={adminRoles}><AdminDashboard /></ProtectedRoute>} />
         <Route path="/admin/users" element={<ProtectedRoute allowedRoles={adminRoles}><AdminUsers /></ProtectedRoute>} />
         <Route path="/admin/jobs" element={<ProtectedRoute allowedRoles={adminRoles}><AdminJobs /></ProtectedRoute>} />

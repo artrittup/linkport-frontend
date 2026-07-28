@@ -11,7 +11,7 @@ const AuthContext = createContext(null)
 
 const dashboardPaths = {
   candidate: '/candidate/home',
-  company: '/company/dashboard',
+  company: '/company/overview',
   admin: '/admin/dashboard',
 }
 

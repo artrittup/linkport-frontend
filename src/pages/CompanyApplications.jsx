@@ -10,6 +10,7 @@ import EmptyState from '../components/EmptyState'
 import LoadingSpinner from '../components/LoadingSpinner'
 import useToast from '../hooks/useToast'
 import DashboardLayout from '../layouts/DashboardLayout'
+import CompanyApplicationTabs from '../components/CompanyApplicationTabs'
 
 const statusClasses = {
   Pending: 'border-[#facc15]/30 bg-[#facc15]/10 text-[#facc15]',
@@ -197,6 +198,7 @@ export default function CompanyApplications() {
   return (
     <DashboardLayout title="Applications" userType="Company">
       <div className="space-y-8">
+        <CompanyApplicationTabs />
         <section>
           <p className="font-mono text-sm text-[#64ffda]">Hiring pipeline</p>
           <h2 className="mt-2 text-2xl font-bold sm:text-3xl">Applications</h2>

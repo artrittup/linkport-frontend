@@ -26,9 +26,12 @@ export function getProfileErrorMessage(error, fallbackMessage) {
     ? Object.values(validationErrors).flat().filter(Boolean)
     : []
 
-  return messages.length > 0
-    ? messages.join(' ')
-    : error.response?.data?.message || error.message || fallbackMessage
+  if (messages.length > 0) return messages.join(' ')
+
+  const status = error.response?.status
+  return status && status < 500
+    ? error.response?.data?.message || fallbackMessage
+    : fallbackMessage
 }
 
 export function getProfileValidationErrors(error) {

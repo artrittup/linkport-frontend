@@ -1,4 +1,8 @@
 import Button from './Button'
+import {
+  getCollaborationStatusLabel,
+  getSafeMemberUrl,
+} from '../data/communityMemberMapper'
 
 function ExternalLink({ href, children }) {
   return (
@@ -15,7 +19,7 @@ function ExternalLink({ href, children }) {
 
 export default function CandidateProfileHeader({ profile, isOwner = false, onEdit }) {
   const displayName = profile.fullName || 'LinkPort member'
-  const organization = profile.education?.split(/\r?\n/).find(Boolean)
+  const organization = profile.university || profile.education?.split(/\r?\n/).find(Boolean)
   const initials = displayName
     .split(' ')
     .filter(Boolean)
@@ -27,7 +31,7 @@ export default function CandidateProfileHeader({ profile, isOwner = false, onEdi
     { label: 'Portfolio', href: profile.portfolioLink },
     { label: 'GitHub', href: profile.githubUrl },
     { label: 'LinkedIn', href: profile.linkedinUrl },
-  ].filter((link) => link.href)
+  ].map((link) => ({ ...link, href: getSafeMemberUrl(link.href) })).filter((link) => link.href)
 
   return (
     <header className="min-w-0 rounded-2xl border border-[#233554] bg-[#112240]/65 p-5 sm:p-7">
@@ -43,7 +47,7 @@ export default function CandidateProfileHeader({ profile, isOwner = false, onEdi
               {profile.professionalTitle && <p className="mt-1 break-words text-[#64ffda]">{profile.professionalTitle}</p>}
               {profile.collaborationStatus && (
                 <span className="mt-3 inline-flex max-w-full break-words rounded-full border border-[#64ffda]/25 bg-[#64ffda]/5 px-3 py-1 text-xs font-medium text-[#64ffda]">
-                  {profile.collaborationStatus}
+                  {getCollaborationStatusLabel(profile.collaborationStatus)}
                 </span>
               )}
               {(organization || profile.location) && (
@@ -56,7 +60,9 @@ export default function CandidateProfileHeader({ profile, isOwner = false, onEdi
           </div>
 
           <p className="mt-5 max-w-3xl whitespace-pre-line break-words text-sm leading-6 text-[#a8b2d1]">
-            {profile.bio || 'Add a short biography to introduce your work and interests.'}
+            {profile.bio || (isOwner
+              ? 'Add a short biography to introduce your work and interests.'
+              : 'This member has not added a biography yet.')}
           </p>
 
           {externalLinks.length > 0 && (

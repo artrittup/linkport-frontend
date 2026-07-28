@@ -1,17 +1,18 @@
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { Link } from 'react-router'
 import EventCard from '../components/EventCard'
 import MemberCard from '../components/MemberCard'
 import TeammateRequestCard from '../components/TeammateRequestCard'
-import { communityInterests } from '../data/mockCommunity'
-import { mockMembers } from '../data/mockMembers'
+import { INTEREST_OPTIONS, getInterestLabel } from '../data/communityMemberMapper'
 import { TEAMMATE_REQUEST_STATUSES } from '../data/teammateRequestMapper'
 import useCommunityProjects from '../hooks/useCommunityProjects'
 import useCommunityEvents from '../hooks/useCommunityEvents'
+import useCommunityMembers from '../hooks/useCommunityMembers'
 import useTeammateRequests from '../hooks/useTeammateRequests'
 import CandidateLayout from '../layouts/CandidateLayout'
 
 const discordUrl = 'https://discord.gg/8NemkkpJj'
+const communityInterests = INTEREST_OPTIONS.filter((interest) => interest.value)
 
 export default function Community() {
   const {
@@ -37,19 +38,16 @@ export default function Community() {
     retry: retryEvents,
   } = useCommunityEvents({ perPage: 3 })
   const [selectedInterest, setSelectedInterest] = useState('')
-
-  const visibleMembers = useMemo(() => {
-    const directoryInterest = communityInterests
-      .find((interest) => interest.name === selectedInterest)
-      ?.directoryInterest
-
-    return mockMembers
-      .filter((member) => !directoryInterest || member.interests.includes(directoryInterest))
-      .slice(0, 6)
-  }, [selectedInterest])
+  const {
+    members: visibleMembers,
+    meta: membersMeta,
+    isLoading: membersLoading,
+    error: membersError,
+    retry: retryMembers,
+  } = useCommunityMembers({ interest: selectedInterest, perPage: 6 })
 
   const overview = [
-    { label: 'Active members', value: '240+' },
+    { label: selectedInterest ? 'Matching members' : 'Active members', value: membersLoading ? '...' : membersError ? '—' : membersMeta.total },
     { label: 'Upcoming events', value: eventsLoading ? '...' : eventsError ? '—' : eventsMeta.total },
     { label: 'Interest areas', value: communityInterests.length },
     { label: 'Projects seeking teammates', value: teammateProjects.length },
@@ -140,21 +138,20 @@ export default function Community() {
           <p className="mt-2 text-sm text-[#8892b0]">Select an area to preview members with similar interests.</p>
           <div className="mt-5 flex min-w-0 flex-wrap gap-3">
             {communityInterests.map((interest) => {
-              const isSelected = selectedInterest === interest.name
+              const isSelected = selectedInterest === interest.value
               return (
                 <button
-                  key={interest.name}
+                  key={interest.value}
                   type="button"
                   aria-pressed={isSelected}
-                  onClick={() => setSelectedInterest(isSelected ? '' : interest.name)}
+                  onClick={() => setSelectedInterest(isSelected ? '' : interest.value)}
                   className={`max-w-full break-words rounded-xl border px-4 py-3 text-left text-sm transition-colors ${
                     isSelected
                       ? 'border-[#64ffda] bg-[#64ffda]/10 text-[#64ffda]'
                       : 'border-[#233554] bg-[#112240]/55 text-[#a8b2d1] hover:border-[#64ffda]/40'
                   }`}
                 >
-                  <span className="font-medium">{interest.name}</span>
-                  <span className="ml-2 text-xs text-[#64748b]">{interest.memberCount} members</span>
+                  <span className="font-medium">{interest.label}</span>
                 </button>
               )
             })}
@@ -166,7 +163,7 @@ export default function Community() {
             <div>
               <h3 className="text-2xl font-semibold text-[#e6f1ff]">Member preview</h3>
               <p className="mt-2 text-sm text-[#8892b0]">
-                {selectedInterest ? `Members interested in ${selectedInterest}.` : 'A few people building and learning on LinkPort.'}
+                {selectedInterest ? `Members interested in ${getInterestLabel(selectedInterest)}.` : 'A few people building and learning on LinkPort.'}
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-4">
@@ -180,9 +177,20 @@ export default function Community() {
               </Link>
             </div>
           </div>
-          <div className="mt-5 grid min-w-0 gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {visibleMembers.map((member) => <MemberCard key={member.id} member={member} />)}
-          </div>
+          {membersLoading ? (
+            <p className="mt-5 rounded-xl border border-[#233554] bg-[#112240]/45 p-5 text-sm text-[#8892b0]">Loading community members...</p>
+          ) : membersError ? (
+            <div className="mt-5 rounded-xl border border-[#233554] bg-[#112240]/45 p-5">
+              <p className="text-sm text-[#8892b0]">Member previews are temporarily unavailable. The rest of Community remains available.</p>
+              <button type="button" onClick={retryMembers} className="mt-3 text-sm font-medium text-[#64ffda] hover:underline">Try again</button>
+            </div>
+          ) : visibleMembers.length === 0 ? (
+            <p className="mt-5 rounded-xl border border-[#233554] bg-[#112240]/45 p-5 text-sm text-[#8892b0]">No members are available for this interest yet.</p>
+          ) : (
+            <div className="mt-5 grid min-w-0 gap-4 md:grid-cols-2 xl:grid-cols-3">
+              {visibleMembers.map((member) => <MemberCard key={member.id} member={member} />)}
+            </div>
+          )}
         </section>
 
         <section className="mt-12 min-w-0">

@@ -1,8 +1,9 @@
 import { Link } from 'react-router'
+import { getCollaborationStatusLabel } from '../data/communityMemberMapper'
 
 const statusClasses = {
-  'Not actively looking': 'border-[#64748b]/30 bg-[#64748b]/10 text-[#a8b2d1]',
-  'Looking for internship': 'border-[#a78bfa]/30 bg-[#a78bfa]/10 text-[#c4b5fd]',
+  not_looking: 'border-[#64748b]/30 bg-[#64748b]/10 text-[#a8b2d1]',
+  looking_for_internship: 'border-[#a78bfa]/30 bg-[#a78bfa]/10 text-[#c4b5fd]',
 }
 
 export default function MemberCard({ member }) {
@@ -18,22 +19,27 @@ export default function MemberCard({ member }) {
           {member.initials}
         </div>
         <div className="min-w-0 flex-1">
-          <h3 className="break-words font-semibold text-[#e6f1ff]">{member.name}</h3>
-          <p className="mt-1 break-words text-sm leading-5 text-[#a8b2d1]">{member.headline}</p>
+          <div className="flex flex-wrap items-center gap-2">
+            <h3 className="break-words font-semibold text-[#e6f1ff]">{member.name}</h3>
+            {member.isCurrentUser && <span className="rounded-full border border-[#64ffda]/25 px-2 py-0.5 text-[10px] font-medium text-[#64ffda]">You</span>}
+          </div>
+          {(member.headline || member.fieldOfStudy) && <p className="mt-1 break-words text-sm leading-5 text-[#a8b2d1]">{member.headline || member.fieldOfStudy}</p>}
           {member.university && <p className="mt-1 break-words text-xs text-[#64748b]">{member.university}</p>}
         </div>
       </div>
 
-      <span className={`mt-4 w-fit max-w-full break-words rounded-full border px-2.5 py-1 text-xs ${statusClass}`}>
-        {member.collaborationStatus}
-      </span>
+      {member.collaborationStatus && (
+        <span className={`mt-4 w-fit max-w-full break-words rounded-full border px-2.5 py-1 text-xs ${statusClass}`}>
+          {getCollaborationStatusLabel(member.collaborationStatus)}
+        </span>
+      )}
 
-      <div className="mt-4 flex min-w-0 flex-wrap gap-2">
+      {visibleSkills.length > 0 && <div className="mt-4 flex min-w-0 flex-wrap gap-2">
         {visibleSkills.map((skill) => (
           <span key={skill} className="max-w-full break-words rounded-md border border-[#233554] px-2.5 py-1 text-xs text-[#8892b0]">{skill}</span>
         ))}
         {remainingSkills > 0 && <span className="rounded-md border border-[#233554] px-2.5 py-1 text-xs text-[#64748b]">+{remainingSkills}</span>}
-      </div>
+      </div>}
 
       <div className="mt-auto pt-5">
         <Link

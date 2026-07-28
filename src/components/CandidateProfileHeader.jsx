@@ -17,7 +17,7 @@ function ExternalLink({ href, children }) {
   )
 }
 
-export default function CandidateProfileHeader({ profile, isOwner = false, onEdit }) {
+export default function CandidateProfileHeader({ profile, isOwner = false, onEdit, showBio = true }) {
   const displayName = profile.fullName || 'LinkPort member'
   const organization = profile.university || profile.education?.split(/\r?\n/).find(Boolean)
   const initials = displayName
@@ -59,11 +59,11 @@ export default function CandidateProfileHeader({ profile, isOwner = false, onEdi
             {isOwner && <Button variant="outline" onClick={onEdit}>Edit profile</Button>}
           </div>
 
-          <p className="mt-5 max-w-3xl whitespace-pre-line break-words text-sm leading-6 text-[#a8b2d1]">
+          {showBio && <p className="mt-5 max-w-3xl whitespace-pre-line break-words text-sm leading-6 text-[#a8b2d1]">
             {profile.bio || (isOwner
               ? 'Add a short biography to introduce your work and interests.'
               : 'This member has not added a biography yet.')}
-          </p>
+          </p>}
 
           {externalLinks.length > 0 && (
             <div className="mt-5 flex min-w-0 flex-wrap gap-2">

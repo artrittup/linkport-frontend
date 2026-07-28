@@ -11,7 +11,7 @@ const statusClasses = {
   [COMMUNITY_PROJECT_STATUSES.COMPLETED]: 'border-[#22c55e]/30 bg-[#22c55e]/10 text-[#22c55e]',
 }
 
-export default function ProjectShowcaseCard({ project }) {
+export default function ProjectShowcaseCard({ project, showLink = true }) {
   const normalizedStatus = normalizeCommunityProjectStatus(project.status)
   const creatorContext = [project.creatorHeadline, project.creatorLocation ?? project.university].filter(Boolean).join(' · ')
   const lookingForTeam = normalizedStatus === COMMUNITY_PROJECT_STATUSES.LOOKING_FOR_TEAM
@@ -48,14 +48,14 @@ export default function ProjectShowcaseCard({ project }) {
         </p>
       )}
 
-      <div className="mt-auto pt-6">
+      {showLink && <div className="mt-auto pt-6">
         <Link
           to={`/candidate/projects/${project.id}`}
           className="inline-flex w-full items-center justify-center rounded-lg border border-[#64ffda] px-4 py-2.5 text-sm font-semibold text-[#64ffda] transition-colors hover:bg-[#64ffda]/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#64ffda]"
         >
           View project
         </Link>
-      </div>
+      </div>}
     </article>
   )
 }

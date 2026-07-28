@@ -32,6 +32,7 @@ const CompanyProfile = lazy(() => import('../pages/CompanyProfile'))
 const CompanyOverview = lazy(() => import('../pages/CompanyOverview'))
 const CompanyOpportunities = lazy(() => import('../pages/CompanyOpportunities'))
 const CompanyTalent = lazy(() => import('../pages/CompanyTalent'))
+const CompanyTalentProfile = lazy(() => import('../pages/CompanyTalentProfile'))
 const ManageJobs = lazy(() => import('../pages/ManageJobs'))
 const ManageProjects = lazy(() => import('../pages/ManageProjects'))
 const CompanyApplications = lazy(() => import('../pages/CompanyApplications'))
@@ -99,6 +100,7 @@ export default function AppRoutes() {
         <Route path="/company/overview" element={<ProtectedRoute allowedRoles={companyRoles}><CompanyOverview /></ProtectedRoute>} />
         <Route path="/company/opportunities" element={<ProtectedRoute allowedRoles={companyRoles}><CompanyOpportunities /></ProtectedRoute>} />
         <Route path="/company/talent" element={<ProtectedRoute allowedRoles={companyRoles}><CompanyTalent /></ProtectedRoute>} />
+        <Route path="/company/talent/:candidateId" element={<ProtectedRoute allowedRoles={companyRoles}><CompanyTalentProfile /></ProtectedRoute>} />
         <Route path="/company/jobs" element={<ProtectedRoute allowedRoles={companyRoles}><ManageJobs /></ProtectedRoute>} />
         <Route path="/company/jobs/create" element={<ProtectedRoute allowedRoles={companyRoles}><ManageJobs key="create-job" initialCreate /></ProtectedRoute>} />
         <Route path="/company/projects" element={<ProtectedRoute allowedRoles={companyRoles}><ManageProjects /></ProtectedRoute>} />

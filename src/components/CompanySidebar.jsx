@@ -34,6 +34,9 @@ function isActive(item, pathname) {
   if (item.key === 'applications') {
     return pathname === '/company/applications' || pathname === '/company/bids'
   }
+  if (item.key === 'talent') {
+    return pathname.startsWith('/company/talent')
+  }
   return pathname === item.path
 }
 

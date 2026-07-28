@@ -156,6 +156,7 @@ export default function CompanyOverview() {
                   ['Post a project', '/company/projects/create'],
                   ['Review applications', '/company/applications?type=applications'],
                   ['Review proposals', '/company/applications?type=proposals'],
+                  ['Explore talent', '/company/talent'],
                   ['Update company profile', '/company/profile'],
                 ].map(([label, path]) => <Link key={path} to={path} className="rounded-lg bg-[#0a192f]/70 px-3 py-2.5 text-sm text-[#a8b2d1] hover:text-[#64ffda]">{label}</Link>)}
               </div>

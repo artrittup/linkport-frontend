@@ -53,7 +53,7 @@ export function mapCompanyApplication(application) {
     skills: application.skills ?? [],
     budget: null,
     duration: null,
-    candidateRoute: candidateId ? `/members/${candidateId}` : null,
+    candidateRoute: candidateId ? `/company/talent/${candidateId}` : null,
     opportunityRoute: '/company/jobs',
     rawData: application,
     ...mapStatus(application.status, applicationStatusLabels),
@@ -82,7 +82,7 @@ export function mapCompanyProposal(proposal) {
     duration: proposal.deliveryDays
       ? `${proposal.deliveryDays} days`
       : 'Not specified',
-    candidateRoute: candidateId ? `/members/${candidateId}` : null,
+    candidateRoute: candidateId ? `/company/talent/${candidateId}` : null,
     opportunityRoute: '/company/projects',
     rawData: proposal,
     ...mapStatus(proposal.status, proposalStatusLabels),

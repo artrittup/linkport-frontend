@@ -1,5 +1,6 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router'
+import { getCommunityEventErrorMessage, removeCommunityEventAttendance } from '../api/communityEventsApi'
 import CandidateActivityOverview from '../components/CandidateActivityOverview'
 import CandidateApplicationsActivity from '../components/CandidateApplicationsActivity'
 import CandidateContentActivity from '../components/CandidateContentActivity'
@@ -10,15 +11,14 @@ import {
   normalizeCandidateActivityTab,
 } from '../config/candidateActivity'
 import { useAuth } from '../context/AuthContext'
-import { useLocalContent } from '../context/LocalContentContext'
 import { getCandidateContentItems } from '../data/candidateActivityAdapters'
-import { mockEvents } from '../data/mockEvents'
 import {
   useCandidateApplications,
   useCandidateProposals,
 } from '../hooks/useCandidateActivityData'
 import useCommunityProjects from '../hooks/useCommunityProjects'
 import useCommunityPosts from '../hooks/useCommunityPosts'
+import { useMyCommunityEvents } from '../hooks/useCommunityEvents'
 import useTeammateRequests from '../hooks/useTeammateRequests'
 import CandidateLayout from '../layouts/CandidateLayout'
 
@@ -29,11 +29,8 @@ export default function CandidateActivity() {
   const applications = useCandidateApplications()
   const proposals = useCandidateProposals()
   const { user } = useAuth()
-  const {
-    attendingEventIds,
-    setEventAttendance,
-    storageError,
-  } = useLocalContent()
+  const [removingEventId, setRemovingEventId] = useState('')
+  const [eventActionError, setEventActionError] = useState('')
   const {
     projects,
     isLoading: projectsLoading,
@@ -61,16 +58,30 @@ export default function CandidateActivity() {
     perPage: 50,
     enabled: Boolean(user?.id),
   })
+  const {
+    events: savedEvents,
+    isLoading: eventsLoading,
+    error: eventsError,
+    retry: retryEvents,
+  } = useMyCommunityEvents({ perPage: 50 })
 
   const contentItems = useMemo(
     () => getCandidateContentItems({ projects, posts, teamRequests }),
     [posts, projects, teamRequests],
   )
-  const attendingEventIdSet = useMemo(() => new Set(attendingEventIds), [attendingEventIds])
-  const savedEvents = useMemo(
-    () => mockEvents.filter((event) => attendingEventIdSet.has(event.id)),
-    [attendingEventIdSet],
-  )
+  async function removeEvent(eventId) {
+    if (removingEventId) return
+    setRemovingEventId(eventId)
+    setEventActionError('')
+    try {
+      await removeCommunityEventAttendance(eventId)
+      retryEvents()
+    } catch (error) {
+      setEventActionError(getCommunityEventErrorMessage(error, 'We could not remove this event. Please try again.'))
+    } finally {
+      setRemovingEventId('')
+    }
+  }
 
   useEffect(() => {
     if (requestedTab && requestedTab !== activeTab) {
@@ -93,9 +104,6 @@ export default function CandidateActivity() {
           </p>
         </section>
 
-        {storageError && (
-          <p role="status" className="mt-6 rounded-lg border border-[#facc15]/25 bg-[#facc15]/5 px-4 py-3 text-sm text-[#fde68a]">{storageError}</p>
-        )}
         {projectsError && (
           <p role="status" className="mt-4 rounded-lg border border-[#233554] bg-[#112240]/45 px-4 py-3 text-sm text-[#8892b0]">
             Shared projects are temporarily unavailable. Other shared content remains available.
@@ -146,16 +154,30 @@ export default function CandidateActivity() {
               proposals={proposals}
               contentItems={contentItems}
               savedEvents={savedEvents}
+              savedEventsState={{
+                total: savedEvents.length,
+                isLoading: eventsLoading,
+                error: eventsError,
+              }}
             />
           )}
           {activeTab === 'applications' && <CandidateApplicationsActivity activity={applications} />}
           {activeTab === 'proposals' && <CandidateProposalsActivity activity={proposals} />}
           {activeTab === 'content' && <CandidateContentActivity items={contentItems} />}
           {activeTab === 'events' && (
-            <CandidateEventsActivity
-              events={savedEvents}
-              onRemove={(eventId) => setEventAttendance(eventId, false)}
-            />
+            eventsLoading ? (
+              <p role="status" className="rounded-xl border border-[#233554] bg-[#112240]/45 p-5 text-sm text-[#8892b0]">Loading My Events...</p>
+            ) : eventsError ? (
+              <div className="rounded-xl border border-[#233554] bg-[#112240]/45 p-5">
+                <p className="text-sm text-[#8892b0]">My Events are temporarily unavailable. Other Activity sections remain available.</p>
+                <button type="button" onClick={retryEvents} className="mt-3 text-sm font-medium text-[#64ffda] hover:underline">Try again</button>
+              </div>
+            ) : (
+              <>
+                {eventActionError && <p role="alert" className="mb-4 rounded-lg border border-[#f87171]/25 bg-[#f87171]/5 px-4 py-3 text-sm text-[#fca5a5]">{eventActionError}</p>}
+                <CandidateEventsActivity events={savedEvents} onRemove={removeEvent} removingEventId={removingEventId} />
+              </>
+            )
           )}
         </div>
       </div>

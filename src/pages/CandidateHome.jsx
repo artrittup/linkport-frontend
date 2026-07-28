@@ -1,20 +1,23 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router'
-import { useLocalContent } from '../context/LocalContentContext'
+import {
+  formatCommunityEventDate,
+  formatCommunityEventTime,
+  getCommunityEventLocationLabel,
+} from '../data/communityEventMapper'
 import { getCommunityProjectStatusLabel } from '../data/communityProjectMapper'
 import { getCommunityPostCategoryLabel } from '../data/communityPostMapper'
-import { formatEventDate, formatEventTime, mockEvents } from '../data/mockEvents'
 import {
   TEAMMATE_REQUEST_STATUSES,
   getTeammateRequestWorkStyleLabel,
 } from '../data/teammateRequestMapper'
 import useCommunityProjects from '../hooks/useCommunityProjects'
 import useCommunityPosts from '../hooks/useCommunityPosts'
+import useCommunityEvents from '../hooks/useCommunityEvents'
 import useTeammateRequests from '../hooks/useTeammateRequests'
 import CandidateLayout from '../layouts/CandidateLayout'
 
 const filters = ['All', 'Projects', 'Posts', 'Team', 'Opportunities', 'Events']
-const featuredEvent = mockEvents[0]
 
 function formatFeedTimestamp(value) {
   const date = new Date(value)
@@ -35,19 +38,6 @@ const defaultFeedItems = [
     meta: 'Prishtina · Apply by August 18',
     action: 'View opportunity',
     path: '/candidate/opportunities/internship-northstar-frontend',
-  },
-  {
-    id: 3,
-    filter: 'Events',
-    type: 'EVENT',
-    eventId: featuredEvent.id,
-    title: featuredEvent.title,
-    description: featuredEvent.shortDescription,
-    author: featuredEvent.organizer,
-    tags: featuredEvent.topics,
-    meta: `${formatEventDate(featuredEvent.date)} · ${formatEventTime(featuredEvent)} · ${featuredEvent.location}`,
-    action: 'View event',
-    path: `/candidate/community/events/${featuredEvent.id}`,
   },
 ]
 
@@ -91,7 +81,6 @@ function FeedCard({ item }) {
 }
 
 export default function CandidateHome() {
-  const { attendingEventIds, storageError } = useLocalContent()
   const {
     projects: communityProjects,
     error: projectsError,
@@ -109,6 +98,11 @@ export default function CandidateHome() {
     status: TEAMMATE_REQUEST_STATUSES.OPEN,
     perPage: 3,
   })
+  const {
+    events: communityEvents,
+    isLoading: eventsLoading,
+    error: eventsError,
+  } = useCommunityEvents({ perPage: 3 })
   const [activeFilter, setActiveFilter] = useState('All')
   const communityFeedItems = useMemo(() => [
     ...communityProjects.map((project) => ({
@@ -150,14 +144,22 @@ export default function CandidateHome() {
       path: `/candidate/community/team-requests/${request.id}`,
       createdAt: request.createdAt,
     })),
-  ].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)), [communityPosts, communityProjects, teammateRequests])
-  const feedItems = [
-    ...communityFeedItems,
-    ...defaultFeedItems.map((item) => ({
-      ...item,
-      attending: Boolean(item.eventId && attendingEventIds.includes(item.eventId)),
+    ...communityEvents.map((event) => ({
+      id: `event-${event.id}`,
+      filter: 'Events',
+      type: event.status === 'cancelled' ? 'EVENT · CANCELLED' : 'EVENT',
+      title: event.title,
+      description: event.shortDescription,
+      author: event.organizer,
+      tags: event.topics,
+      meta: `${formatCommunityEventDate(event.startsAt)} · ${formatCommunityEventTime(event.startsAt, event.endsAt)} · ${getCommunityEventLocationLabel(event)}`,
+      action: 'View event',
+      path: `/candidate/community/events/${event.id}`,
+      attending: event.isAttending,
+      createdAt: event.createdAt,
     })),
-  ]
+  ].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)), [communityEvents, communityPosts, communityProjects, teammateRequests])
+  const feedItems = [...communityFeedItems, ...defaultFeedItems]
   const visibleItems = activeFilter === 'All'
     ? feedItems
     : feedItems.filter((item) => item.filter === activeFilter)
@@ -174,9 +176,6 @@ export default function CandidateHome() {
         </p>
       </section>
 
-      {storageError && (
-        <p role="status" className="mt-6 rounded-lg border border-[#facc15]/25 bg-[#facc15]/5 px-4 py-3 text-sm text-[#fde68a]">{storageError}</p>
-      )}
       {projectsError && (
         <p role="status" className="mt-4 rounded-lg border border-[#233554] bg-[#112240]/45 px-4 py-3 text-sm text-[#8892b0]">
           Community projects are temporarily unavailable. Other Home updates are still available.
@@ -196,6 +195,12 @@ export default function CandidateHome() {
       {teammateRequestsError && (
         <p role="status" className="mt-4 rounded-lg border border-[#233554] bg-[#112240]/45 px-4 py-3 text-sm text-[#8892b0]">
           Teammate requests are temporarily unavailable. Other Home updates are still available.
+        </p>
+      )}
+      {eventsLoading && <p role="status" className="mt-4 text-sm text-[#8892b0]">Loading upcoming events...</p>}
+      {eventsError && (
+        <p role="status" className="mt-4 rounded-lg border border-[#233554] bg-[#112240]/45 px-4 py-3 text-sm text-[#8892b0]">
+          Upcoming events are temporarily unavailable. Other Home updates are still available.
         </p>
       )}
 

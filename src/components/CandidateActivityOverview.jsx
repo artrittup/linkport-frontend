@@ -1,7 +1,7 @@
 import { Link } from 'react-router'
 import { getCandidateActivityPath } from '../config/candidateActivity'
 import { formatActivityDate } from '../data/candidateActivityAdapters'
-import { formatEventDate, formatEventTime } from '../data/mockEvents'
+import { formatCommunityEventDate, formatCommunityEventTime } from '../data/communityEventMapper'
 import ActivityStatusBadge from './ActivityStatusBadge'
 
 function SummaryValue({ summary }) {
@@ -27,6 +27,7 @@ export default function CandidateActivityOverview({
   proposals,
   contentItems,
   savedEvents,
+  savedEventsState,
 }) {
   const sharedProjectCount = contentItems.filter((item) => item.type === 'Projects').length
   const latestContent = contentItems.find((item) => ['Projects', 'Posts'].includes(item.type))
@@ -35,7 +36,7 @@ export default function CandidateActivityOverview({
     { label: 'Applications', summary: applications.summary },
     { label: 'Submitted proposals', summary: proposals.summary },
     { label: 'Shared projects', value: sharedProjectCount },
-    { label: 'Saved events', value: savedEvents.length },
+    { label: 'Saved events', summary: savedEventsState },
   ]
 
   return (
@@ -109,15 +110,19 @@ export default function CandidateActivityOverview({
 
           <RecentCard
             title="Next saved event"
-            emptyText="No events saved yet."
+            emptyText={savedEventsState.isLoading
+              ? 'Loading saved events...'
+              : savedEventsState.error
+                ? 'Saved events are currently unavailable.'
+                : 'No events saved yet.'}
             path={getCandidateActivityPath('events')}
             action="Open saved events"
           >
             {nextEvent && (
               <div>
                 <p className="break-words font-semibold text-[#e6f1ff]">{nextEvent.title}</p>
-                <p className="mt-2 break-words text-sm text-[#a8b2d1]">{formatEventDate(nextEvent.date)}</p>
-                <p className="mt-1 text-sm text-[#8892b0]">{formatEventTime(nextEvent)}</p>
+                <p className="mt-2 break-words text-sm text-[#a8b2d1]">{formatCommunityEventDate(nextEvent.startsAt)}</p>
+                <p className="mt-1 text-sm text-[#8892b0]">{formatCommunityEventTime(nextEvent.startsAt, nextEvent.endsAt)}</p>
               </div>
             )}
           </RecentCard>

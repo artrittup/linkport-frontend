@@ -4,18 +4,16 @@ import EventCard from '../components/EventCard'
 import MemberCard from '../components/MemberCard'
 import TeammateRequestCard from '../components/TeammateRequestCard'
 import { communityInterests } from '../data/mockCommunity'
-import { useLocalContent } from '../context/LocalContentContext'
-import { mockEvents } from '../data/mockEvents'
 import { mockMembers } from '../data/mockMembers'
 import { TEAMMATE_REQUEST_STATUSES } from '../data/teammateRequestMapper'
 import useCommunityProjects from '../hooks/useCommunityProjects'
+import useCommunityEvents from '../hooks/useCommunityEvents'
 import useTeammateRequests from '../hooks/useTeammateRequests'
 import CandidateLayout from '../layouts/CandidateLayout'
 
 const discordUrl = 'https://discord.gg/8NemkkpJj'
 
 export default function Community() {
-  const { attendingEventIds, storageError } = useLocalContent()
   const {
     projects: teammateProjects,
     isLoading: projectsLoading,
@@ -31,6 +29,13 @@ export default function Community() {
     status: TEAMMATE_REQUEST_STATUSES.OPEN,
     perPage: 3,
   })
+  const {
+    events,
+    meta: eventsMeta,
+    isLoading: eventsLoading,
+    error: eventsError,
+    retry: retryEvents,
+  } = useCommunityEvents({ perPage: 3 })
   const [selectedInterest, setSelectedInterest] = useState('')
 
   const visibleMembers = useMemo(() => {
@@ -45,7 +50,7 @@ export default function Community() {
 
   const overview = [
     { label: 'Active members', value: '240+' },
-    { label: 'Upcoming events', value: mockEvents.length },
+    { label: 'Upcoming events', value: eventsLoading ? '...' : eventsError ? '—' : eventsMeta.total },
     { label: 'Interest areas', value: communityInterests.length },
     { label: 'Projects seeking teammates', value: teammateProjects.length },
   ]
@@ -70,10 +75,6 @@ export default function Community() {
             Join Discord
           </a>
         </section>
-
-        {storageError && (
-          <p role="status" className="mt-6 rounded-lg border border-[#facc15]/25 bg-[#facc15]/5 px-4 py-3 text-sm text-[#fde68a]">{storageError}</p>
-        )}
 
         <section className="mt-10 grid min-w-0 gap-3 sm:grid-cols-2 xl:grid-cols-4" aria-label="Community overview">
           {overview.map((item) => (
@@ -118,11 +119,20 @@ export default function Community() {
             </div>
             <Link to="/candidate/community/events" className="text-sm font-medium text-[#64ffda] hover:underline">View all events</Link>
           </div>
-          <div className="mt-5 grid min-w-0 gap-5 md:grid-cols-2 xl:grid-cols-3">
-            {mockEvents.slice(0, 3).map((event) => (
-              <EventCard key={event.id} event={event} isAttending={attendingEventIds.includes(event.id)} />
-            ))}
-          </div>
+          {eventsLoading ? (
+            <p className="mt-5 rounded-xl border border-[#233554] bg-[#112240]/45 p-5 text-sm text-[#8892b0]">Loading upcoming events...</p>
+          ) : eventsError ? (
+            <div className="mt-5 rounded-xl border border-[#233554] bg-[#112240]/45 p-5">
+              <p className="text-sm text-[#8892b0]">Upcoming events are temporarily unavailable. The rest of Community remains available.</p>
+              <button type="button" onClick={retryEvents} className="mt-3 text-sm font-medium text-[#64ffda] hover:underline">Try again</button>
+            </div>
+          ) : events.length === 0 ? (
+            <p className="mt-5 rounded-xl border border-[#233554] bg-[#112240]/45 p-5 text-sm text-[#8892b0]">No upcoming events are published yet.</p>
+          ) : (
+            <div className="mt-5 grid min-w-0 gap-5 md:grid-cols-2 xl:grid-cols-3">
+              {events.map((event) => <EventCard key={event.id} event={event} />)}
+            </div>
+          )}
         </section>
 
         <section className="mt-12 min-w-0">

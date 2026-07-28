@@ -3,7 +3,6 @@ import { createContext, useCallback, useContext, useRef, useState } from 'react'
 
 const STORAGE_KEY = 'linkport_candidate_content_v1'
 const emptyContent = {
-  attendingEventIds: [],
   readNotificationIds: [],
   deletedNotificationIds: [],
 }
@@ -17,9 +16,6 @@ function readStoredContent() {
     const parsed = JSON.parse(raw)
     if (!parsed || typeof parsed !== 'object') throw new Error('Invalid local content')
 
-    const attendingEventIds = Array.isArray(parsed.attendingEventIds)
-      ? [...new Set(parsed.attendingEventIds.filter((eventId) => typeof eventId === 'string' && eventId.trim()))]
-      : []
     const readNotificationIds = Array.isArray(parsed.readNotificationIds)
       ? [...new Set(parsed.readNotificationIds.filter((notificationId) => typeof notificationId === 'string' && notificationId.trim()))]
       : []
@@ -29,7 +25,6 @@ function readStoredContent() {
 
     return {
       content: {
-        attendingEventIds,
         readNotificationIds,
         deletedNotificationIds,
       },
@@ -65,20 +60,6 @@ export function LocalContentProvider({ children }) {
       setStorageError('Content is available for this session, but this browser could not save it for refresh.')
     }
   }, [])
-
-  const setEventAttendance = useCallback((eventId, isAttending) => {
-    if (typeof eventId !== 'string' || !eventId.trim()) return
-
-    const currentIds = contentRef.current.attendingEventIds
-    const nextIds = isAttending
-      ? [...new Set([...currentIds, eventId])]
-      : currentIds.filter((savedEventId) => savedEventId !== eventId)
-
-    persistContent({
-      ...contentRef.current,
-      attendingEventIds: nextIds,
-    })
-  }, [persistContent])
 
   const markCandidateNotificationRead = useCallback((notificationId) => {
     if (typeof notificationId !== 'string' || !notificationId.trim()) return
@@ -124,11 +105,9 @@ export function LocalContentProvider({ children }) {
 
   return (
     <LocalContentContext.Provider value={{
-      attendingEventIds: content.attendingEventIds,
       readNotificationIds: content.readNotificationIds,
       deletedNotificationIds: content.deletedNotificationIds,
       storageError,
-      setEventAttendance,
       markCandidateNotificationRead,
       markAllCandidateNotificationsRead,
       deleteCandidateNotifications,

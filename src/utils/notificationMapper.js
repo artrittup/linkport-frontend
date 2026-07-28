@@ -1,3 +1,5 @@
+import { normalizePaginatedResponse } from './apiResponse'
+
 export const NOTIFICATION_CATEGORY_LABELS = Object.freeze({
   opportunity: 'Opportunity',
   event: 'Event',
@@ -37,17 +39,18 @@ export function mapNotification(notification = {}) {
 }
 
 export function mapNotificationsResponse(response = {}) {
-  const data = Array.isArray(response.data)
-    ? response.data.map(mapNotification)
-    : []
+  const normalized = normalizePaginatedResponse(response, {
+    mapItem: mapNotification,
+    perPage: 20,
+  })
 
   return {
-    data,
-    currentPage: Number(response.current_page ?? 1),
-    lastPage: Math.max(1, Number(response.last_page ?? 1)),
-    perPage: Number(response.per_page ?? data.length),
-    total: Number(response.total ?? data.length),
-    unreadCount: Number(response.unread_count ?? 0),
+    data: normalized.data,
+    currentPage: normalized.meta.current_page,
+    lastPage: normalized.meta.last_page,
+    perPage: normalized.meta.per_page,
+    total: normalized.meta.total,
+    unreadCount: Number(response.unread_count ?? response.data?.unread_count ?? 0),
   }
 }
 

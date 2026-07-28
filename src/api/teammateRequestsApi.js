@@ -1,4 +1,5 @@
 import { mapTeammateRequest } from '../data/teammateRequestMapper'
+import { normalizePaginatedResponse } from '../utils/apiResponse'
 import api from './axios'
 
 function mapRequestPayload(payload) {
@@ -10,20 +11,10 @@ function mapRequestPayload(payload) {
 
 export async function getTeammateRequests(params = {}) {
   const response = await api.get('/teammate-requests', { params })
-  const payload = response.data
-
-  return {
-    data: Array.isArray(payload?.data)
-      ? payload.data.map(mapTeammateRequest).filter(Boolean)
-      : [],
-    links: payload?.links ?? {},
-    meta: payload?.meta ?? {
-      current_page: 1,
-      last_page: 1,
-      per_page: 12,
-      total: 0,
-    },
-  }
+  return normalizePaginatedResponse(response.data, {
+    mapItem: mapTeammateRequest,
+    perPage: params.per_page ?? 12,
+  })
 }
 
 export async function getTeammateRequest(id) {

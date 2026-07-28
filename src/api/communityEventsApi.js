@@ -1,21 +1,12 @@
 import { mapCommunityEvent } from '../data/communityEventMapper'
+import { normalizePaginatedResponse } from '../utils/apiResponse'
 import api from './axios'
 
-const defaultMeta = {
-  current_page: 1,
-  last_page: 1,
-  per_page: 15,
-  total: 0,
-}
-
-function mapPaginatedEvents(payload) {
-  return {
-    data: Array.isArray(payload?.data)
-      ? payload.data.map(mapCommunityEvent).filter(Boolean)
-      : [],
-    links: payload?.links ?? {},
-    meta: payload?.meta ?? defaultMeta,
-  }
+function mapPaginatedEvents(payload, perPage) {
+  return normalizePaginatedResponse(payload, {
+    mapItem: mapCommunityEvent,
+    perPage,
+  })
 }
 
 function mapEventPayload(payload) {
@@ -27,7 +18,7 @@ function mapEventPayload(payload) {
 
 export async function getCommunityEvents(params = {}) {
   const response = await api.get('/community-events', { params })
-  return mapPaginatedEvents(response.data)
+  return mapPaginatedEvents(response.data, params.per_page ?? 15)
 }
 
 export async function getCommunityEvent(id) {
@@ -47,7 +38,7 @@ export async function removeCommunityEventAttendance(id) {
 
 export async function getMyCommunityEvents(params = {}) {
   const response = await api.get('/my-community-events', { params })
-  return mapPaginatedEvents(response.data)
+  return mapPaginatedEvents(response.data, params.per_page ?? 15)
 }
 
 export function getCommunityEventErrorMessage(error, fallback = 'Community events are temporarily unavailable. Please try again.') {

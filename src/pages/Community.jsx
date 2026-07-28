@@ -17,6 +17,7 @@ const communityInterests = INTEREST_OPTIONS.filter((interest) => interest.value)
 export default function Community() {
   const {
     projects: teammateProjects,
+    meta: teammateProjectsMeta,
     isLoading: projectsLoading,
     error: projectsError,
     retry: retryProjects,
@@ -50,7 +51,7 @@ export default function Community() {
     { label: selectedInterest ? 'Matching members' : 'Active members', value: membersLoading ? '...' : membersError ? '—' : membersMeta.total },
     { label: 'Upcoming events', value: eventsLoading ? '...' : eventsError ? '—' : eventsMeta.total },
     { label: 'Interest areas', value: communityInterests.length },
-    { label: 'Projects seeking teammates', value: teammateProjects.length },
+    { label: 'Projects seeking teammates', value: projectsLoading ? '...' : projectsError ? '—' : teammateProjectsMeta.total },
   ]
 
   return (

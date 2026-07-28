@@ -1,5 +1,7 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router'
+import { getJobs } from '../api/jobsApi'
+import { getProjects } from '../api/projectsApi'
 import {
   formatCommunityEventDate,
   formatCommunityEventTime,
@@ -11,6 +13,7 @@ import {
   TEAMMATE_REQUEST_STATUSES,
   getTeammateRequestWorkStyleLabel,
 } from '../data/teammateRequestMapper'
+import { jobToOpportunity, projectToOpportunity } from '../data/opportunityAdapters'
 import useCommunityProjects from '../hooks/useCommunityProjects'
 import useCommunityPosts from '../hooks/useCommunityPosts'
 import useCommunityEvents from '../hooks/useCommunityEvents'
@@ -38,6 +41,7 @@ const defaultFeedItems = [
     meta: 'Prishtina · Apply by August 18',
     action: 'View opportunity',
     path: '/candidate/opportunities/internship-northstar-frontend',
+    createdAt: null,
   },
 ]
 
@@ -83,6 +87,7 @@ function FeedCard({ item }) {
 export default function CandidateHome() {
   const {
     projects: communityProjects,
+    isLoading: projectsLoading,
     error: projectsError,
   } = useCommunityProjects({ perPage: 3 })
   const {
@@ -103,7 +108,40 @@ export default function CandidateHome() {
     isLoading: eventsLoading,
     error: eventsError,
   } = useCommunityEvents({ perPage: 3 })
+  const [liveOpportunities, setLiveOpportunities] = useState([])
+  const [opportunitiesLoading, setOpportunitiesLoading] = useState(true)
+  const [opportunitiesError, setOpportunitiesError] = useState(false)
   const [activeFilter, setActiveFilter] = useState('All')
+
+  useEffect(() => {
+    let isActive = true
+
+    Promise.allSettled([
+      getJobs({ per_page: 2, page: 1 }),
+      getProjects({ per_page: 2, page: 1 }),
+    ]).then(([jobsResult, projectsResult]) => {
+      if (!isActive) return
+
+      const nextOpportunities = []
+      if (jobsResult.status === 'fulfilled') {
+        nextOpportunities.push(...jobsResult.value.data.map(jobToOpportunity))
+      }
+      if (projectsResult.status === 'fulfilled') {
+        nextOpportunities.push(...projectsResult.value.data.map(projectToOpportunity))
+      }
+
+      setLiveOpportunities(nextOpportunities)
+      setOpportunitiesError(
+        jobsResult.status === 'rejected' || projectsResult.status === 'rejected',
+      )
+      setOpportunitiesLoading(false)
+    })
+
+    return () => {
+      isActive = false
+    }
+  }, [])
+
   const communityFeedItems = useMemo(() => [
     ...communityProjects.map((project) => ({
       id: `project-${project.id}`,
@@ -158,11 +196,42 @@ export default function CandidateHome() {
       attending: event.isAttending,
       createdAt: event.createdAt,
     })),
-  ].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)), [communityEvents, communityPosts, communityProjects, teammateRequests])
-  const feedItems = [...communityFeedItems, ...defaultFeedItems]
+    ...liveOpportunities.map((opportunity) => ({
+      id: `opportunity-${opportunity.id}`,
+      filter: 'Opportunities',
+      type: opportunity.type,
+      title: opportunity.title,
+      description: opportunity.description,
+      author: opportunity.company,
+      tags: opportunity.skills,
+      meta: opportunity.location,
+      action: 'View opportunity',
+      path: `/candidate/opportunities/${opportunity.id}`,
+      createdAt: opportunity.sourceData?.created_at ?? null,
+    })),
+    ...defaultFeedItems,
+  ].sort((first, second) => {
+    const firstTimestamp = Date.parse(first.createdAt)
+    const secondTimestamp = Date.parse(second.createdAt)
+    return (Number.isFinite(secondTimestamp) ? secondTimestamp : 0)
+      - (Number.isFinite(firstTimestamp) ? firstTimestamp : 0)
+  }), [communityEvents, communityPosts, communityProjects, liveOpportunities, teammateRequests])
+  const feedItems = communityFeedItems
   const visibleItems = activeFilter === 'All'
     ? feedItems
     : feedItems.filter((item) => item.filter === activeFilter)
+  const isFeedLoading = projectsLoading
+    || postsLoading
+    || teammateRequestsLoading
+    || eventsLoading
+    || opportunitiesLoading
+  const activeFilterPending = {
+    Projects: projectsLoading || projectsError,
+    Posts: postsLoading || postsError,
+    Team: teammateRequestsLoading || teammateRequestsError,
+    Opportunities: opportunitiesLoading || opportunitiesError,
+    Events: eventsLoading || eventsError,
+  }[activeFilter]
 
   return (
     <CandidateLayout title="Explore LinkPort">
@@ -181,27 +250,28 @@ export default function CandidateHome() {
           Community projects are temporarily unavailable. Other Home updates are still available.
         </p>
       )}
-      {postsLoading && (
-        <p role="status" className="mt-4 text-sm text-[#8892b0]">Loading community posts...</p>
-      )}
       {postsError && (
         <p role="status" className="mt-4 rounded-lg border border-[#233554] bg-[#112240]/45 px-4 py-3 text-sm text-[#8892b0]">
           Community posts are temporarily unavailable. Other Home updates are still available.
         </p>
-      )}
-      {teammateRequestsLoading && (
-        <p role="status" className="mt-4 text-sm text-[#8892b0]">Loading teammate requests...</p>
       )}
       {teammateRequestsError && (
         <p role="status" className="mt-4 rounded-lg border border-[#233554] bg-[#112240]/45 px-4 py-3 text-sm text-[#8892b0]">
           Teammate requests are temporarily unavailable. Other Home updates are still available.
         </p>
       )}
-      {eventsLoading && <p role="status" className="mt-4 text-sm text-[#8892b0]">Loading upcoming events...</p>}
       {eventsError && (
         <p role="status" className="mt-4 rounded-lg border border-[#233554] bg-[#112240]/45 px-4 py-3 text-sm text-[#8892b0]">
           Upcoming events are temporarily unavailable. Other Home updates are still available.
         </p>
+      )}
+      {opportunitiesError && (
+        <p role="status" className="mt-4 rounded-lg border border-[#233554] bg-[#112240]/45 px-4 py-3 text-sm text-[#8892b0]">
+          Some live opportunities are temporarily unavailable. Other Home updates are still available.
+        </p>
+      )}
+      {isFeedLoading && (
+        <p role="status" className="mt-4 text-sm text-[#8892b0]">Loading the latest Home updates...</p>
       )}
 
       <div className="mt-8 flex gap-2 overflow-x-auto pb-1" role="tablist" aria-label="Filter community feed">
@@ -227,8 +297,7 @@ export default function CandidateHome() {
         {visibleItems.map((item) => <FeedCard key={item.id} item={item} />)}
       </section>
 
-      {visibleItems.length === 0
-        && !(activeFilter === 'Team' && (teammateRequestsLoading || teammateRequestsError)) && (
+      {visibleItems.length === 0 && !activeFilterPending && (
         <p className="mt-8 rounded-xl border border-[#233554] bg-[#112240]/50 p-6 text-sm text-[#8892b0]">
           {activeFilter === 'Team'
             ? 'No open teammate requests are available yet.'

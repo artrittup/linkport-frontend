@@ -1,4 +1,5 @@
 import api from './axios'
+import { normalizeFlatPaginatedResponse } from '../utils/apiResponse'
 
 const capitalize = (value) =>
   value ? value.charAt(0).toUpperCase() + value.slice(1) : 'Unknown'
@@ -46,15 +47,10 @@ function normalizeBid(bid) {
 
 export async function getMyBids(params) {
   const response = await api.get('/bids/my', { params })
-  const payload = response.data
-
-  return {
-    ...payload,
-    data: Array.isArray(payload.data) ? payload.data.map(normalizeBid) : [],
-    current_page: Number(payload.current_page ?? 1),
-    total: Number(payload.total ?? 0),
-    per_page: Number(payload.per_page ?? params?.per_page ?? 15),
-  }
+  return normalizeFlatPaginatedResponse(response.data, {
+    mapItem: normalizeBid,
+    perPage: params?.per_page ?? 15,
+  })
 }
 
 const normalizeCompanyBid = (bid) => {
@@ -82,17 +78,10 @@ const normalizeCompanyBid = (bid) => {
 
 export async function getCompanyBids(params) {
   const response = await api.get('/company/bids', { params })
-  const payload = response.data ?? {}
-
-  return {
-    ...payload,
-    data: Array.isArray(payload.data)
-      ? payload.data.map(normalizeCompanyBid)
-      : [],
-    current_page: Number(payload.current_page ?? 1),
-    total: Number(payload.total ?? 0),
-    per_page: Number(payload.per_page ?? params?.per_page ?? 15),
-  }
+  return normalizeFlatPaginatedResponse(response.data, {
+    mapItem: normalizeCompanyBid,
+    perPage: params?.per_page ?? 15,
+  })
 }
 
 export async function acceptBid(id) {

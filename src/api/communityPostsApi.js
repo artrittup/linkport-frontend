@@ -1,4 +1,5 @@
 import { mapCommunityPost } from '../data/communityPostMapper'
+import { normalizePaginatedResponse } from '../utils/apiResponse'
 import api from './axios'
 
 function mapPostPayload(payload) {
@@ -10,20 +11,10 @@ function mapPostPayload(payload) {
 
 export async function getCommunityPosts(params = {}) {
   const response = await api.get('/community-posts', { params })
-  const payload = response.data
-
-  return {
-    data: Array.isArray(payload?.data)
-      ? payload.data.map(mapCommunityPost).filter(Boolean)
-      : [],
-    links: payload?.links ?? {},
-    meta: payload?.meta ?? {
-      current_page: 1,
-      last_page: 1,
-      per_page: 15,
-      total: 0,
-    },
-  }
+  return normalizePaginatedResponse(response.data, {
+    mapItem: mapCommunityPost,
+    perPage: params.per_page ?? 15,
+  })
 }
 
 export async function getCommunityPost(id) {

@@ -1,24 +1,13 @@
 import { mapCommunityMember } from '../data/communityMemberMapper'
+import { normalizePaginatedResponse } from '../utils/apiResponse'
 import api from './axios'
-
-const defaultMeta = {
-  current_page: 1,
-  last_page: 1,
-  per_page: 12,
-  total: 0,
-}
 
 export async function getCommunityMembers(params = {}) {
   const response = await api.get('/community-members', { params })
-  const payload = response.data
-
-  return {
-    data: Array.isArray(payload?.data)
-      ? payload.data.map(mapCommunityMember).filter(Boolean)
-      : [],
-    links: payload?.links ?? {},
-    meta: payload?.meta ?? defaultMeta,
-  }
+  return normalizePaginatedResponse(response.data, {
+    mapItem: mapCommunityMember,
+    perPage: params.per_page ?? 12,
+  })
 }
 
 export async function getCommunityMember(userId) {

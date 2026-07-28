@@ -34,7 +34,6 @@ function isNavigationItemActive(item, pathname) {
   if (pathname === item.path) return true
   if (item.key === 'home') {
     return pathname === '/candidate/create/post'
-      || pathname === '/candidate/notifications'
   }
   if (item.key === 'projects') {
     return pathname.startsWith('/candidate/projects/')

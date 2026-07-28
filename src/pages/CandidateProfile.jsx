@@ -23,7 +23,7 @@ import {
 } from '../data/communityMemberMapper'
 import useCommunityProjects from '../hooks/useCommunityProjects'
 import useToast from '../hooks/useToast'
-import DashboardLayout from '../layouts/DashboardLayout'
+import CandidateLayout from '../layouts/CandidateLayout'
 
 const inputClasses = 'mt-2 w-full min-w-0 max-w-full rounded-lg border border-[#233554] bg-[#0a192f]/70 px-4 py-3 text-sm text-[#e6f1ff] outline-none transition-colors placeholder:text-[#64748b] focus:border-[#64ffda] focus:ring-1 focus:ring-[#64ffda]'
 
@@ -202,15 +202,15 @@ export default function CandidateProfile() {
 
   if (isLoading) {
     return (
-      <DashboardLayout title="Profile" userType="Member">
+      <CandidateLayout title="Profile">
         <LoadingSpinner label="Loading your profile..." size="lg" />
-      </DashboardLayout>
+      </CandidateLayout>
     )
   }
 
   if (isEditing) {
     return (
-      <DashboardLayout title="Edit profile" userType="Member">
+      <CandidateLayout title="Edit profile">
         <div className="min-w-0 max-w-4xl">
           <section>
             <p className="font-mono text-sm text-[#64ffda]">Member profile</p>
@@ -368,14 +368,14 @@ export default function CandidateProfile() {
             </form>
           </Card>
         </div>
-      </DashboardLayout>
+      </CandidateLayout>
     )
   }
 
   const currentFocus = profile.skills.slice(0, 3)
 
   return (
-    <DashboardLayout title="Profile" userType="Member">
+    <CandidateLayout title="Profile">
       <div className="min-w-0 max-w-full space-y-8">
         <section>
           <p className="font-mono text-sm text-[#64ffda]">Member profile</p>
@@ -527,6 +527,6 @@ export default function CandidateProfile() {
           </div>
         </ProfileSection>
       </div>
-    </DashboardLayout>
+    </CandidateLayout>
   )
 }

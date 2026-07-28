@@ -1,4 +1,5 @@
 import api from './axios'
+import { normalizeFlatPaginatedResponse } from '../utils/apiResponse'
 
 export function normalizeProject(project) {
   if (!project) return null
@@ -19,14 +20,10 @@ export function normalizeProject(project) {
 
 export async function getProjects(params) {
   const response = await api.get('/projects', { params })
-  const payload = response.data
-
-  return {
-    ...payload,
-    data: Array.isArray(payload.data)
-      ? payload.data.map(normalizeProject)
-      : [],
-  }
+  return normalizeFlatPaginatedResponse(response.data, {
+    mapItem: normalizeProject,
+    perPage: params?.per_page ?? 15,
+  })
 }
 
 export async function getProjectById(id) {
@@ -39,21 +36,17 @@ export async function getProjectById(id) {
 
 export async function getCompanyProjects(params) {
   const response = await api.get('/company/projects', { params })
-  const payload = response.data
-
-  return {
-    ...payload,
-    data: Array.isArray(payload.data)
-      ? payload.data.map((project) => ({
-          ...normalizeProject(project),
-          bids: Number(project.bids_count ?? 0),
-          status: project.status
-            ? project.status.charAt(0).toUpperCase() + project.status.slice(1)
-            : 'Unknown',
-          deadline: project.deadline?.slice(0, 10) ?? '',
-        }))
-      : [],
-  }
+  return normalizeFlatPaginatedResponse(response.data, {
+    mapItem: (project) => ({
+      ...normalizeProject(project),
+      bids: Number(project.bids_count ?? 0),
+      status: project.status
+        ? project.status.charAt(0).toUpperCase() + project.status.slice(1)
+        : 'Unknown',
+      deadline: project.deadline?.slice(0, 10) ?? '',
+    }),
+    perPage: params?.per_page ?? 15,
+  })
 }
 
 export async function createProject(data) {

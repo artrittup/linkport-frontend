@@ -1,4 +1,5 @@
 import { mapCommunityProject } from '../data/communityProjectMapper'
+import { normalizePaginatedResponse } from '../utils/apiResponse'
 import api from './axios'
 
 function mapProjectPayload(payload) {
@@ -10,20 +11,10 @@ function mapProjectPayload(payload) {
 
 export async function getCommunityProjects(params = {}) {
   const response = await api.get('/community-projects', { params })
-  const payload = response.data
-
-  return {
-    data: Array.isArray(payload?.data)
-      ? payload.data.map(mapCommunityProject).filter(Boolean)
-      : [],
-    links: payload?.links ?? {},
-    meta: payload?.meta ?? {
-      current_page: 1,
-      last_page: 1,
-      per_page: 12,
-      total: 0,
-    },
-  }
+  return normalizePaginatedResponse(response.data, {
+    mapItem: mapCommunityProject,
+    perPage: params.per_page ?? 12,
+  })
 }
 
 export async function getCommunityProject(id) {
@@ -52,9 +43,12 @@ export function getCommunityProjectErrorMessage(error, fallback = 'Community pro
     ? Object.values(validationErrors).flat().filter(Boolean)
     : []
 
-  return validationMessages.length > 0
-    ? validationMessages.join(' ')
-    : error.response?.data?.message || fallback
+  if (validationMessages.length > 0) return validationMessages.join(' ')
+
+  const status = error.response?.status
+  return status && status < 500
+    ? error.response?.data?.message || fallback
+    : fallback
 }
 
 export function getCommunityProjectValidationErrors(error) {

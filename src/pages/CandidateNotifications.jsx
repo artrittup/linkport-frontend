@@ -1,16 +1,26 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router'
+import {
+  announceNotificationsChanged,
+  deleteAllNotifications,
+  deleteNotification,
+  deleteSelectedNotifications,
+  getNotificationErrorMessage,
+  getNotifications,
+  markAllNotificationsAsRead,
+  markNotificationAsRead,
+  NOTIFICATIONS_CHANGED_EVENT,
+} from '../api/notificationsApi'
 import Button from '../components/Button'
 import EmptyState from '../components/EmptyState'
+import LoadingSpinner from '../components/LoadingSpinner'
 import Modal from '../components/Modal'
 import NotificationRow from '../components/NotificationRow'
-import { useLocalContent } from '../context/LocalContentContext'
-import {
-  formatNotificationTime,
-  getVisibleCandidateNotifications,
-} from '../data/mockCandidateNotifications'
 import CandidateLayout from '../layouts/CandidateLayout'
+import { getNotificationDestination } from '../utils/notificationDestination'
+import { formatNotificationTime } from '../utils/notificationMapper'
 
+const PAGE_SIZE = 15
 const filters = [
   { id: 'all', label: 'All' },
   { id: 'unread', label: 'Unread' },
@@ -20,28 +30,66 @@ export default function CandidateNotifications() {
   const navigate = useNavigate()
   const selectAllRef = useRef(null)
   const [filter, setFilter] = useState('all')
+  const [page, setPage] = useState(1)
+  const [reloadKey, setReloadKey] = useState(0)
+  const [lastPage, setLastPage] = useState(1)
+  const [total, setTotal] = useState(0)
+  const [unreadCount, setUnreadCount] = useState(0)
+  const [notifications, setNotifications] = useState([])
   const [selectedIds, setSelectedIds] = useState(() => new Set())
   const [showDeleteAllConfirmation, setShowDeleteAllConfirmation] = useState(false)
-  const {
-    readNotificationIds,
-    deletedNotificationIds,
-    markCandidateNotificationRead,
-    markAllCandidateNotificationsRead,
-    deleteCandidateNotifications,
-    storageError,
-  } = useLocalContent()
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState('')
+  const [markingReadIds, setMarkingReadIds] = useState(() => new Set())
+  const [deletingIds, setDeletingIds] = useState(() => new Set())
+  const [isMarkingAll, setIsMarkingAll] = useState(false)
+  const [isDeletingSelected, setIsDeletingSelected] = useState(false)
+  const [isDeletingAll, setIsDeletingAll] = useState(false)
 
-  const notifications = useMemo(
-    () => getVisibleCandidateNotifications(readNotificationIds, deletedNotificationIds),
-    [deletedNotificationIds, readNotificationIds],
-  )
-  const unreadCount = notifications.filter((notification) => !notification.isRead).length
-  const visibleNotifications = filter === 'unread'
-    ? notifications.filter((notification) => !notification.isRead)
-    : notifications
+  useEffect(() => {
+    let active = true
+
+    getNotifications({ filter, page, per_page: PAGE_SIZE })
+      .then((response) => {
+        if (!active) return
+        setNotifications(response.data)
+        setPage(response.currentPage)
+        setLastPage(response.lastPage)
+        setTotal(response.total)
+        setUnreadCount(response.unreadCount)
+        setSelectedIds(new Set())
+      })
+      .catch((requestError) => {
+        if (active) {
+          setError(getNotificationErrorMessage(requestError, 'Notifications are unavailable right now.'))
+        }
+      })
+      .finally(() => {
+        if (active) setIsLoading(false)
+      })
+
+    return () => {
+      active = false
+    }
+  }, [filter, page, reloadKey])
+
+  useEffect(() => {
+    const refreshAfterExternalChange = (event) => {
+      if (event.detail?.source === 'candidate-page') return
+      setIsLoading(true)
+      setError('')
+      setReloadKey((current) => current + 1)
+    }
+
+    window.addEventListener(NOTIFICATIONS_CHANGED_EVENT, refreshAfterExternalChange)
+    return () => {
+      window.removeEventListener(NOTIFICATIONS_CHANGED_EVENT, refreshAfterExternalChange)
+    }
+  }, [])
+
   const visibleIds = useMemo(
-    () => visibleNotifications.map((notification) => notification.id),
-    [visibleNotifications],
+    () => notifications.map((notification) => notification.id),
+    [notifications],
   )
   const visibleIdSet = useMemo(() => new Set(visibleIds), [visibleIds])
   const validSelectedIds = useMemo(
@@ -50,7 +98,8 @@ export default function CandidateNotifications() {
   )
   const selectedVisibleCount = validSelectedIds.size
   const allVisibleSelected = visibleIds.length > 0 && selectedVisibleCount === visibleIds.length
-  const hasSelection = validSelectedIds.size > 0
+  const hasSelection = selectedVisibleCount > 0
+  const isWorking = isMarkingAll || isDeletingSelected || isDeletingAll
 
   useEffect(() => {
     if (selectAllRef.current) {
@@ -58,14 +107,65 @@ export default function CandidateNotifications() {
     }
   }, [allVisibleSelected, selectedVisibleCount])
 
-  const openNotification = (notification) => {
-    if (!notification.isRead) markCandidateNotificationRead(notification.id)
-    navigate(notification.targetRoute)
+  const removeFromPage = (ids) => {
+    const removedIds = new Set(ids)
+    setNotifications((items) => items.filter((item) => !removedIds.has(item.id)))
+    setSelectedIds(new Set())
+    setTotal((count) => Math.max(0, count - removedIds.size))
+    if (notifications.every((item) => removedIds.has(item.id)) && page > 1) {
+      setIsLoading(true)
+      setPage((current) => current - 1)
+    } else if (notifications.every((item) => removedIds.has(item.id)) && total > removedIds.size) {
+      setIsLoading(true)
+      setReloadKey((current) => current + 1)
+    }
+  }
+
+  const openNotification = async (notification) => {
+    if (markingReadIds.has(notification.id)) return
+
+    if (!notification.isRead) {
+      setMarkingReadIds((ids) => new Set(ids).add(notification.id))
+      setError('')
+      try {
+        const response = await markNotificationAsRead(notification.id)
+        setUnreadCount(response.unreadCount)
+        if (filter === 'unread') {
+          setNotifications((items) => items.filter((item) => item.id !== notification.id))
+          setTotal((count) => Math.max(0, count - 1))
+          setSelectedIds((ids) => {
+            const next = new Set(ids)
+            next.delete(notification.id)
+            return next
+          })
+        } else {
+          setNotifications((items) => items.map((item) => (
+            item.id === notification.id ? response.notification : item
+          )))
+        }
+        announceNotificationsChanged('candidate-page')
+      } catch {
+        setError('This update could not be marked as read, but you can still open it.')
+      } finally {
+        setMarkingReadIds((ids) => {
+          const next = new Set(ids)
+          next.delete(notification.id)
+          return next
+        })
+      }
+    }
+
+    navigate(getNotificationDestination(notification, '/candidate/notifications'))
   }
 
   const changeFilter = (nextFilter) => {
+    if (!filters.some((item) => item.id === nextFilter)) return
+    if (nextFilter === filter) return
     setFilter(nextFilter)
+    setPage(1)
     setSelectedIds(new Set())
+    setIsLoading(true)
+    setError('')
   }
 
   const selectNotification = (notificationId, selected) => {
@@ -81,34 +181,93 @@ export default function CandidateNotifications() {
     setSelectedIds(allVisibleSelected ? new Set() : new Set(visibleIds))
   }
 
-  const deleteOne = (notificationId) => {
-    deleteCandidateNotifications(notificationId)
-    setSelectedIds((current) => {
-      if (!current.has(notificationId)) return current
-      const next = new Set(current)
-      next.delete(notificationId)
-      return next
-    })
+  const deleteOne = async (notificationId) => {
+    if (deletingIds.has(notificationId)) return
+    setDeletingIds((ids) => new Set(ids).add(notificationId))
+    setError('')
+    try {
+      const response = await deleteNotification(notificationId)
+      removeFromPage([notificationId])
+      setUnreadCount(response.unreadCount)
+      announceNotificationsChanged('candidate-page')
+    } catch (requestError) {
+      setError(getNotificationErrorMessage(requestError, 'Unable to delete this notification.'))
+    } finally {
+      setDeletingIds((ids) => {
+        const next = new Set(ids)
+        next.delete(notificationId)
+        return next
+      })
+    }
   }
 
-  const deleteSelected = () => {
-    deleteCandidateNotifications([...validSelectedIds])
-    setSelectedIds(new Set())
+  const deleteSelected = async () => {
+    const ids = [...validSelectedIds]
+    if (ids.length === 0 || isDeletingSelected) return
+
+    setIsDeletingSelected(true)
+    setError('')
+    try {
+      const response = await deleteSelectedNotifications(ids)
+      removeFromPage(ids)
+      setUnreadCount(response.unreadCount)
+      announceNotificationsChanged('candidate-page')
+    } catch (requestError) {
+      setError(getNotificationErrorMessage(requestError, 'Unable to delete the selected notifications.'))
+    } finally {
+      setIsDeletingSelected(false)
+    }
   }
 
-  const deleteAll = () => {
-    deleteCandidateNotifications(notifications.map((notification) => notification.id))
-    setSelectedIds(new Set())
-    setShowDeleteAllConfirmation(false)
+  const deleteAll = async () => {
+    if (isDeletingAll) return
+    setIsDeletingAll(true)
+    setError('')
+    try {
+      const response = await deleteAllNotifications()
+      setNotifications([])
+      setSelectedIds(new Set())
+      setTotal(0)
+      setPage(1)
+      setLastPage(1)
+      setUnreadCount(response.unreadCount)
+      setShowDeleteAllConfirmation(false)
+      announceNotificationsChanged('candidate-page')
+    } catch (requestError) {
+      setError(getNotificationErrorMessage(requestError, 'Unable to delete all notifications.'))
+    } finally {
+      setIsDeletingAll(false)
+    }
   }
 
-  const markAllVisibleRead = () => {
-    markAllCandidateNotificationsRead(visibleIds)
-    setSelectedIds(new Set())
+  const markAllRead = async () => {
+    if (isMarkingAll) return
+    setIsMarkingAll(true)
+    setError('')
+    try {
+      const response = await markAllNotificationsAsRead()
+      const readAt = new Date().toISOString()
+      if (filter === 'unread') {
+        setNotifications([])
+        setTotal(0)
+      } else {
+        setNotifications((items) => items.map((item) => ({
+          ...item,
+          isRead: true,
+          readAt: item.readAt ?? readAt,
+        })))
+      }
+      setSelectedIds(new Set())
+      setUnreadCount(response.unreadCount)
+      announceNotificationsChanged('candidate-page')
+    } catch (requestError) {
+      setError(getNotificationErrorMessage(requestError, 'Unable to mark notifications as read.'))
+    } finally {
+      setIsMarkingAll(false)
+    }
   }
 
-  const everyNotificationDeleted = notifications.length === 0
-  const emptyTitle = everyNotificationDeleted
+  const emptyTitle = total === 0 && filter === 'all'
     ? 'You have no notifications.'
     : 'You are all caught up.'
 
@@ -123,8 +282,8 @@ export default function CandidateNotifications() {
           </p>
         </section>
 
-        {storageError && (
-          <p role="status" className="mt-6 rounded-lg border border-[#facc15]/25 bg-[#facc15]/5 px-4 py-3 text-sm text-[#fde68a]">{storageError}</p>
+        {error && (
+          <p role="alert" className="mt-6 rounded-lg border border-[#ef4444]/30 bg-[#ef4444]/10 px-4 py-3 text-sm text-[#fca5a5]">{error}</p>
         )}
 
         <div className="mt-8 flex min-w-0 gap-2 overflow-x-auto pb-1" role="tablist" aria-label="Filter notifications">
@@ -134,8 +293,9 @@ export default function CandidateNotifications() {
               type="button"
               role="tab"
               aria-selected={filter === item.id}
+              disabled={isWorking}
               onClick={() => changeFilter(item.id)}
-              className={`shrink-0 rounded-full border px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#64ffda] ${
+              className={`shrink-0 rounded-full border px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#64ffda] disabled:opacity-60 ${
                 filter === item.id
                   ? 'border-[#64ffda] bg-[#64ffda]/10 text-[#64ffda]'
                   : 'border-[#233554] text-[#8892b0] hover:border-[#64ffda]/50 hover:text-[#e6f1ff]'
@@ -146,7 +306,7 @@ export default function CandidateNotifications() {
           ))}
         </div>
 
-        {!everyNotificationDeleted && (
+        {!isLoading && total > 0 && (
           <div
             className="mt-5 flex min-w-0 flex-wrap items-center gap-2 rounded-xl border border-[#233554] bg-[#112240]/70 px-3 py-2.5 sm:px-4"
             aria-label={hasSelection ? 'Notification selection actions' : 'Notification actions'}
@@ -156,36 +316,36 @@ export default function CandidateNotifications() {
                 ref={selectAllRef}
                 type="checkbox"
                 checked={allVisibleSelected}
-                disabled={visibleIds.length === 0}
+                disabled={visibleIds.length === 0 || isWorking}
                 onChange={toggleAllVisible}
                 aria-label="Select all visible notifications"
                 className="h-4 w-4 shrink-0 cursor-pointer accent-[#64ffda] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#64ffda] focus-visible:ring-offset-2 focus-visible:ring-offset-[#112240] disabled:cursor-not-allowed"
               />
               <span className="break-words">
-                {hasSelection ? `${validSelectedIds.size} selected` : 'Select all visible'}
+                {hasSelection ? `${selectedVisibleCount} selected` : 'Select all visible'}
               </span>
             </label>
 
             {hasSelection ? (
               <>
-                <button type="button" onClick={toggleAllVisible} className="shrink-0 rounded-md px-2.5 py-2 text-xs font-semibold text-[#64ffda] hover:bg-[#64ffda]/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#64ffda]">
+                <button type="button" disabled={isWorking} onClick={toggleAllVisible} className="shrink-0 rounded-md px-2.5 py-2 text-xs font-semibold text-[#64ffda] hover:bg-[#64ffda]/10 disabled:opacity-60">
                   {allVisibleSelected ? 'Deselect all' : 'Select all'}
                 </button>
-                <button type="button" onClick={deleteSelected} className="shrink-0 rounded-md px-2.5 py-2 text-xs font-semibold text-[#fca5a5] hover:bg-[#ef4444]/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#64ffda]">
-                  Delete selected
+                <button type="button" disabled={isDeletingSelected} onClick={deleteSelected} className="shrink-0 rounded-md px-2.5 py-2 text-xs font-semibold text-[#fca5a5] hover:bg-[#ef4444]/10 disabled:cursor-wait disabled:opacity-60">
+                  {isDeletingSelected ? 'Deleting...' : 'Delete selected'}
                 </button>
-                <button type="button" onClick={() => setSelectedIds(new Set())} className="shrink-0 rounded-md px-2.5 py-2 text-xs font-semibold text-[#8892b0] hover:bg-[#172a45] hover:text-[#e6f1ff] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#64ffda]">
+                <button type="button" disabled={isWorking} onClick={() => setSelectedIds(new Set())} className="shrink-0 rounded-md px-2.5 py-2 text-xs font-semibold text-[#8892b0] hover:bg-[#172a45] hover:text-[#e6f1ff] disabled:opacity-60">
                   Clear
                 </button>
               </>
             ) : (
               <>
-                {visibleNotifications.some((notification) => !notification.isRead) && (
-                  <button type="button" onClick={markAllVisibleRead} className="shrink-0 rounded-md px-2.5 py-2 text-xs font-semibold text-[#64ffda] hover:bg-[#64ffda]/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#64ffda]">
-                    Mark all as read
+                {unreadCount > 0 && (
+                  <button type="button" disabled={isMarkingAll} onClick={markAllRead} className="shrink-0 rounded-md px-2.5 py-2 text-xs font-semibold text-[#64ffda] hover:bg-[#64ffda]/10 disabled:cursor-wait disabled:opacity-60">
+                    {isMarkingAll ? 'Marking...' : 'Mark all as read'}
                   </button>
                 )}
-                <button type="button" onClick={() => setShowDeleteAllConfirmation(true)} className="shrink-0 rounded-md px-2.5 py-2 text-xs font-semibold text-[#8892b0] hover:bg-[#ef4444]/10 hover:text-[#fca5a5] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#64ffda]">
+                <button type="button" disabled={isWorking} onClick={() => setShowDeleteAllConfirmation(true)} className="shrink-0 rounded-md px-2.5 py-2 text-xs font-semibold text-[#8892b0] hover:bg-[#ef4444]/10 hover:text-[#fca5a5] disabled:opacity-60">
                   Delete all
                 </button>
               </>
@@ -194,9 +354,11 @@ export default function CandidateNotifications() {
         )}
 
         <section className="mt-4 min-w-0" aria-live="polite">
-          {visibleNotifications.length > 0 ? (
+          {isLoading ? (
+            <LoadingSpinner label="Loading notifications..." />
+          ) : notifications.length > 0 ? (
             <div className="min-w-0 divide-y divide-[#233554] overflow-hidden rounded-xl border border-[#233554] bg-[#112240]/45">
-              {visibleNotifications.map((notification) => (
+              {notifications.map((notification) => (
                 <NotificationRow
                   key={notification.id}
                   notification={notification}
@@ -206,32 +368,58 @@ export default function CandidateNotifications() {
                   onOpen={openNotification}
                   onDelete={deleteOne}
                   formattedTime={formatNotificationTime(notification.createdAt)}
+                  disabled={markingReadIds.has(notification.id) || deletingIds.has(notification.id) || isWorking}
+                  isDeleting={deletingIds.has(notification.id)}
                 />
               ))}
             </div>
           ) : (
             <EmptyState
               title={emptyTitle}
-              description={everyNotificationDeleted
+              description={filter === 'all'
                 ? 'Explore LinkPort to find opportunities, projects, and community activity.'
                 : 'New Candidate updates will appear here when they are available.'}
-              actionLabel={everyNotificationDeleted ? 'Explore LinkPort' : 'Browse opportunities'}
-              onAction={() => navigate(everyNotificationDeleted ? '/candidate/community' : '/candidate/opportunities')}
+              actionLabel={filter === 'all' ? 'Explore LinkPort' : 'Browse opportunities'}
+              onAction={() => navigate(filter === 'all' ? '/candidate/community' : '/candidate/opportunities')}
             />
           )}
         </section>
+
+        {!isLoading && lastPage > 1 && (
+          <nav className="mt-6 flex items-center justify-center gap-3" aria-label="Notification pages">
+            <Button variant="outline" size="sm" disabled={page <= 1 || isWorking} onClick={() => {
+              setIsLoading(true)
+              setError('')
+              setPage((current) => Math.max(1, current - 1))
+            }}>
+              Previous
+            </Button>
+            <span className="text-xs text-[#8892b0]">Page {page} of {lastPage}</span>
+            <Button variant="outline" size="sm" disabled={page >= lastPage || isWorking} onClick={() => {
+              setIsLoading(true)
+              setError('')
+              setPage((current) => Math.min(lastPage, current + 1))
+            }}>
+              Next
+            </Button>
+          </nav>
+        )}
       </div>
 
       <Modal
         isOpen={showDeleteAllConfirmation}
-        onClose={() => setShowDeleteAllConfirmation(false)}
+        onClose={() => {
+          if (!isDeletingAll) setShowDeleteAllConfirmation(false)
+        }}
         title="Delete all notifications?"
         maxWidth="max-w-md"
         showCloseButton={false}
         footer={(
           <>
-            <Button variant="outline" size="sm" onClick={() => setShowDeleteAllConfirmation(false)}>Cancel</Button>
-            <Button variant="danger" size="sm" onClick={deleteAll}>Delete all</Button>
+            <Button variant="outline" size="sm" disabled={isDeletingAll} onClick={() => setShowDeleteAllConfirmation(false)}>Cancel</Button>
+            <Button variant="danger" size="sm" disabled={isDeletingAll} onClick={deleteAll}>
+              {isDeletingAll ? 'Deleting...' : 'Delete all'}
+            </Button>
           </>
         )}
       >

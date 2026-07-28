@@ -10,16 +10,8 @@ import {
 } from '../api/notificationsApi'
 import { useAuth } from '../context/AuthContext'
 import { getNotificationDestination } from '../utils/notificationDestination'
+import { formatNotificationTime } from '../utils/notificationMapper'
 import NotificationRow from './NotificationRow'
-
-function relativeTime(value) {
-  const seconds = Math.max(0, Math.floor((Date.now() - new Date(value).getTime()) / 1000))
-  if (seconds < 60) return 'Just now'
-  if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`
-  if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`
-  if (seconds < 604800) return `${Math.floor(seconds / 86400)}d ago`
-  return new Date(value).toLocaleDateString()
-}
 
 export default function NotificationBell() {
   const navigate = useNavigate()
@@ -91,6 +83,7 @@ export default function NotificationBell() {
         refreshUnreadCount(),
       ])
       setNotifications(response.data ?? [])
+      setUnreadCount(response.unreadCount)
     } catch (requestError) {
       setError(getNotificationErrorMessage(requestError))
     } finally {
@@ -102,13 +95,13 @@ export default function NotificationBell() {
     if (openingId !== null) return
     setOpeningId(notification.id)
 
-    if (!notification.read_at) {
+    if (!notification.isRead) {
       try {
-        await markNotificationAsRead(notification.id)
-        setUnreadCount((count) => Math.max(0, count - 1))
+        const response = await markNotificationAsRead(notification.id)
+        setUnreadCount(response.unreadCount)
         setNotifications((items) => items.map((item) => (
           item.id === notification.id
-            ? { ...item, read_at: new Date().toISOString() }
+            ? response.notification
             : item
         )))
         refreshUnreadCount()
@@ -123,9 +116,13 @@ export default function NotificationBell() {
 
   const markAll = async () => {
     try {
-      await markAllNotificationsAsRead()
-      setUnreadCount(0)
-      setNotifications((items) => items.map((item) => ({ ...item, read_at: item.read_at || new Date().toISOString() })))
+      const response = await markAllNotificationsAsRead()
+      setUnreadCount(response.unreadCount)
+      setNotifications((items) => items.map((item) => ({
+        ...item,
+        isRead: true,
+        readAt: item.readAt || new Date().toISOString(),
+      })))
       refreshUnreadCount()
     } catch (requestError) {
       setError(getNotificationErrorMessage(requestError, 'Unable to mark notifications as read.'))
@@ -151,7 +148,7 @@ export default function NotificationBell() {
                 key={notification.id}
                 notification={notification}
                 onOpen={openNotification}
-                formattedTime={relativeTime(notification.created_at)}
+                formattedTime={formatNotificationTime(notification.createdAt)}
                 compact
                 disabled={openingId !== null}
               />

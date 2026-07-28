@@ -19,7 +19,6 @@ import ActivityToastMessage from '../components/ActivityToastMessage'
 import Button from '../components/Button'
 import Card from '../components/Card'
 import SkillsInput from '../components/SkillsInput'
-import { useLocalContent } from '../context/LocalContentContext'
 import {
   COMMUNITY_PROJECT_STATUSES,
   toCommunityProjectPayload,
@@ -482,7 +481,6 @@ const pageConfig = {
 
 export default function CandidateCreatePage({ type }) {
   const navigate = useNavigate()
-  const { storageError } = useLocalContent()
   const config = useMemo(() => pageConfig[type], [type])
 
   const cancel = (isDirty) => {
@@ -501,9 +499,6 @@ export default function CandidateCreatePage({ type }) {
           <h2 className="mt-2 text-3xl font-bold tracking-tight text-[#e6f1ff]">{config.title}</h2>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-[#8892b0]">{config.description}</p>
         </section>
-        {storageError && (
-          <p role="status" className="mt-6 rounded-lg border border-[#facc15]/25 bg-[#facc15]/5 px-4 py-3 text-sm text-[#fde68a]">{storageError}</p>
-        )}
         <Card padding="lg" className="mt-8 min-w-0 max-w-full">
           <Form onCancel={cancel} />
         </Card>

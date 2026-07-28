@@ -8,9 +8,10 @@ export default function NotificationRow({
   onDelete,
   formattedTime,
   disabled = false,
+  isDeleting = false,
 }) {
-  const isRead = notification.isRead ?? Boolean(notification.read_at)
-  const timestamp = notification.createdAt ?? notification.created_at
+  const isRead = notification.isRead
+  const timestamp = notification.createdAt
 
   if (compact) {
     return (
@@ -35,19 +36,21 @@ export default function NotificationRow({
       {selectionMode && (
         <div className="flex shrink-0 items-center self-stretch pl-4 sm:pl-5">
           <input
-            type="checkbox"
-            checked={selected}
+          type="checkbox"
+          checked={selected}
+          disabled={disabled}
             onChange={(event) => onSelect?.(notification.id, event.target.checked)}
             aria-label={`Select notification: ${notification.title}`}
-            className="h-4 w-4 cursor-pointer accent-[#64ffda] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#64ffda] focus-visible:ring-offset-2 focus-visible:ring-offset-[#112240]"
+            className="h-4 w-4 cursor-pointer accent-[#64ffda] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#64ffda] focus-visible:ring-offset-2 focus-visible:ring-offset-[#112240] disabled:cursor-wait disabled:opacity-60"
           />
         </div>
       )}
 
       <button
         type="button"
+        disabled={disabled}
         onClick={() => onOpen?.(notification)}
-        className="relative min-w-0 flex-1 px-3 py-4 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#64ffda] sm:px-4"
+        className="relative min-w-0 flex-1 px-3 py-4 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#64ffda] disabled:cursor-wait sm:px-4"
       >
         {!isRead && <span className="absolute right-3 top-5 h-1.5 w-1.5 rounded-full bg-[#64ffda]" aria-label="Unread" />}
         <p className="break-words pr-4 text-sm font-medium text-[#e6f1ff]">{notification.title}</p>
@@ -58,12 +61,13 @@ export default function NotificationRow({
       {onDelete && (
         <button
           type="button"
+          disabled={disabled}
           onClick={() => onDelete(notification.id)}
           aria-label={`Delete notification: ${notification.title}`}
           title="Delete notification"
-          className="mr-2 mt-2 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-[#8892b0] transition-colors hover:bg-[#0a192f] hover:text-[#fca5a5] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#64ffda] sm:opacity-70 sm:group-hover:opacity-100 sm:focus:opacity-100"
+          className="mr-2 mt-2 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-[#8892b0] transition-colors hover:bg-[#0a192f] hover:text-[#fca5a5] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#64ffda] disabled:cursor-wait disabled:opacity-50 sm:opacity-70 sm:group-hover:opacity-100 sm:focus:opacity-100"
         >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" className={`h-4 w-4 ${isDeleting ? 'animate-pulse' : ''}`} aria-hidden="true">
             <path d="M3 6h18" />
             <path d="M8 6V4h8v2" />
             <path d="M19 6l-1 14H6L5 6" />

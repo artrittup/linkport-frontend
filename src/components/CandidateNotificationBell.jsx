@@ -1,10 +1,17 @@
-import { useEffect, useId, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useId, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router'
-import { useLocalContent } from '../context/LocalContentContext'
 import {
-  formatNotificationTime,
-  getVisibleCandidateNotifications,
-} from '../data/mockCandidateNotifications'
+  announceNotificationsChanged,
+  getNotificationErrorMessage,
+  getNotifications,
+  getUnreadNotificationCount,
+  markAllNotificationsAsRead,
+  markNotificationAsRead,
+  NOTIFICATIONS_CHANGED_EVENT,
+} from '../api/notificationsApi'
+import { useAuth } from '../context/AuthContext'
+import { getNotificationDestination } from '../utils/notificationDestination'
+import { formatNotificationTime } from '../utils/notificationMapper'
 import NotificationRow from './NotificationRow'
 
 export default function CandidateNotificationBell({
@@ -12,23 +19,45 @@ export default function CandidateNotificationBell({
   className = '',
 }) {
   const navigate = useNavigate()
+  const { isAuthenticated } = useAuth()
   const panelId = useId()
   const containerRef = useRef(null)
   const triggerRef = useRef(null)
+  const refreshingCountRef = useRef(false)
   const [isOpen, setIsOpen] = useState(false)
-  const {
-    readNotificationIds,
-    deletedNotificationIds,
-    markCandidateNotificationRead,
-    markAllCandidateNotificationsRead,
-  } = useLocalContent()
+  const [notifications, setNotifications] = useState([])
+  const [unreadCount, setUnreadCount] = useState(0)
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState('')
+  const [openingId, setOpeningId] = useState(null)
+  const [isMarkingAll, setIsMarkingAll] = useState(false)
 
-  const notifications = useMemo(
-    () => getVisibleCandidateNotifications(readNotificationIds, deletedNotificationIds),
-    [deletedNotificationIds, readNotificationIds],
-  )
-  const unreadCount = notifications.filter((notification) => !notification.isRead).length
-  const recentNotifications = notifications.slice(0, 6)
+  const refreshUnreadCount = useCallback(async () => {
+    if (!isAuthenticated || refreshingCountRef.current) return
+
+    refreshingCountRef.current = true
+    try {
+      const response = await getUnreadNotificationCount()
+      setUnreadCount(Number(response.unread_count ?? 0))
+    } catch {
+      // Keep the last confirmed count when a background refresh fails.
+    } finally {
+      refreshingCountRef.current = false
+    }
+  }, [isAuthenticated])
+
+  useEffect(() => {
+    if (!isAuthenticated) return undefined
+
+    const refreshId = window.setTimeout(refreshUnreadCount, 0)
+    const intervalId = window.setInterval(refreshUnreadCount, 45000)
+    window.addEventListener(NOTIFICATIONS_CHANGED_EVENT, refreshUnreadCount)
+    return () => {
+      window.clearTimeout(refreshId)
+      window.clearInterval(intervalId)
+      window.removeEventListener(NOTIFICATIONS_CHANGED_EVENT, refreshUnreadCount)
+    }
+  }, [isAuthenticated, refreshUnreadCount])
 
   useEffect(() => {
     if (!isOpen) return undefined
@@ -50,18 +79,70 @@ export default function CandidateNotificationBell({
     }
   }, [isOpen])
 
-  const openNotification = (notification) => {
-    if (!notification.isRead) markCandidateNotificationRead(notification.id)
-    setIsOpen(false)
-    navigate(notification.targetRoute)
+  const toggleDropdown = async () => {
+    const nextOpen = !isOpen
+    setIsOpen(nextOpen)
+    if (!nextOpen) return
+
+    setIsLoading(true)
+    setError('')
+    try {
+      const response = await getNotifications({ filter: 'all', per_page: 6, page: 1 })
+      setNotifications(response.data)
+      setUnreadCount(response.unreadCount)
+    } catch (requestError) {
+      setError(getNotificationErrorMessage(requestError, 'Notifications are unavailable right now.'))
+    } finally {
+      setIsLoading(false)
+    }
   }
 
-  const markAllRead = () => {
-    markAllCandidateNotificationsRead(notifications.map((notification) => notification.id))
+  const openNotification = async (notification) => {
+    if (openingId !== null) return
+    setOpeningId(notification.id)
+    setError('')
+
+    if (!notification.isRead) {
+      try {
+        const response = await markNotificationAsRead(notification.id)
+        setNotifications((items) => items.map((item) => (
+          item.id === notification.id ? response.notification : item
+        )))
+        setUnreadCount(response.unreadCount)
+        announceNotificationsChanged('candidate-bell')
+      } catch {
+        setError('This update could not be marked as read.')
+      }
+    }
+
+    setIsOpen(false)
+    navigate(getNotificationDestination(notification, '/candidate/notifications'))
+    setOpeningId(null)
+  }
+
+  const markAllRead = async () => {
+    if (isMarkingAll) return
+    setIsMarkingAll(true)
+    setError('')
+    try {
+      const response = await markAllNotificationsAsRead()
+      const readAt = new Date().toISOString()
+      setNotifications((items) => items.map((item) => ({
+        ...item,
+        isRead: true,
+        readAt: item.readAt ?? readAt,
+      })))
+      setUnreadCount(response.unreadCount)
+      announceNotificationsChanged('candidate-bell')
+    } catch (requestError) {
+      setError(getNotificationErrorMessage(requestError, 'Unable to mark notifications as read.'))
+    } finally {
+      setIsMarkingAll(false)
+    }
   }
 
   const panelPosition = placement === 'sidebar'
-    ? 'left-0 top-full w-[22rem] max-w-[calc(100vw-17rem)]'
+    ? 'left-0 top-full w-[min(22rem,calc(100vw-2rem))]'
     : 'right-0 top-full w-[min(22rem,calc(100vw-2rem))]'
 
   return (
@@ -69,7 +150,7 @@ export default function CandidateNotificationBell({
       <button
         ref={triggerRef}
         type="button"
-        onClick={() => setIsOpen((open) => !open)}
+        onClick={toggleDropdown}
         aria-label="Open notifications"
         aria-expanded={isOpen}
         aria-controls={panelId}
@@ -85,7 +166,7 @@ export default function CandidateNotificationBell({
         </svg>
         {unreadCount > 0 && (
           <span className="absolute right-0.5 top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#64ffda] px-1 text-[9px] font-bold text-[#071426]">
-            {unreadCount > 9 ? '9+' : unreadCount}
+            {unreadCount > 99 ? '99+' : unreadCount}
           </span>
         )}
       </button>
@@ -103,24 +184,28 @@ export default function CandidateNotificationBell({
               <p className="mt-0.5 text-[11px] text-[#8892b0]">{unreadCount} unread</p>
             </div>
             {unreadCount > 0 && (
-              <button type="button" onClick={markAllRead} className="shrink-0 text-xs font-medium text-[#64ffda] hover:underline">
-                Mark all as read
+              <button type="button" disabled={isMarkingAll} onClick={markAllRead} className="shrink-0 text-xs font-medium text-[#64ffda] hover:underline disabled:cursor-wait disabled:opacity-60">
+                {isMarkingAll ? 'Marking...' : 'Mark all as read'}
               </button>
             )}
           </header>
 
           <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-1.5">
-            {recentNotifications.length > 0 ? recentNotifications.map((notification) => (
+            {isLoading && <p className="px-3 py-8 text-center text-xs text-[#8892b0]">Loading notifications...</p>}
+            {!isLoading && error && <p role="alert" className="px-3 py-3 text-center text-xs text-[#fca5a5]">{error}</p>}
+            {!isLoading && notifications.length === 0 && (
+              <p className="px-3 py-8 text-center text-xs text-[#8892b0]">You have no notifications.</p>
+            )}
+            {!isLoading && notifications.map((notification) => (
               <NotificationRow
                 key={notification.id}
                 notification={notification}
                 onOpen={openNotification}
                 formattedTime={formatNotificationTime(notification.createdAt)}
                 compact
+                disabled={openingId !== null}
               />
-            )) : (
-              <p className="px-3 py-8 text-center text-xs text-[#8892b0]">You have no notifications.</p>
-            )}
+            ))}
           </div>
 
           <Link

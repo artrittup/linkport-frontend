@@ -133,7 +133,7 @@ export default function ManageProjects({ initialCreate = false }) {
   const stats = [
     { label: 'Projects on This Page', value: projects.length },
     {
-      label: 'Bids',
+      label: 'Proposals',
       value: projects.reduce((total, project) => total + project.bids, 0),
     },
     {
@@ -275,7 +275,9 @@ export default function ManageProjects({ initialCreate = false }) {
     setSelectedProject(project)
   }
 
-  const viewBids = () => navigate('/company/bids')
+  const viewProposals = (project) => {
+    navigate(`/company/applications?type=proposals&project_id=${project.id}`)
+  }
 
   return (
     <DashboardLayout
@@ -292,7 +294,7 @@ export default function ManageProjects({ initialCreate = false }) {
               Manage Projects
             </h2>
             <p className="mt-3 text-[#8892b0]">
-              Create, edit, and manage projects that candidates can bid on.
+              Create, edit, and manage projects that candidates can submit proposals to.
             </p>
           </div>
           <Button size="lg" onClick={openCreateForm}>
@@ -378,7 +380,7 @@ export default function ManageProjects({ initialCreate = false }) {
                         <th className="px-4 py-3 font-medium">Category</th>
                         <th className="px-4 py-3 font-medium">Budget</th>
                         <th className="px-4 py-3 font-medium">Deadline</th>
-                        <th className="px-4 py-3 font-medium">Bids</th>
+                        <th className="px-4 py-3 font-medium">Proposals</th>
                         <th className="px-4 py-3 font-medium">Status</th>
                         <th className="px-4 py-3 text-right font-medium">
                           Actions
@@ -437,9 +439,9 @@ export default function ManageProjects({ initialCreate = false }) {
                               </Button>
                               <Button
                                 size="sm"
-                                onClick={() => viewBids(project)}
+                                onClick={() => viewProposals(project)}
                               >
-                                View Bids
+                                View Proposals
                               </Button>
                             </div>
                           </td>
@@ -478,7 +480,7 @@ export default function ManageProjects({ initialCreate = false }) {
                         </p>
                       </div>
                       <div>
-                        <p className="text-[#64748b]">Bids</p>
+                        <p className="text-[#64748b]">Proposals</p>
                         <p className="mt-1 text-[#e6f1ff]">{project.bids}</p>
                       </div>
                     </div>
@@ -505,8 +507,8 @@ export default function ManageProjects({ initialCreate = false }) {
                       >
                         {deletingId === project.id ? 'Deleting...' : 'Delete'}
                       </Button>
-                      <Button size="sm" onClick={() => viewBids(project)}>
-                        View Bids
+                      <Button size="sm" onClick={() => viewProposals(project)}>
+                        View Proposals
                       </Button>
                     </div>
                   </Card>
@@ -545,7 +547,7 @@ export default function ManageProjects({ initialCreate = false }) {
         {selectedProject && <><DetailGrid items={[
           { label: 'Status', value: selectedProject.status }, { label: 'Category', value: selectedProject.category ?? 'Not specified' },
           { label: 'Budget', value: selectedProject.budget }, { label: 'Deadline', value: selectedProject.deadline || 'No deadline' },
-          { label: 'Bids', value: selectedProject.bids },
+          { label: 'Proposals', value: selectedProject.bids },
         ]} /><SkillList skills={selectedProject.skills} /><DetailSection label="Description">{selectedProject.description}</DetailSection></>}
       </Modal>
 

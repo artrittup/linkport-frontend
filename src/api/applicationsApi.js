@@ -51,7 +51,6 @@ const normalizeCompanyApplication = (application) => {
     coverLetter: application?.cover_letter ?? '',
     dateApplied: formatDate(application?.created_at),
     candidateName: candidate.name ?? 'Unknown candidate',
-    candidateEmail: candidate.email ?? '',
     headline: profile.headline ?? 'Headline not provided',
     location: profile.location ?? 'Location not provided',
     skills: Array.isArray(profile.skills) ? profile.skills : [],

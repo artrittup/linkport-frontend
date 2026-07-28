@@ -12,19 +12,6 @@ export const COMPANY_PROFILE_FIELD_MAP = {
   employeeCount: 'employee_count',
 }
 
-export const emptyCompanyProfileForm = {
-  companyName: '',
-  description: '',
-  industry: '',
-  location: '',
-  phone: '',
-  website: '',
-  linkedinUrl: '',
-  logoUrl: '',
-  employeeCount: '',
-  contactEmail: '',
-}
-
 export function mapCompanyProfileToForm(profile, email = '') {
   return {
     companyName: profile?.company_name ?? '',

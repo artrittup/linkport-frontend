@@ -120,10 +120,13 @@ export default function CompanyApplications() {
   }
 
   const changeStatus = (nextStatus) => {
-    setApplications((current) => ({ ...current, loading: true, error: false }))
-    setProposals((current) => ({ ...current, loading: true, error: false }))
-    setApplicationPage(1)
-    setProposalPage(1)
+    if (type === 'applications') {
+      setApplications((current) => ({ ...current, loading: true, error: false }))
+      setApplicationPage(1)
+    } else {
+      setProposals((current) => ({ ...current, loading: true, error: false }))
+      setProposalPage(1)
+    }
     updateParams({ status: nextStatus })
   }
 
@@ -152,8 +155,13 @@ export default function CompanyApplications() {
       showToast(`Unable to ${decision} this ${response.type}. Please try again.`, 'error')
       if (error.response?.status === 409) {
         setSelected(null)
-        if (response.type === 'application') setApplicationRefresh((current) => current + 1)
-        else setProposalRefresh((current) => current + 1)
+        if (response.type === 'application') {
+          setApplications((current) => ({ ...current, loading: true, error: false }))
+          setApplicationRefresh((current) => current + 1)
+        } else {
+          setProposals((current) => ({ ...current, loading: true, error: false }))
+          setProposalRefresh((current) => current + 1)
+        }
       }
     } finally {
       setReviewing('')

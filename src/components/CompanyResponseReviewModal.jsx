@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { Link } from 'react-router'
 import Button from './Button'
 import Card from './Card'
@@ -9,13 +9,33 @@ export default function CompanyResponseReviewModal({
   onClose,
   onDecision,
 }) {
+  const closeButtonRef = useRef(null)
+
   useEffect(() => {
+    if (!response) return undefined
+
+    const previouslyFocused = document.activeElement
+    const focusFrame = window.requestAnimationFrame(() => {
+      closeButtonRef.current?.focus()
+    })
+
+    return () => {
+      window.cancelAnimationFrame(focusFrame)
+      if (previouslyFocused instanceof HTMLElement && previouslyFocused.isConnected) {
+        previouslyFocused.focus()
+      }
+    }
+  }, [response])
+
+  useEffect(() => {
+    if (!response) return undefined
+
     const closeOnEscape = (event) => {
       if (event.key === 'Escape' && !reviewing) onClose()
     }
     document.addEventListener('keydown', closeOnEscape)
     return () => document.removeEventListener('keydown', closeOnEscape)
-  }, [onClose, reviewing])
+  }, [onClose, response, reviewing])
 
   if (!response) return null
   const pending = response.statusValue === 'pending'
@@ -32,7 +52,7 @@ export default function CompanyResponseReviewModal({
               <h2 id="company-response-title" className="mt-2 break-words text-2xl font-bold">{response.candidateName}</h2>
               <p className="mt-1 text-sm text-[#64ffda]">{response.candidateHeadline}</p>
             </div>
-            <button type="button" disabled={Boolean(reviewing)} onClick={onClose} aria-label="Close review" className="h-9 w-9 shrink-0 text-xl text-[#8892b0] disabled:opacity-50">×</button>
+            <button ref={closeButtonRef} type="button" disabled={Boolean(reviewing)} onClick={onClose} aria-label="Close review" className="h-9 w-9 shrink-0 text-xl text-[#8892b0] disabled:opacity-50">×</button>
           </div>
 
           <dl className="mt-5 grid gap-4 border-y border-[#233554] py-5 sm:grid-cols-2">

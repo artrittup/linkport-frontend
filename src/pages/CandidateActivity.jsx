@@ -19,6 +19,7 @@ import {
 } from '../hooks/useCandidateActivityData'
 import useCommunityProjects from '../hooks/useCommunityProjects'
 import useCommunityPosts from '../hooks/useCommunityPosts'
+import useTeammateRequests from '../hooks/useTeammateRequests'
 import CandidateLayout from '../layouts/CandidateLayout'
 
 export default function CandidateActivity() {
@@ -29,7 +30,6 @@ export default function CandidateActivity() {
   const proposals = useCandidateProposals()
   const { user } = useAuth()
   const {
-    teamRequests,
     attendingEventIds,
     setEventAttendance,
     storageError,
@@ -48,6 +48,15 @@ export default function CandidateActivity() {
     isLoading: postsLoading,
     error: postsError,
   } = useCommunityPosts({
+    userId: user?.id,
+    perPage: 50,
+    enabled: Boolean(user?.id),
+  })
+  const {
+    requests: teamRequests,
+    isLoading: teammateRequestsLoading,
+    error: teammateRequestsError,
+  } = useTeammateRequests({
     userId: user?.id,
     perPage: 50,
     enabled: Boolean(user?.id),
@@ -97,11 +106,19 @@ export default function CandidateActivity() {
         )}
         {postsError && (
           <p role="status" className="mt-4 rounded-lg border border-[#233554] bg-[#112240]/45 px-4 py-3 text-sm text-[#8892b0]">
-            Your posts are temporarily unavailable. Shared projects and teammate requests remain available.
+            Your posts are temporarily unavailable. Other shared content remains available.
           </p>
         )}
         {postsLoading && (
           <p role="status" className="mt-4 text-sm text-[#64748b]">Loading your posts...</p>
+        )}
+        {teammateRequestsError && (
+          <p role="status" className="mt-4 rounded-lg border border-[#233554] bg-[#112240]/45 px-4 py-3 text-sm text-[#8892b0]">
+            Your teammate requests are temporarily unavailable. Shared projects and posts remain available.
+          </p>
+        )}
+        {teammateRequestsLoading && (
+          <p role="status" className="mt-4 text-sm text-[#64748b]">Loading your teammate requests...</p>
         )}
 
         <nav className="mt-8 flex min-w-0 max-w-full gap-2 overflow-x-auto border-b border-[#233554] pb-3" aria-label="Activity sections">

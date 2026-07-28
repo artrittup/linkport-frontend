@@ -10,11 +10,15 @@ import {
   getCommunityPostErrorMessage,
   getCommunityPostValidationErrors,
 } from '../api/communityPostsApi'
+import {
+  createTeammateRequest,
+  getTeammateRequestErrorMessage,
+  getTeammateRequestValidationErrors,
+} from '../api/teammateRequestsApi'
 import ActivityToastMessage from '../components/ActivityToastMessage'
 import Button from '../components/Button'
 import Card from '../components/Card'
 import SkillsInput from '../components/SkillsInput'
-import { useAuth } from '../context/AuthContext'
 import { useLocalContent } from '../context/LocalContentContext'
 import {
   COMMUNITY_PROJECT_STATUSES,
@@ -25,13 +29,17 @@ import {
   COMMUNITY_POST_CATEGORY_OPTIONS,
   toCommunityPostPayload,
 } from '../data/communityPostMapper'
+import {
+  TEAMMATE_REQUEST_COMMITMENTS,
+  TEAMMATE_REQUEST_COMMITMENT_OPTIONS,
+  TEAMMATE_REQUEST_WORK_STYLES,
+  TEAMMATE_REQUEST_WORK_STYLE_OPTIONS,
+  toTeammateRequestPayload,
+} from '../data/teammateRequestMapper'
 import useToast from '../hooks/useToast'
 import CandidateLayout from '../layouts/CandidateLayout'
 
 const inputClasses = 'mt-2 w-full min-w-0 max-w-full rounded-lg border border-[#233554] bg-[#0a192f]/70 px-4 py-3 text-sm text-[#e6f1ff] outline-none placeholder:text-[#64748b] focus:border-[#64ffda] focus:ring-1 focus:ring-[#64ffda]'
-const commitments = ['A few hours per week', 'Part-time collaboration', 'Weekend project', 'Short-term challenge', 'Flexible']
-const workStyles = ['Remote', 'In-person', 'Flexible']
-
 function splitList(value) {
   return [...new Set(value.split(',').map((item) => item.trim()).filter(Boolean))]
 }
@@ -309,67 +317,97 @@ function PostForm({ onCancel }) {
 
 function TeamRequestForm({ onCancel }) {
   const navigate = useNavigate()
-  const { user } = useAuth()
-  const { addTeamRequest } = useLocalContent()
   const { showToast } = useToast()
   const [form, setForm] = useState({
     title: '',
-    context: '',
+    description: '',
     roles: '',
     skills: '',
-    commitment: 'Flexible',
-    workStyle: 'Flexible',
+    commitment: TEAMMATE_REQUEST_COMMITMENTS.FLEXIBLE,
+    workStyle: TEAMMATE_REQUEST_WORK_STYLES.FLEXIBLE,
+    preferredUniversity: '',
     preferredLocation: '',
   })
   const [errors, setErrors] = useState({})
+  const [submitError, setSubmitError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const updateField = (event) => {
     const { name, value } = event.target
     setForm((current) => ({ ...current, [name]: value }))
     setErrors((current) => ({ ...current, [name]: '' }))
+    setSubmitError('')
   }
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault()
+    if (isSubmitting) return
+
+    const rolesNeeded = splitList(form.roles)
+    const skills = splitList(form.skills)
     const nextErrors = {}
     if (!form.title.trim()) nextErrors.title = 'A short title is required.'
-    if (!form.context.trim()) nextErrors.context = 'Project context is required.'
-    if (splitList(form.roles).length === 0) nextErrors.roles = 'Add at least one role.'
-    if (splitList(form.skills).length === 0) nextErrors.skills = 'Add at least one relevant skill.'
+    if (!form.description.trim()) nextErrors.description = 'Project context is required.'
+    if (rolesNeeded.length === 0) nextErrors.roles = 'Add at least one role.'
+    if (rolesNeeded.length > 10) nextErrors.roles = 'Add no more than 10 roles.'
+    if (rolesNeeded.some((role) => role.length > 100)) nextErrors.roles = 'Each role must be 100 characters or fewer.'
+    if (skills.length === 0) nextErrors.skills = 'Add at least one relevant skill.'
+    if (skills.length > 20) nextErrors.skills = 'Add no more than 20 skills.'
+    if (skills.some((skill) => skill.length > 50)) nextErrors.skills = 'Each skill must be 50 characters or fewer.'
     setErrors(nextErrors)
     if (Object.keys(nextErrors).length > 0) return
 
     setIsSubmitting(true)
-    addTeamRequest({
-      title: form.title.trim(),
-      context: form.context.trim(),
-      roles: splitList(form.roles),
-      skills: splitList(form.skills),
-      commitment: form.commitment,
-      workStyle: form.workStyle,
-      preferredLocation: form.preferredLocation.trim(),
-      author: user?.name || 'LinkPort Member',
-    })
-    showToast(<ActivityToastMessage message="Collaboration request published." tab="content" />, 'success', 6000)
-    navigate('/candidate/community#collaboration', { replace: true })
+    setSubmitError('')
+
+    try {
+      const response = await createTeammateRequest(toTeammateRequestPayload({
+        ...form,
+        rolesNeeded,
+        skills,
+      }))
+      showToast(<ActivityToastMessage message="Collaboration request published." tab="content" />, 'success', 6000)
+      navigate(`/candidate/community/team-requests/${response.data.id}`, { replace: true })
+    } catch (error) {
+      const validationErrors = getTeammateRequestValidationErrors(error)
+      setErrors({
+        title: validationErrors.title,
+        description: validationErrors.description,
+        roles: validationErrors.roles_needed || validationErrors['roles_needed.0'],
+        skills: validationErrors.skills || validationErrors['skills.0'],
+        commitment: validationErrors.commitment,
+        workStyle: validationErrors.work_style,
+        preferredUniversity: validationErrors.preferred_university,
+        preferredLocation: validationErrors.preferred_location,
+      })
+      setSubmitError(getTeammateRequestErrorMessage(
+        error,
+        'We could not publish your teammate request. Please try again.',
+      ))
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const isDirty = Object.entries(form).some(([key, value]) => (
-    !['commitment', 'workStyle'].includes(key) ? Boolean(value) : value !== 'Flexible'
+    key === 'commitment'
+      ? value !== TEAMMATE_REQUEST_COMMITMENTS.FLEXIBLE
+      : key === 'workStyle'
+        ? value !== TEAMMATE_REQUEST_WORK_STYLES.FLEXIBLE
+        : Boolean(value)
   ))
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <label className="block min-w-0 text-sm font-medium">
         Short title <span className="text-[#64ffda]">*</span>
-        <input name="title" value={form.title} onChange={updateField} placeholder="Looking for a designer for a study app" className={inputClasses} />
+        <input name="title" value={form.title} onChange={updateField} maxLength="160" placeholder="Looking for a designer for a study app" className={inputClasses} />
         <FieldError message={errors.title} />
       </label>
       <label className="block min-w-0 text-sm font-medium">
         Project idea or context <span className="text-[#64ffda]">*</span>
-        <textarea name="context" rows="5" value={form.context} onChange={updateField} maxLength="800" placeholder="Describe the idea, current progress, and what you want to build together." className={`${inputClasses} resize-y`} />
-        <FieldError message={errors.context} />
+        <textarea name="description" rows="5" value={form.description} onChange={updateField} maxLength="800" placeholder="Describe the idea, current progress, and what you want to build together." className={`${inputClasses} resize-y`} />
+        <FieldError message={errors.description} />
       </label>
       <div className="grid min-w-0 gap-5 sm:grid-cols-2">
         <label className="block min-w-0 text-sm font-medium">
@@ -387,21 +425,32 @@ function TeamRequestForm({ onCancel }) {
         <label className="block min-w-0 text-sm font-medium">
           Expected commitment
           <select name="commitment" value={form.commitment} onChange={updateField} className={inputClasses}>
-            {commitments.map((commitment) => <option key={commitment}>{commitment}</option>)}
+            {TEAMMATE_REQUEST_COMMITMENT_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
           </select>
+          <FieldError message={errors.commitment} />
         </label>
         <label className="block min-w-0 text-sm font-medium">
           Collaboration style
           <select name="workStyle" value={form.workStyle} onChange={updateField} className={inputClasses}>
-            {workStyles.map((style) => <option key={style}>{style}</option>)}
+            {TEAMMATE_REQUEST_WORK_STYLE_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
           </select>
+          <FieldError message={errors.workStyle} />
         </label>
       </div>
-      <label className="block min-w-0 text-sm font-medium">
-        Preferred university or location <span className="text-[#64748b]">(optional)</span>
-        <input name="preferredLocation" value={form.preferredLocation} onChange={updateField} placeholder="Prishtina or University of Prizren" className={inputClasses} />
-      </label>
+      <div className="grid min-w-0 gap-5 sm:grid-cols-2">
+        <label className="block min-w-0 text-sm font-medium">
+          Preferred university <span className="text-[#64748b]">(optional)</span>
+          <input name="preferredUniversity" value={form.preferredUniversity} onChange={updateField} maxLength="160" placeholder="University of Prizren" className={inputClasses} />
+          <FieldError message={errors.preferredUniversity} />
+        </label>
+        <label className="block min-w-0 text-sm font-medium">
+          Preferred location <span className="text-[#64748b]">(optional)</span>
+          <input name="preferredLocation" value={form.preferredLocation} onChange={updateField} maxLength="120" placeholder="Prishtina" className={inputClasses} />
+          <FieldError message={errors.preferredLocation} />
+        </label>
+      </div>
       <p className="text-xs leading-5 text-[#64748b]">Roles and skills may be separated with commas. This request will not send messages or invitations.</p>
+      {submitError && <p role="alert" className="rounded-lg border border-[#ef4444]/35 bg-[#ef4444]/10 px-4 py-3 text-sm text-[#fca5a5]">{submitError}</p>}
       <FormActions onCancel={() => onCancel(isDirty)} isSubmitting={isSubmitting} submitLabel="Create request" />
     </form>
   )

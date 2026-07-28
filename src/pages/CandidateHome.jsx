@@ -4,8 +4,13 @@ import { useLocalContent } from '../context/LocalContentContext'
 import { getCommunityProjectStatusLabel } from '../data/communityProjectMapper'
 import { getCommunityPostCategoryLabel } from '../data/communityPostMapper'
 import { formatEventDate, formatEventTime, mockEvents } from '../data/mockEvents'
+import {
+  TEAMMATE_REQUEST_STATUSES,
+  getTeammateRequestWorkStyleLabel,
+} from '../data/teammateRequestMapper'
 import useCommunityProjects from '../hooks/useCommunityProjects'
 import useCommunityPosts from '../hooks/useCommunityPosts'
+import useTeammateRequests from '../hooks/useTeammateRequests'
 import CandidateLayout from '../layouts/CandidateLayout'
 
 const filters = ['All', 'Projects', 'Posts', 'Team', 'Opportunities', 'Events']
@@ -86,7 +91,7 @@ function FeedCard({ item }) {
 }
 
 export default function CandidateHome() {
-  const { attendingEventIds, teamRequests, storageError } = useLocalContent()
+  const { attendingEventIds, storageError } = useLocalContent()
   const {
     projects: communityProjects,
     error: projectsError,
@@ -96,8 +101,16 @@ export default function CandidateHome() {
     isLoading: postsLoading,
     error: postsError,
   } = useCommunityPosts({ perPage: 3 })
+  const {
+    requests: teammateRequests,
+    isLoading: teammateRequestsLoading,
+    error: teammateRequestsError,
+  } = useTeammateRequests({
+    status: TEAMMATE_REQUEST_STATUSES.OPEN,
+    perPage: 3,
+  })
   const [activeFilter, setActiveFilter] = useState('All')
-  const localFeedItems = useMemo(() => [
+  const communityFeedItems = useMemo(() => [
     ...communityProjects.map((project) => ({
       id: `project-${project.id}`,
       filter: 'Projects',
@@ -124,22 +137,22 @@ export default function CandidateHome() {
       path: null,
       createdAt: post.createdAt,
     })),
-    ...teamRequests.map((request) => ({
-      id: request.id,
+    ...teammateRequests.map((request) => ({
+      id: `team-${request.id}`,
       filter: 'Team',
       type: 'LOOKING FOR TEAM',
       title: request.title,
-      description: request.context,
-      author: request.author,
+      description: request.description,
+      author: request.ownerName || 'Owner information unavailable',
       tags: request.skills,
-      meta: `${request.roles.length} ${request.roles.length === 1 ? 'role' : 'roles'} · ${request.workStyle}`,
+      meta: `${request.rolesNeeded.length} ${request.rolesNeeded.length === 1 ? 'role' : 'roles'} · ${getTeammateRequestWorkStyleLabel(request.workStyle)}`,
       action: 'View request',
-      path: '/candidate/community#collaboration',
+      path: `/candidate/community/team-requests/${request.id}`,
       createdAt: request.createdAt,
     })),
-  ].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)), [communityPosts, communityProjects, teamRequests])
+  ].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)), [communityPosts, communityProjects, teammateRequests])
   const feedItems = [
-    ...localFeedItems,
+    ...communityFeedItems,
     ...defaultFeedItems.map((item) => ({
       ...item,
       attending: Boolean(item.eventId && attendingEventIds.includes(item.eventId)),
@@ -177,6 +190,14 @@ export default function CandidateHome() {
           Community posts are temporarily unavailable. Other Home updates are still available.
         </p>
       )}
+      {teammateRequestsLoading && (
+        <p role="status" className="mt-4 text-sm text-[#8892b0]">Loading teammate requests...</p>
+      )}
+      {teammateRequestsError && (
+        <p role="status" className="mt-4 rounded-lg border border-[#233554] bg-[#112240]/45 px-4 py-3 text-sm text-[#8892b0]">
+          Teammate requests are temporarily unavailable. Other Home updates are still available.
+        </p>
+      )}
 
       <div className="mt-8 flex gap-2 overflow-x-auto pb-1" role="tablist" aria-label="Filter community feed">
         {filters.map((filter) => (
@@ -201,9 +222,12 @@ export default function CandidateHome() {
         {visibleItems.map((item) => <FeedCard key={item.id} item={item} />)}
       </section>
 
-      {visibleItems.length === 0 && (
+      {visibleItems.length === 0
+        && !(activeFilter === 'Team' && (teammateRequestsLoading || teammateRequestsError)) && (
         <p className="mt-8 rounded-xl border border-[#233554] bg-[#112240]/50 p-6 text-sm text-[#8892b0]">
-          No items are available in this category yet.
+          {activeFilter === 'Team'
+            ? 'No open teammate requests are available yet.'
+            : 'No items are available in this category yet.'}
         </p>
       )}
     </CandidateLayout>

@@ -3,18 +3,11 @@ import { createContext, useCallback, useContext, useRef, useState } from 'react'
 
 const STORAGE_KEY = 'linkport_candidate_content_v1'
 const emptyContent = {
-  teamRequests: [],
   attendingEventIds: [],
   readNotificationIds: [],
   deletedNotificationIds: [],
 }
 const LocalContentContext = createContext(null)
-
-function sanitizeArray(value, normalize) {
-  return Array.isArray(value)
-    ? value.filter((item) => item && typeof item === 'object').map(normalize).filter(Boolean)
-    : []
-}
 
 function readStoredContent() {
   try {
@@ -24,15 +17,6 @@ function readStoredContent() {
     const parsed = JSON.parse(raw)
     if (!parsed || typeof parsed !== 'object') throw new Error('Invalid local content')
 
-    const teamRequests = sanitizeArray(parsed.teamRequests, (request) => (
-      typeof request.id === 'string' && typeof request.title === 'string'
-        ? {
-            ...request,
-            roles: Array.isArray(request.roles) ? request.roles.filter((item) => typeof item === 'string') : [],
-            skills: Array.isArray(request.skills) ? request.skills.filter((item) => typeof item === 'string') : [],
-          }
-        : null
-    ))
     const attendingEventIds = Array.isArray(parsed.attendingEventIds)
       ? [...new Set(parsed.attendingEventIds.filter((eventId) => typeof eventId === 'string' && eventId.trim()))]
       : []
@@ -45,7 +29,6 @@ function readStoredContent() {
 
     return {
       content: {
-        teamRequests,
         attendingEventIds,
         readNotificationIds,
         deletedNotificationIds,
@@ -65,12 +48,6 @@ function readStoredContent() {
   }
 }
 
-function createId(prefix) {
-  const randomId = globalThis.crypto?.randomUUID?.()
-    ?? `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`
-  return `${prefix}-${randomId}`
-}
-
 export function LocalContentProvider({ children }) {
   const [initialContent] = useState(readStoredContent)
   const [content, setContent] = useState(initialContent.content)
@@ -88,19 +65,6 @@ export function LocalContentProvider({ children }) {
       setStorageError('Content is available for this session, but this browser could not save it for refresh.')
     }
   }, [])
-
-  const storeItem = useCallback((collection, item) => {
-    persistContent({
-      ...contentRef.current,
-      [collection]: [item, ...contentRef.current[collection]],
-    })
-  }, [persistContent])
-
-  const addTeamRequest = useCallback((request) => {
-    const item = { ...request, id: createId('local-team'), createdAt: new Date().toISOString(), local: true }
-    storeItem('teamRequests', item)
-    return item
-  }, [storeItem])
 
   const setEventAttendance = useCallback((eventId, isAttending) => {
     if (typeof eventId !== 'string' || !eventId.trim()) return
@@ -160,12 +124,10 @@ export function LocalContentProvider({ children }) {
 
   return (
     <LocalContentContext.Provider value={{
-      teamRequests: content.teamRequests,
       attendingEventIds: content.attendingEventIds,
       readNotificationIds: content.readNotificationIds,
       deletedNotificationIds: content.deletedNotificationIds,
       storageError,
-      addTeamRequest,
       setEventAttendance,
       markCandidateNotificationRead,
       markAllCandidateNotificationsRead,

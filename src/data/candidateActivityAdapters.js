@@ -1,5 +1,6 @@
 import { getCommunityProjectStatusLabel } from './communityProjectMapper'
 import { getCommunityPostCategoryLabel } from './communityPostMapper'
+import { getTeammateRequestStatusLabel } from './teammateRequestMapper'
 
 export function formatActivityDate(value) {
   if (!value) return 'Date unavailable'
@@ -40,10 +41,10 @@ export function getCandidateContentItems({ projects, posts, teamRequests }) {
       type: 'Team requests',
       label: 'Team request',
       title: request.title,
-      description: request.context,
-      status: 'Looking for team',
+      description: request.description,
+      status: getTeammateRequestStatusLabel(request.status),
       createdAt: request.createdAt,
-      path: '/candidate/community#collaboration',
+      path: `/candidate/community/team-requests/${request.id}`,
       action: 'View request',
     })),
   ].sort((first, second) => {

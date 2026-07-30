@@ -12,12 +12,12 @@ export default function Card({
 }) {
   const paddingClass = paddingClasses[padding] ?? paddingClasses.md
   const hoverClass = hover
-    ? 'hover:-translate-y-1 hover:border-[#64ffda]/50 hover:bg-[#172a45] hover:shadow-lg hover:shadow-black/20'
+    ? 'hover:-translate-y-1 hover:border-primary/50 hover:bg-surface-elevated hover:shadow-lg hover:shadow-black/20'
     : ''
 
   return (
     <div
-      className={`rounded-lg border border-[#233554] bg-[#112240] text-[#e6f1ff] transition-all duration-200 ${paddingClass} ${hoverClass} ${className}`}
+      className={`rounded-lg border border-border bg-surface text-text-primary transition-all duration-200 ${paddingClass} ${hoverClass} ${className}`}
     >
       {children}
     </div>
@@ -30,7 +30,7 @@ export function CardHeader({ children, className = '' }) {
 
 export function CardTitle({ children, className = '' }) {
   return (
-    <h3 className={`text-lg font-semibold text-[#e6f1ff] ${className}`}>
+    <h3 className={`text-lg font-semibold text-text-primary ${className}`}>
       {children}
     </h3>
   )
@@ -38,12 +38,12 @@ export function CardTitle({ children, className = '' }) {
 
 export function CardDescription({ children, className = '' }) {
   return (
-    <p className={`text-sm leading-relaxed text-[#8892b0] ${className}`}>
+    <p className={`text-sm leading-relaxed text-text-muted ${className}`}>
       {children}
     </p>
   )
 }
 
 export function CardContent({ children, className = '' }) {
-  return <div className={`text-[#e6f1ff] ${className}`}>{children}</div>
+  return <div className={`text-text-primary ${className}`}>{children}</div>
 }

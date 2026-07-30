@@ -1,10 +1,11 @@
 import { Link, useLocation, useNavigate } from 'react-router'
-import linkPortLogo from '../assets/linkport-logo.svg'
+import LinkPortLogo from './LinkPortLogo'
 import { getNavigationForRole } from '../config/navigation'
 import { useAuth } from '../context/AuthContext'
 import CandidateCreateMenu from './CandidateCreateMenu'
 import CandidateNotificationBell from './CandidateNotificationBell'
 import GlobalSearch from './GlobalSearch'
+import ThemeToggle from './ThemeToggle'
 
 function NavigationIcon({ iconKey }) {
   const paths = {
@@ -82,30 +83,33 @@ export default function CandidateSidebar({ isOpen, onClose }) {
           type="button"
           aria-label="Close navigation"
           onClick={onClose}
-          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden"
+          className="fixed inset-0 z-40 bg-overlay/60 backdrop-blur-sm lg:hidden"
         />
       )}
 
       <aside
         aria-label="Member sidebar"
-        className={`fixed inset-y-0 left-0 z-50 flex w-72 flex-col border-r border-[#233554]/80 bg-[#071426] shadow-2xl shadow-black/20 transition-transform duration-200 lg:w-64 lg:translate-x-0 lg:shadow-none ${
+        className={`fixed inset-y-0 left-0 z-50 flex w-72 flex-col border-r border-border/80 bg-background shadow-2xl shadow-black/20 transition-transform duration-200 lg:w-64 lg:translate-x-0 lg:shadow-none ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
-        <div className="flex h-20 shrink-0 items-center justify-between border-b border-[#233554]/80 px-5">
-          <Link to="/member/home" onClick={onClose} className="flex items-center gap-2.5 font-bold text-[#e6f1ff]" aria-label="LinkPort Member Home">
-            <img src={linkPortLogo} alt="" className="h-8 w-auto" />
-            <span className="text-xl">Link<span className="text-[#64ffda]">Port</span></span>
+        <div className="flex h-20 shrink-0 items-center justify-between border-b border-border/80 px-5">
+          <Link to="/member/home" onClick={onClose} className="flex items-center gap-2.5 font-bold text-text-primary" aria-label="LinkPort Member Home">
+            <LinkPortLogo className="h-8 w-auto" />
+            <span className="text-xl">Link<span className="text-primary">Port</span></span>
           </Link>
           <div className="flex items-center gap-1">
+            <div className="hidden lg:block">
+              <ThemeToggle compact />
+            </div>
             <CandidateNotificationBell placement="sidebar" className="hidden lg:block" />
-            <button type="button" onClick={onClose} className="flex h-9 w-9 items-center justify-center rounded-lg text-xl text-[#8892b0] hover:bg-[#112240] hover:text-[#64ffda] lg:hidden" aria-label="Close menu">
+            <button type="button" onClick={onClose} className="flex h-9 w-9 items-center justify-center rounded-lg text-xl text-text-muted hover:bg-surface hover:text-primary lg:hidden" aria-label="Close menu">
               &times;
             </button>
           </div>
         </div>
 
-        <div className="border-b border-[#233554]/80 px-4 py-4">
+        <div className="border-b border-border/80 px-4 py-4">
           <GlobalSearch className="w-full min-w-0 max-w-full" dropdownAlign="left" />
         </div>
 
@@ -119,10 +123,10 @@ export default function CandidateSidebar({ isOpen, onClose }) {
                 to={item.path}
                 onClick={onClose}
                 aria-current={isActive ? 'page' : undefined}
-                className={`flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#64ffda] ${
+                className={`flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring ${
                   isActive
-                    ? 'bg-[#64ffda]/10 text-[#64ffda]'
-                    : 'text-[#8892b0] hover:bg-[#112240] hover:text-[#e6f1ff]'
+                    ? 'border border-primary-soft-border bg-primary-soft text-primary-soft-text'
+                    : 'text-text-muted hover:bg-surface hover:text-text-primary'
                 }`}
               >
                 <NavigationIcon iconKey={item.key} />
@@ -132,24 +136,24 @@ export default function CandidateSidebar({ isOpen, onClose }) {
           })}
         </nav>
 
-        <div className="border-t border-[#233554]/80 px-4 py-4">
+        <div className="border-t border-border/80 px-4 py-4">
           <CandidateCreateMenu onActionComplete={onClose} />
         </div>
 
-        <div className="border-t border-[#233554]/80 p-3">
+        <div className="border-t border-border/80 p-3">
           <div className="flex items-center gap-3 rounded-xl px-2 py-2">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[#64ffda]/35 bg-[#112240] font-mono text-xs font-semibold text-[#64ffda]">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-primary/35 bg-surface font-mono text-xs font-semibold text-primary">
               {initials}
             </div>
             <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-medium text-[#e6f1ff]">{displayName}</p>
-              <Link to="/member/profile" onClick={onClose} className="text-xs text-[#8892b0] hover:text-[#64ffda]">View profile</Link>
+              <p className="truncate text-sm font-medium text-text-primary">{displayName}</p>
+              <Link to="/member/profile" onClick={onClose} className="text-xs text-text-muted hover:text-primary">View profile</Link>
             </div>
           </div>
           <button
             type="button"
             onClick={handleLogout}
-            className="mt-1 flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-[#f87171] transition-colors hover:bg-[#ef4444]/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#ef4444]"
+            className="mt-1 flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-danger-soft transition-colors hover:bg-danger/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-danger"
           >
             <LogoutIcon />
             Logout

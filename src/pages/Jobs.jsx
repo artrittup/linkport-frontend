@@ -13,7 +13,7 @@ import useToast from '../hooks/useToast'
 import DashboardLayout from '../layouts/DashboardLayout'
 
 const controlClasses =
-  'w-full rounded-md border border-[#233554] bg-[#112240] px-4 py-3 text-sm text-[#e6f1ff] outline-none transition-colors placeholder:text-[#64748b] focus:border-[#64ffda] focus:ring-1 focus:ring-[#64ffda]'
+  'w-full rounded-md border border-border bg-surface px-4 py-3 text-sm text-text-primary outline-none transition-colors placeholder:text-text-subtle focus:border-primary focus:ring-1 focus:ring-focus-ring'
 
 export default function Jobs() {
   const navigate = useNavigate()
@@ -136,17 +136,17 @@ export default function Jobs() {
     <DashboardLayout title="Explore Jobs" userType="Member">
       <div className="space-y-8">
         <section>
-          <p className="font-mono text-sm text-[#64ffda]">Career opportunities</p>
+          <p className="font-mono text-sm text-primary">Career opportunities</p>
           <h2 className="mt-2 text-2xl font-bold tracking-tight sm:text-3xl">
             Explore Jobs
           </h2>
-          <p className="mt-3 text-[#8892b0]">Find opportunities that match your skills.</p>
+          <p className="mt-3 text-text-muted">Find opportunities that match your skills.</p>
         </section>
 
         <Card padding="md">
           <div className="grid gap-4 md:grid-cols-2">
             <div>
-              <label htmlFor="job-search" className="mb-2 block text-xs text-[#8892b0]">
+              <label htmlFor="job-search" className="mb-2 block text-xs text-text-muted">
                 Search
               </label>
               <input
@@ -159,7 +159,7 @@ export default function Jobs() {
               />
             </div>
             <div>
-              <label htmlFor="location-filter" className="mb-2 block text-xs text-[#8892b0]">
+              <label htmlFor="location-filter" className="mb-2 block text-xs text-text-muted">
                 Location
               </label>
               <select
@@ -179,15 +179,15 @@ export default function Jobs() {
 
         <section>
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <p className="text-sm text-[#8892b0]">
-              Showing <span className="font-medium text-[#e6f1ff]">{jobs.length}</span>{' '}
+            <p className="text-sm text-text-muted">
+              Showing <span className="font-medium text-text-primary">{jobs.length}</span>{' '}
               of {pagination?.total ?? jobs.length} opportunities
             </p>
             {(search || location !== 'All locations') && (
               <button
                 type="button"
                 onClick={clearFilters}
-                className="text-xs text-[#64ffda] transition-opacity hover:opacity-80"
+                className="text-xs text-primary transition-opacity hover:opacity-80"
               >
                 Clear filters
               </button>
@@ -220,7 +220,7 @@ export default function Jobs() {
           {!isLoading && !error && pagination?.last_page > 1 && (
             <div className="mt-6 flex items-center justify-center gap-4">
               <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((current) => current - 1)}>Previous</Button>
-              <span className="text-sm text-[#8892b0]">Page {pagination.current_page} of {pagination.last_page}</span>
+              <span className="text-sm text-text-muted">Page {pagination.current_page} of {pagination.last_page}</span>
               <Button variant="outline" size="sm" disabled={page >= pagination.last_page} onClick={() => setPage((current) => current + 1)}>Next</Button>
             </div>
           )}
@@ -229,7 +229,7 @@ export default function Jobs() {
 
       {modal && (
         <div
-          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 px-4 backdrop-blur-sm"
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-overlay/70 px-4 backdrop-blur-sm"
           role="presentation"
           onMouseDown={(event) => {
             if (event.target === event.currentTarget) setModal(null)
@@ -237,23 +237,23 @@ export default function Jobs() {
         >
           <Card className="w-full max-w-md shadow-2xl shadow-black/40" padding="lg">
             <div role="dialog" aria-modal="true" aria-labelledby="job-modal-title">
-              <p className="font-mono text-xs uppercase tracking-wider text-[#64ffda]">
+              <p className="font-mono text-xs uppercase tracking-wider text-primary">
                 Job details
               </p>
-              <h2 id="job-modal-title" className="mt-3 text-xl font-bold text-[#e6f1ff]">
+              <h2 id="job-modal-title" className="mt-3 text-xl font-bold text-text-primary">
                 {modal.job.title}
               </h2>
-              <p className="mt-1 text-sm text-[#64ffda]">{modal.job.company}</p>
+              <p className="mt-1 text-sm text-primary">{modal.job.company}</p>
               {modal.isLoading ? (
                 <LoadingSpinner label="Loading job details..." />
               ) : (
-                <div className="mt-5 space-y-4 text-sm leading-relaxed text-[#8892b0]">
+                <div className="mt-5 space-y-4 text-sm leading-relaxed text-text-muted">
                   <p>
                     {modal.error || modal.job.description}
                   </p>
                   {!modal.error && modal.job.requirements && (
                     <div>
-                      <h3 className="font-medium text-[#e6f1ff]">Requirements</h3>
+                      <h3 className="font-medium text-text-primary">Requirements</h3>
                       <p className="mt-1 whitespace-pre-line">{modal.job.requirements}</p>
                     </div>
                   )}

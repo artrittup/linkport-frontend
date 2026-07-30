@@ -43,20 +43,20 @@ export default function CandidateCreateMenu({ onActionComplete }) {
         onClick={() => setIsOpen((open) => !open)}
         aria-expanded={isOpen}
         aria-haspopup="menu"
-        className="inline-flex w-full items-center justify-center rounded-lg border border-[#64ffda] bg-[#64ffda] px-4 py-2.5 text-sm font-semibold text-[#071426] transition-colors hover:bg-[#7dffe1] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#64ffda]"
+        className="inline-flex w-full items-center justify-center rounded-lg border border-primary bg-primary px-4 py-2.5 text-sm font-semibold text-primary-contrast transition-colors hover:bg-primary-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
       >
         + Create
       </button>
 
       {isOpen && (
-        <div role="menu" className="absolute bottom-full left-0 z-[70] mb-2 w-full min-w-52 rounded-xl border border-[#233554] bg-[#112240] p-1.5 shadow-2xl shadow-black/40">
+        <div role="menu" className="absolute bottom-full left-0 z-[70] mb-2 w-full min-w-52 rounded-xl border border-border bg-surface p-1.5 shadow-2xl shadow-black/40">
           {createActions.map((action) => (
             <button
               key={action.path}
               type="button"
               role="menuitem"
               onClick={() => handleAction(action.path)}
-              className="block w-full rounded-lg px-3 py-2.5 text-left text-sm text-[#e6f1ff] transition-colors hover:bg-[#172a45] hover:text-[#64ffda] focus:outline-none focus-visible:bg-[#172a45] focus-visible:text-[#64ffda]"
+              className="block w-full rounded-lg px-3 py-2.5 text-left text-sm text-text-primary transition-colors hover:bg-surface-elevated hover:text-primary focus:outline-none focus-visible:bg-surface-elevated focus-visible:text-primary"
             >
               {action.label}
             </button>

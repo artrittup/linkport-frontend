@@ -30,7 +30,7 @@ function ResultSection({ label, items, kind, onSelect }) {
 
   return (
     <section>
-      <p className="px-3 pb-1.5 pt-2 font-mono text-[10px] uppercase tracking-[0.16em] text-[#64ffda]">{label}</p>
+      <p className="px-3 pb-1.5 pt-2 font-mono text-[10px] uppercase tracking-[0.16em] text-primary">{label}</p>
       {items.slice(0, 3).map((item) => {
         const isMember = kind === 'member'
         const profile = item.profile ?? {}
@@ -42,21 +42,21 @@ function ResultSection({ label, items, kind, onSelect }) {
             key={item.id}
             to={isMember ? `/members/${item.id}` : `/companies/${item.id}`}
             onClick={onSelect}
-            className="group flex items-start gap-3 rounded-lg px-3 py-2.5 transition-colors hover:bg-[#172a45] focus:bg-[#172a45] focus:outline-none"
+            className="group flex items-start gap-3 rounded-lg px-3 py-2.5 transition-colors hover:bg-surface-elevated focus:bg-surface-elevated focus:outline-none"
           >
-            <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-[#233554] bg-[#071426] text-xs font-semibold text-[#64ffda]">
+            <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-border bg-surface-deep text-xs font-semibold text-primary">
               {name?.charAt(0)?.toUpperCase() || '?'}
             </span>
             <span className="min-w-0 flex-1">
-              <span className="block truncate text-sm font-medium text-[#e6f1ff]">{name}</span>
-              {(detail || profile.location) && <span className="mt-0.5 block truncate text-xs text-[#8892b0]">{[detail, profile.location].filter(Boolean).join(' · ')}</span>}
+              <span className="block truncate text-sm font-medium text-text-primary">{name}</span>
+              {(detail || profile.location) && <span className="mt-0.5 block truncate text-xs text-text-muted">{[detail, profile.location].filter(Boolean).join(' · ')}</span>}
               {isMember && profile.skills?.length > 0 && (
                 <span className="mt-1 flex gap-1 overflow-hidden">
-                  {profile.skills.slice(0, 2).map((skill) => <span key={skill} className="truncate rounded-full bg-[#64ffda]/8 px-1.5 py-0.5 text-[10px] text-[#64ffda]">{skill}</span>)}
+                  {profile.skills.slice(0, 2).map((skill) => <span key={skill} className="truncate rounded-full bg-primary/8 px-1.5 py-0.5 text-[10px] text-primary">{skill}</span>)}
                 </span>
               )}
             </span>
-            <span className="pt-1 text-[#64748b] transition-colors group-hover:text-[#64ffda]">→</span>
+            <span className="pt-1 text-text-subtle transition-colors group-hover:text-primary">→</span>
           </Link>
         )
       })}
@@ -136,13 +136,13 @@ export default function GlobalSearch({
   }, [query, type, skill, location, industry, canSearch, isAuthenticated])
 
   const noResults = !results.members.data.length && !results.companies.data.length
-  const filterInput = 'h-9 min-w-0 rounded-md border border-[#233554] bg-[#071426] px-2.5 text-xs text-[#e6f1ff] outline-none placeholder:text-[#64748b] focus:border-[#64ffda]'
+  const filterInput = 'h-9 min-w-0 rounded-md border border-border bg-surface-deep px-2.5 text-xs text-text-primary outline-none placeholder:text-text-subtle focus:border-primary'
 
   return (
     <div ref={containerRef} className={`relative min-w-0 max-w-full ${className}`}>
       <label htmlFor={inputId} className="sr-only">Search LinkPort</label>
-      <div className="group flex h-10 items-center rounded-lg border border-[#233554] bg-[#112240] transition-colors focus-within:border-[#64ffda]/70 focus-within:ring-1 focus-within:ring-[#64ffda]/30">
-        <span className="pointer-events-none pl-3 text-[#8892b0] group-focus-within:text-[#64ffda]"><SearchIcon /></span>
+      <div className="group flex h-10 items-center rounded-lg border border-border bg-surface transition-colors focus-within:border-primary/70 focus-within:ring-1 focus-within:ring-focus-ring/30">
+        <span className="pointer-events-none pl-3 text-text-muted group-focus-within:text-primary"><SearchIcon /></span>
         <input
           id={inputId}
           type="search"
@@ -150,7 +150,7 @@ export default function GlobalSearch({
           onChange={(event) => { setQuery(event.target.value); setIsOpen(true) }}
           onFocus={() => setIsOpen(true)}
           placeholder={placeholder}
-          className="h-full min-w-0 flex-1 bg-transparent px-2.5 text-sm text-[#e6f1ff] outline-none placeholder:text-[#64748b]"
+          className="h-full min-w-0 flex-1 bg-transparent px-2.5 text-sm text-text-primary outline-none placeholder:text-text-subtle"
           autoComplete="off"
           aria-expanded={isOpen}
           aria-controls={`${inputId}-results`}
@@ -163,18 +163,18 @@ export default function GlobalSearch({
           type="button"
           aria-label="Close search"
           onClick={() => setIsOpen(false)}
-          className="fixed inset-x-0 bottom-0 top-[88px] z-40 cursor-default bg-[#020c1b]/35 backdrop-blur-[1px]"
+          className="fixed inset-x-0 bottom-0 top-[88px] z-40 cursor-default bg-overlay/35 backdrop-blur-[1px]"
         />
-        <div id={`${inputId}-results`} className={`absolute top-full z-50 mt-2 w-[min(24rem,calc(100vw-2rem))] max-w-[calc(100vw-2rem)] overflow-hidden rounded-xl border border-[#233554] bg-[#112240] shadow-2xl shadow-black/50 ${dropdownAlign === 'left' ? 'left-0' : 'right-0'}`}>
-          <div className="flex items-center justify-between border-b border-[#233554] px-3 py-2">
-            <span className="text-xs text-[#8892b0]">Search people and companies</span>
-            <button type="button" onClick={() => setFiltersOpen((open) => !open)} aria-expanded={filtersOpen} className={`flex items-center gap-1.5 rounded-md px-2 py-1 text-xs transition-colors ${filtersOpen || filtersApplied ? 'bg-[#64ffda]/10 text-[#64ffda]' : 'text-[#8892b0] hover:bg-[#172a45] hover:text-[#e6f1ff]'}`}>
+        <div id={`${inputId}-results`} className={`absolute top-full z-50 mt-2 w-[min(24rem,calc(100vw-2rem))] max-w-[calc(100vw-2rem)] overflow-hidden rounded-xl border border-border bg-surface shadow-2xl shadow-black/50 ${dropdownAlign === 'left' ? 'left-0' : 'right-0'}`}>
+          <div className="flex items-center justify-between border-b border-border px-3 py-2">
+            <span className="text-xs text-text-muted">Search people and companies</span>
+            <button type="button" onClick={() => setFiltersOpen((open) => !open)} aria-expanded={filtersOpen} className={`flex items-center gap-1.5 rounded-md px-2 py-1 text-xs transition-colors ${filtersOpen || filtersApplied ? 'bg-primary/10 text-primary' : 'text-text-muted hover:bg-surface-elevated hover:text-text-primary'}`}>
               <TuneIcon /> Filters{filtersApplied ? ' •' : ''}
             </button>
           </div>
 
           {filtersOpen && (
-            <div className="grid grid-cols-2 gap-2 border-b border-[#233554] bg-[#071426]/55 p-3">
+            <div className="grid grid-cols-2 gap-2 border-b border-border bg-surface-deep/55 p-3">
               <select aria-label="Result type" value={type} onChange={(event) => setType(event.target.value)} className={filterInput}><option value="all">All</option><option value="members">Members</option><option value="companies">Companies</option></select>
               <select aria-label="Skill filter" value={skill} onChange={(event) => setSkill(event.target.value)} className={filterInput}>
                 <option value="">Any skill</option>
@@ -191,12 +191,12 @@ export default function GlobalSearch({
 
           <div className="max-h-[25rem] overflow-y-auto p-1.5" aria-live="polite">
             {!isAuthLoading && !isAuthenticated && (
-              <div className="px-4 py-5 text-center"><p className="text-sm text-[#e6f1ff]">Sign in to search LinkPort</p><p className="mt-1 text-xs text-[#8892b0]">Member and company profiles are available to active users.</p><Link to="/login" className="mt-3 inline-flex rounded-md bg-[#64ffda] px-3 py-1.5 text-xs font-semibold text-[#071426]">Log in</Link></div>
+              <div className="px-4 py-5 text-center"><p className="text-sm text-text-primary">Sign in to search LinkPort</p><p className="mt-1 text-xs text-text-muted">Member and company profiles are available to active users.</p><Link to="/login" className="mt-3 inline-flex rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-primary-contrast">Log in</Link></div>
             )}
-            {isAuthenticated && !canSearch && <p className="px-3 py-5 text-center text-xs text-[#8892b0]">Type at least 2 characters or apply a filter.</p>}
-            {isAuthenticated && canSearch && isLoading && <p className="px-3 py-5 text-center text-xs text-[#8892b0]">Searching...</p>}
-            {isAuthenticated && canSearch && !isLoading && error && <p role="alert" className="px-3 py-5 text-center text-xs text-[#fca5a5]">{error}</p>}
-            {isAuthenticated && canSearch && !isLoading && !error && noResults && <p className="px-3 py-5 text-center text-xs text-[#8892b0]">No matching members or companies.</p>}
+            {isAuthenticated && !canSearch && <p className="px-3 py-5 text-center text-xs text-text-muted">Type at least 2 characters or apply a filter.</p>}
+            {isAuthenticated && canSearch && isLoading && <p className="px-3 py-5 text-center text-xs text-text-muted">Searching...</p>}
+            {isAuthenticated && canSearch && !isLoading && error && <p role="alert" className="px-3 py-5 text-center text-xs text-danger-text">{error}</p>}
+            {isAuthenticated && canSearch && !isLoading && !error && noResults && <p className="px-3 py-5 text-center text-xs text-text-muted">No matching members or companies.</p>}
             {isAuthenticated && canSearch && !isLoading && !error && !noResults && (
               <div className="space-y-1"><ResultSection label="Members" items={results.members.data} kind="member" onSelect={() => setIsOpen(false)} /><ResultSection label="Companies" items={results.companies.data} kind="company" onSelect={() => setIsOpen(false)} /></div>
             )}

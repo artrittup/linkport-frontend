@@ -31,7 +31,7 @@ const initialSource = {
   lastPage: 1,
   total: 0,
 }
-const controlClasses = 'w-full rounded-lg border border-[#233554] bg-[#112240] px-4 py-3 text-sm text-[#e6f1ff] outline-none placeholder:text-[#64748b] focus:border-[#64ffda] focus:ring-1 focus:ring-[#64ffda]'
+const controlClasses = 'w-full rounded-lg border border-border bg-surface px-4 py-3 text-sm text-text-primary outline-none placeholder:text-text-subtle focus:border-primary focus:ring-1 focus:ring-focus-ring'
 
 export default function CompanyApplications() {
   const { showToast } = useToast()
@@ -188,16 +188,16 @@ export default function CompanyApplications() {
     <DashboardLayout title="Applications" userType="Company">
       <div className="min-w-0 space-y-7">
         <section>
-          <p className="font-mono text-sm text-[#64ffda]">Response workspace</p>
+          <p className="font-mono text-sm text-primary">Response workspace</p>
           <h2 className="mt-2 text-3xl font-bold">Applications</h2>
-          <p className="mt-2 max-w-2xl text-[#8892b0]">Review job applications and company project proposals in one place.</p>
+          <p className="mt-2 max-w-2xl text-text-muted">Review job applications and company project proposals in one place.</p>
         </section>
 
         <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           {summary.map((item) => <Link key={item.label} to={item.path} onClick={() => {
             setApplicationPage(1)
             setProposalPage(1)
-          }} className="rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#64ffda]"><Card hover className="h-full"><p className="text-sm text-[#8892b0]">{item.label}</p><p className="mt-3 text-3xl font-bold">{item.value}</p></Card></Link>)}
+          }} className="rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"><Card hover className="h-full"><p className="text-sm text-text-muted">{item.label}</p><p className="mt-3 text-3xl font-bold">{item.value}</p></Card></Link>)}
         </section>
 
         <CompanyApplicationTabs />
@@ -216,10 +216,10 @@ export default function CompanyApplications() {
           </div>
         </section>
 
-        {opportunityId && <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-[#64ffda]/30 bg-[#64ffda]/10 px-4 py-3 text-sm"><span>Filtering by {type === 'applications' ? 'job' : 'project'} ID {opportunityId}</span><button type="button" onClick={() => updateParams({ [opportunityFilterKey]: null })} className="font-semibold text-[#64ffda]">Clear opportunity filter</button></div>}
+        {opportunityId && <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-primary/30 bg-primary/10 px-4 py-3 text-sm"><span>Filtering by {type === 'applications' ? 'job' : 'project'} ID {opportunityId}</span><button type="button" onClick={() => updateParams({ [opportunityFilterKey]: null })} className="font-semibold text-primary">Clear opportunity filter</button></div>}
 
-        {type === 'applications' && applications.error && <p role="alert" className="rounded-lg border border-[#ef4444]/30 bg-[#ef4444]/10 px-4 py-3 text-sm text-[#fca5a5]">Applications could not be loaded right now. Proposals remain available.</p>}
-        {type === 'proposals' && proposals.error && <p role="alert" className="rounded-lg border border-[#ef4444]/30 bg-[#ef4444]/10 px-4 py-3 text-sm text-[#fca5a5]">Proposals could not be loaded right now. Applications remain available.</p>}
+        {type === 'applications' && applications.error && <p role="alert" className="rounded-lg border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger-text">Applications could not be loaded right now. Proposals remain available.</p>}
+        {type === 'proposals' && proposals.error && <p role="alert" className="rounded-lg border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger-text">Proposals could not be loaded right now. Applications remain available.</p>}
 
         {activeSource.loading ? <LoadingSpinner label={`Loading ${type}...`} /> : !activeSource.error && visibleResponses.length > 0 ? (
           <section className="grid min-w-0 gap-5 lg:grid-cols-2">{visibleResponses.map((response) => <CompanyResponseCard key={response.key} response={response} onReview={setSelected} />)}</section>
@@ -243,7 +243,7 @@ export default function CompanyApplications() {
                 setProposalPage((page) => page - 1)
               }
             }}>Previous</Button>
-            <span className="text-sm text-[#8892b0]">Page {activeSource.currentPage} of {activeSource.lastPage}</span>
+            <span className="text-sm text-text-muted">Page {activeSource.currentPage} of {activeSource.lastPage}</span>
             <Button variant="outline" size="sm" disabled={activeSource.currentPage >= activeSource.lastPage} onClick={() => {
               if (type === 'applications') {
                 setApplications((current) => ({ ...current, loading: true, error: false }))

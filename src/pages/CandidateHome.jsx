@@ -31,24 +31,24 @@ function formatFeedTimestamp(value) {
 
 function FeedCard({ item }) {
   return (
-    <article className="flex h-full min-w-0 max-w-full flex-col rounded-2xl border border-[#233554] bg-[#112240]/65 p-5 sm:p-6">
+    <article className="flex h-full min-w-0 max-w-full flex-col rounded-2xl border border-border bg-surface/65 p-5 sm:p-6">
       <div className="flex min-w-0 flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="rounded-full bg-[#64ffda]/10 px-3 py-1 font-mono text-[10px] font-semibold tracking-[0.12em] text-[#64ffda]">
+          <span className="rounded-full bg-primary/10 px-3 py-1 font-mono text-[10px] font-semibold tracking-[0.12em] text-primary">
             {item.type}
           </span>
-          {item.attending && <span className="rounded-full border border-[#22c55e]/30 bg-[#22c55e]/10 px-2.5 py-1 text-xs font-medium text-[#86efac]">Attending</span>}
+          {item.attending && <span className="rounded-full border border-success/30 bg-success/10 px-2.5 py-1 text-xs font-medium text-success-text">Attending</span>}
         </div>
-        <span className="text-xs text-[#64748b]">{item.meta}</span>
+        <span className="text-xs text-text-subtle">{item.meta}</span>
       </div>
 
-      <h2 className="mt-5 break-words text-xl font-semibold text-[#e6f1ff]">{item.title}</h2>
-      <p className="mt-3 break-words text-sm leading-6 text-[#8892b0]">{item.description}</p>
-      <p className="mt-4 break-words text-xs font-medium text-[#a8b2d1]">{item.author}</p>
+      <h2 className="mt-5 break-words text-xl font-semibold text-text-primary">{item.title}</h2>
+      <p className="mt-3 break-words text-sm leading-6 text-text-muted">{item.description}</p>
+      <p className="mt-4 break-words text-xs font-medium text-text-secondary">{item.author}</p>
 
       <div className="mt-5 flex flex-wrap gap-2">
         {item.tags.map((tag) => (
-          <span key={tag} className="max-w-full break-words rounded-md border border-[#233554] px-2.5 py-1 text-xs text-[#8892b0]">
+          <span key={tag} className="max-w-full break-words rounded-md border border-border px-2.5 py-1 text-xs text-text-muted">
             {tag}
           </span>
         ))}
@@ -58,7 +58,7 @@ function FeedCard({ item }) {
         {item.action && item.path && (
           <Link
             to={item.path}
-            className="inline-flex items-center justify-center rounded-lg border border-[#64ffda]/70 px-4 py-2 text-sm font-semibold text-[#64ffda] transition-colors hover:border-[#64ffda] hover:bg-[#64ffda]/10"
+            className="inline-flex items-center justify-center rounded-lg border border-primary/70 px-4 py-2 text-sm font-semibold text-primary transition-colors hover:border-primary hover:bg-primary/10"
           >
             {item.action}
           </Link>
@@ -219,42 +219,42 @@ export default function CandidateHome() {
   return (
     <CandidateLayout title="Explore LinkPort">
       <section>
-        <p className="font-mono text-sm text-[#64ffda]">Community home</p>
-        <h2 className="mt-2 text-3xl font-bold tracking-tight text-[#e6f1ff] sm:text-4xl">
+        <p className="font-mono text-sm text-primary">Community home</p>
+        <h2 className="mt-2 text-3xl font-bold tracking-tight text-text-primary sm:text-4xl">
           Explore LinkPort
         </h2>
-        <p className="mt-4 max-w-2xl leading-7 text-[#8892b0]">
+        <p className="mt-4 max-w-2xl leading-7 text-text-muted">
           Discover projects, opportunities, events, and people building their next step.
         </p>
       </section>
 
       {projectsError && (
-        <p role="status" className="mt-4 rounded-lg border border-[#233554] bg-[#112240]/45 px-4 py-3 text-sm text-[#8892b0]">
+        <p role="status" className="mt-4 rounded-lg border border-border bg-surface/45 px-4 py-3 text-sm text-text-muted">
           Community projects are temporarily unavailable. Other Home updates are still available.
         </p>
       )}
       {postsError && (
-        <p role="status" className="mt-4 rounded-lg border border-[#233554] bg-[#112240]/45 px-4 py-3 text-sm text-[#8892b0]">
+        <p role="status" className="mt-4 rounded-lg border border-border bg-surface/45 px-4 py-3 text-sm text-text-muted">
           Community posts are temporarily unavailable. Other Home updates are still available.
         </p>
       )}
       {teammateRequestsError && (
-        <p role="status" className="mt-4 rounded-lg border border-[#233554] bg-[#112240]/45 px-4 py-3 text-sm text-[#8892b0]">
+        <p role="status" className="mt-4 rounded-lg border border-border bg-surface/45 px-4 py-3 text-sm text-text-muted">
           Teammate requests are temporarily unavailable. Other Home updates are still available.
         </p>
       )}
       {eventsError && (
-        <p role="status" className="mt-4 rounded-lg border border-[#233554] bg-[#112240]/45 px-4 py-3 text-sm text-[#8892b0]">
+        <p role="status" className="mt-4 rounded-lg border border-border bg-surface/45 px-4 py-3 text-sm text-text-muted">
           Upcoming events are temporarily unavailable. Other Home updates are still available.
         </p>
       )}
       {opportunitiesError && (
-        <p role="status" className="mt-4 rounded-lg border border-[#233554] bg-[#112240]/45 px-4 py-3 text-sm text-[#8892b0]">
+        <p role="status" className="mt-4 rounded-lg border border-border bg-surface/45 px-4 py-3 text-sm text-text-muted">
           Some live opportunities are temporarily unavailable. Other Home updates are still available.
         </p>
       )}
       {isFeedLoading && (
-        <p role="status" className="mt-4 text-sm text-[#8892b0]">Loading the latest Home updates...</p>
+        <p role="status" className="mt-4 text-sm text-text-muted">Loading the latest Home updates...</p>
       )}
 
       <div className="mt-8 flex gap-2 overflow-x-auto pb-1" role="tablist" aria-label="Filter community feed">
@@ -267,8 +267,8 @@ export default function CandidateHome() {
             onClick={() => setActiveFilter(filter)}
             className={`shrink-0 rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
               activeFilter === filter
-                ? 'border-[#64ffda] bg-[#64ffda]/10 text-[#64ffda]'
-                : 'border-[#233554] text-[#8892b0] hover:border-[#64ffda]/50 hover:text-[#e6f1ff]'
+                ? 'border-primary bg-primary/10 text-primary'
+                : 'border-border text-text-muted hover:border-primary/50 hover:text-text-primary'
             }`}
           >
             {filter}
@@ -281,7 +281,7 @@ export default function CandidateHome() {
       </section>
 
       {visibleItems.length === 0 && !activeFilterPending && (
-        <p className="mt-8 rounded-xl border border-[#233554] bg-[#112240]/50 p-6 text-sm text-[#8892b0]">
+        <p className="mt-8 rounded-xl border border-border bg-surface/50 p-6 text-sm text-text-muted">
           {activeFilter === 'Team'
             ? 'No open teammate requests are available yet.'
             : 'No items are available in this category yet.'}

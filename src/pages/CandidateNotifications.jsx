@@ -275,15 +275,15 @@ export default function CandidateNotifications() {
     <CandidateLayout title="Notifications">
       <div className="mx-auto min-w-0 max-w-4xl">
         <section className="min-w-0">
-          <p className="font-mono text-sm text-[#64ffda]">Member updates</p>
-          <h2 className="mt-2 text-3xl font-bold tracking-tight text-[#e6f1ff] sm:text-4xl">Notifications</h2>
-          <p className="mt-4 max-w-2xl leading-7 text-[#8892b0]">
+          <p className="font-mono text-sm text-primary">Member updates</p>
+          <h2 className="mt-2 text-3xl font-bold tracking-tight text-text-primary sm:text-4xl">Notifications</h2>
+          <p className="mt-4 max-w-2xl leading-7 text-text-muted">
             Review useful updates about opportunities, projects, applications, proposals, and community events.
           </p>
         </section>
 
         {error && (
-          <p role="alert" className="mt-6 rounded-lg border border-[#ef4444]/30 bg-[#ef4444]/10 px-4 py-3 text-sm text-[#fca5a5]">{error}</p>
+          <p role="alert" className="mt-6 rounded-lg border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger-text">{error}</p>
         )}
 
         <div className="mt-8 flex min-w-0 gap-2 overflow-x-auto pb-1" role="tablist" aria-label="Filter notifications">
@@ -295,10 +295,10 @@ export default function CandidateNotifications() {
               aria-selected={filter === item.id}
               disabled={isWorking}
               onClick={() => changeFilter(item.id)}
-              className={`shrink-0 rounded-full border px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#64ffda] disabled:opacity-60 ${
+              className={`shrink-0 rounded-full border px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring disabled:opacity-60 ${
                 filter === item.id
-                  ? 'border-[#64ffda] bg-[#64ffda]/10 text-[#64ffda]'
-                  : 'border-[#233554] text-[#8892b0] hover:border-[#64ffda]/50 hover:text-[#e6f1ff]'
+                  ? 'border-primary bg-primary/10 text-primary'
+                  : 'border-border text-text-muted hover:border-primary/50 hover:text-text-primary'
               }`}
             >
               {item.label}{item.id === 'unread' ? ` (${unreadCount})` : ''}
@@ -308,10 +308,10 @@ export default function CandidateNotifications() {
 
         {!isLoading && total > 0 && (
           <div
-            className="mt-5 flex min-w-0 flex-wrap items-center gap-2 rounded-xl border border-[#233554] bg-[#112240]/70 px-3 py-2.5 sm:px-4"
+            className="mt-5 flex min-w-0 flex-wrap items-center gap-2 rounded-xl border border-border bg-surface/70 px-3 py-2.5 sm:px-4"
             aria-label={hasSelection ? 'Notification selection actions' : 'Notification actions'}
           >
-            <label className="mr-auto flex min-w-0 cursor-pointer items-center gap-2 text-sm text-[#e6f1ff]">
+            <label className="mr-auto flex min-w-0 cursor-pointer items-center gap-2 text-sm text-text-primary">
               <input
                 ref={selectAllRef}
                 type="checkbox"
@@ -319,7 +319,7 @@ export default function CandidateNotifications() {
                 disabled={visibleIds.length === 0 || isWorking}
                 onChange={toggleAllVisible}
                 aria-label="Select all visible notifications"
-                className="h-4 w-4 shrink-0 cursor-pointer accent-[#64ffda] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#64ffda] focus-visible:ring-offset-2 focus-visible:ring-offset-[#112240] disabled:cursor-not-allowed"
+                className="h-4 w-4 shrink-0 cursor-pointer accent-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring focus-visible:ring-offset-2 focus-visible:ring-offset-surface disabled:cursor-not-allowed"
               />
               <span className="break-words">
                 {hasSelection ? `${selectedVisibleCount} selected` : 'Select all visible'}
@@ -328,24 +328,24 @@ export default function CandidateNotifications() {
 
             {hasSelection ? (
               <>
-                <button type="button" disabled={isWorking} onClick={toggleAllVisible} className="shrink-0 rounded-md px-2.5 py-2 text-xs font-semibold text-[#64ffda] hover:bg-[#64ffda]/10 disabled:opacity-60">
+                <button type="button" disabled={isWorking} onClick={toggleAllVisible} className="shrink-0 rounded-md px-2.5 py-2 text-xs font-semibold text-primary hover:bg-primary/10 disabled:opacity-60">
                   {allVisibleSelected ? 'Deselect all' : 'Select all'}
                 </button>
-                <button type="button" disabled={isDeletingSelected} onClick={deleteSelected} className="shrink-0 rounded-md px-2.5 py-2 text-xs font-semibold text-[#fca5a5] hover:bg-[#ef4444]/10 disabled:cursor-wait disabled:opacity-60">
+                <button type="button" disabled={isDeletingSelected} onClick={deleteSelected} className="shrink-0 rounded-md px-2.5 py-2 text-xs font-semibold text-danger-text hover:bg-danger/10 disabled:cursor-wait disabled:opacity-60">
                   {isDeletingSelected ? 'Deleting...' : 'Delete selected'}
                 </button>
-                <button type="button" disabled={isWorking} onClick={() => setSelectedIds(new Set())} className="shrink-0 rounded-md px-2.5 py-2 text-xs font-semibold text-[#8892b0] hover:bg-[#172a45] hover:text-[#e6f1ff] disabled:opacity-60">
+                <button type="button" disabled={isWorking} onClick={() => setSelectedIds(new Set())} className="shrink-0 rounded-md px-2.5 py-2 text-xs font-semibold text-text-muted hover:bg-surface-elevated hover:text-text-primary disabled:opacity-60">
                   Clear
                 </button>
               </>
             ) : (
               <>
                 {unreadCount > 0 && (
-                  <button type="button" disabled={isMarkingAll} onClick={markAllRead} className="shrink-0 rounded-md px-2.5 py-2 text-xs font-semibold text-[#64ffda] hover:bg-[#64ffda]/10 disabled:cursor-wait disabled:opacity-60">
+                  <button type="button" disabled={isMarkingAll} onClick={markAllRead} className="shrink-0 rounded-md px-2.5 py-2 text-xs font-semibold text-primary hover:bg-primary/10 disabled:cursor-wait disabled:opacity-60">
                     {isMarkingAll ? 'Marking...' : 'Mark all as read'}
                   </button>
                 )}
-                <button type="button" disabled={isWorking} onClick={() => setShowDeleteAllConfirmation(true)} className="shrink-0 rounded-md px-2.5 py-2 text-xs font-semibold text-[#8892b0] hover:bg-[#ef4444]/10 hover:text-[#fca5a5] disabled:opacity-60">
+                <button type="button" disabled={isWorking} onClick={() => setShowDeleteAllConfirmation(true)} className="shrink-0 rounded-md px-2.5 py-2 text-xs font-semibold text-text-muted hover:bg-danger/10 hover:text-danger-text disabled:opacity-60">
                   Delete all
                 </button>
               </>
@@ -357,7 +357,7 @@ export default function CandidateNotifications() {
           {isLoading ? (
             <LoadingSpinner label="Loading notifications..." />
           ) : notifications.length > 0 ? (
-            <div className="min-w-0 divide-y divide-[#233554] overflow-hidden rounded-xl border border-[#233554] bg-[#112240]/45">
+            <div className="min-w-0 divide-y divide-border overflow-hidden rounded-xl border border-border bg-surface/45">
               {notifications.map((notification) => (
                 <NotificationRow
                   key={notification.id}
@@ -394,7 +394,7 @@ export default function CandidateNotifications() {
             }}>
               Previous
             </Button>
-            <span className="text-xs text-[#8892b0]">Page {page} of {lastPage}</span>
+            <span className="text-xs text-text-muted">Page {page} of {lastPage}</span>
             <Button variant="outline" size="sm" disabled={page >= lastPage || isWorking} onClick={() => {
               setIsLoading(true)
               setError('')
@@ -423,7 +423,7 @@ export default function CandidateNotifications() {
           </>
         )}
       >
-        <p className="text-sm leading-6 text-[#8892b0]">This action cannot be undone.</p>
+        <p className="text-sm leading-6 text-text-muted">This action cannot be undone.</p>
       </Modal>
     </CandidateLayout>
   )

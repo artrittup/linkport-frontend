@@ -4,7 +4,7 @@ export default function ActivityToastMessage({ message, tab }) {
   return (
     <span>
       {message}{' '}
-      <a href={getCandidateActivityPath(tab)} className="font-semibold text-[#64ffda] underline underline-offset-2">
+      <a href={getCandidateActivityPath(tab)} className="font-semibold text-primary underline underline-offset-2">
         View in My Activity
       </a>
     </span>

@@ -2,9 +2,9 @@ import Button from './Button'
 import Card from './Card'
 
 const statusClasses = {
-  open: 'border-[#22c55e]/30 bg-[#22c55e]/10 text-[#22c55e]',
-  pending: 'border-[#facc15]/30 bg-[#facc15]/10 text-[#facc15]',
-  closed: 'border-[#ef4444]/30 bg-[#ef4444]/10 text-[#ef4444]',
+  open: 'border-success/30 bg-success/10 text-success',
+  pending: 'border-warning/30 bg-warning/10 text-warning',
+  closed: 'border-danger/30 bg-danger/10 text-danger',
 }
 
 export default function ProjectCard({
@@ -15,7 +15,7 @@ export default function ProjectCard({
 }) {
   const statusClass =
     statusClasses[project.status?.toLowerCase()] ??
-    'border-[#233554] bg-[#0a192f]/70 text-[#8892b0]'
+    'border-border bg-background/70 text-text-muted'
   const budget = new Intl.NumberFormat(undefined, {
     style: 'currency',
     currency: 'EUR',
@@ -35,14 +35,14 @@ export default function ProjectCard({
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           {project.category && (
-            <p className="font-mono text-[10px] uppercase tracking-wider text-[#64748b]">
+            <p className="font-mono text-[10px] uppercase tracking-wider text-text-subtle">
               {project.category}
             </p>
           )}
-          <h3 className={`${project.category ? 'mt-2' : ''} font-semibold leading-snug text-[#e6f1ff]`}>
+          <h3 className={`${project.category ? 'mt-2' : ''} font-semibold leading-snug text-text-primary`}>
             {project.title}
           </h3>
-          <p className="mt-1 text-sm text-[#64ffda]">{project.company}</p>
+          <p className="mt-1 text-sm text-primary">{project.company}</p>
         </div>
         <span
           className={`shrink-0 rounded-full border px-2.5 py-1 text-[10px] font-semibold capitalize ${statusClass}`}
@@ -52,28 +52,28 @@ export default function ProjectCard({
       </div>
 
       {!compact && (
-        <p className="mt-4 text-sm leading-relaxed text-[#8892b0]">
+        <p className="mt-4 text-sm leading-relaxed text-text-muted">
           {project.description}
         </p>
       )}
 
       <div
-        className={`grid ${project.bids == null ? 'grid-cols-2' : 'grid-cols-3'} gap-3 border-y border-[#233554] text-xs ${
+        className={`grid ${project.bids == null ? 'grid-cols-2' : 'grid-cols-3'} gap-3 border-y border-border text-xs ${
           compact ? 'mt-4 py-3' : 'mt-5 py-4'
         }`}
       >
         <div>
-          <p className="text-[#64748b]">Budget</p>
-          <p className="mt-1 font-medium text-[#e6f1ff]">{budget}</p>
+          <p className="text-text-subtle">Budget</p>
+          <p className="mt-1 font-medium text-text-primary">{budget}</p>
         </div>
         <div>
-          <p className="text-[#64748b]">Deadline</p>
-          <p className="mt-1 text-[#facc15]">{deadline}</p>
+          <p className="text-text-subtle">Deadline</p>
+          <p className="mt-1 text-warning">{deadline}</p>
         </div>
         {project.bids != null && (
           <div>
-            <p className="text-[#64748b]">Bids</p>
-            <p className="mt-1 text-[#8892b0]">{project.bids} offers</p>
+            <p className="text-text-subtle">Bids</p>
+            <p className="mt-1 text-text-muted">{project.bids} offers</p>
           </div>
         )}
       </div>
@@ -82,7 +82,7 @@ export default function ProjectCard({
         {project.skills?.map((skill) => (
           <span
             key={skill}
-            className="rounded-full border border-[#233554] bg-[#0a192f]/70 px-2.5 py-1 font-mono text-[10px] text-[#64ffda]"
+            className="rounded-full border border-border bg-background/70 px-2.5 py-1 font-mono text-[10px] text-primary"
           >
             {skill}
           </span>

@@ -6,7 +6,7 @@ import Button from './Button'
 import EmptyState from './EmptyState'
 import LoadingSpinner from './LoadingSpinner'
 
-const inputClasses = 'w-full min-w-0 max-w-full rounded-xl border border-[#233554] bg-[#112240]/70 px-4 py-3 text-sm text-[#e6f1ff] outline-none placeholder:text-[#64748b] focus:border-[#64ffda] focus:ring-1 focus:ring-[#64ffda]'
+const inputClasses = 'w-full min-w-0 max-w-full rounded-xl border border-border bg-surface/70 px-4 py-3 text-sm text-text-primary outline-none placeholder:text-text-subtle focus:border-primary focus:ring-1 focus:ring-focus-ring'
 
 export default function CandidateProposalsActivity({ activity }) {
   const [search, setSearch] = useState('')
@@ -23,7 +23,7 @@ export default function CandidateProposalsActivity({ activity }) {
 
   return (
     <section className="min-w-0" aria-live="polite">
-      <div className="grid min-w-0 gap-3 rounded-2xl border border-[#233554] bg-[#112240]/55 p-4 sm:grid-cols-[minmax(0,1fr)_minmax(0,12rem)]">
+      <div className="grid min-w-0 gap-3 rounded-2xl border border-border bg-surface/55 p-4 sm:grid-cols-[minmax(0,1fr)_minmax(0,12rem)]">
         <div className="min-w-0">
           <label htmlFor="activity-proposal-search" className="sr-only">Search proposals</label>
           <input
@@ -43,7 +43,7 @@ export default function CandidateProposalsActivity({ activity }) {
         </div>
       </div>
 
-      <p className="my-4 text-sm text-[#64748b]">
+      <p className="my-4 text-sm text-text-subtle">
         {activity.isLoading ? 'Loading proposals...' : `${visibleProposals.length} proposals on this page`}
       </p>
 
@@ -59,36 +59,36 @@ export default function CandidateProposalsActivity({ activity }) {
               : ''
 
             return (
-              <article key={proposal.id} className="flex min-w-0 flex-col rounded-2xl border border-[#233554] bg-[#112240]/60 p-5">
+              <article key={proposal.id} className="flex min-w-0 flex-col rounded-2xl border border-border bg-surface/60 p-5">
                 <div className="flex min-w-0 flex-wrap items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <h3 className="break-words text-lg font-semibold text-[#e6f1ff]">{proposal.projectTitle}</h3>
-                    <p className="mt-1 break-words text-sm text-[#64ffda]">{proposal.company}</p>
+                    <h3 className="break-words text-lg font-semibold text-text-primary">{proposal.projectTitle}</h3>
+                    <p className="mt-1 break-words text-sm text-primary">{proposal.company}</p>
                   </div>
                   <ActivityStatusBadge status={proposal.status} />
                 </div>
-                <dl className="mt-4 grid grid-cols-2 gap-3 border-y border-[#233554] py-4 text-sm sm:grid-cols-3">
+                <dl className="mt-4 grid grid-cols-2 gap-3 border-y border-border py-4 text-sm sm:grid-cols-3">
                   <div className="min-w-0">
-                    <dt className="text-xs uppercase tracking-wide text-[#64748b]">Offer</dt>
-                    <dd className="mt-1 break-words font-medium text-[#e6f1ff]">{proposal.offeredPrice}</dd>
+                    <dt className="text-xs uppercase tracking-wide text-text-subtle">Offer</dt>
+                    <dd className="mt-1 break-words font-medium text-text-primary">{proposal.offeredPrice}</dd>
                   </div>
                   <div className="min-w-0">
-                    <dt className="text-xs uppercase tracking-wide text-[#64748b]">Duration</dt>
-                    <dd className="mt-1 break-words text-[#a8b2d1]">{proposal.deliveryDays ? `${proposal.deliveryDays} days` : 'Not specified'}</dd>
+                    <dt className="text-xs uppercase tracking-wide text-text-subtle">Duration</dt>
+                    <dd className="mt-1 break-words text-text-secondary">{proposal.deliveryDays ? `${proposal.deliveryDays} days` : 'Not specified'}</dd>
                   </div>
                   <div className="col-span-2 min-w-0 sm:col-span-1">
-                    <dt className="text-xs uppercase tracking-wide text-[#64748b]">Submitted</dt>
-                    <dd className="mt-1 break-words text-[#a8b2d1]">{proposal.dateSubmitted}</dd>
+                    <dt className="text-xs uppercase tracking-wide text-text-subtle">Submitted</dt>
+                    <dd className="mt-1 break-words text-text-secondary">{proposal.dateSubmitted}</dd>
                   </div>
                 </dl>
-                <p className="mt-4 line-clamp-3 break-words text-sm leading-6 text-[#8892b0]">{proposal.proposalPreview}</p>
+                <p className="mt-4 line-clamp-3 break-words text-sm leading-6 text-text-muted">{proposal.proposalPreview}</p>
                 <div className="mt-auto pt-5">
                   {opportunityPath ? (
-                    <Link to={opportunityPath} className="inline-flex w-full items-center justify-center rounded-lg border border-[#64ffda] px-4 py-2.5 text-sm font-semibold text-[#64ffda] hover:bg-[#64ffda]/10">
+                    <Link to={opportunityPath} className="inline-flex w-full items-center justify-center rounded-lg border border-primary px-4 py-2.5 text-sm font-semibold text-primary hover:bg-primary/10">
                       View opportunity
                     </Link>
                   ) : (
-                    <p className="text-sm text-[#64748b]">The related project is no longer available.</p>
+                    <p className="text-sm text-text-subtle">The related project is no longer available.</p>
                   )}
                 </div>
               </article>
@@ -107,7 +107,7 @@ export default function CandidateProposalsActivity({ activity }) {
       {lastPage > 1 && !activity.isLoading && !activity.error && (
         <div className="mt-6 flex flex-wrap items-center justify-center gap-4">
           <Button variant="outline" size="sm" disabled={activity.page <= 1} onClick={() => activity.setPage((current) => current - 1)}>Previous</Button>
-          <span className="text-sm text-[#8892b0]">Page {activity.pagination.current_page} of {lastPage}</span>
+          <span className="text-sm text-text-muted">Page {activity.pagination.current_page} of {lastPage}</span>
           <Button variant="outline" size="sm" disabled={activity.page >= lastPage} onClick={() => activity.setPage((current) => current + 1)}>Next</Button>
         </div>
       )}

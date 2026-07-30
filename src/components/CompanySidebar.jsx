@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router'
-import linkPortLogo from '../assets/linkport-logo.svg'
+import LinkPortLogo from './LinkPortLogo'
 import { getNavigationForRole } from '../config/navigation'
 import { useAuth } from '../context/AuthContext'
 import GlobalSearch from './GlobalSearch'
@@ -8,6 +8,7 @@ import NotificationBell from './NotificationBell'
 import PostOpportunityMenu from './PostOpportunityMenu'
 import CompanyBrandMark from './CompanyBrandMark'
 import { COMPANY_PROFILE_UPDATED_EVENT } from '../utils/companyProfile'
+import ThemeToggle from './ThemeToggle'
 
 function Icon({ name }) {
   const paths = {
@@ -72,27 +73,30 @@ export default function CompanySidebar({ isOpen, onClose }) {
   return (
     <>
       {isOpen && (
-        <button type="button" aria-label="Close navigation" onClick={onClose} className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden" />
+        <button type="button" aria-label="Close navigation" onClick={onClose} className="fixed inset-0 z-40 bg-overlay/60 backdrop-blur-sm lg:hidden" />
       )}
 
-      <aside className={`fixed inset-y-0 left-0 z-50 flex w-72 max-w-[calc(100vw-2rem)] flex-col border-r border-[#233554]/80 bg-[#071426] shadow-2xl shadow-black/30 transition-transform duration-200 lg:w-64 lg:max-w-none lg:translate-x-0 lg:shadow-none ${
+      <aside className={`fixed inset-y-0 left-0 z-50 flex w-72 max-w-[calc(100vw-2rem)] flex-col border-r border-border/80 bg-background shadow-2xl shadow-black/30 transition-transform duration-200 lg:w-64 lg:max-w-none lg:translate-x-0 lg:shadow-none ${
         isOpen ? 'translate-x-0' : '-translate-x-full'
       }`}>
-        <div className="flex h-20 shrink-0 items-center justify-between border-b border-[#233554]/80 px-5">
+        <div className="flex h-20 shrink-0 items-center justify-between border-b border-border/80 px-5">
           <Link to="/company/overview" onClick={onClose} className="min-w-0" aria-label="LinkPort Company Overview">
-            <span className="flex items-center gap-2.5 font-bold text-[#e6f1ff]">
-              <img src={linkPortLogo} alt="" className="h-8 w-auto" />
-              <span className="text-xl">Link<span className="text-[#64ffda]">Port</span></span>
+            <span className="flex items-center gap-2.5 font-bold text-text-primary">
+              <LinkPortLogo className="h-8 w-auto" />
+              <span className="text-xl">Link<span className="text-primary">Port</span></span>
             </span>
-            <span className="mt-1 block pl-10 text-[10px] uppercase tracking-[0.16em] text-[#64748b]">Company Workspace</span>
+            <span className="mt-1 block pl-10 text-[10px] uppercase tracking-[0.16em] text-text-subtle">Company Workspace</span>
           </Link>
           <div className="flex items-center gap-1">
+            <div className="hidden lg:block">
+              <ThemeToggle compact />
+            </div>
             <NotificationBell align="left" />
-            <button type="button" onClick={onClose} className="flex h-9 w-9 items-center justify-center rounded-lg text-xl text-[#8892b0] hover:bg-[#112240] hover:text-[#64ffda] lg:hidden" aria-label="Close menu">&times;</button>
+            <button type="button" onClick={onClose} className="flex h-9 w-9 items-center justify-center rounded-lg text-xl text-text-muted hover:bg-surface hover:text-primary lg:hidden" aria-label="Close menu">&times;</button>
           </div>
         </div>
 
-        <div className="space-y-3 border-b border-[#233554]/80 px-4 py-4">
+        <div className="space-y-3 border-b border-border/80 px-4 py-4">
           <PostOpportunityMenu onNavigate={onClose} />
           <GlobalSearch className="w-full min-w-0 max-w-full" dropdownAlign="left" />
         </div>
@@ -104,10 +108,10 @@ export default function CompanySidebar({ isOpen, onClose }) {
               to={item.path}
               onClick={onClose}
               aria-current={isActive(item, location.pathname) ? 'page' : undefined}
-              className={`flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#64ffda] ${
+              className={`flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring ${
                 isActive(item, location.pathname)
-                  ? 'bg-[#64ffda]/10 text-[#64ffda]'
-                  : 'text-[#8892b0] hover:bg-[#112240] hover:text-[#e6f1ff]'
+                  ? 'border border-primary-soft-border bg-primary-soft text-primary-soft-text'
+                  : 'text-text-muted hover:bg-surface hover:text-text-primary'
               }`}
             >
               <Icon name={item.key} />
@@ -116,15 +120,15 @@ export default function CompanySidebar({ isOpen, onClose }) {
           ))}
         </nav>
 
-        <div className="border-t border-[#233554]/80 p-3">
-          <Link to="/" onClick={onClose} className="flex items-center justify-center rounded-lg border border-[#233554] px-3 py-2.5 text-sm font-medium text-[#a8b2d1] hover:border-[#64ffda]/45 hover:text-[#64ffda]">
+        <div className="border-t border-border/80 p-3">
+          <Link to="/" onClick={onClose} className="flex items-center justify-center rounded-lg border border-border px-3 py-2.5 text-sm font-medium text-text-secondary hover:border-primary/45 hover:text-primary">
             Explore LinkPort
           </Link>
           <div className="mt-3 flex items-center gap-3 rounded-xl px-2 py-2">
             <CompanyBrandMark name={companyName} logoUrl={brand.logoUrl} size="sm" />
-            <p className="min-w-0 flex-1 truncate text-sm font-medium text-[#e6f1ff]">{companyName}</p>
+            <p className="min-w-0 flex-1 truncate text-sm font-medium text-text-primary">{companyName}</p>
           </div>
-          <button type="button" onClick={handleLogout} className="mt-1 flex w-full items-center justify-center rounded-lg px-3 py-2.5 text-sm font-medium text-[#f87171] hover:bg-[#ef4444]/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ef4444]">
+          <button type="button" onClick={handleLogout} className="mt-1 flex w-full items-center justify-center rounded-lg px-3 py-2.5 text-sm font-medium text-danger-soft hover:bg-danger/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger">
             Logout
           </button>
         </div>

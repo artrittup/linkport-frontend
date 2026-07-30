@@ -1,10 +1,11 @@
 import { Link, useNavigate } from 'react-router'
 import Button from './Button'
-import linkPortLogo from '../assets/linkport-logo.svg'
+import LinkPortLogo from './LinkPortLogo'
 import { useAuth } from '../context/AuthContext'
 import GlobalSearch from './GlobalSearch'
 import NotificationBell from './NotificationBell'
 import CandidateNotificationBell from './CandidateNotificationBell'
+import ThemeToggle from './ThemeToggle'
 
 export default function Navbar() {
   const navigate = useNavigate()
@@ -18,53 +19,58 @@ export default function Navbar() {
   const dashboardPath = getDashboardPath(user?.role)
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 border-b border-[#233554]/80 bg-[#0a192f]/95 backdrop-blur-lg">
+    <header className="app-topbar fixed inset-x-0 top-0 z-50">
       <nav
-        className="flex h-22 w-full items-center justify-between px-4 sm:px-6 lg:px-7"
+        className="flex h-22 w-full items-center justify-between px-2 sm:px-6 lg:px-7"
         aria-label="Main navigation"
       >
         <Link
           to="/"
-          className="flex items-center gap-2.5 text-xl font-bold tracking-tight text-[#e6f1ff] transition-opacity duration-200 hover:opacity-80"
+          className="flex items-center gap-2.5 text-xl font-bold tracking-tight text-text-primary transition-opacity duration-200 hover:opacity-80"
           aria-label="LinkPort home"
         >
-          <img src={linkPortLogo} alt="LinkPort logo" className="h-9 w-auto" />
-          <span>
-            Link<span className="text-[#64ffda]">Port</span>
+          <LinkPortLogo className="h-8 w-auto sm:h-9" />
+          <span className="hidden sm:inline">
+            Link<span className="text-primary">Port</span>
           </span>
         </Link>
 
         <div className="ml-auto flex items-center gap-2 sm:gap-4">
-          <GlobalSearch className="w-10 transition-[width] duration-200 focus-within:w-52 sm:w-40 sm:focus-within:w-64" />
+          <GlobalSearch className="w-32 sm:w-48 lg:w-56" />
+          <div className="hidden sm:block">
+            <ThemeToggle />
+          </div>
 
           {isLoading ? (
-            <div className="h-9 w-32 animate-pulse rounded-lg bg-[#112240]" aria-label="Checking account" />
+            <div className="hidden h-9 w-32 animate-pulse rounded-lg bg-surface sm:block" aria-label="Checking account" />
           ) : isAuthenticated ? (
-            <div className="flex items-center gap-2 sm:gap-3">
+            <div className="flex items-center gap-1.5 sm:gap-3">
               {user?.role === 'candidate'
                 ? <CandidateNotificationBell placement="mobile" />
                 : <NotificationBell />}
-              <span className="hidden max-w-40 truncate text-sm text-[#8892b0] sm:block">
+              <span className="hidden max-w-40 truncate text-sm text-text-muted sm:block">
                 {user?.name}
               </span>
               <Button variant="outline" size="sm" onClick={() => navigate(dashboardPath)}>
-                Dashboard
+                <span className="sm:hidden">Open</span>
+                <span className="hidden sm:inline">Dashboard</span>
               </Button>
               <button
                 type="button"
                 onClick={logout}
-                className="rounded-lg px-2 py-2 text-xs font-semibold text-[#ef4444] transition-colors hover:bg-[#ef4444]/10 lg:hidden"
+                className="hidden rounded-lg px-2 py-2 text-xs font-semibold text-danger transition-colors hover:bg-danger/10 sm:block lg:hidden"
               >
                 Logout
               </button>
             </div>
           ) : (
-            <div className="flex items-center gap-2 sm:gap-4">
-              <Link to="/login" className="rounded-lg px-3 py-2 text-sm font-semibold text-[#8892b0] transition-colors duration-200 hover:text-[#e6f1ff]">
+            <div className="flex items-center gap-1.5 sm:gap-4">
+              <Link to="/login" className="hidden rounded-lg px-3 py-2 text-sm font-semibold text-text-muted transition-colors duration-200 hover:text-text-primary sm:inline-flex">
                 Login
               </Link>
               <Button variant="outline" size="sm" onClick={() => navigate('/register')}>
-                Sign Up
+                <span className="sm:hidden">Join</span>
+                <span className="hidden sm:inline">Sign Up</span>
               </Button>
             </div>
           )}

@@ -38,7 +38,7 @@ import {
 import useToast from '../hooks/useToast'
 import DashboardLayout from '../layouts/DashboardLayout'
 
-const control = 'w-full rounded-md border border-[#233554] bg-[#0a192f]/70 px-4 py-3 text-sm text-[#e6f1ff] outline-none placeholder:text-[#64748b] focus:border-[#64ffda]'
+const control = 'w-full rounded-md border border-border bg-background/70 px-4 py-3 text-sm text-text-primary outline-none placeholder:text-text-subtle focus:border-primary'
 
 const types = {
   projects: {
@@ -198,7 +198,7 @@ function TagList({ label, items }) {
     <DetailSection label={label}>
       <div className="flex flex-wrap gap-2">
         {values.map((item, index) => (
-          <span key={`${item}-${index}`} className="rounded-full border border-[#64ffda]/20 bg-[#64ffda]/5 px-2.5 py-1 text-xs text-[#64ffda]">{item}</span>
+          <span key={`${item}-${index}`} className="rounded-full border border-primary/20 bg-primary/5 px-2.5 py-1 text-xs text-primary">{item}</span>
         ))}
       </div>
     </DetailSection>
@@ -328,20 +328,20 @@ export default function AdminCommunity() {
     <DashboardLayout title="Community" userType="Admin">
       <div className="min-w-0 space-y-8">
         <section>
-          <p className="font-mono text-sm text-[#64ffda]">Moderation workspace</p>
+          <p className="font-mono text-sm text-primary">Moderation workspace</p>
           <h2 className="mt-2 text-2xl font-bold sm:text-3xl">Community</h2>
-          <p className="mt-3 max-w-2xl text-[#8892b0]">Inspect community records and use only moderation actions authorized by the current backend.</p>
+          <p className="mt-3 max-w-2xl text-text-muted">Inspect community records and use only moderation actions authorized by the current backend.</p>
         </section>
 
-        <nav className="flex max-w-full gap-2 overflow-x-auto border-b border-[#233554] pb-2" aria-label="Community content type">
+        <nav className="flex max-w-full gap-2 overflow-x-auto border-b border-border pb-2" aria-label="Community content type">
           {Object.entries(types).map(([key, item]) => (
             <button
               key={key}
               type="button"
               aria-current={type === key ? 'page' : undefined}
               onClick={() => selectType(key)}
-              className={`shrink-0 rounded-lg px-4 py-2.5 text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#64ffda] ${
-                type === key ? 'bg-[#64ffda]/10 text-[#64ffda]' : 'text-[#8892b0] hover:bg-[#112240] hover:text-[#e6f1ff]'
+              className={`shrink-0 rounded-lg px-4 py-2.5 text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring ${
+                type === key ? 'bg-primary/10 text-primary' : 'text-text-muted hover:bg-surface hover:text-text-primary'
               }`}
             >
               {item.label}
@@ -368,8 +368,8 @@ export default function AdminCommunity() {
         </Card>
 
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-sm text-[#8892b0]">{source.total} matching {config.label.toLowerCase()}</p>
-          <span className={`w-fit rounded-full px-3 py-1 text-xs font-semibold ${config.remove ? 'bg-[#64ffda]/10 text-[#64ffda]' : 'bg-[#233554] text-[#a8b2d1]'}`}>{config.capability}</span>
+          <p className="text-sm text-text-muted">{source.total} matching {config.label.toLowerCase()}</p>
+          <span className={`w-fit rounded-full px-3 py-1 text-xs font-semibold ${config.remove ? 'bg-primary/10 text-primary' : 'bg-border text-text-secondary'}`}>{config.capability}</span>
         </div>
 
         {source.loading ? (
@@ -385,12 +385,12 @@ export default function AdminCommunity() {
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <h3 className="break-words font-semibold">{config.title(item)}</h3>
-                    <p className="mt-1 break-words text-sm text-[#64ffda]">{config.owner(item)}</p>
+                    <p className="mt-1 break-words text-sm text-primary">{config.owner(item)}</p>
                   </div>
-                  <span className="shrink-0 rounded-full bg-[#233554] px-2.5 py-1 text-[10px] font-semibold text-[#a8b2d1]">{config.status(item)}</span>
+                  <span className="shrink-0 rounded-full bg-border px-2.5 py-1 text-[10px] font-semibold text-text-secondary">{config.status(item)}</span>
                 </div>
-                <p className="mt-4 break-words text-sm leading-6 text-[#8892b0]">{previewText(config.preview(item)) || 'No summary provided.'}</p>
-                <p className="mt-4 text-xs text-[#64748b]">{formatDate(config.createdAt(item))}</p>
+                <p className="mt-4 break-words text-sm leading-6 text-text-muted">{previewText(config.preview(item)) || 'No summary provided.'}</p>
+                <p className="mt-4 text-xs text-text-subtle">{formatDate(config.createdAt(item))}</p>
                 <div className="mt-5 flex flex-wrap justify-end gap-2">
                   <Button variant="outline" size="sm" onClick={() => setSelected(item)}>View</Button>
                   {config.remove && (
@@ -400,7 +400,7 @@ export default function AdminCommunity() {
                     }}>Delete</Button>
                   )}
                 </div>
-                {!config.remove && <p className="mt-3 text-right text-xs text-[#64748b]">Account actions remain in Admin Users.</p>}
+                {!config.remove && <p className="mt-3 text-right text-xs text-text-subtle">Account actions remain in Admin Users.</p>}
               </Card>
             ))}
           </div>
@@ -409,14 +409,14 @@ export default function AdminCommunity() {
         {!source.loading && !source.error && source.lastPage > 1 && (
           <div className="flex items-center justify-center gap-4">
             <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => updateParams({ page: page - 1 })}>Previous</Button>
-            <span className="text-sm text-[#8892b0]">Page {source.currentPage} of {source.lastPage}</span>
+            <span className="text-sm text-text-muted">Page {source.currentPage} of {source.lastPage}</span>
             <Button variant="outline" size="sm" disabled={page >= source.lastPage} onClick={() => updateParams({ page: page + 1 })}>Next</Button>
           </div>
         )}
 
         {type === 'events' && (
           <Card>
-            <p className="text-sm text-[#8892b0]">Event creation, editing, publishing, and cancellation are supported by backend authorization, but a complete validated Admin Event form is deferred. This phase exposes safe review and deletion only.</p>
+            <p className="text-sm text-text-muted">Event creation, editing, publishing, and cancellation are supported by backend authorization, but a complete validated Admin Event form is deferred. This phase exposes safe review and deletion only.</p>
           </Card>
         )}
 

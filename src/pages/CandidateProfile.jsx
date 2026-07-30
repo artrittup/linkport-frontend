@@ -25,20 +25,20 @@ import useCommunityProjects from '../hooks/useCommunityProjects'
 import useToast from '../hooks/useToast'
 import CandidateLayout from '../layouts/CandidateLayout'
 
-const inputClasses = 'mt-2 w-full min-w-0 max-w-full rounded-lg border border-[#233554] bg-[#0a192f]/70 px-4 py-3 text-sm text-[#e6f1ff] outline-none transition-colors placeholder:text-[#64748b] focus:border-[#64ffda] focus:ring-1 focus:ring-[#64ffda]'
+const inputClasses = 'mt-2 w-full min-w-0 max-w-full rounded-lg border border-border bg-background/70 px-4 py-3 text-sm text-text-primary outline-none transition-colors placeholder:text-text-subtle focus:border-primary focus:ring-1 focus:ring-focus-ring'
 
 function FieldError({ errors, name }) {
   const message = errors[name]
     || Object.entries(errors).find(([field]) => field.startsWith(`${name}.`))?.[1]
   if (!message) return null
-  return <p className="mt-1.5 text-xs text-[#fca5a5]">{message}</p>
+  return <p className="mt-1.5 text-xs text-danger-text">{message}</p>
 }
 
 function ProfileSection({ title, description, children, className = '' }) {
   return (
-    <section className={`min-w-0 rounded-2xl border border-[#233554] bg-[#112240]/55 p-5 sm:p-6 ${className}`}>
-      <h3 className="text-xl font-semibold text-[#e6f1ff]">{title}</h3>
-      {description && <p className="mt-1 text-sm text-[#64748b]">{description}</p>}
+    <section className={`min-w-0 rounded-2xl border border-border bg-surface/55 p-5 sm:p-6 ${className}`}>
+      <h3 className="text-xl font-semibold text-text-primary">{title}</h3>
+      {description && <p className="mt-1 text-sm text-text-subtle">{description}</p>}
       <div className="mt-5 min-w-0">{children}</div>
     </section>
   )
@@ -47,9 +47,9 @@ function ProfileSection({ title, description, children, className = '' }) {
 function EmptyProfileText({ children, onEdit }) {
   return (
     <div>
-      <p className="text-sm leading-6 text-[#8892b0]">{children}</p>
+      <p className="text-sm leading-6 text-text-muted">{children}</p>
       {onEdit && (
-        <button type="button" onClick={onEdit} className="mt-3 text-sm font-medium text-[#64ffda] hover:underline">
+        <button type="button" onClick={onEdit} className="mt-3 text-sm font-medium text-primary hover:underline">
           Add information
         </button>
       )}
@@ -213,16 +213,16 @@ export default function CandidateProfile() {
       <CandidateLayout title="Edit profile">
         <div className="min-w-0 max-w-4xl">
           <section>
-            <p className="font-mono text-sm text-[#64ffda]">Member profile</p>
-            <h2 className="mt-2 text-3xl font-bold tracking-tight text-[#e6f1ff]">Edit profile</h2>
-            <p className="mt-3 text-sm leading-6 text-[#8892b0]">Update the information shown on your professional community profile.</p>
+            <p className="font-mono text-sm text-primary">Member profile</p>
+            <h2 className="mt-2 text-3xl font-bold tracking-tight text-text-primary">Edit profile</h2>
+            <p className="mt-3 text-sm leading-6 text-text-muted">Update the information shown on your professional community profile.</p>
           </section>
 
           <Card padding="lg" className="mt-8 min-w-0">
             <form onSubmit={handleSubmit} className="min-w-0 space-y-8">
               <fieldset className="min-w-0">
-                <legend className="text-lg font-semibold text-[#e6f1ff]">Account</legend>
-                <p className="mt-1 text-xs text-[#64748b]">Name and email are managed by your account.</p>
+                <legend className="text-lg font-semibold text-text-primary">Account</legend>
+                <p className="mt-1 text-xs text-text-subtle">Name and email are managed by your account.</p>
                 <div className="mt-4 grid min-w-0 gap-5 md:grid-cols-2">
                   <label className="min-w-0 text-sm font-medium">
                     Full name
@@ -235,9 +235,9 @@ export default function CandidateProfile() {
                 </div>
               </fieldset>
 
-              <fieldset className="min-w-0 border-t border-[#233554] pt-7">
-                <legend className="text-lg font-semibold text-[#e6f1ff]">Community profile</legend>
-                <p className="mt-1 text-xs text-[#64748b]">These fields help other members discover you and understand how you want to collaborate.</p>
+              <fieldset className="min-w-0 border-t border-border pt-7">
+                <legend className="text-lg font-semibold text-text-primary">Community profile</legend>
+                <p className="mt-1 text-xs text-text-subtle">These fields help other members discover you and understand how you want to collaborate.</p>
                 <div className="mt-4 grid min-w-0 gap-5 md:grid-cols-2">
                   <label className="min-w-0 text-sm font-medium">
                     University
@@ -264,20 +264,20 @@ export default function CandidateProfile() {
                   <label className="min-w-0 text-sm font-medium md:col-span-2">
                     Interests
                     <input name="interestsInput" value={draft.interestsInput} onChange={updateField} placeholder="web_development, design, AI ethics" className={inputClasses} />
-                    <p className="mt-1.5 text-xs text-[#64748b]">Separate interests with commas. Common values use readable labels publicly.</p>
+                    <p className="mt-1.5 text-xs text-text-subtle">Separate interests with commas. Common values use readable labels publicly.</p>
                     <FieldError errors={fieldErrors} name="interests" />
                   </label>
                   <label className="min-w-0 text-sm font-medium md:col-span-2">
                     Looking-for roles
                     <input name="lookingForRolesInput" value={draft.lookingForRolesInput} onChange={updateField} placeholder="Frontend Developer, UI/UX Designer" className={inputClasses} />
-                    <p className="mt-1.5 text-xs text-[#64748b]">Separate roles with commas.</p>
+                    <p className="mt-1.5 text-xs text-text-subtle">Separate roles with commas.</p>
                     <FieldError errors={fieldErrors} name="looking_for_roles" />
                   </label>
                 </div>
               </fieldset>
 
-              <fieldset className="min-w-0 border-t border-[#233554] pt-7">
-                <legend className="text-lg font-semibold text-[#e6f1ff]">Profile basics</legend>
+              <fieldset className="min-w-0 border-t border-border pt-7">
+                <legend className="text-lg font-semibold text-text-primary">Profile basics</legend>
                 <div className="mt-4 grid min-w-0 gap-5 md:grid-cols-2">
                   <label className="min-w-0 text-sm font-medium">
                     Professional headline
@@ -302,8 +302,8 @@ export default function CandidateProfile() {
                 </div>
               </fieldset>
 
-              <fieldset className="min-w-0 border-t border-[#233554] pt-7">
-                <legend className="text-lg font-semibold text-[#e6f1ff]">Experience and skills</legend>
+              <fieldset className="min-w-0 border-t border-border pt-7">
+                <legend className="text-lg font-semibold text-text-primary">Experience and skills</legend>
                 <div className="mt-4 grid min-w-0 gap-5 md:grid-cols-2">
                   <label className="min-w-0 text-sm font-medium">
                     Education
@@ -329,8 +329,8 @@ export default function CandidateProfile() {
                 </div>
               </fieldset>
 
-              <fieldset className="min-w-0 border-t border-[#233554] pt-7">
-                <legend className="text-lg font-semibold text-[#e6f1ff]">Professional links</legend>
+              <fieldset className="min-w-0 border-t border-border pt-7">
+                <legend className="text-lg font-semibold text-text-primary">Professional links</legend>
                 <div className="mt-4 grid min-w-0 gap-5 md:grid-cols-2">
                   <label className="min-w-0 text-sm font-medium">
                     Portfolio or website
@@ -356,12 +356,12 @@ export default function CandidateProfile() {
               </fieldset>
 
               {saveError && (
-                <p role="alert" className="rounded-lg border border-[#ef4444]/35 bg-[#ef4444]/10 px-4 py-3 text-sm text-[#fca5a5]">
+                <p role="alert" className="rounded-lg border border-danger/35 bg-danger/10 px-4 py-3 text-sm text-danger-text">
                   {saveError}
                 </p>
               )}
 
-              <div className="flex flex-col-reverse gap-3 border-t border-[#233554] pt-6 sm:flex-row sm:justify-end">
+              <div className="flex flex-col-reverse gap-3 border-t border-border pt-6 sm:flex-row sm:justify-end">
                 <Button variant="outline" onClick={cancelEdit} disabled={isSaving}>Cancel</Button>
                 <Button type="submit" disabled={isSaving}>{isSaving ? 'Saving...' : 'Save profile'}</Button>
               </div>
@@ -378,16 +378,16 @@ export default function CandidateProfile() {
     <CandidateLayout title="Profile">
       <div className="min-w-0 max-w-full space-y-8">
         <section>
-          <p className="font-mono text-sm text-[#64ffda]">Member profile</p>
-          <h2 className="mt-2 text-3xl font-bold tracking-tight text-[#e6f1ff]">Profile</h2>
-          <p className="mt-3 text-sm leading-6 text-[#8892b0]">Your professional community profile and project portfolio.</p>
+          <p className="font-mono text-sm text-primary">Member profile</p>
+          <h2 className="mt-2 text-3xl font-bold tracking-tight text-text-primary">Profile</h2>
+          <p className="mt-3 text-sm leading-6 text-text-muted">Your professional community profile and project portfolio.</p>
         </section>
 
         {loadError && (
-          <p role="alert" className="rounded-lg border border-[#ef4444]/35 bg-[#ef4444]/10 px-4 py-3 text-sm text-[#fca5a5]">{loadError}</p>
+          <p role="alert" className="rounded-lg border border-danger/35 bg-danger/10 px-4 py-3 text-sm text-danger-text">{loadError}</p>
         )}
         {saveSuccess && (
-          <p role="status" className="rounded-lg border border-[#22c55e]/30 bg-[#22c55e]/10 px-4 py-3 text-sm text-[#86efac]">Profile changes saved successfully.</p>
+          <p role="status" className="rounded-lg border border-success/30 bg-success/10 px-4 py-3 text-sm text-success-text">Profile changes saved successfully.</p>
         )}
 
         <CandidateProfileHeader profile={profile} isOwner onEdit={openEdit} />
@@ -396,27 +396,27 @@ export default function CandidateProfile() {
           <ProfileSection title="About">
             <div className="space-y-5">
               <div>
-                <h4 className="text-xs font-semibold uppercase tracking-wide text-[#64748b]">Biography</h4>
+                <h4 className="text-xs font-semibold uppercase tracking-wide text-text-subtle">Biography</h4>
                 {profile.bio
-                  ? <p className="mt-2 whitespace-pre-line break-words text-sm leading-6 text-[#a8b2d1]">{profile.bio}</p>
+                  ? <p className="mt-2 whitespace-pre-line break-words text-sm leading-6 text-text-secondary">{profile.bio}</p>
                   : <EmptyProfileText onEdit={openEdit}>No biography added yet.</EmptyProfileText>}
               </div>
               {(profile.university || profile.fieldOfStudy || profile.graduationYear) && (
-                <dl className="grid gap-4 border-y border-[#233554] py-5 sm:grid-cols-2">
-                  {profile.university && <div><dt className="text-xs font-semibold uppercase tracking-wide text-[#64748b]">University</dt><dd className="mt-2 break-words text-sm text-[#a8b2d1]">{profile.university}</dd></div>}
-                  {profile.fieldOfStudy && <div><dt className="text-xs font-semibold uppercase tracking-wide text-[#64748b]">Field of study</dt><dd className="mt-2 break-words text-sm text-[#a8b2d1]">{profile.fieldOfStudy}</dd></div>}
-                  {profile.graduationYear && <div><dt className="text-xs font-semibold uppercase tracking-wide text-[#64748b]">Graduation year</dt><dd className="mt-2 text-sm text-[#a8b2d1]">{profile.graduationYear}</dd></div>}
+                <dl className="grid gap-4 border-y border-border py-5 sm:grid-cols-2">
+                  {profile.university && <div><dt className="text-xs font-semibold uppercase tracking-wide text-text-subtle">University</dt><dd className="mt-2 break-words text-sm text-text-secondary">{profile.university}</dd></div>}
+                  {profile.fieldOfStudy && <div><dt className="text-xs font-semibold uppercase tracking-wide text-text-subtle">Field of study</dt><dd className="mt-2 break-words text-sm text-text-secondary">{profile.fieldOfStudy}</dd></div>}
+                  {profile.graduationYear && <div><dt className="text-xs font-semibold uppercase tracking-wide text-text-subtle">Graduation year</dt><dd className="mt-2 text-sm text-text-secondary">{profile.graduationYear}</dd></div>}
                 </dl>
               )}
               <div>
-                <h4 className="text-xs font-semibold uppercase tracking-wide text-[#64748b]">Education summary</h4>
+                <h4 className="text-xs font-semibold uppercase tracking-wide text-text-subtle">Education summary</h4>
                 {profile.education
-                  ? <p className="mt-2 whitespace-pre-line break-words text-sm leading-6 text-[#a8b2d1]">{profile.education}</p>
+                  ? <p className="mt-2 whitespace-pre-line break-words text-sm leading-6 text-text-secondary">{profile.education}</p>
                   : <EmptyProfileText onEdit={openEdit}>No education summary added yet.</EmptyProfileText>}
               </div>
               <div>
-                <h4 className="text-xs font-semibold uppercase tracking-wide text-[#64748b]">Current focus</h4>
-                <p className="mt-2 break-words text-sm leading-6 text-[#a8b2d1]">
+                <h4 className="text-xs font-semibold uppercase tracking-wide text-text-subtle">Current focus</h4>
+                <p className="mt-2 break-words text-sm leading-6 text-text-secondary">
                   {currentFocus.length > 0 ? currentFocus.join(', ') : (profile.professionalTitle || 'Add skills to show your current focus.')}
                 </p>
               </div>
@@ -425,12 +425,12 @@ export default function CandidateProfile() {
 
           <ProfileSection title="Links and CV">
             {profile.cvUrl ? (
-              <a href={profile.cvUrl} target="_blank" rel="noreferrer" className="text-sm font-medium text-[#64ffda] hover:underline">View CV</a>
+              <a href={profile.cvUrl} target="_blank" rel="noreferrer" className="text-sm font-medium text-primary hover:underline">View CV</a>
             ) : (
               <EmptyProfileText onEdit={openEdit}>No CV link added.</EmptyProfileText>
             )}
             {!profile.portfolioLink && !profile.githubUrl && !profile.linkedinUrl && (
-              <p className="mt-4 text-xs leading-5 text-[#64748b]">No external professional links added yet.</p>
+              <p className="mt-4 text-xs leading-5 text-text-subtle">No external professional links added yet.</p>
             )}
           </ProfileSection>
         </div>
@@ -439,7 +439,7 @@ export default function CandidateProfile() {
           {profile.skills.length > 0 ? (
             <div className="flex min-w-0 flex-wrap gap-2">
               {profile.skills.map((skill) => (
-                <span key={skill} className="max-w-full break-words rounded-full border border-[#64ffda]/25 bg-[#64ffda]/5 px-3 py-1.5 text-sm text-[#64ffda]">{skill}</span>
+                <span key={skill} className="max-w-full break-words rounded-full border border-primary/25 bg-primary/5 px-3 py-1.5 text-sm text-primary">{skill}</span>
               ))}
             </div>
           ) : (
@@ -450,22 +450,22 @@ export default function CandidateProfile() {
         <ProfileSection title="Community and collaboration" description="Your public interests and collaboration preferences.">
           <div className="grid min-w-0 gap-6 md:grid-cols-2">
             <div>
-              <h4 className="text-xs font-semibold uppercase tracking-wide text-[#64748b]">Collaboration status</h4>
+              <h4 className="text-xs font-semibold uppercase tracking-wide text-text-subtle">Collaboration status</h4>
               {profile.collaborationStatus
-                ? <p className="mt-2 inline-flex max-w-full break-words rounded-full border border-[#64ffda]/25 bg-[#64ffda]/5 px-3 py-1.5 text-sm text-[#64ffda]">{getCollaborationStatusLabel(profile.collaborationStatus)}</p>
+                ? <p className="mt-2 inline-flex max-w-full break-words rounded-full border border-primary/25 bg-primary/5 px-3 py-1.5 text-sm text-primary">{getCollaborationStatusLabel(profile.collaborationStatus)}</p>
                 : <EmptyProfileText onEdit={openEdit}>No collaboration status selected.</EmptyProfileText>}
             </div>
             <div>
-              <h4 className="text-xs font-semibold uppercase tracking-wide text-[#64748b]">Looking for</h4>
+              <h4 className="text-xs font-semibold uppercase tracking-wide text-text-subtle">Looking for</h4>
               {profile.lookingForRoles.length > 0
-                ? <ul className="mt-2 space-y-1 text-sm text-[#a8b2d1]">{profile.lookingForRoles.map((role) => <li key={role} className="break-words">&bull; {role}</li>)}</ul>
+                ? <ul className="mt-2 space-y-1 text-sm text-text-secondary">{profile.lookingForRoles.map((role) => <li key={role} className="break-words">&bull; {role}</li>)}</ul>
                 : <EmptyProfileText onEdit={openEdit}>No collaboration roles listed.</EmptyProfileText>}
             </div>
           </div>
-          <div className="mt-6 border-t border-[#233554] pt-5">
-            <h4 className="text-xs font-semibold uppercase tracking-wide text-[#64748b]">Interests</h4>
+          <div className="mt-6 border-t border-border pt-5">
+            <h4 className="text-xs font-semibold uppercase tracking-wide text-text-subtle">Interests</h4>
             {profile.interests.length > 0
-              ? <div className="mt-2 flex min-w-0 flex-wrap gap-2">{profile.interests.map((interest) => <span key={interest} className="max-w-full break-words rounded-full border border-[#233554] px-3 py-1.5 text-sm text-[#a8b2d1]">{getInterestLabel(interest)}</span>)}</div>
+              ? <div className="mt-2 flex min-w-0 flex-wrap gap-2">{profile.interests.map((interest) => <span key={interest} className="max-w-full break-words rounded-full border border-border px-3 py-1.5 text-sm text-text-secondary">{getInterestLabel(interest)}</span>)}</div>
               : <EmptyProfileText onEdit={openEdit}>No interests added yet.</EmptyProfileText>}
           </div>
         </ProfileSection>
@@ -473,17 +473,17 @@ export default function CandidateProfile() {
         <section className="min-w-0">
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div>
-              <h3 className="text-2xl font-semibold text-[#e6f1ff]">Projects</h3>
-              <p className="mt-2 text-sm text-[#8892b0]">Selected work from the LinkPort Project Showcase.</p>
+              <h3 className="text-2xl font-semibold text-text-primary">Projects</h3>
+              <p className="mt-2 text-sm text-text-muted">Selected work from the LinkPort Project Showcase.</p>
             </div>
-            <Link to="/member/projects" className="text-sm font-medium text-[#64ffda] hover:underline">View all projects</Link>
+            <Link to="/member/projects" className="text-sm font-medium text-primary hover:underline">View all projects</Link>
           </div>
           {projectsLoading ? (
-            <Card className="mt-5"><p className="text-sm text-[#8892b0]">Loading your projects...</p></Card>
+            <Card className="mt-5"><p className="text-sm text-text-muted">Loading your projects...</p></Card>
           ) : projectsError ? (
             <Card className="mt-5">
-              <p className="text-sm text-[#8892b0]">Your projects are temporarily unavailable.</p>
-              <button type="button" onClick={retryProjects} className="mt-3 text-sm font-medium text-[#64ffda] hover:underline">Try again</button>
+              <p className="text-sm text-text-muted">Your projects are temporarily unavailable.</p>
+              <button type="button" onClick={retryProjects} className="mt-3 text-sm font-medium text-primary hover:underline">Try again</button>
             </Card>
           ) : profileProjects.length > 0 ? (
             <div className="mt-5 grid min-w-0 gap-5 md:grid-cols-2 xl:grid-cols-3">
@@ -492,7 +492,7 @@ export default function CandidateProfile() {
           ) : (
             <Card className="mt-5">
               <EmptyProfileText>You have not shared a community project yet.</EmptyProfileText>
-              <Link to="/member/create/project" className="mt-3 inline-flex text-sm font-medium text-[#64ffda] hover:underline">Share a project</Link>
+              <Link to="/member/create/project" className="mt-3 inline-flex text-sm font-medium text-primary hover:underline">Share a project</Link>
             </Card>
           )}
         </section>
@@ -500,18 +500,18 @@ export default function CandidateProfile() {
         <div className="grid min-w-0 gap-5 md:grid-cols-2">
           <ProfileSection title="Experience">
             {profile.experience
-              ? <p className="whitespace-pre-line break-words text-sm leading-6 text-[#a8b2d1]">{profile.experience}</p>
+              ? <p className="whitespace-pre-line break-words text-sm leading-6 text-text-secondary">{profile.experience}</p>
               : <EmptyProfileText onEdit={openEdit}>No experience added yet.</EmptyProfileText>}
           </ProfileSection>
           <ProfileSection title="Education">
             {profile.education
-              ? <p className="whitespace-pre-line break-words text-sm leading-6 text-[#a8b2d1]">{profile.education}</p>
+              ? <p className="whitespace-pre-line break-words text-sm leading-6 text-text-secondary">{profile.education}</p>
               : <EmptyProfileText onEdit={openEdit}>No education details added yet.</EmptyProfileText>}
           </ProfileSection>
         </div>
 
         <ProfileSection title="Activity" description="Quick links to your private member activity.">
-          <Link to={getCandidateActivityPath()} className="inline-flex w-full items-center justify-center rounded-xl border border-[#64ffda] bg-[#64ffda] px-5 py-3 text-sm font-semibold text-[#071426] transition-colors hover:bg-[#7dffe1]">
+          <Link to={getCandidateActivityPath()} className="inline-flex w-full items-center justify-center rounded-xl border border-primary bg-primary px-5 py-3 text-sm font-semibold text-primary-contrast transition-colors hover:bg-primary-hover">
             View all activity
           </Link>
           <div className="mt-3 grid min-w-0 gap-3 sm:grid-cols-3">
@@ -520,7 +520,7 @@ export default function CandidateProfile() {
               { label: 'Proposals', path: getCandidateActivityPath('proposals') },
               { label: 'Shared content', path: getCandidateActivityPath('content') },
             ].map((item) => (
-              <Link key={item.path} to={item.path} className="rounded-xl border border-[#233554] bg-[#0a192f]/45 px-4 py-3 text-sm font-medium text-[#a8b2d1] transition-colors hover:border-[#64ffda]/40 hover:text-[#64ffda]">
+              <Link key={item.path} to={item.path} className="rounded-xl border border-border bg-background/45 px-4 py-3 text-sm font-medium text-text-secondary transition-colors hover:border-primary/40 hover:text-primary">
                 {item.label}
               </Link>
             ))}

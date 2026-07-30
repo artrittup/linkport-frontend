@@ -38,7 +38,7 @@ import {
 import useToast from '../hooks/useToast'
 import CandidateLayout from '../layouts/CandidateLayout'
 
-const inputClasses = 'mt-2 w-full min-w-0 max-w-full rounded-lg border border-[#233554] bg-[#0a192f]/70 px-4 py-3 text-sm text-[#e6f1ff] outline-none placeholder:text-[#64748b] focus:border-[#64ffda] focus:ring-1 focus:ring-[#64ffda]'
+const inputClasses = 'mt-2 w-full min-w-0 max-w-full rounded-lg border border-border bg-background/70 px-4 py-3 text-sm text-text-primary outline-none placeholder:text-text-subtle focus:border-primary focus:ring-1 focus:ring-focus-ring'
 function splitList(value) {
   return [...new Set(value.split(',').map((item) => item.trim()).filter(Boolean))]
 }
@@ -54,12 +54,12 @@ function isValidUrl(value) {
 }
 
 function FieldError({ message }) {
-  return message ? <p className="mt-1.5 text-xs text-[#fca5a5]">{message}</p> : null
+  return message ? <p className="mt-1.5 text-xs text-danger-text">{message}</p> : null
 }
 
 function FormActions({ onCancel, isSubmitting, submitLabel }) {
   return (
-    <div className="flex flex-col-reverse gap-3 border-t border-[#233554] pt-6 sm:flex-row sm:justify-end">
+    <div className="flex flex-col-reverse gap-3 border-t border-border pt-6 sm:flex-row sm:justify-end">
       <Button variant="outline" onClick={onCancel} disabled={isSubmitting}>Cancel</Button>
       <Button type="submit" disabled={isSubmitting}>{isSubmitting ? 'Creating...' : submitLabel}</Button>
     </div>
@@ -166,17 +166,17 @@ function ProjectForm({ onCancel }) {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <label className="block min-w-0 text-sm font-medium">
-        Project title <span className="text-[#64ffda]">*</span>
+        Project title <span className="text-primary">*</span>
         <input name="title" value={form.title} onChange={updateField} placeholder="What are you building?" className={inputClasses} />
         <FieldError message={errors.title} />
       </label>
       <label className="block min-w-0 text-sm font-medium">
-        Short description <span className="text-[#64ffda]">*</span>
+        Short description <span className="text-primary">*</span>
         <textarea name="description" rows="4" value={form.description} onChange={updateField} maxLength="500" placeholder="Explain the project and why it matters." className={`${inputClasses} resize-y`} />
         <FieldError message={errors.description} />
       </label>
       <label className="block min-w-0 text-sm font-medium">
-        Full description <span className="text-[#64748b]">(optional)</span>
+        Full description <span className="text-text-subtle">(optional)</span>
         <textarea name="fullDescription" rows="7" value={form.fullDescription} onChange={updateField} maxLength="20000" placeholder="Share more context, progress, goals, and decisions." className={`${inputClasses} resize-y`} />
         <FieldError message={errors.fullDescription} />
       </label>
@@ -191,15 +191,15 @@ function ProjectForm({ onCancel }) {
           <FieldError message={errors.status} />
         </label>
         <div>
-          <label className="mt-7 flex min-w-0 items-center gap-3 rounded-lg border border-[#233554] bg-[#0a192f]/45 px-4 py-3 text-sm text-[#a8b2d1]">
-            <input type="checkbox" checked={form.lookingForTeam} onChange={handleTeamToggle} className="h-4 w-4 shrink-0 accent-[#64ffda]" />
+          <label className="mt-7 flex min-w-0 items-center gap-3 rounded-lg border border-border bg-background/45 px-4 py-3 text-sm text-text-secondary">
+            <input type="checkbox" checked={form.lookingForTeam} onChange={handleTeamToggle} className="h-4 w-4 shrink-0 accent-primary" />
             Looking for teammates
           </label>
           <FieldError message={errors.lookingForTeam} />
         </div>
       </div>
       <div className="min-w-0">
-        <p className="text-sm font-medium">Skills or technologies <span className="text-[#64ffda]">*</span></p>
+        <p className="text-sm font-medium">Skills or technologies <span className="text-primary">*</span></p>
         <div className="mt-2 min-w-0">
           <SkillsInput skills={form.skills} setSkills={(skills) => { setForm((current) => ({ ...current, skills })); setErrors((current) => ({ ...current, skills: '' })) }} />
         </div>
@@ -207,25 +207,25 @@ function ProjectForm({ onCancel }) {
       </div>
       {form.lookingForTeam && (
         <label className="block min-w-0 text-sm font-medium">
-          Roles needed <span className="text-[#64ffda]">*</span>
+          Roles needed <span className="text-primary">*</span>
           <input name="roles" value={form.roles} onChange={updateField} placeholder="Product designer, Backend developer" className={inputClasses} />
-          <p className="mt-1.5 text-xs text-[#64748b]">Separate roles with commas.</p>
+          <p className="mt-1.5 text-xs text-text-subtle">Separate roles with commas.</p>
           <FieldError message={errors.roles} />
         </label>
       )}
       <div className="grid min-w-0 gap-5 sm:grid-cols-2">
         <label className="block min-w-0 text-sm font-medium">
-          Repository URL <span className="text-[#64748b]">(optional)</span>
+          Repository URL <span className="text-text-subtle">(optional)</span>
           <input name="repositoryUrl" type="text" inputMode="url" value={form.repositoryUrl} onChange={updateField} placeholder="https://github.com/..." className={inputClasses} />
           <FieldError message={errors.repositoryUrl} />
         </label>
         <label className="block min-w-0 text-sm font-medium">
-          Live demo URL <span className="text-[#64748b]">(optional)</span>
+          Live demo URL <span className="text-text-subtle">(optional)</span>
           <input name="liveUrl" type="text" inputMode="url" value={form.liveUrl} onChange={updateField} placeholder="https://..." className={inputClasses} />
           <FieldError message={errors.liveUrl} />
         </label>
       </div>
-      {submitError && <p role="alert" className="rounded-lg border border-[#ef4444]/35 bg-[#ef4444]/10 px-4 py-3 text-sm text-[#fca5a5]">{submitError}</p>}
+      {submitError && <p role="alert" className="rounded-lg border border-danger/35 bg-danger/10 px-4 py-3 text-sm text-danger-text">{submitError}</p>}
       <FormActions onCancel={() => onCancel(isDirty)} isSubmitting={isSubmitting} submitLabel="Publish project" />
     </form>
   )
@@ -279,7 +279,7 @@ function PostForm({ onCancel }) {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <label className="block min-w-0 text-sm font-medium">
-        Post text <span className="text-[#64ffda]">*</span>
+        Post text <span className="text-primary">*</span>
         <textarea
           rows="7"
           value={form.text}
@@ -290,7 +290,7 @@ function PostForm({ onCancel }) {
         />
         <div className="mt-1.5 flex justify-between gap-3 text-xs">
           <FieldError message={errors.text} />
-          <span className="ml-auto text-[#64748b]">{form.text.length}/1000</span>
+          <span className="ml-auto text-text-subtle">{form.text.length}/1000</span>
         </div>
       </label>
       <div className="grid min-w-0 gap-5 sm:grid-cols-2">
@@ -302,13 +302,13 @@ function PostForm({ onCancel }) {
           <FieldError message={errors.category} />
         </label>
         <label className="block min-w-0 text-sm font-medium">
-          Related skills or tags <span className="text-[#64748b]">(optional)</span>
+          Related skills or tags <span className="text-text-subtle">(optional)</span>
           <input value={form.tags} onChange={(event) => { setForm((current) => ({ ...current, tags: event.target.value })); setErrors((current) => ({ ...current, tags: '' })); setSubmitError('') }} placeholder="React, Career, Design" className={inputClasses} />
-          <p className="mt-1.5 text-xs text-[#64748b]">Separate tags with commas.</p>
+          <p className="mt-1.5 text-xs text-text-subtle">Separate tags with commas.</p>
           <FieldError message={errors.tags} />
         </label>
       </div>
-      {submitError && <p role="alert" className="rounded-lg border border-[#ef4444]/35 bg-[#ef4444]/10 px-4 py-3 text-sm text-[#fca5a5]">{submitError}</p>}
+      {submitError && <p role="alert" className="rounded-lg border border-danger/35 bg-danger/10 px-4 py-3 text-sm text-danger-text">{submitError}</p>}
       <FormActions onCancel={() => onCancel(isDirty)} isSubmitting={isSubmitting} submitLabel="Publish post" />
     </form>
   )
@@ -399,23 +399,23 @@ function TeamRequestForm({ onCancel }) {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <label className="block min-w-0 text-sm font-medium">
-        Short title <span className="text-[#64ffda]">*</span>
+        Short title <span className="text-primary">*</span>
         <input name="title" value={form.title} onChange={updateField} maxLength="160" placeholder="Looking for a designer for a study app" className={inputClasses} />
         <FieldError message={errors.title} />
       </label>
       <label className="block min-w-0 text-sm font-medium">
-        Project idea or context <span className="text-[#64ffda]">*</span>
+        Project idea or context <span className="text-primary">*</span>
         <textarea name="description" rows="5" value={form.description} onChange={updateField} maxLength="800" placeholder="Describe the idea, current progress, and what you want to build together." className={`${inputClasses} resize-y`} />
         <FieldError message={errors.description} />
       </label>
       <div className="grid min-w-0 gap-5 sm:grid-cols-2">
         <label className="block min-w-0 text-sm font-medium">
-          Roles needed <span className="text-[#64ffda]">*</span>
+          Roles needed <span className="text-primary">*</span>
           <input name="roles" value={form.roles} onChange={updateField} placeholder="Designer, Backend developer" className={inputClasses} />
           <FieldError message={errors.roles} />
         </label>
         <label className="block min-w-0 text-sm font-medium">
-          Relevant skills <span className="text-[#64ffda]">*</span>
+          Relevant skills <span className="text-primary">*</span>
           <input name="skills" value={form.skills} onChange={updateField} placeholder="Figma, Laravel, Research" className={inputClasses} />
           <FieldError message={errors.skills} />
         </label>
@@ -438,18 +438,18 @@ function TeamRequestForm({ onCancel }) {
       </div>
       <div className="grid min-w-0 gap-5 sm:grid-cols-2">
         <label className="block min-w-0 text-sm font-medium">
-          Preferred university <span className="text-[#64748b]">(optional)</span>
+          Preferred university <span className="text-text-subtle">(optional)</span>
           <input name="preferredUniversity" value={form.preferredUniversity} onChange={updateField} maxLength="160" placeholder="University of Prizren" className={inputClasses} />
           <FieldError message={errors.preferredUniversity} />
         </label>
         <label className="block min-w-0 text-sm font-medium">
-          Preferred location <span className="text-[#64748b]">(optional)</span>
+          Preferred location <span className="text-text-subtle">(optional)</span>
           <input name="preferredLocation" value={form.preferredLocation} onChange={updateField} maxLength="120" placeholder="Prishtina" className={inputClasses} />
           <FieldError message={errors.preferredLocation} />
         </label>
       </div>
-      <p className="text-xs leading-5 text-[#64748b]">Roles and skills may be separated with commas. This request will not send messages or invitations.</p>
-      {submitError && <p role="alert" className="rounded-lg border border-[#ef4444]/35 bg-[#ef4444]/10 px-4 py-3 text-sm text-[#fca5a5]">{submitError}</p>}
+      <p className="text-xs leading-5 text-text-subtle">Roles and skills may be separated with commas. This request will not send messages or invitations.</p>
+      {submitError && <p role="alert" className="rounded-lg border border-danger/35 bg-danger/10 px-4 py-3 text-sm text-danger-text">{submitError}</p>}
       <FormActions onCancel={() => onCancel(isDirty)} isSubmitting={isSubmitting} submitLabel="Create request" />
     </form>
   )
@@ -495,9 +495,9 @@ export default function CandidateCreatePage({ type }) {
     <CandidateLayout title={config.title}>
       <div className="mx-auto min-w-0 max-w-3xl">
         <section>
-          <p className="font-mono text-sm text-[#64ffda]">{config.eyebrow}</p>
-          <h2 className="mt-2 text-3xl font-bold tracking-tight text-[#e6f1ff]">{config.title}</h2>
-          <p className="mt-3 max-w-2xl text-sm leading-6 text-[#8892b0]">{config.description}</p>
+          <p className="font-mono text-sm text-primary">{config.eyebrow}</p>
+          <h2 className="mt-2 text-3xl font-bold tracking-tight text-text-primary">{config.title}</h2>
+          <p className="mt-3 max-w-2xl text-sm leading-6 text-text-muted">{config.description}</p>
         </section>
         <Card padding="lg" className="mt-8 min-w-0 max-w-full">
           <Form onCancel={cancel} />

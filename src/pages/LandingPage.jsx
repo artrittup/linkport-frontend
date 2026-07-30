@@ -99,7 +99,7 @@ function DesktopSidebar({ activeSection, onSelect }) {
   } = useAuth()
 
   return (
-    <aside className="fixed bottom-0 left-0 top-[88px] z-40 hidden w-20 border-r border-[#233554]/80 bg-[#071426]/95 backdrop-blur-lg lg:flex lg:flex-col">
+    <aside className="fixed bottom-0 left-0 top-[88px] z-40 hidden w-20 bg-background lg:flex lg:flex-col">
       <nav className="flex flex-1 flex-col items-center gap-1 px-2 py-5" aria-label="Landing sections">
         {navigation.map((item) => {
           const active = activeSection === item.id
@@ -114,8 +114,8 @@ function DesktopSidebar({ activeSection, onSelect }) {
               }}
               className={`group flex w-full flex-col items-center gap-1.5 rounded-xl px-1 py-3 text-[10px] font-medium transition-all duration-200 ${
                 active
-                  ? 'bg-[#64ffda]/10 text-[#64ffda]'
-                  : 'text-[#64748b] hover:bg-[#112240] hover:text-[#e6f1ff]'
+                  ? 'bg-primary/10 text-primary'
+                  : 'text-text-subtle hover:bg-surface hover:text-text-primary'
               }`}
             >
               <Icon name={item.icon} className="h-5 w-5" />
@@ -124,17 +124,17 @@ function DesktopSidebar({ activeSection, onSelect }) {
           )
         })}
       </nav>
-      <div className="w-full border-t border-[#233554]/80 p-2">
+      <div className="w-full border-t border-border/80 p-2">
         {isLoading ? (
-          <div className="mx-auto my-3 h-8 w-8 animate-pulse rounded-full bg-[#112240]" />
+          <div className="mx-auto my-3 h-8 w-8 animate-pulse rounded-full bg-surface" />
         ) : isAuthenticated ? (
           <div className="space-y-1">
             <Link
               to={getDashboardPath(user?.role)}
               title={user?.name || 'Open dashboard'}
-              className="flex w-full flex-col items-center gap-1 rounded-xl px-1 py-2 text-[9px] text-[#64ffda] transition-colors hover:bg-[#112240]"
+              className="flex w-full flex-col items-center gap-1 rounded-xl px-1 py-2 text-[9px] text-primary transition-colors hover:bg-surface"
             >
-              <span className="flex h-7 w-7 items-center justify-center rounded-full border border-[#64ffda]/40 bg-[#64ffda]/10 text-[9px] font-bold">
+              <span className="flex h-7 w-7 items-center justify-center rounded-full border border-primary/40 bg-primary/10 text-[9px] font-bold">
                 {(user?.name || 'U').split(' ').filter(Boolean).slice(0, 2).map((part) => part[0]).join('').toUpperCase()}
               </span>
               Account
@@ -142,7 +142,7 @@ function DesktopSidebar({ activeSection, onSelect }) {
             <button
               type="button"
               onClick={logout}
-              className="flex w-full flex-col items-center gap-1 rounded-xl px-1 py-2 text-[9px] text-[#ef4444] transition-colors hover:bg-[#ef4444]/10"
+              className="flex w-full flex-col items-center gap-1 rounded-xl px-1 py-2 text-[9px] text-danger transition-colors hover:bg-danger/10"
             >
               <Icon name="logout" className="h-4 w-4" />
               Logout
@@ -152,11 +152,11 @@ function DesktopSidebar({ activeSection, onSelect }) {
           <Link
             to="/login"
             title="Not signed in"
-            className="flex w-full flex-col items-center gap-1.5 rounded-xl px-1 py-3 text-center text-[9px] leading-tight text-[#64748b] transition-colors hover:bg-[#112240] hover:text-[#e6f1ff]"
+            className="flex w-full flex-col items-center gap-1.5 rounded-xl px-1 py-3 text-center text-[9px] leading-tight text-text-subtle transition-colors hover:bg-surface hover:text-text-primary"
           >
             <span className="relative">
               <Icon name="profile" className="h-5 w-5" />
-              <span className="absolute -bottom-0.5 -right-0.5 h-2 w-2 rounded-full border border-[#071426] bg-[#64748b]" />
+              <span className="absolute -bottom-0.5 -right-0.5 h-2 w-2 rounded-full border border-surface-deep bg-text-subtle" />
             </span>
             Not signed in
           </Link>
@@ -169,7 +169,7 @@ function DesktopSidebar({ activeSection, onSelect }) {
 function MobileNavigation({ activeSection, onSelect }) {
   return (
     <nav
-      className="sticky top-[88px] z-40 flex gap-2 overflow-x-auto border-b border-[#233554]/80 bg-[#071426]/95 px-4 py-3 backdrop-blur-lg lg:hidden"
+      className="sticky top-[88px] z-40 flex gap-2 overflow-x-auto border-b border-border/80 bg-surface-deep/95 px-4 py-3 backdrop-blur-lg lg:hidden"
       aria-label="Landing sections"
     >
       {navigation.map((item) => {
@@ -185,8 +185,8 @@ function MobileNavigation({ activeSection, onSelect }) {
             }}
             className={`flex shrink-0 items-center gap-2 rounded-full border px-3 py-2 text-xs font-medium transition-colors ${
               active
-                ? 'border-[#64ffda]/50 bg-[#64ffda]/10 text-[#64ffda]'
-                : 'border-[#233554] bg-[#112240]/70 text-[#8892b0]'
+                ? 'border-primary/50 bg-primary/10 text-primary'
+                : 'border-border bg-surface/70 text-text-muted'
             }`}
           >
             <Icon name={item.icon} className="h-4 w-4" />
@@ -201,21 +201,21 @@ function MobileNavigation({ activeSection, onSelect }) {
 function SectionHeader({ label, title, description, align = 'left' }) {
   return (
     <div className={align === 'center' ? 'mx-auto max-w-2xl text-center' : 'max-w-2xl'}>
-      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#64ffda]">{label}</p>
-      <h2 className="mt-4 text-3xl font-bold tracking-tight text-[#e6f1ff] sm:text-4xl">{title}</h2>
-      <p className="mt-4 text-base leading-7 text-[#8892b0]">{description}</p>
+      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">{label}</p>
+      <h2 className="mt-4 text-3xl font-bold tracking-tight text-text-primary sm:text-4xl">{title}</h2>
+      <p className="mt-4 text-base leading-7 text-text-muted">{description}</p>
     </div>
   )
 }
 
 function FeatureCard({ feature }) {
   return (
-    <article className="group rounded-2xl border border-[#233554] bg-[#112240]/65 p-5 transition-all duration-200 hover:-translate-y-1 hover:border-[#64ffda]/35 hover:bg-[#112240]">
-      <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#64ffda]/20 bg-[#64ffda]/10 text-[#64ffda]">
+    <article className="group rounded-2xl border border-border bg-surface/65 p-5 transition-all duration-200 hover:-translate-y-1 hover:border-primary/35 hover:bg-surface">
+      <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-primary/20 bg-primary/10 text-primary">
         <Icon name={feature.icon} />
       </div>
-      <h3 className="mt-5 text-lg font-semibold text-[#e6f1ff]">{feature.title}</h3>
-      <p className="mt-2 text-sm leading-6 text-[#8892b0]">{feature.description}</p>
+      <h3 className="mt-5 text-lg font-semibold text-text-primary">{feature.title}</h3>
+      <p className="mt-2 text-sm leading-6 text-text-muted">{feature.description}</p>
     </article>
   )
 }
@@ -223,55 +223,55 @@ function FeatureCard({ feature }) {
 function OpportunityVisual({ job, project, isLoading }) {
   return (
     <div className="relative mx-auto w-full max-w-lg py-8 lg:py-0">
-      <div className="absolute inset-8 rounded-full bg-[#64ffda]/10 blur-3xl" />
-      <div className="relative rounded-3xl border border-[#233554] bg-[#071426]/90 p-4 shadow-2xl shadow-black/30 backdrop-blur-xl sm:p-5">
+      <div className="absolute inset-8 rounded-full bg-primary/10 blur-3xl" />
+      <div className="relative rounded-3xl border border-border bg-surface-deep/90 p-4 shadow-2xl shadow-black/30 backdrop-blur-xl sm:p-5">
         <div className="mb-5 flex items-center justify-between">
           <div>
-            <p className="text-xs text-[#64748b]">Opportunity feed</p>
-            <p className="mt-1 text-sm font-semibold text-[#e6f1ff]">Matched for you</p>
+            <p className="text-xs text-text-subtle">Opportunity feed</p>
+            <p className="mt-1 text-sm font-semibold text-text-primary">Matched for you</p>
           </div>
-          <span className="rounded-full bg-[#64ffda]/10 px-3 py-1 text-xs font-medium text-[#64ffda]">
+          <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
             {isLoading ? 'Loading' : 'Live'}
           </span>
         </div>
 
         <div className="space-y-3">
-          <div className="translate-x-3 rounded-2xl border border-[#233554] bg-[#112240] p-4 shadow-lg sm:translate-x-8">
+          <div className="translate-x-3 rounded-2xl border border-border bg-surface p-4 shadow-lg sm:translate-x-8">
             <div className="flex items-start justify-between gap-4">
               <div className="flex gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#64ffda]/10 text-[#64ffda]">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
                   <Icon name="briefcase" />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-[#e6f1ff]">{job?.title ?? 'No open jobs'}</p>
-                  <p className="mt-1 text-xs text-[#8892b0]">
+                  <p className="text-sm font-semibold text-text-primary">{job?.title ?? 'No open jobs'}</p>
+                  <p className="mt-1 text-xs text-text-muted">
                     {job ? `${job.company} - ${job.location}` : 'New roles will appear here'}
                   </p>
                 </div>
               </div>
-              {job?.type && <span className="text-xs text-[#64ffda]">{job.type}</span>}
+              {job?.type && <span className="text-xs text-primary">{job.type}</span>}
             </div>
           </div>
 
-          <div className="-translate-x-2 rounded-2xl border border-[#233554] bg-[#112240] p-4 shadow-lg sm:-translate-x-5">
+          <div className="-translate-x-2 rounded-2xl border border-border bg-surface p-4 shadow-lg sm:-translate-x-5">
             <div className="flex items-start justify-between gap-4">
               <div className="flex gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#64ffda]/10 text-[#64ffda]">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
                   <Icon name="layers" />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-[#e6f1ff]">{project?.title ?? 'No active projects'}</p>
-                  <p className="mt-1 text-xs text-[#8892b0]">
+                  <p className="text-sm font-semibold text-text-primary">{project?.title ?? 'No active projects'}</p>
+                  <p className="mt-1 text-xs text-text-muted">
                     {project ? `${project.company} - ${formatCurrency(project.budget)}` : 'New projects will appear here'}
                   </p>
                 </div>
               </div>
-              <span className="rounded-full border border-[#233554] px-2 py-1 text-[10px] text-[#8892b0]">New</span>
+              <span className="rounded-full border border-border px-2 py-1 text-[10px] text-text-muted">New</span>
             </div>
           </div>
         </div>
 
-        <p className="mx-auto mt-5 w-fit rounded-full border border-[#233554] bg-[#0a192f] px-4 py-2 text-xs text-[#8892b0]">
+        <p className="mx-auto mt-5 w-fit rounded-full border border-border bg-background px-4 py-2 text-xs text-text-muted">
           Live opportunities from LinkPort
         </p>
       </div>
@@ -285,19 +285,19 @@ function ProjectCard({ project, onClick }) {
       type="button"
       onClick={onClick}
       aria-label={`Open project: ${project.title}`}
-      className="group flex h-full w-full flex-col rounded-2xl border border-[#233554] bg-[#112240]/65 p-5 text-left transition-all duration-200 hover:-translate-y-1 hover:border-[#64ffda]/40 hover:shadow-xl hover:shadow-black/20 focus:outline-none focus-visible:border-[#64ffda] focus-visible:ring-2 focus-visible:ring-[#64ffda]/30"
+      className="group flex h-full w-full flex-col rounded-2xl border border-border bg-surface/65 p-5 text-left transition-all duration-200 hover:-translate-y-1 hover:border-primary/40 hover:shadow-xl hover:shadow-black/20 focus:outline-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-focus-ring/30"
     >
       <div className="flex items-center justify-between gap-3">
-        <span className="rounded-full bg-[#64ffda]/10 px-3 py-1 text-xs font-medium text-[#64ffda]">{project.category || 'Project'}</span>
-        <span className="text-xs text-[#64748b]">{project.company}</span>
+        <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">{project.category || 'Project'}</span>
+        <span className="text-xs text-text-subtle">{project.company}</span>
       </div>
-      <h3 className="mt-5 text-lg font-semibold text-[#e6f1ff]">{project.title}</h3>
+      <h3 className="mt-5 text-lg font-semibold text-text-primary">{project.title}</h3>
       <div className="mt-4 flex flex-wrap gap-2">
-        {project.skills.map((tag) => <span key={tag} className="rounded-md border border-[#233554] px-2.5 py-1 text-xs text-[#8892b0]">{tag}</span>)}
+        {project.skills.map((tag) => <span key={tag} className="rounded-md border border-border px-2.5 py-1 text-xs text-text-muted">{tag}</span>)}
       </div>
-      <div className="mt-auto flex w-full items-end justify-between border-t border-[#233554] pt-4">
-        <div><p className="text-[10px] uppercase tracking-wide text-[#64748b]">Budget</p><p className="mt-1 font-semibold text-[#e6f1ff]">{formatCurrency(project.budget)}</p></div>
-        <span className="text-[#64ffda] transition-transform group-hover:translate-x-1"><Icon name="arrow" /></span>
+      <div className="mt-auto flex w-full items-end justify-between border-t border-border pt-4">
+        <div><p className="text-[10px] uppercase tracking-wide text-text-subtle">Budget</p><p className="mt-1 font-semibold text-text-primary">{formatCurrency(project.budget)}</p></div>
+        <span className="text-primary transition-transform group-hover:translate-x-1"><Icon name="arrow" /></span>
       </div>
     </button>
   )
@@ -309,26 +309,26 @@ function JobCard({ job, onClick }) {
       type="button"
       onClick={onClick}
       aria-label={`Open job: ${job.title}`}
-      className="group flex h-full w-full flex-col rounded-2xl border border-[#233554] bg-[#112240]/65 p-5 text-left transition-all duration-200 hover:-translate-y-1 hover:border-[#64ffda]/40 hover:shadow-xl hover:shadow-black/20 focus:outline-none focus-visible:border-[#64ffda] focus-visible:ring-2 focus-visible:ring-[#64ffda]/30"
+      className="group flex h-full w-full flex-col rounded-2xl border border-border bg-surface/65 p-5 text-left transition-all duration-200 hover:-translate-y-1 hover:border-primary/40 hover:shadow-xl hover:shadow-black/20 focus:outline-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-focus-ring/30"
     >
       <div className="flex w-full items-center justify-between gap-3">
-        <span className="rounded-full bg-[#64ffda]/10 px-3 py-1 text-xs font-medium text-[#64ffda]">{job.type || 'Job'}</span>
-        <span className="truncate text-xs text-[#64748b]">{job.company}</span>
+        <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">{job.type || 'Job'}</span>
+        <span className="truncate text-xs text-text-subtle">{job.company}</span>
       </div>
-      <h3 className="mt-5 text-lg font-semibold text-[#e6f1ff]">{job.title}</h3>
+      <h3 className="mt-5 text-lg font-semibold text-text-primary">{job.title}</h3>
       <div className="mt-4 flex flex-wrap gap-2">
         {job.skills?.map((skill) => (
-          <span key={skill} className="rounded-md border border-[#233554] px-2.5 py-1 text-xs text-[#8892b0]">
+          <span key={skill} className="rounded-md border border-border px-2.5 py-1 text-xs text-text-muted">
             {skill}
           </span>
         ))}
       </div>
-      <div className="mt-auto flex w-full items-end justify-between border-t border-[#233554] pt-4">
+      <div className="mt-auto flex w-full items-end justify-between border-t border-border pt-4">
         <div>
-          <p className="text-[10px] uppercase tracking-wide text-[#64748b]">Location</p>
-          <p className="mt-1 font-semibold text-[#e6f1ff]">{job.location || 'Remote'}</p>
+          <p className="text-[10px] uppercase tracking-wide text-text-subtle">Location</p>
+          <p className="mt-1 font-semibold text-text-primary">{job.location || 'Remote'}</p>
         </div>
-        <span className="text-[#64ffda] transition-transform group-hover:translate-x-1"><Icon name="arrow" /></span>
+        <span className="text-primary transition-transform group-hover:translate-x-1"><Icon name="arrow" /></span>
       </div>
     </button>
   )
@@ -378,25 +378,40 @@ export default function LandingPage() {
 
     navigate(canExploreMemberFeatures ? path : getDashboardPath(user?.role))
   }
-
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visible = entries
-          .filter((entry) => entry.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0]
+    let animationFrame = null
 
-        if (visible) setActiveSection(visible.target.id)
-      },
-      { rootMargin: '-20% 0px -60%', threshold: [0, 0.1, 0.25] },
-    )
+    const updateActiveSection = () => {
+      animationFrame = null
+      const marker = window.innerWidth >= 1024 ? 100 : 170
+      let nextSection = navigation[0].id
 
-    navigation.forEach(({ id }) => {
-      const section = document.getElementById(id)
-      if (section) observer.observe(section)
-    })
+      navigation.forEach(({ id }) => {
+        const section = document.getElementById(id)
+        if (section?.getBoundingClientRect().top <= marker) nextSection = id
+      })
 
-    return () => observer.disconnect()
+      const reachedPageEnd =
+        window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 2
+      if (reachedPageEnd) nextSection = navigation[navigation.length - 1].id
+
+      setActiveSection((current) => current === nextSection ? current : nextSection)
+    }
+    const scheduleUpdate = () => {
+      if (animationFrame === null) {
+        animationFrame = window.requestAnimationFrame(updateActiveSection)
+      }
+    }
+
+    scheduleUpdate()
+    window.addEventListener('scroll', scheduleUpdate, { passive: true })
+    window.addEventListener('resize', scheduleUpdate)
+
+    return () => {
+      window.removeEventListener('scroll', scheduleUpdate)
+      window.removeEventListener('resize', scheduleUpdate)
+      if (animationFrame !== null) window.cancelAnimationFrame(animationFrame)
+    }
   }, [])
 
   useEffect(() => {
@@ -458,13 +473,13 @@ export default function LandingPage() {
   ]
 
   return (
-    <main className="min-h-screen bg-[#0a192f] text-[#e6f1ff]">
+    <main className="min-h-screen bg-background text-text-primary">
       <Navbar />
       <DesktopSidebar activeSection={activeSection} onSelect={setActiveSection} />
 
       {accessPrompt && (
         <div
-          className="fixed inset-0 z-[100] grid place-items-center bg-[#020c1b]/80 px-5 backdrop-blur-sm"
+          className="fixed inset-0 z-[100] grid place-items-center bg-overlay/80 px-5 backdrop-blur-sm"
           role="presentation"
           onMouseDown={(event) => {
             if (event.target === event.currentTarget) setAccessPrompt(null)
@@ -474,32 +489,32 @@ export default function LandingPage() {
             role="dialog"
             aria-modal="true"
             aria-labelledby="access-prompt-title"
-            className="w-full max-w-md rounded-2xl border border-[#233554] bg-[#112240] p-6 shadow-2xl shadow-black/40 sm:p-8"
+            className="w-full max-w-md rounded-2xl border border-border bg-surface p-6 shadow-2xl shadow-black/40 sm:p-8"
           >
             <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#64ffda]">Members only</p>
-                <h2 id="access-prompt-title" className="mt-3 text-2xl font-bold text-[#e6f1ff]">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Members only</p>
+                <h2 id="access-prompt-title" className="mt-3 text-2xl font-bold text-text-primary">
                   Sign in to explore {accessPrompt.feature}
                 </h2>
               </div>
               <button
                 type="button"
                 onClick={() => setAccessPrompt(null)}
-                className="rounded-lg px-2 py-1 text-xl text-[#8892b0] transition hover:bg-[#0a192f] hover:text-white"
+                className="rounded-lg px-2 py-1 text-xl text-text-muted transition hover:bg-background hover:text-text-primary"
                 aria-label="Close dialog"
               >
                 ×
               </button>
             </div>
-            <p className="mt-4 leading-7 text-[#a8b2d1]">
+            <p className="mt-4 leading-7 text-text-secondary">
               You need a LinkPort account to view {accessPrompt.feature} and continue.
             </p>
             <div className="mt-7 flex flex-col gap-3 sm:flex-row">
               <Button className="flex-1" onClick={() => navigate('/login', { state: { from: accessPrompt.path } })}>Sign in</Button>
               <Button variant="outline" className="flex-1" onClick={() => navigate('/register')}>Create account</Button>
             </div>
-            <button type="button" onClick={() => setAccessPrompt(null)} className="mt-4 w-full text-sm font-medium text-[#8892b0] transition hover:text-white">Cancel</button>
+            <button type="button" onClick={() => setAccessPrompt(null)} className="mt-4 w-full text-sm font-medium text-text-muted transition hover:text-text-primary">Cancel</button>
           </section>
         </div>
       )}
@@ -507,17 +522,17 @@ export default function LandingPage() {
       <div className="pt-22 lg:pl-20">
         <MobileNavigation activeSection={activeSection} onSelect={setActiveSection} />
 
-        <section id="home" className="scroll-mt-40 overflow-hidden border-b border-[#233554]/70 lg:scroll-mt-24">
+        <section id="home" className="scroll-mt-40 overflow-hidden border-b border-border/70 lg:scroll-mt-24">
           <div className="mx-auto grid min-h-[calc(100vh-88px)] max-w-7xl items-center gap-12 px-6 py-16 lg:grid-cols-[1.05fr_0.95fr] lg:px-10 lg:py-20">
             <div>
-              <div className="inline-flex items-center gap-2 rounded-full border border-[#64ffda]/20 bg-[#64ffda]/5 px-3 py-1.5 text-xs font-medium text-[#64ffda]">
-                <span className="h-1.5 w-1.5 rounded-full bg-[#64ffda] shadow-[0_0_10px_#64ffda]" />
+              <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3 py-1.5 text-xs font-medium text-primary">
+                <span className="h-1.5 w-1.5 rounded-full bg-primary shadow-[0_0_10px] shadow-primary" />
                 The professional launchpad for emerging talent
               </div>
-              <h1 className="mt-7 max-w-3xl text-5xl font-bold leading-[1.05] tracking-[-0.04em] text-[#e6f1ff] sm:text-6xl xl:text-7xl">
-                Where talent meets <span className="text-[#64ffda]">opportunity.</span>
+              <h1 className="mt-7 max-w-3xl text-5xl font-bold leading-[1.05] tracking-[-0.04em] text-text-primary sm:text-6xl xl:text-7xl">
+                Where talent meets <span className="text-primary">opportunity.</span>
               </h1>
-              <p className="mt-6 max-w-xl text-lg leading-8 text-[#8892b0]">
+              <p className="mt-6 max-w-xl text-lg leading-8 text-text-muted">
                 Build your future through meaningful jobs, real projects, and connections that move your career forward.
               </p>
               <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -527,7 +542,7 @@ export default function LandingPage() {
                 <a
                   href="#projects"
                   onClick={(event) => scrollToSection(event, 'projects')}
-                  className="inline-flex items-center justify-center gap-2 rounded-lg px-5 py-3.5 text-sm font-semibold text-[#e6f1ff] transition-colors hover:text-[#64ffda]"
+                  className="inline-flex items-center justify-center gap-2 rounded-lg px-5 py-3.5 text-sm font-semibold text-text-primary transition-colors hover:text-primary"
                 >
                   Explore Opportunities <Icon name="arrow" className="h-4 w-4" />
                 </a>
@@ -541,45 +556,45 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section aria-label="Platform snapshot" className="border-b border-[#233554]/70 bg-[#071426]/55">
+        <section aria-label="Platform snapshot" className="border-b border-border/70 bg-surface-muted/80">
           <div className="mx-auto grid max-w-7xl grid-cols-2 px-6 py-7 sm:grid-cols-4 lg:px-10">
             {metrics.map((metric, index) => (
-              <div key={metric.label} className={`px-4 py-3 text-center ${index > 0 ? 'border-l border-[#233554]' : ''}`}>
-                <p className="text-2xl font-bold text-[#e6f1ff] sm:text-3xl">{metric.value}</p>
-                <p className="mt-1 text-xs text-[#8892b0] sm:text-sm">{metric.label}</p>
+              <div key={metric.label} className={`px-4 py-3 text-center ${index > 0 ? 'border-l border-border' : ''}`}>
+                <p className="text-2xl font-bold text-text-primary sm:text-3xl">{metric.value}</p>
+                <p className="mt-1 text-xs text-text-muted sm:text-sm">{metric.label}</p>
               </div>
             ))}
           </div>
         </section>
 
-        <section id="members" className={`${audienceSectionClass} border-b border-[#233554]/70`}>
+        <section id="members" className={`${audienceSectionClass} border-b border-border/70`}>
           <div className="mx-auto max-w-7xl px-6 lg:px-10">
             <SectionHeader label="For members" title="Turn potential into proof." description="Create a profile that works for you, then move from discovery to real experience." />
             <div className="mt-10 grid gap-4 md:grid-cols-3">{candidateFeatures.map((feature) => <FeatureCard key={feature.title} feature={feature} />)}</div>
           </div>
         </section>
 
-        <section id="companies" className={`${audienceSectionClass} border-b border-[#233554]/70 bg-[#071426]/35`}>
+        <section id="companies" className={`${audienceSectionClass} border-b border-border/70 bg-surface-muted/55`}>
           <div className="mx-auto max-w-7xl px-6 lg:px-10">
             <SectionHeader label="For companies" title="Find the signal in emerging talent." description="Publish opportunities, review strong matches, and build the team or solution you need." />
             <div className="mt-10 grid gap-4 md:grid-cols-3">{companyFeatures.map((feature) => <FeatureCard key={feature.title} feature={feature} />)}</div>
           </div>
         </section>
 
-        <section id="projects" className={`${sectionClass} border-b border-[#233554]/70`}>
+        <section id="projects" className={`${sectionClass} border-b border-border/70`}>
           <div className="mx-auto max-w-7xl px-6 lg:px-10">
             <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
               <SectionHeader label="Project marketplace" title="Build something real." description="Preview focused briefs from growing companies. Members can sign in to send proposals and turn their skills into delivered work." />
-              <button type="button" onClick={() => requestProtectedAccess('/projects', 'projects')} className="inline-flex items-center justify-center gap-2 rounded-lg border border-[#64ffda]/60 px-4 py-2.5 text-sm font-semibold text-[#64ffda] transition-all hover:-translate-y-0.5 hover:border-[#64ffda] hover:bg-[#64ffda]/10">
+              <button type="button" onClick={() => requestProtectedAccess('/projects', 'projects')} className="inline-flex items-center justify-center gap-2 rounded-lg border border-primary/60 px-4 py-2.5 text-sm font-semibold text-primary transition-all hover:-translate-y-0.5 hover:border-primary hover:bg-primary/10">
                 {protectedCtaLabel('Explore projects')} <Icon name="arrow" className="h-4 w-4" />
               </button>
             </div>
             {projectsError ? (
-              <p className={`mt-10 rounded-xl border p-4 text-sm ${isAuthenticated ? 'border-[#ef4444]/30 bg-[#ef4444]/10 text-[#fca5a5]' : 'border-[#233554] bg-[#112240]/60 text-[#8892b0]'}`}>
+              <p className={`mt-10 rounded-xl border p-4 text-sm ${isAuthenticated ? 'border-danger/30 bg-danger/10 text-danger-text' : 'border-border bg-surface/60 text-text-muted'}`}>
                 {isAuthenticated ? projectsError : 'Sign in or create an account to explore available projects.'}
               </p>
             ) : !isLoadingOpportunities && projects.length === 0 ? (
-              <p className="mt-10 rounded-xl border border-[#233554] bg-[#112240]/60 p-6 text-sm text-[#8892b0]">There are no open projects right now.</p>
+              <p className="mt-10 rounded-xl border border-border bg-surface/60 p-6 text-sm text-text-muted">There are no open projects right now.</p>
             ) : (
               <div className="mt-10 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
                 {projects.map((project) => (
@@ -594,20 +609,20 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section id="jobs" className={`${sectionClass} border-b border-[#233554]/70 bg-[#071426]/35`}>
+        <section id="jobs" className={`${sectionClass} border-b border-border/70 bg-surface-muted/55`}>
           <div className="mx-auto max-w-7xl px-6 lg:px-10">
             <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
               <SectionHeader label="Jobs board" title="Your next role could start here." description="Preview early-career openings from companies looking for fresh thinking. Members can sign in to explore and apply." />
-              <button type="button" onClick={() => requestProtectedAccess('/jobs', 'jobs')} className="inline-flex items-center justify-center gap-2 rounded-lg border border-[#64ffda]/60 px-4 py-2.5 text-sm font-semibold text-[#64ffda] transition-all hover:-translate-y-0.5 hover:border-[#64ffda] hover:bg-[#64ffda]/10">
+              <button type="button" onClick={() => requestProtectedAccess('/jobs', 'jobs')} className="inline-flex items-center justify-center gap-2 rounded-lg border border-primary/60 px-4 py-2.5 text-sm font-semibold text-primary transition-all hover:-translate-y-0.5 hover:border-primary hover:bg-primary/10">
                 {protectedCtaLabel('Explore jobs')} <Icon name="arrow" className="h-4 w-4" />
               </button>
             </div>
             {jobsError ? (
-              <p className={`mt-10 rounded-xl border p-4 text-sm ${isAuthenticated ? 'border-[#ef4444]/30 bg-[#ef4444]/10 text-[#fca5a5]' : 'border-[#233554] bg-[#112240]/60 text-[#8892b0]'}`}>
+              <p className={`mt-10 rounded-xl border p-4 text-sm ${isAuthenticated ? 'border-danger/30 bg-danger/10 text-danger-text' : 'border-border bg-surface/60 text-text-muted'}`}>
                 {isAuthenticated ? jobsError : 'Sign in or create an account to explore available jobs.'}
               </p>
             ) : !isLoadingOpportunities && jobs.length === 0 ? (
-              <p className="mt-10 rounded-xl border border-[#233554] bg-[#112240]/60 p-6 text-sm text-[#8892b0]">There are no open jobs right now.</p>
+              <p className="mt-10 rounded-xl border border-border bg-surface/60 p-6 text-sm text-text-muted">There are no open jobs right now.</p>
             ) : (
               <div className="mt-10 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
                 {jobs.map((job) => (
@@ -628,29 +643,29 @@ export default function LandingPage() {
               <SectionHeader label="Circles" title="Build better, together." description="Members can create circles, invite others, and collaborate as a team. A LinkPort member account is required to join or participate." />
               <div className="mt-8 grid grid-cols-2 gap-3">
                 {['Create a circle', 'Invite members', 'Collaborate as a team', 'Deliver projects together'].map((item) => (
-                  <div key={item} className="flex items-center gap-2 rounded-xl border border-[#233554] bg-[#112240]/55 p-3 text-sm text-[#e6f1ff]">
-                    <span className="text-[#64ffda]"><Icon name="check" className="h-4 w-4" /></span>{item}
+                  <div key={item} className="flex items-center gap-2 rounded-xl border border-border bg-surface/55 p-3 text-sm text-text-primary">
+                    <span className="text-primary"><Icon name="check" className="h-4 w-4" /></span>{item}
                   </div>
                 ))}
               </div>
-              <Link to={protectedLandingTarget('/circles')} className="mt-7 inline-flex items-center gap-2 text-sm font-semibold text-[#64ffda] transition-opacity hover:opacity-80">
+              <Link to={protectedLandingTarget('/circles')} className="mt-7 inline-flex items-center gap-2 text-sm font-semibold text-primary transition-opacity hover:opacity-80">
                 {protectedCtaLabel('Explore Circles')} <Icon name="arrow" className="h-4 w-4" />
               </Link>
             </div>
-            <div className="overflow-hidden rounded-3xl border border-[#233554] bg-[#112240]/65 p-7 shadow-xl shadow-black/10 sm:p-9">
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-[#64ffda]/25 bg-[#64ffda]/10 text-[#64ffda]">
+            <div className="overflow-hidden rounded-3xl border border-border bg-surface/65 p-7 shadow-xl shadow-black/10 sm:p-9">
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-primary/25 bg-primary/10 text-primary">
                 <Icon name="discord" className="h-7 w-7" />
               </div>
-              <p className="mt-7 text-xs font-semibold uppercase tracking-[0.18em] text-[#64ffda]">Discord Community</p>
-              <h2 className="mt-3 text-3xl font-bold tracking-tight text-[#e6f1ff]">terminal_0</h2>
-              <p className="mt-4 max-w-xl text-sm leading-7 text-[#8892b0]">
+              <p className="mt-7 text-xs font-semibold uppercase tracking-[0.18em] text-primary">Discord Community</p>
+              <h2 className="mt-3 text-3xl font-bold tracking-tight text-text-primary">terminal_0</h2>
+              <p className="mt-4 max-w-xl text-sm leading-7 text-text-muted">
                 Join the terminal_0 community on Discord. More information about the community will be added soon.
               </p>
               <a
                 href="https://discord.gg/8NemkkpJj"
                 target="_blank"
                 rel="noreferrer"
-                className="mt-7 inline-flex items-center justify-center gap-2 rounded-lg border border-[#64ffda] bg-[#64ffda] px-6 py-3.5 text-sm font-semibold text-[#0a192f] transition-all hover:-translate-y-0.5 hover:bg-[#7dffe1]"
+                className="mt-7 inline-flex items-center justify-center gap-2 rounded-lg border border-primary bg-primary px-6 py-3.5 text-sm font-semibold text-primary-contrast transition-all hover:-translate-y-0.5 hover:bg-primary-hover"
               >
                 Join Discord <Icon name="arrow" className="h-4 w-4" />
               </a>
@@ -659,18 +674,18 @@ export default function LandingPage() {
         </section>
 
         <section className="px-6 pb-20 lg:px-10">
-          <div className="mx-auto max-w-5xl overflow-hidden rounded-3xl border border-[#64ffda]/20 bg-gradient-to-br from-[#112240] to-[#071426] px-6 py-12 text-center shadow-2xl shadow-black/20 sm:px-12">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#64ffda]">Your next move</p>
-            <h2 className="mx-auto mt-4 max-w-2xl text-3xl font-bold text-[#e6f1ff] sm:text-4xl">Start building your future on LinkPort.</h2>
+          <div className="mx-auto max-w-5xl overflow-hidden rounded-3xl border border-primary/20 bg-gradient-to-br from-surface to-surface-deep px-6 py-12 text-center shadow-2xl shadow-black/20 sm:px-12">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Your next move</p>
+            <h2 className="mx-auto mt-4 max-w-2xl text-3xl font-bold text-text-primary sm:text-4xl">Start building your future on LinkPort.</h2>
             <Button size="lg" className="mt-8" disabled={isLoading} onClick={goToPrimaryAction}>
               {isLoading ? 'Checking account...' : isAuthenticated ? 'Open Dashboard' : 'Create your account'}
             </Button>
           </div>
         </section>
 
-        <footer className="border-t border-[#233554] px-6 py-8 lg:px-10">
+        <footer className="border-t border-border px-6 py-8 lg:px-10">
           <div className="mx-auto flex max-w-7xl flex-col gap-5 text-sm sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-[#8892b0]">&copy; 2026 LinkPort. All rights reserved.</p>
+            <p className="text-text-muted">&copy; 2026 LinkPort. All rights reserved.</p>
             <nav className="flex flex-wrap gap-x-6 gap-y-3" aria-label="Footer navigation">
               {[
                 ['About Us', '/about'],
@@ -680,7 +695,7 @@ export default function LandingPage() {
                 ['Privacy Policy', '/privacy'],
                 ['Cookie Policy', '/cookies'],
               ].map(([label, path]) => (
-                <Link key={path} to={path} className="text-[#8892b0] transition-colors hover:text-[#64ffda]">{label}</Link>
+                <Link key={path} to={path} className="text-text-muted transition-colors hover:text-primary">{label}</Link>
               ))}
             </nav>
           </div>

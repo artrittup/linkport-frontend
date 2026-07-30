@@ -97,39 +97,39 @@ export default function CandidateActivity() {
     <CandidateLayout title="My Activity">
       <div className="min-w-0 max-w-full">
         <section>
-          <p className="font-mono text-sm text-[#64ffda]">Member activity</p>
-          <h2 className="mt-2 text-3xl font-bold tracking-tight text-[#e6f1ff] sm:text-4xl">My Activity</h2>
-          <p className="mt-4 max-w-3xl leading-7 text-[#8892b0]">
+          <p className="font-mono text-sm text-primary">Member activity</p>
+          <h2 className="mt-2 text-3xl font-bold tracking-tight text-text-primary sm:text-4xl">My Activity</h2>
+          <p className="mt-4 max-w-3xl leading-7 text-text-muted">
             Track your applications, proposals, shared content, teammate requests, and saved community events.
           </p>
         </section>
 
         {projectsError && (
-          <p role="status" className="mt-4 rounded-lg border border-[#233554] bg-[#112240]/45 px-4 py-3 text-sm text-[#8892b0]">
+          <p role="status" className="mt-4 rounded-lg border border-border bg-surface/45 px-4 py-3 text-sm text-text-muted">
             Shared projects are temporarily unavailable. Other shared content remains available.
           </p>
         )}
         {projectsLoading && (
-          <p role="status" className="mt-4 text-sm text-[#64748b]">Loading shared projects...</p>
+          <p role="status" className="mt-4 text-sm text-text-subtle">Loading shared projects...</p>
         )}
         {postsError && (
-          <p role="status" className="mt-4 rounded-lg border border-[#233554] bg-[#112240]/45 px-4 py-3 text-sm text-[#8892b0]">
+          <p role="status" className="mt-4 rounded-lg border border-border bg-surface/45 px-4 py-3 text-sm text-text-muted">
             Your posts are temporarily unavailable. Other shared content remains available.
           </p>
         )}
         {postsLoading && (
-          <p role="status" className="mt-4 text-sm text-[#64748b]">Loading your posts...</p>
+          <p role="status" className="mt-4 text-sm text-text-subtle">Loading your posts...</p>
         )}
         {teammateRequestsError && (
-          <p role="status" className="mt-4 rounded-lg border border-[#233554] bg-[#112240]/45 px-4 py-3 text-sm text-[#8892b0]">
+          <p role="status" className="mt-4 rounded-lg border border-border bg-surface/45 px-4 py-3 text-sm text-text-muted">
             Your teammate requests are temporarily unavailable. Shared projects and posts remain available.
           </p>
         )}
         {teammateRequestsLoading && (
-          <p role="status" className="mt-4 text-sm text-[#64748b]">Loading your teammate requests...</p>
+          <p role="status" className="mt-4 text-sm text-text-subtle">Loading your teammate requests...</p>
         )}
 
-        <nav className="mt-8 flex min-w-0 max-w-full gap-2 overflow-x-auto border-b border-[#233554] pb-3" aria-label="Activity sections">
+        <nav className="mt-8 flex min-w-0 max-w-full gap-2 overflow-x-auto border-b border-border pb-3" aria-label="Activity sections">
           {CANDIDATE_ACTIVITY_TABS.map((tab) => (
             <button
               key={tab.id}
@@ -138,8 +138,8 @@ export default function CandidateActivity() {
               onClick={() => selectTab(tab.id)}
               className={`shrink-0 rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
                 activeTab === tab.id
-                  ? 'border-[#64ffda] bg-[#64ffda]/10 text-[#64ffda]'
-                  : 'border-[#233554] text-[#8892b0] hover:border-[#64ffda]/50 hover:text-[#e6f1ff]'
+                  ? 'border-primary bg-primary/10 text-primary'
+                  : 'border-border text-text-muted hover:border-primary/50 hover:text-text-primary'
               }`}
             >
               {tab.label}
@@ -166,15 +166,15 @@ export default function CandidateActivity() {
           {activeTab === 'content' && <CandidateContentActivity items={contentItems} />}
           {activeTab === 'events' && (
             eventsLoading ? (
-              <p role="status" className="rounded-xl border border-[#233554] bg-[#112240]/45 p-5 text-sm text-[#8892b0]">Loading My Events...</p>
+              <p role="status" className="rounded-xl border border-border bg-surface/45 p-5 text-sm text-text-muted">Loading My Events...</p>
             ) : eventsError ? (
-              <div className="rounded-xl border border-[#233554] bg-[#112240]/45 p-5">
-                <p className="text-sm text-[#8892b0]">My Events are temporarily unavailable. Other Activity sections remain available.</p>
-                <button type="button" onClick={retryEvents} className="mt-3 text-sm font-medium text-[#64ffda] hover:underline">Try again</button>
+              <div className="rounded-xl border border-border bg-surface/45 p-5">
+                <p className="text-sm text-text-muted">My Events are temporarily unavailable. Other Activity sections remain available.</p>
+                <button type="button" onClick={retryEvents} className="mt-3 text-sm font-medium text-primary hover:underline">Try again</button>
               </div>
             ) : (
               <>
-                {eventActionError && <p role="alert" className="mb-4 rounded-lg border border-[#f87171]/25 bg-[#f87171]/5 px-4 py-3 text-sm text-[#fca5a5]">{eventActionError}</p>}
+                {eventActionError && <p role="alert" className="mb-4 rounded-lg border border-danger-soft/25 bg-danger-soft/5 px-4 py-3 text-sm text-danger-text">{eventActionError}</p>}
                 <CandidateEventsActivity events={savedEvents} onRemove={removeEvent} removingEventId={removingEventId} />
               </>
             )

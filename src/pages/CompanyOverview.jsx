@@ -13,18 +13,18 @@ import { getCompanyProfileCompleteness } from '../utils/companyProfile'
 const initialSource = { data: null, loading: true, error: false }
 
 function SectionError({ children }) {
-  return <p role="alert" className="rounded-lg border border-[#ef4444]/30 bg-[#ef4444]/10 px-4 py-3 text-sm text-[#fca5a5]">{children}</p>
+  return <p role="alert" className="rounded-lg border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger-text">{children}</p>
 }
 
 function StatCard({ label, value, href, loading, unavailable }) {
   return (
-    <Link to={href} className="block rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#64ffda]">
+    <Link to={href} className="block rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring">
       <Card hover className="h-full">
-        <p className="text-sm text-[#8892b0]">{label}</p>
-        {loading ? <div className="mt-4 h-9 w-16 animate-pulse rounded bg-[#233554]" /> : (
+        <p className="text-sm text-text-muted">{label}</p>
+        {loading ? <div className="mt-4 h-9 w-16 animate-pulse rounded bg-border" /> : (
           <p className="mt-3 text-3xl font-bold">{unavailable ? '—' : value}</p>
         )}
-        <p className="mt-3 text-xs font-medium text-[#64ffda]">View details →</p>
+        <p className="mt-3 text-xs font-medium text-primary">View details →</p>
       </Card>
     </Link>
   )
@@ -97,9 +97,9 @@ export default function CompanyOverview() {
       <div className="space-y-8">
         <section className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <p className="font-mono text-sm text-[#64ffda]">Company workspace</p>
+            <p className="font-mono text-sm text-primary">Company workspace</p>
             <h2 className="mt-2 text-3xl font-bold tracking-tight">Company Overview</h2>
-            <p className="mt-2 max-w-2xl text-[#8892b0]">A clear view of your opportunities and member activity.</p>
+            <p className="mt-2 max-w-2xl text-text-muted">A clear view of your opportunities and member activity.</p>
           </div>
           <div className="w-full sm:w-auto sm:min-w-48"><PostOpportunityMenu /></div>
         </section>
@@ -116,24 +116,24 @@ export default function CompanyOverview() {
         <div className="grid min-w-0 gap-6 xl:grid-cols-[minmax(0,2fr)_minmax(18rem,1fr)]">
           <section className="min-w-0">
             <div className="flex items-end justify-between gap-4">
-              <div><h3 className="text-xl font-semibold">Active opportunities</h3><p className="mt-1 text-sm text-[#8892b0]">Your open jobs and company projects.</p></div>
-              <Link to="/company/opportunities" className="shrink-0 text-sm font-medium text-[#64ffda]">View all</Link>
+              <div><h3 className="text-xl font-semibold">Active opportunities</h3><p className="mt-1 text-sm text-text-muted">Your open jobs and company projects.</p></div>
+              <Link to="/company/opportunities" className="shrink-0 text-sm font-medium text-primary">View all</Link>
             </div>
             {jobs.loading || projects.loading ? <LoadingSpinner label="Loading opportunities..." /> : opportunities.length === 0 ? (
-              <Card className="mt-4 text-center"><p className="font-semibold">No active opportunities</p><p className="mt-2 text-sm text-[#8892b0]">Post a job or company project to get started.</p></Card>
+              <Card className="mt-4 text-center"><p className="font-semibold">No active opportunities</p><p className="mt-2 text-sm text-text-muted">Post a job or company project to get started.</p></Card>
             ) : (
               <div className="mt-4 grid gap-4 md:grid-cols-2">
                 {opportunities.map((item) => (
                   <Card key={`${item.kind}-${item.id}`} hover className="min-w-0">
                     <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0"><p className="text-xs font-semibold uppercase tracking-wider text-[#64ffda]">{item.kind}</p><h4 className="mt-1 truncate font-semibold">{item.title}</h4></div>
-                      <span className="rounded-full border border-[#64ffda]/30 bg-[#64ffda]/10 px-2 py-1 text-[10px] text-[#64ffda]">{item.status}</span>
+                      <div className="min-w-0"><p className="text-xs font-semibold uppercase tracking-wider text-primary">{item.kind}</p><h4 className="mt-1 truncate font-semibold">{item.title}</h4></div>
+                      <span className="rounded-full border border-primary/30 bg-primary/10 px-2 py-1 text-[10px] text-primary">{item.status}</span>
                     </div>
-                    <div className="mt-5 space-y-2 border-t border-[#233554] pt-4 text-sm text-[#8892b0]">
-                      <p>Deadline: <span className="text-[#e6f1ff]">{formatDeadline(item.deadline)}</span></p>
-                      <p>{item.kind === 'Job' ? 'Applications' : 'Proposals'}: <span className="text-[#e6f1ff]">{item.responses ?? 0}</span></p>
+                    <div className="mt-5 space-y-2 border-t border-border pt-4 text-sm text-text-muted">
+                      <p>Deadline: <span className="text-text-primary">{formatDeadline(item.deadline)}</span></p>
+                      <p>{item.kind === 'Job' ? 'Applications' : 'Proposals'}: <span className="text-text-primary">{item.responses ?? 0}</span></p>
                     </div>
-                    <Link to={item.managePath} className="mt-4 inline-block text-sm font-medium text-[#64ffda]">Manage {item.kind.toLowerCase()} →</Link>
+                    <Link to={item.managePath} className="mt-4 inline-block text-sm font-medium text-primary">Manage {item.kind.toLowerCase()} →</Link>
                   </Card>
                 ))}
               </div>
@@ -145,10 +145,10 @@ export default function CompanyOverview() {
             <Card>
               <h3 className="text-lg font-semibold">Needs attention</h3>
               {summary.loading || profile.loading ? <LoadingSpinner label="Checking activity..." size="sm" /> : attention.length === 0 ? (
-                <p className="mt-4 text-sm text-[#8892b0]">Nothing urgent right now.</p>
+                <p className="mt-4 text-sm text-text-muted">Nothing urgent right now.</p>
               ) : (
                 <ul className="mt-4 space-y-2">{attention.slice(0, 5).map((item) => (
-                  <li key={`${item.path}-${item.text}`}><Link to={item.path} className="block rounded-lg border border-[#233554] px-3 py-3 text-sm hover:border-[#64ffda]/40 hover:text-[#64ffda]">{item.text} →</Link></li>
+                  <li key={`${item.path}-${item.text}`}><Link to={item.path} className="block rounded-lg border border-border px-3 py-3 text-sm hover:border-primary/40 hover:text-primary">{item.text} →</Link></li>
                 ))}</ul>
               )}
             </Card>
@@ -162,7 +162,7 @@ export default function CompanyOverview() {
                   ['Review proposals', '/company/applications?type=proposals'],
                   ['Explore talent', '/company/talent'],
                   ['Update company profile', '/company/profile'],
-                ].map(([label, path]) => <Link key={path} to={path} className="rounded-lg bg-[#0a192f]/70 px-3 py-2.5 text-sm text-[#a8b2d1] hover:text-[#64ffda]">{label}</Link>)}
+                ].map(([label, path]) => <Link key={path} to={path} className="rounded-lg bg-background/70 px-3 py-2.5 text-sm text-text-secondary hover:text-primary">{label}</Link>)}
               </div>
             </Card>
           </aside>

@@ -20,18 +20,18 @@ import {
   mapCompanyProfileToPayload,
 } from '../utils/companyProfile'
 
-const inputClasses = 'mt-2 w-full min-w-0 rounded-lg border border-[#233554] bg-[#0a192f]/70 px-4 py-3 text-sm text-[#e6f1ff] outline-none placeholder:text-[#64748b] focus:border-[#64ffda] focus:ring-1 focus:ring-[#64ffda]'
+const inputClasses = 'mt-2 w-full min-w-0 rounded-lg border border-border bg-background/70 px-4 py-3 text-sm text-text-primary outline-none placeholder:text-text-subtle focus:border-primary focus:ring-1 focus:ring-focus-ring'
 
 function FieldError({ id, children }) {
   if (!children) return null
-  return <p id={id} role="alert" className="mt-1.5 text-xs text-[#fca5a5]">{children}</p>
+  return <p id={id} role="alert" className="mt-1.5 text-xs text-danger-text">{children}</p>
 }
 
 function FormSection({ title, description, children }) {
   return (
-    <section className="border-b border-[#233554] pb-7 last:border-0 last:pb-0">
+    <section className="border-b border-border pb-7 last:border-0 last:pb-0">
       <h3 className="text-lg font-semibold">{title}</h3>
-      <p className="mt-1 text-sm text-[#8892b0]">{description}</p>
+      <p className="mt-1 text-sm text-text-muted">{description}</p>
       <div className="mt-5 grid gap-5 md:grid-cols-2">{children}</div>
     </section>
   )
@@ -140,7 +140,7 @@ export default function CompanyProfile() {
       <DashboardLayout title="Company Profile" userType="Company">
         <Card padding="lg" className="mx-auto max-w-2xl text-center">
           <h2 className="text-2xl font-bold">Company Profile unavailable</h2>
-          <p className="mt-3 text-sm text-[#8892b0]">Your saved profile could not be loaded, so editing is temporarily disabled to protect your information.</p>
+          <p className="mt-3 text-sm text-text-muted">Your saved profile could not be loaded, so editing is temporarily disabled to protect your information.</p>
           <Button className="mt-6" onClick={() => { setIsLoading(true); setRefreshKey((current) => current + 1) }}>Try again</Button>
         </Card>
       </DashboardLayout>
@@ -151,20 +151,20 @@ export default function CompanyProfile() {
     <DashboardLayout title="Company Profile" userType="Company">
       <div className="min-w-0 space-y-7">
         <section className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
-          <div><p className="font-mono text-sm text-[#64ffda]">Brand presence</p><h2 className="mt-2 text-3xl font-bold">Company Profile</h2><p className="mt-2 max-w-2xl text-[#8892b0]">Manage supported company information and preview how it may appear across LinkPort.</p></div>
+          <div><p className="font-mono text-sm text-primary">Brand presence</p><h2 className="mt-2 text-3xl font-bold">Company Profile</h2><p className="mt-2 max-w-2xl text-text-muted">Manage supported company information and preview how it may appear across LinkPort.</p></div>
           <div className="flex flex-col items-stretch gap-2 sm:items-end">
             <Button type="submit" form="company-profile-form" size="lg" disabled={isSaving || !isDirty}>{isSaving ? 'Saving...' : 'Save changes'}</Button>
-            <p aria-live="polite" className="text-xs text-[#8892b0]">{isDirty ? 'Unsaved changes' : saved ? 'All changes saved' : 'No unsaved changes'}</p>
+            <p aria-live="polite" className="text-xs text-text-muted">{isDirty ? 'Unsaved changes' : saved ? 'All changes saved' : 'No unsaved changes'}</p>
           </div>
         </section>
 
         <Card className="flex flex-col gap-5 sm:flex-row sm:items-center">
           <CompanyBrandMark name={form.companyName} logoUrl={form.logoUrl} size="lg" />
-          <div className="min-w-0 flex-1"><h3 className="break-words text-xl font-semibold">{form.companyName || 'Set up your Company Profile'}</h3><p className="mt-1 break-words text-sm text-[#8892b0]">{form.industry || 'Add your industry and company details.'}</p></div>
+          <div className="min-w-0 flex-1"><h3 className="break-words text-xl font-semibold">{form.companyName || 'Set up your Company Profile'}</h3><p className="mt-1 break-words text-sm text-text-muted">{form.industry || 'Add your industry and company details.'}</p></div>
           <div className="w-full sm:max-w-xs">
-            <div className="flex items-center justify-between gap-3"><span className="text-sm font-semibold">{completeness.label}</span><span className="font-mono text-sm text-[#64ffda]">{completeness.percentage}%</span></div>
-            <div className="mt-2 h-2 overflow-hidden rounded-full bg-[#0a192f]" role="progressbar" aria-label="Company Profile completeness" aria-valuemin="0" aria-valuemax="100" aria-valuenow={completeness.percentage}><div className="h-full bg-[#64ffda]" style={{ width: `${completeness.percentage}%` }} /></div>
-            {completeness.missing.length > 0 && <p className="mt-2 text-xs leading-5 text-[#8892b0]">Missing: {completeness.missing.join(', ')}</p>}
+            <div className="flex items-center justify-between gap-3"><span className="text-sm font-semibold">{completeness.label}</span><span className="font-mono text-sm text-primary">{completeness.percentage}%</span></div>
+            <div className="mt-2 h-2 overflow-hidden rounded-full bg-background" role="progressbar" aria-label="Company Profile completeness" aria-valuemin="0" aria-valuemax="100" aria-valuenow={completeness.percentage}><div className="h-full bg-primary" style={{ width: `${completeness.percentage}%` }} /></div>
+            {completeness.missing.length > 0 && <p className="mt-2 text-xs leading-5 text-text-muted">Missing: {completeness.missing.join(', ')}</p>}
           </div>
         </Card>
 
@@ -173,7 +173,7 @@ export default function CompanyProfile() {
             <form id="company-profile-form" onSubmit={handleSubmit} className="space-y-7" noValidate>
               <FormSection title="Basic information" description="Account and contact information supported by your Company Profile.">
                 <div><label htmlFor="company-name" className="text-sm font-medium">Company name</label><input id="company-name" name="companyName" value={form.companyName} onChange={updateField} maxLength="255" aria-invalid={Boolean(fieldErrors.company_name)} aria-describedby={fieldErrors.company_name ? 'company-name-error' : undefined} className={inputClasses} /><FieldError id="company-name-error">{fieldErrors.company_name}</FieldError></div>
-                <div><label htmlFor="company-email" className="text-sm font-medium">Account email</label><input id="company-email" type="email" value={form.contactEmail} readOnly className={`${inputClasses} cursor-not-allowed opacity-70`} /><p className="mt-1.5 text-xs text-[#64748b]">Read-only account information; it is not saved with this profile.</p></div>
+                <div><label htmlFor="company-email" className="text-sm font-medium">Account email</label><input id="company-email" type="email" value={form.contactEmail} readOnly className={`${inputClasses} cursor-not-allowed opacity-70`} /><p className="mt-1.5 text-xs text-text-subtle">Read-only account information; it is not saved with this profile.</p></div>
                 <div><label htmlFor="company-phone" className="text-sm font-medium">Phone</label><input id="company-phone" name="phone" type="tel" value={form.phone} onChange={updateField} maxLength="30" aria-invalid={Boolean(fieldErrors.phone)} aria-describedby={fieldErrors.phone ? 'company-phone-error' : undefined} className={inputClasses} /><FieldError id="company-phone-error">{fieldErrors.phone}</FieldError></div>
                 <div><label htmlFor="company-location" className="text-sm font-medium">Location</label><input id="company-location" name="location" value={form.location} onChange={updateField} maxLength="120" aria-invalid={Boolean(fieldErrors.location)} aria-describedby={fieldErrors.location ? 'company-location-error' : undefined} className={inputClasses} /><FieldError id="company-location-error">{fieldErrors.location}</FieldError></div>
               </FormSection>
@@ -191,11 +191,11 @@ export default function CompanyProfile() {
 
               <FormSection title="Logo and brand image" description="Use a hosted URL to persist your logo, or choose a local file for temporary preview only.">
                 <div><label htmlFor="company-logo-url" className="text-sm font-medium">Persisted logo URL</label><input id="company-logo-url" name="logoUrl" type="url" value={form.logoUrl} onChange={updateField} placeholder="https://company.example/logo.png" aria-invalid={Boolean(fieldErrors.logo_url)} aria-describedby={fieldErrors.logo_url ? 'company-logo-error' : undefined} className={inputClasses} /><FieldError id="company-logo-error">{fieldErrors.logo_url}</FieldError></div>
-                <div><label htmlFor="company-logo-file" className="text-sm font-medium">Temporary local preview</label><input id="company-logo-file" type="file" accept="image/*" onChange={selectLocalLogo} className={`${inputClasses} file:mr-3 file:rounded-md file:border-0 file:bg-[#64ffda] file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-[#071426]`} />{localLogoName && <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-[#facc15]"><span className="break-all">{localLogoName} is preview-only.</span><button type="button" onClick={clearLocalLogo} className="font-semibold text-[#64ffda]">Clear preview</button></div>}<p className="mt-1.5 text-xs leading-5 text-[#64748b]">File upload is not connected yet. Use a hosted logo URL to save your logo.</p></div>
+                <div><label htmlFor="company-logo-file" className="text-sm font-medium">Temporary local preview</label><input id="company-logo-file" type="file" accept="image/*" onChange={selectLocalLogo} className={`${inputClasses} file:mr-3 file:rounded-md file:border-0 file:bg-primary file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-primary-contrast`} />{localLogoName && <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-warning"><span className="break-all">{localLogoName} is preview-only.</span><button type="button" onClick={clearLocalLogo} className="font-semibold text-primary">Clear preview</button></div>}<p className="mt-1.5 text-xs leading-5 text-text-subtle">File upload is not connected yet. Use a hosted logo URL to save your logo.</p></div>
               </FormSection>
 
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div aria-live="polite">{generalError && <p role="alert" className="text-sm text-[#fca5a5]">{generalError}</p>}{saved && <p className="text-sm text-[#4ade80]">Company Profile saved successfully.</p>}</div>
+                <div aria-live="polite">{generalError && <p role="alert" className="text-sm text-danger-text">{generalError}</p>}{saved && <p className="text-sm text-success-bright">Company Profile saved successfully.</p>}</div>
                 <Button type="submit" size="lg" disabled={isSaving || !isDirty}>{isSaving ? 'Saving...' : 'Save changes'}</Button>
               </div>
             </form>

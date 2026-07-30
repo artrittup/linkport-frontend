@@ -22,10 +22,10 @@ const sourceError = (fallback) => ({
 
 function SummaryCard({ label, value, path }) {
   return (
-    <Link to={path} className="rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#64ffda]">
+    <Link to={path} className="rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring">
       <Card hover className="h-full">
-        <p className="text-sm text-[#8892b0]">{label}</p>
-        <p className="mt-3 text-3xl font-bold text-[#e6f1ff]">{value}</p>
+        <p className="text-sm text-text-muted">{label}</p>
+        <p className="mt-3 text-3xl font-bold text-text-primary">{value}</p>
       </Card>
     </Link>
   )
@@ -33,9 +33,9 @@ function SummaryCard({ label, value, path }) {
 
 function ActionLink({ to, title, description }) {
   return (
-    <Link to={to} className="rounded-lg border border-[#233554] bg-[#112240] p-4 transition-colors hover:border-[#64ffda]/50 hover:bg-[#172a45] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#64ffda]">
-      <p className="font-semibold text-[#e6f1ff]">{title}</p>
-      <p className="mt-1 text-sm text-[#8892b0]">{description}</p>
+    <Link to={to} className="rounded-lg border border-border bg-surface p-4 transition-colors hover:border-primary/50 hover:bg-surface-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring">
+      <p className="font-semibold text-text-primary">{title}</p>
+      <p className="mt-1 text-sm text-text-muted">{description}</p>
     </Link>
   )
 }
@@ -169,14 +169,14 @@ export default function AdminDashboard() {
     <DashboardLayout title="Admin Overview" userType="Admin">
       <div className="min-w-0 space-y-10">
         <section>
-          <p className="font-mono text-sm text-[#64ffda]">Platform operations</p>
+          <p className="font-mono text-sm text-primary">Platform operations</p>
           <h2 className="mt-2 text-2xl font-bold sm:text-3xl">Admin Overview</h2>
-          <p className="mt-3 max-w-2xl text-[#8892b0]">Monitor platform participation and open the management area that needs attention next.</p>
+          <p className="mt-3 max-w-2xl text-text-muted">Monitor platform participation and open the management area that needs attention next.</p>
 
           {summary.loading ? (
             <div className="mt-8"><LoadingSpinner label="Loading platform totals..." /></div>
           ) : summary.error ? (
-            <p role="alert" className="mt-8 rounded-lg border border-[#ef4444]/30 bg-[#ef4444]/10 px-4 py-3 text-sm text-[#fca5a5]">{summary.error}</p>
+            <p role="alert" className="mt-8 rounded-lg border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger-text">{summary.error}</p>
           ) : (
             <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
               {stats.map((item) => <SummaryCard key={item.label} {...item} />)}
@@ -190,14 +190,14 @@ export default function AdminDashboard() {
             {disabledUsers.loading && summary.loading ? (
               <LoadingSpinner label="Checking platform status..." />
             ) : attention.length === 0 ? (
-              <Card><p className="text-sm text-[#8892b0]">No urgent Admin actions were found.</p></Card>
+              <Card><p className="text-sm text-text-muted">No urgent Admin actions were found.</p></Card>
             ) : (
               <Card padding="sm">
-                <div className="divide-y divide-[#233554]">
+                <div className="divide-y divide-border">
                   {attention.slice(0, 5).map((item) => (
                     <div key={item.key} className="flex flex-col gap-3 px-2 py-4 first:pt-2 last:pb-2 sm:flex-row sm:items-center sm:justify-between">
-                      <p className="text-sm text-[#a8b2d1]">{item.message}</p>
-                      <Link to={item.path} className="shrink-0 text-sm font-semibold text-[#64ffda] hover:opacity-80">{item.action}</Link>
+                      <p className="text-sm text-text-secondary">{item.message}</p>
+                      <Link to={item.path} className="shrink-0 text-sm font-semibold text-primary hover:opacity-80">{item.action}</Link>
                     </div>
                   ))}
                 </div>
@@ -214,16 +214,16 @@ export default function AdminDashboard() {
                 {activityLoading && activity.length === 0 ? (
                   <LoadingSpinner label="Loading recent activity..." />
                 ) : activity.length === 0 ? (
-                  <p className="text-sm text-[#8892b0]">No recent records are available.</p>
+                  <p className="text-sm text-text-muted">No recent records are available.</p>
                 ) : (
-                  <div className="divide-y divide-[#233554]">
+                  <div className="divide-y divide-border">
                     {activity.map((item) => (
-                      <Link key={item.key} to={item.path} className="flex min-w-0 items-center justify-between gap-4 py-3 first:pt-0 last:pb-0 hover:text-[#64ffda]">
+                      <Link key={item.key} to={item.path} className="flex min-w-0 items-center justify-between gap-4 py-3 first:pt-0 last:pb-0 hover:text-primary">
                         <div className="min-w-0">
                           <p className="break-words text-sm font-medium">{item.title}</p>
-                          <p className="mt-1 break-words text-xs text-[#8892b0]">{item.meta}</p>
+                          <p className="mt-1 break-words text-xs text-text-muted">{item.meta}</p>
                         </div>
-                        <span className="shrink-0 text-xs text-[#64748b]">{item.date}</span>
+                        <span className="shrink-0 text-xs text-text-subtle">{item.date}</span>
                       </Link>
                     ))}
                   </div>

@@ -15,18 +15,18 @@ import useToast from '../hooks/useToast'
 import DashboardLayout from '../layouts/DashboardLayout'
 
 const control =
-  'w-full rounded-md border border-[#233554] bg-[#0a192f]/70 px-4 py-3 text-sm text-[#e6f1ff] outline-none placeholder:text-[#64748b] focus:border-[#64ffda]'
+  'w-full rounded-md border border-border bg-background/70 px-4 py-3 text-sm text-text-primary outline-none placeholder:text-text-subtle focus:border-primary'
 const roleStyle = {
-  Admin: 'bg-[#64ffda]/10 text-[#64ffda]',
-  Candidate: 'bg-blue-500/10 text-blue-300',
-  Company: 'bg-violet-500/10 text-violet-300',
+  Admin: 'bg-primary/10 text-primary',
+  Candidate: 'bg-info/10 text-info-text',
+  Company: 'bg-violet/10 text-violet-text',
 }
 const displayRole = (role) => (
   role === 'Candidate' || role === 'candidate' ? 'Member' : role || 'Unknown'
 )
 const statusStyle = {
-  Active: 'bg-[#22c55e]/10 text-[#22c55e]',
-  Disabled: 'bg-[#ef4444]/10 text-[#fca5a5]',
+  Active: 'bg-success/10 text-success',
+  Disabled: 'bg-danger/10 text-danger-text',
 }
 
 const getErrorMessage = (error, fallback) => {
@@ -44,12 +44,12 @@ function UserBadges({ user }) {
   return (
     <>
       <span
-        className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${roleStyle[user.role] ?? 'bg-[#233554] text-[#8892b0]'}`}
+        className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${roleStyle[user.role] ?? 'bg-border text-text-muted'}`}
       >
         {displayRole(user.role)}
       </span>
       <span
-        className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${statusStyle[user.status] ?? 'bg-[#233554] text-[#a8b2d1]'}`}
+        className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${statusStyle[user.status] ?? 'bg-border text-text-secondary'}`}
       >
         {user.status}
       </span>
@@ -255,7 +255,7 @@ export default function AdminUsers() {
         >
           {deletingId === user.id ? 'Deleting...' : 'Delete'}
         </Button>
-        {isAdmin && <span className="w-full text-right text-[10px] text-[#64748b]">Admin accounts are protected.</span>}
+        {isAdmin && <span className="w-full text-right text-[10px] text-text-subtle">Admin accounts are protected.</span>}
       </div>
     )
   }
@@ -264,9 +264,9 @@ export default function AdminUsers() {
     <DashboardLayout title="Users" userType="Admin">
       <div className="space-y-8">
         <section>
-          <p className="font-mono text-sm text-[#64ffda]">User management</p>
+          <p className="font-mono text-sm text-primary">User management</p>
           <h2 className="mt-2 text-2xl font-bold sm:text-3xl">Users</h2>
-          <p className="mt-3 text-[#8892b0]">Manage all platform users.</p>
+          <p className="mt-3 text-text-muted">Manage all platform users.</p>
         </section>
 
         <Card>
@@ -310,7 +310,7 @@ export default function AdminUsers() {
         </Card>
 
         <section>
-          <p className="mb-4 text-sm text-[#8892b0]">
+          <p className="mb-4 text-sm text-text-muted">
             Showing {users.length} of {pagination.total} users
           </p>
           {isLoading ? (
@@ -328,7 +328,7 @@ export default function AdminUsers() {
                 <div className="overflow-x-auto">
                   <table className="w-full min-w-[900px] text-left">
                     <thead>
-                      <tr className="border-b border-[#233554] text-xs text-[#64748b]">
+                      <tr className="border-b border-border text-xs text-text-subtle">
                         <th className="p-4">Name</th>
                         <th className="p-4">Email</th>
                         <th className="p-4">Role</th>
@@ -341,29 +341,29 @@ export default function AdminUsers() {
                       {users.map((user) => (
                         <tr
                           key={user.id}
-                          className="border-b border-[#233554]/70 last:border-0"
+                          className="border-b border-border/70 last:border-0"
                         >
                           <td className="p-4 text-sm font-medium">
                             {user.name}
                           </td>
-                          <td className="break-all p-4 text-sm text-[#8892b0]">
+                          <td className="break-all p-4 text-sm text-text-muted">
                             {user.email}
                           </td>
                           <td className="p-4">
                             <span
-                              className={`rounded-full px-2.5 py-1 text-[10px] ${roleStyle[user.role] ?? 'bg-[#233554] text-[#8892b0]'}`}
+                              className={`rounded-full px-2.5 py-1 text-[10px] ${roleStyle[user.role] ?? 'bg-border text-text-muted'}`}
                             >
                               {displayRole(user.role)}
                             </span>
                           </td>
                           <td className="p-4">
                             <span
-                              className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${statusStyle[user.status] ?? 'bg-[#233554] text-[#a8b2d1]'}`}
+                              className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${statusStyle[user.status] ?? 'bg-border text-text-secondary'}`}
                             >
                               {user.status}
                             </span>
                           </td>
-                          <td className="p-4 text-xs text-[#8892b0]">
+                          <td className="p-4 text-xs text-text-muted">
                             {user.createdDate}
                           </td>
                           <td className="p-4">
@@ -380,13 +380,13 @@ export default function AdminUsers() {
                 {users.map((user) => (
                   <Card key={user.id} hover>
                     <h3 className="font-semibold">{user.name}</h3>
-                    <p className="mt-1 break-all text-sm text-[#8892b0]">
+                    <p className="mt-1 break-all text-sm text-text-muted">
                       {user.email}
                     </p>
                     <div className="mt-4 flex gap-2">
                       <UserBadges user={user} />
                     </div>
-                    <p className="my-4 text-xs text-[#64748b]">
+                    <p className="my-4 text-xs text-text-subtle">
                       Created {user.createdDate}
                     </p>
                     <Actions user={user} />
@@ -406,7 +406,7 @@ export default function AdminUsers() {
               >
                 Previous
               </Button>
-              <span className="text-sm text-[#8892b0]">
+              <span className="text-sm text-text-muted">
                 Page {pagination.current_page} of {lastPage}
               </span>
               <Button

@@ -34,9 +34,9 @@ const categories = [
 ]
 
 const inputClasses =
-  'mt-2 w-full rounded-md border border-[#233554] bg-[#0a192f]/70 px-4 py-3 text-sm text-[#e6f1ff] outline-none transition-colors placeholder:text-[#64748b] focus:border-[#64ffda] focus:ring-1 focus:ring-[#64ffda]'
+  'mt-2 w-full rounded-md border border-border bg-background/70 px-4 py-3 text-sm text-text-primary outline-none transition-colors placeholder:text-text-subtle focus:border-primary focus:ring-1 focus:ring-focus-ring'
 const controlClasses =
-  'w-full rounded-md border border-[#233554] bg-[#112240] px-4 py-3 text-sm text-[#e6f1ff] outline-none placeholder:text-[#64748b] focus:border-[#64ffda]'
+  'w-full rounded-md border border-border bg-surface px-4 py-3 text-sm text-text-primary outline-none placeholder:text-text-subtle focus:border-primary'
 
 const getErrorMessage = (error, fallback) => {
   const errors = error.response?.data?.errors
@@ -48,10 +48,10 @@ const getErrorMessage = (error, fallback) => {
 
 function StatusBadge({ status }) {
   const classes = {
-    Open: 'border-[#22c55e]/30 bg-[#22c55e]/10 text-[#22c55e]',
-    Draft: 'border-[#facc15]/30 bg-[#facc15]/10 text-[#facc15]',
-    Closed: 'border-[#ef4444]/30 bg-[#ef4444]/10 text-[#ef4444]',
-  }[status] ?? 'border-[#233554] text-[#8892b0]'
+    Open: 'border-success/30 bg-success/10 text-success',
+    Draft: 'border-warning/30 bg-warning/10 text-warning',
+    Closed: 'border-danger/30 bg-danger/10 text-danger',
+  }[status] ?? 'border-border text-text-muted'
 
   return (
     <span
@@ -287,13 +287,13 @@ export default function ManageProjects({ initialCreate = false }) {
       <div className="space-y-8">
         <section className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="font-mono text-sm text-[#64ffda]">
+            <p className="font-mono text-sm text-primary">
               Project workspace
             </p>
             <h2 className="mt-2 text-2xl font-bold tracking-tight sm:text-3xl">
               Manage Projects
             </h2>
-            <p className="mt-3 text-[#8892b0]">
+            <p className="mt-3 text-text-muted">
               Create, edit, and manage projects that members can submit proposals to.
             </p>
           </div>
@@ -307,12 +307,12 @@ export default function ManageProjects({ initialCreate = false }) {
             <Card key={item.label} hover>
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <p className="text-sm text-[#8892b0]">{item.label}</p>
-                  <p className="mt-3 text-3xl font-bold text-[#e6f1ff]">
+                  <p className="text-sm text-text-muted">{item.label}</p>
+                  <p className="mt-3 text-3xl font-bold text-text-primary">
                     {item.value}
                   </p>
                 </div>
-                <span className="font-mono text-xs text-[#64ffda]">
+                <span className="font-mono text-xs text-primary">
                   0{index + 1}
                 </span>
               </div>
@@ -348,10 +348,10 @@ export default function ManageProjects({ initialCreate = false }) {
 
         <section>
           <div className="mb-5">
-            <h2 className="text-xl font-semibold text-[#e6f1ff] sm:text-2xl">
+            <h2 className="text-xl font-semibold text-text-primary sm:text-2xl">
               Company Projects
             </h2>
-            <p className="mt-1 text-sm text-[#8892b0]">
+            <p className="mt-1 text-sm text-text-muted">
               {pagination.total ?? 0} projects in your company workspace.
             </p>
           </div>
@@ -375,7 +375,7 @@ export default function ManageProjects({ initialCreate = false }) {
                 <div className="overflow-x-auto">
                   <table className="w-full min-w-[1050px] text-left">
                     <thead>
-                      <tr className="border-b border-[#233554] text-[11px] uppercase tracking-wider text-[#64748b]">
+                      <tr className="border-b border-border text-[11px] uppercase tracking-wider text-text-subtle">
                         <th className="px-4 py-3 font-medium">Project title</th>
                         <th className="px-4 py-3 font-medium">Category</th>
                         <th className="px-4 py-3 font-medium">Budget</th>
@@ -391,21 +391,21 @@ export default function ManageProjects({ initialCreate = false }) {
                       {filteredProjects.map((project) => (
                         <tr
                           key={project.id}
-                          className="border-b border-[#233554]/70 transition-colors last:border-0 hover:bg-[#172a45]/60"
+                          className="border-b border-border/70 transition-colors last:border-0 hover:bg-surface-elevated/60"
                         >
-                          <td className="px-4 py-4 text-sm font-medium text-[#e6f1ff]">
+                          <td className="px-4 py-4 text-sm font-medium text-text-primary">
                             {project.title}
                           </td>
-                          <td className="px-4 py-4 text-xs text-[#8892b0]">
+                          <td className="px-4 py-4 text-xs text-text-muted">
                             {project.category || 'Not specified'}
                           </td>
-                          <td className="px-4 py-4 text-sm text-[#e6f1ff]">
+                          <td className="px-4 py-4 text-sm text-text-primary">
                             {project.budget}
                           </td>
-                          <td className="px-4 py-4 text-xs text-[#facc15]">
+                          <td className="px-4 py-4 text-xs text-warning">
                             {project.deadline || 'No deadline'}
                           </td>
-                          <td className="px-4 py-4 text-sm text-[#e6f1ff]">
+                          <td className="px-4 py-4 text-sm text-text-primary">
                             {project.bids}
                           </td>
                           <td className="px-4 py-4">
@@ -457,31 +457,31 @@ export default function ManageProjects({ initialCreate = false }) {
                   <Card key={project.id} hover>
                     <div className="flex items-start justify-between gap-3">
                       <div>
-                        <p className="font-mono text-[10px] uppercase tracking-wider text-[#64748b]">
+                        <p className="font-mono text-[10px] uppercase tracking-wider text-text-subtle">
                           {project.category || 'Uncategorized'}
                         </p>
-                        <h3 className="mt-2 font-semibold text-[#e6f1ff]">
+                        <h3 className="mt-2 font-semibold text-text-primary">
                           {project.title}
                         </h3>
                       </div>
                       <StatusBadge status={project.status} />
                     </div>
-                    <div className="mt-4 grid grid-cols-2 gap-3 border-y border-[#233554] py-4 text-xs">
+                    <div className="mt-4 grid grid-cols-2 gap-3 border-y border-border py-4 text-xs">
                       <div>
-                        <p className="text-[#64748b]">Budget</p>
-                        <p className="mt-1 text-[#e6f1ff]">
+                        <p className="text-text-subtle">Budget</p>
+                        <p className="mt-1 text-text-primary">
                           {project.budget}
                         </p>
                       </div>
                       <div>
-                        <p className="text-[#64748b]">Deadline</p>
-                        <p className="mt-1 text-[#facc15]">
+                        <p className="text-text-subtle">Deadline</p>
+                        <p className="mt-1 text-warning">
                           {project.deadline || 'No deadline'}
                         </p>
                       </div>
                       <div>
-                        <p className="text-[#64748b]">Proposals</p>
-                        <p className="mt-1 text-[#e6f1ff]">{project.bids}</p>
+                        <p className="text-text-subtle">Proposals</p>
+                        <p className="mt-1 text-text-primary">{project.bids}</p>
                       </div>
                     </div>
                     <div className="mt-5 grid grid-cols-2 gap-2">
@@ -527,7 +527,7 @@ export default function ManageProjects({ initialCreate = false }) {
               >
                 Previous
               </Button>
-              <span className="text-sm text-[#8892b0]">
+              <span className="text-sm text-text-muted">
                 Page {pagination.current_page} of {lastPage}
               </span>
               <Button
@@ -552,7 +552,7 @@ export default function ManageProjects({ initialCreate = false }) {
       </Modal>
 
       {isFormOpen && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 px-4 py-8 backdrop-blur-sm">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-overlay/70 px-4 py-8 backdrop-blur-sm">
           <Card
             padding="lg"
             className="max-h-full w-full max-w-2xl overflow-y-auto shadow-2xl shadow-black/40"
@@ -564,12 +564,12 @@ export default function ManageProjects({ initialCreate = false }) {
             >
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <p className="font-mono text-xs uppercase tracking-wider text-[#64ffda]">
+                  <p className="font-mono text-xs uppercase tracking-wider text-primary">
                     {editingId !== null ? 'Update project' : 'New project'}
                   </p>
                   <h2
                     id="project-form-title"
-                    className="mt-2 text-2xl font-bold text-[#e6f1ff]"
+                    className="mt-2 text-2xl font-bold text-text-primary"
                   >
                     {editingId !== null ? 'Edit Project' : 'Post New Project'}
                   </h2>
@@ -578,7 +578,7 @@ export default function ManageProjects({ initialCreate = false }) {
                   type="button"
                   disabled={isSaving}
                   onClick={closeForm}
-                  className="flex h-9 w-9 items-center justify-center rounded-md text-xl text-[#8892b0] transition-colors hover:bg-[#172a45] hover:text-[#64ffda] disabled:opacity-50"
+                  className="flex h-9 w-9 items-center justify-center rounded-md text-xl text-text-muted transition-colors hover:bg-surface-elevated hover:text-primary disabled:opacity-50"
                   aria-label="Close form"
                 >
                   &times;
@@ -709,12 +709,12 @@ export default function ManageProjects({ initialCreate = false }) {
                 {formError && (
                   <p
                     role="alert"
-                    className="rounded-md border border-[#ef4444]/40 bg-[#ef4444]/10 p-3 text-sm text-[#fca5a5]"
+                    className="rounded-md border border-danger/40 bg-danger/10 p-3 text-sm text-danger-text"
                   >
                     {formError}
                   </p>
                 )}
-                <div className="flex flex-col-reverse gap-3 border-t border-[#233554] pt-6 sm:flex-row sm:justify-end">
+                <div className="flex flex-col-reverse gap-3 border-t border-border pt-6 sm:flex-row sm:justify-end">
                   <Button
                     type="button"
                     variant="ghost"
@@ -729,7 +729,7 @@ export default function ManageProjects({ initialCreate = false }) {
                         type="submit"
                         value="draft"
                         disabled={isSaving}
-                        className="rounded-md border border-[#64ffda] px-4 py-2 text-sm text-[#64ffda] disabled:opacity-50"
+                        className="rounded-md border border-primary px-4 py-2 text-sm text-primary disabled:opacity-50"
                       >
                         Save Draft
                       </button>
@@ -737,7 +737,7 @@ export default function ManageProjects({ initialCreate = false }) {
                         type="submit"
                         value="open"
                         disabled={isSaving}
-                        className="rounded-md border border-[#64ffda] bg-[#64ffda] px-4 py-2 text-sm font-medium text-[#0a192f] disabled:opacity-50"
+                        className="rounded-md border border-primary bg-primary px-4 py-2 text-sm font-medium text-primary-contrast disabled:opacity-50"
                       >
                         {isSaving ? 'Saving...' : 'Publish Project'}
                       </button>

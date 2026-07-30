@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from 'react-router'
-import linkPortLogo from '../assets/linkport-logo.svg'
+import LinkPortLogo from './LinkPortLogo'
 import { useAuth } from '../context/AuthContext'
 
 function SidebarIcon({ label, iconKey }) {
@@ -64,16 +64,16 @@ export default function Sidebar({ navItems = [], isOpen = false, onClose }) {
   return (
     <>
       {isOpen && (
-        <button type="button" aria-label="Close navigation" onClick={onClose} className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden" />
+        <button type="button" aria-label="Close navigation" onClick={onClose} className="fixed inset-0 z-40 bg-overlay/60 backdrop-blur-sm lg:hidden" />
       )}
 
-      <aside className={`fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-[#233554]/80 bg-[#071426]/95 shadow-2xl shadow-black/20 backdrop-blur-lg transition-transform duration-300 lg:w-20 lg:translate-x-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-        <div className="flex h-20 shrink-0 items-center justify-between border-b border-[#233554]/80 px-5 lg:justify-center lg:px-2">
-          <Link to="/" className="flex items-center gap-2.5 font-bold text-[#e6f1ff]" aria-label="LinkPort home">
-            <img src={linkPortLogo} alt="LinkPort logo" className="h-8 w-auto" />
-            <span className="text-xl lg:hidden">Link<span className="text-[#64ffda]">Port</span></span>
+      <aside className={`fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-border/80 bg-background shadow-2xl shadow-black/20 transition-transform duration-300 lg:w-20 lg:translate-x-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+        <div className="flex h-20 shrink-0 items-center justify-between border-b border-border/80 px-5 lg:justify-center lg:px-2">
+          <Link to="/" className="flex items-center gap-2.5 font-bold text-text-primary" aria-label="LinkPort home">
+            <LinkPortLogo className="h-8 w-auto" />
+            <span className="text-xl lg:hidden">Link<span className="text-primary">Port</span></span>
           </Link>
-          <button type="button" onClick={onClose} className="flex h-9 w-9 items-center justify-center rounded-lg text-xl text-[#8892b0] hover:bg-[#112240] hover:text-[#64ffda] lg:hidden" aria-label="Close menu">
+          <button type="button" onClick={onClose} className="flex h-9 w-9 items-center justify-center rounded-lg text-xl text-text-muted hover:bg-surface hover:text-primary lg:hidden" aria-label="Close menu">
             &times;
           </button>
         </div>
@@ -92,8 +92,8 @@ export default function Sidebar({ navItems = [], isOpen = false, onClose }) {
                 title={item.label}
                 className={`group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-all duration-200 lg:flex-col lg:gap-1.5 lg:px-1 lg:text-center lg:text-[10px] ${
                   isActive
-                    ? 'bg-[#64ffda]/10 text-[#64ffda]'
-                    : 'text-[#64748b] hover:bg-[#112240] hover:text-[#e6f1ff]'
+                    ? 'bg-primary/10 text-primary'
+                    : 'text-text-subtle hover:bg-surface hover:text-text-primary'
                 }`}
               >
                 <SidebarIcon label={item.label} iconKey={item.key} />
@@ -104,8 +104,8 @@ export default function Sidebar({ navItems = [], isOpen = false, onClose }) {
         </nav>
 
         {logoutItem && (
-          <div className="border-t border-[#233554]/80 p-3 lg:p-2">
-            <button type="button" onClick={handleLogout} title={logoutItem.label} className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-[#ef4444] transition-colors hover:bg-[#ef4444]/10 lg:flex-col lg:gap-1.5 lg:px-1 lg:text-[10px]">
+          <div className="border-t border-border/80 p-3 lg:p-2">
+            <button type="button" onClick={handleLogout} title={logoutItem.label} className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-danger transition-colors hover:bg-danger/10 lg:flex-col lg:gap-1.5 lg:px-1 lg:text-[10px]">
               <LogoutIcon />
               {logoutItem.label}
             </button>

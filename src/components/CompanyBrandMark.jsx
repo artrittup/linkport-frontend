@@ -17,11 +17,11 @@ export default function CompanyBrandMark({
   const showImage = logoUrl && failedUrl !== logoUrl
 
   return (
-    <div className={`relative flex shrink-0 items-center justify-center overflow-hidden border border-[#64ffda]/35 bg-[#0a192f] font-mono font-bold text-[#64ffda] ${sizes[size] ?? sizes.md}`}>
+    <div className={`relative flex shrink-0 items-center justify-center overflow-hidden border border-primary/35 bg-background font-mono font-bold text-primary ${sizes[size] ?? sizes.md}`}>
       {showImage ? (
         <img src={logoUrl} alt={`${name || 'Company'} logo`} onError={() => setFailedUrl(logoUrl)} className="h-full w-full object-cover" />
       ) : getCompanyInitials(name)}
-      {temporary && <span className="absolute inset-x-0 bottom-0 bg-[#071426]/90 py-0.5 text-center text-[8px] font-sans font-semibold uppercase text-[#facc15]">Preview</span>}
+      {temporary && <span className="absolute inset-x-0 bottom-0 bg-surface-deep/90 py-0.5 text-center text-[8px] font-sans font-semibold uppercase text-warning">Preview</span>}
     </div>
   )
 }

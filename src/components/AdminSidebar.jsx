@@ -1,7 +1,8 @@
 import { Link, useLocation, useNavigate } from 'react-router'
-import linkPortLogo from '../assets/linkport-logo.svg'
+import LinkPortLogo from './LinkPortLogo'
 import { getNavigationForRole } from '../config/navigation'
 import { useAuth } from '../context/AuthContext'
+import ThemeToggle from './ThemeToggle'
 
 function AdminIcon({ name }) {
   const paths = {
@@ -47,21 +48,24 @@ export default function AdminSidebar({ isOpen, onClose }) {
   return (
     <>
       {isOpen && (
-        <button type="button" aria-label="Close navigation" onClick={onClose} className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden" />
+        <button type="button" aria-label="Close navigation" onClick={onClose} className="fixed inset-0 z-40 bg-overlay/60 backdrop-blur-sm lg:hidden" />
       )}
 
-      <aside className={`fixed inset-y-0 left-0 z-50 flex w-72 max-w-[calc(100vw-2rem)] flex-col border-r border-[#233554]/80 bg-[#071426] shadow-2xl shadow-black/30 transition-transform duration-200 lg:w-64 lg:max-w-none lg:translate-x-0 lg:shadow-none ${
+      <aside className={`fixed inset-y-0 left-0 z-50 flex w-72 max-w-[calc(100vw-2rem)] flex-col border-r border-border/80 bg-background shadow-2xl shadow-black/30 transition-transform duration-200 lg:w-64 lg:max-w-none lg:translate-x-0 lg:shadow-none ${
         isOpen ? 'translate-x-0' : '-translate-x-full'
       }`}>
-        <div className="flex h-20 shrink-0 items-center justify-between border-b border-[#233554]/80 px-5">
+        <div className="flex h-20 shrink-0 items-center justify-between border-b border-border/80 px-5">
           <Link to="/admin/overview" onClick={onClose} className="min-w-0" aria-label="LinkPort Admin Overview">
-            <span className="flex items-center gap-2.5 font-bold text-[#e6f1ff]">
-              <img src={linkPortLogo} alt="" className="h-8 w-auto" />
-              <span className="text-xl">Link<span className="text-[#64ffda]">Port</span></span>
+            <span className="flex items-center gap-2.5 font-bold text-text-primary">
+              <LinkPortLogo className="h-8 w-auto" />
+              <span className="text-xl">Link<span className="text-primary">Port</span></span>
             </span>
-            <span className="mt-1 block pl-10 text-[10px] uppercase tracking-[0.16em] text-[#64748b]">Admin Workspace</span>
+            <span className="mt-1 block pl-10 text-[10px] uppercase tracking-[0.16em] text-text-subtle">Admin Workspace</span>
           </Link>
-          <button type="button" onClick={onClose} className="flex h-9 w-9 items-center justify-center rounded-lg text-xl text-[#8892b0] hover:bg-[#112240] hover:text-[#64ffda] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#64ffda] lg:hidden" aria-label="Close menu">&times;</button>
+          <div className="hidden lg:block">
+            <ThemeToggle compact />
+          </div>
+          <button type="button" onClick={onClose} className="flex h-9 w-9 items-center justify-center rounded-lg text-xl text-text-muted hover:bg-surface hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring lg:hidden" aria-label="Close menu">&times;</button>
         </div>
 
         <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-5" aria-label="Admin Workspace navigation">
@@ -73,10 +77,10 @@ export default function AdminSidebar({ isOpen, onClose }) {
                 to={item.path}
                 onClick={onClose}
                 aria-current={active ? 'page' : undefined}
-                className={`flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#64ffda] ${
+                className={`flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring ${
                   active
-                    ? 'bg-[#64ffda]/10 text-[#64ffda]'
-                    : 'text-[#8892b0] hover:bg-[#112240] hover:text-[#e6f1ff]'
+                    ? 'border border-primary-soft-border bg-primary-soft text-primary-soft-text'
+                    : 'text-text-muted hover:bg-surface hover:text-text-primary'
                 }`}
               >
                 <AdminIcon name={item.key} />
@@ -86,15 +90,15 @@ export default function AdminSidebar({ isOpen, onClose }) {
           })}
         </nav>
 
-        <div className="border-t border-[#233554]/80 p-3">
+        <div className="border-t border-border/80 p-3">
           <div className="flex min-w-0 items-center gap-3 rounded-xl px-2 py-2">
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[#64ffda]/35 bg-[#112240] font-mono text-sm font-semibold text-[#64ffda]">{initial}</span>
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-primary/35 bg-surface font-mono text-sm font-semibold text-primary">{initial}</span>
             <div className="min-w-0">
-              <p className="truncate text-sm font-medium text-[#e6f1ff]">{adminName}</p>
-              <p className="text-xs text-[#8892b0]">Administrator</p>
+              <p className="truncate text-sm font-medium text-text-primary">{adminName}</p>
+              <p className="text-xs text-text-muted">Administrator</p>
             </div>
           </div>
-          <button type="button" onClick={handleLogout} className="mt-1 flex w-full items-center justify-center rounded-lg px-3 py-2.5 text-sm font-medium text-[#f87171] hover:bg-[#ef4444]/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ef4444]">
+          <button type="button" onClick={handleLogout} className="mt-1 flex w-full items-center justify-center rounded-lg px-3 py-2.5 text-sm font-medium text-danger-soft hover:bg-danger/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger">
             Logout
           </button>
         </div>

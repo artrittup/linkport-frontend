@@ -6,7 +6,7 @@ import Button from './Button'
 import EmptyState from './EmptyState'
 import LoadingSpinner from './LoadingSpinner'
 
-const inputClasses = 'w-full min-w-0 max-w-full rounded-xl border border-[#233554] bg-[#112240]/70 px-4 py-3 text-sm text-[#e6f1ff] outline-none placeholder:text-[#64748b] focus:border-[#64ffda] focus:ring-1 focus:ring-[#64ffda]'
+const inputClasses = 'w-full min-w-0 max-w-full rounded-xl border border-border bg-surface/70 px-4 py-3 text-sm text-text-primary outline-none placeholder:text-text-subtle focus:border-primary focus:ring-1 focus:ring-focus-ring'
 
 export default function CandidateApplicationsActivity({ activity }) {
   const [search, setSearch] = useState('')
@@ -23,7 +23,7 @@ export default function CandidateApplicationsActivity({ activity }) {
 
   return (
     <section className="min-w-0" aria-live="polite">
-      <div className="grid min-w-0 gap-3 rounded-2xl border border-[#233554] bg-[#112240]/55 p-4 sm:grid-cols-[minmax(0,1fr)_minmax(0,12rem)]">
+      <div className="grid min-w-0 gap-3 rounded-2xl border border-border bg-surface/55 p-4 sm:grid-cols-[minmax(0,1fr)_minmax(0,12rem)]">
         <div className="min-w-0">
           <label htmlFor="activity-application-search" className="sr-only">Search applications</label>
           <input
@@ -43,7 +43,7 @@ export default function CandidateApplicationsActivity({ activity }) {
         </div>
       </div>
 
-      <p className="my-4 text-sm text-[#64748b]">
+      <p className="my-4 text-sm text-text-subtle">
         {activity.isLoading ? 'Loading applications...' : `${visibleApplications.length} applications on this page`}
       </p>
 
@@ -59,32 +59,32 @@ export default function CandidateApplicationsActivity({ activity }) {
               : ''
 
             return (
-              <article key={application.id} className="flex min-w-0 flex-col rounded-2xl border border-[#233554] bg-[#112240]/60 p-5">
+              <article key={application.id} className="flex min-w-0 flex-col rounded-2xl border border-border bg-surface/60 p-5">
                 <div className="flex min-w-0 flex-wrap items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <h3 className="break-words text-lg font-semibold text-[#e6f1ff]">{application.jobTitle}</h3>
-                    <p className="mt-1 break-words text-sm text-[#64ffda]">{application.company}</p>
+                    <h3 className="break-words text-lg font-semibold text-text-primary">{application.jobTitle}</h3>
+                    <p className="mt-1 break-words text-sm text-primary">{application.company}</p>
                   </div>
                   <ActivityStatusBadge status={application.status} />
                 </div>
-                <dl className="mt-4 grid gap-3 border-y border-[#233554] py-4 text-sm sm:grid-cols-2">
+                <dl className="mt-4 grid gap-3 border-y border-border py-4 text-sm sm:grid-cols-2">
                   <div>
-                    <dt className="text-xs uppercase tracking-wide text-[#64748b]">Applied</dt>
-                    <dd className="mt-1 break-words text-[#a8b2d1]">{application.dateApplied}</dd>
+                    <dt className="text-xs uppercase tracking-wide text-text-subtle">Applied</dt>
+                    <dd className="mt-1 break-words text-text-secondary">{application.dateApplied}</dd>
                   </div>
                   <div>
-                    <dt className="text-xs uppercase tracking-wide text-[#64748b]">Location</dt>
-                    <dd className="mt-1 break-words text-[#a8b2d1]">{application.location}</dd>
+                    <dt className="text-xs uppercase tracking-wide text-text-subtle">Location</dt>
+                    <dd className="mt-1 break-words text-text-secondary">{application.location}</dd>
                   </div>
                 </dl>
-                <p className="mt-4 line-clamp-3 break-words text-sm leading-6 text-[#8892b0]">{application.messagePreview}</p>
+                <p className="mt-4 line-clamp-3 break-words text-sm leading-6 text-text-muted">{application.messagePreview}</p>
                 <div className="mt-auto pt-5">
                   {opportunityPath ? (
-                    <Link to={opportunityPath} className="inline-flex w-full items-center justify-center rounded-lg border border-[#64ffda] px-4 py-2.5 text-sm font-semibold text-[#64ffda] hover:bg-[#64ffda]/10">
+                    <Link to={opportunityPath} className="inline-flex w-full items-center justify-center rounded-lg border border-primary px-4 py-2.5 text-sm font-semibold text-primary hover:bg-primary/10">
                       View opportunity
                     </Link>
                   ) : (
-                    <p className="text-sm text-[#64748b]">The related opportunity is no longer available.</p>
+                    <p className="text-sm text-text-subtle">The related opportunity is no longer available.</p>
                   )}
                 </div>
               </article>
@@ -103,7 +103,7 @@ export default function CandidateApplicationsActivity({ activity }) {
       {lastPage > 1 && !activity.isLoading && !activity.error && (
         <div className="mt-6 flex flex-wrap items-center justify-center gap-4">
           <Button variant="outline" size="sm" disabled={activity.page <= 1} onClick={() => activity.setPage((current) => current - 1)}>Previous</Button>
-          <span className="text-sm text-[#8892b0]">Page {activity.pagination.current_page} of {lastPage}</span>
+          <span className="text-sm text-text-muted">Page {activity.pagination.current_page} of {lastPage}</span>
           <Button variant="outline" size="sm" disabled={activity.page >= lastPage} onClick={() => activity.setPage((current) => current + 1)}>Next</Button>
         </div>
       )}

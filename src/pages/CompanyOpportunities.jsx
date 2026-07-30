@@ -21,14 +21,14 @@ const typeTabs = [
 ]
 const statuses = ['all', 'active', 'draft', 'closed', 'expired']
 const initialSource = { items: [], loading: true, error: false }
-const controlClasses = 'w-full rounded-lg border border-[#233554] bg-[#112240] px-4 py-3 text-sm text-[#e6f1ff] outline-none placeholder:text-[#64748b] focus:border-[#64ffda] focus:ring-1 focus:ring-[#64ffda]'
+const controlClasses = 'w-full rounded-lg border border-border bg-surface px-4 py-3 text-sm text-text-primary outline-none placeholder:text-text-subtle focus:border-primary focus:ring-1 focus:ring-focus-ring'
 
 function SourceMessage({ children, error = false }) {
   return (
     <p role={error ? 'alert' : 'status'} className={`rounded-lg border px-4 py-3 text-sm ${
       error
-        ? 'border-[#ef4444]/30 bg-[#ef4444]/10 text-[#fca5a5]'
-        : 'border-[#233554] bg-[#112240] text-[#8892b0]'
+        ? 'border-danger/30 bg-danger/10 text-danger-text'
+        : 'border-border bg-surface text-text-muted'
     }`}>
       {children}
     </p>
@@ -97,14 +97,14 @@ export default function CompanyOpportunities() {
       <div className="min-w-0 space-y-7">
         <section className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <p className="font-mono text-sm text-[#64ffda]">Publishing</p>
+            <p className="font-mono text-sm text-primary">Publishing</p>
             <h2 className="mt-2 text-3xl font-bold">Opportunities</h2>
-            <p className="mt-2 max-w-2xl text-[#8892b0]">Manage jobs and company projects from one clear workspace.</p>
+            <p className="mt-2 max-w-2xl text-text-muted">Manage jobs and company projects from one clear workspace.</p>
           </div>
           <div className="w-full sm:w-auto sm:min-w-48"><PostOpportunityMenu /></div>
         </section>
 
-        <nav className="flex max-w-full gap-1 overflow-x-auto border-b border-[#233554]" aria-label="Opportunity types">
+        <nav className="flex max-w-full gap-1 overflow-x-auto border-b border-border" aria-label="Opportunity types">
           {typeTabs.map((tab) => (
             <button
               key={tab.value}
@@ -113,8 +113,8 @@ export default function CompanyOpportunities() {
               onClick={() => updateQuery('type', tab.value)}
               className={`shrink-0 border-b-2 px-4 py-3 text-sm font-semibold transition-colors ${
                 type === tab.value
-                  ? 'border-[#64ffda] text-[#64ffda]'
-                  : 'border-transparent text-[#8892b0] hover:text-[#e6f1ff]'
+                  ? 'border-primary text-primary'
+                  : 'border-transparent text-text-muted hover:text-text-primary'
               }`}
             >
               {tab.label}
@@ -154,9 +154,9 @@ export default function CompanyOpportunities() {
         {type === 'projects' && projects.error && <SourceMessage error>Projects could not be loaded right now.</SourceMessage>}
 
         {unsupported ? (
-          <section className="rounded-xl border border-[#233554] bg-[#112240] px-6 py-12 text-center">
+          <section className="rounded-xl border border-border bg-surface px-6 py-12 text-center">
             <h3 className="text-xl font-semibold">{type === 'internships' ? 'Internships' : 'Challenges'} are coming later</h3>
-            <p className="mx-auto mt-3 max-w-lg text-sm leading-6 text-[#8892b0]">This opportunity type is not available yet. No placeholder records or publishing requests have been created.</p>
+            <p className="mx-auto mt-3 max-w-lg text-sm leading-6 text-text-muted">This opportunity type is not available yet. No placeholder records or publishing requests have been created.</p>
           </section>
         ) : (
           <>
@@ -167,7 +167,7 @@ export default function CompanyOpportunities() {
               </section>
             )}
             {!initialLoading && visibleItems.length === 0 && !(type === 'jobs' && jobs.error) && !(type === 'projects' && projects.error) && !(type === 'all' && jobs.error && projects.error) && !(type === 'all' && (jobs.loading || projects.loading)) && (
-              <section className="rounded-xl border border-[#233554] bg-[#112240] px-6 py-12 text-center">
+              <section className="rounded-xl border border-border bg-surface px-6 py-12 text-center">
                 <h3 className="text-xl font-semibold">
                   {query || status !== 'all'
                     ? 'No opportunities match your search.'
@@ -179,11 +179,11 @@ export default function CompanyOpportunities() {
                 </h3>
                 <div className="mt-5 flex flex-wrap justify-center gap-3">
                   {(query || status !== 'all') ? (
-                    <button type="button" onClick={clearFilters} className="rounded-lg border border-[#64ffda] px-4 py-2.5 text-sm font-semibold text-[#64ffda]">Clear search</button>
+                    <button type="button" onClick={clearFilters} className="rounded-lg border border-primary px-4 py-2.5 text-sm font-semibold text-primary">Clear search</button>
                   ) : (
                     <>
-                      {(type === 'all' || type === 'jobs') && <Link to="/company/jobs/create" className="rounded-lg bg-[#64ffda] px-4 py-2.5 text-sm font-semibold text-[#071426]">Post a job</Link>}
-                      {(type === 'all' || type === 'projects') && <Link to="/company/projects/create" className="rounded-lg border border-[#64ffda] px-4 py-2.5 text-sm font-semibold text-[#64ffda]">Post a project</Link>}
+                      {(type === 'all' || type === 'jobs') && <Link to="/company/jobs/create" className="rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-contrast">Post a job</Link>}
+                      {(type === 'all' || type === 'projects') && <Link to="/company/projects/create" className="rounded-lg border border-primary px-4 py-2.5 text-sm font-semibold text-primary">Post a project</Link>}
                     </>
                   )}
                 </div>

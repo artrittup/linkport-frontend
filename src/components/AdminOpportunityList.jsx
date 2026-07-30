@@ -14,18 +14,18 @@ import EmptyState from './EmptyState'
 import LoadingSpinner from './LoadingSpinner'
 import Modal, { DetailGrid, DetailSection, SkillList } from './Modal'
 
-const control = 'w-full rounded-md border border-[#233554] bg-[#0a192f]/70 px-4 py-3 text-sm text-[#e6f1ff] outline-none placeholder:text-[#64748b] focus:border-[#64ffda]'
+const control = 'w-full rounded-md border border-border bg-background/70 px-4 py-3 text-sm text-text-primary outline-none placeholder:text-text-subtle focus:border-primary'
 
 const jobStatusStyles = {
-  draft: 'bg-[#facc15]/10 text-[#facc15]',
-  open: 'bg-[#22c55e]/10 text-[#22c55e]',
-  closed: 'bg-[#ef4444]/10 text-[#fca5a5]',
+  draft: 'bg-warning/10 text-warning',
+  open: 'bg-success/10 text-success',
+  closed: 'bg-danger/10 text-danger-text',
 }
 
 const projectStatusStyles = {
-  draft: 'bg-[#facc15]/10 text-[#facc15]',
-  open: 'bg-[#22c55e]/10 text-[#22c55e]',
-  closed: 'bg-[#ef4444]/10 text-[#fca5a5]',
+  draft: 'bg-warning/10 text-warning',
+  open: 'bg-success/10 text-success',
+  closed: 'bg-danger/10 text-danger-text',
 }
 
 const configurations = {
@@ -58,7 +58,7 @@ function StatusBadge({ status, styles }) {
     : 'Unknown'
 
   return (
-    <span className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${styles[value] ?? 'bg-[#233554] text-[#a8b2d1]'}`}>
+    <span className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${styles[value] ?? 'bg-border text-text-secondary'}`}>
       {label}
     </span>
   )
@@ -191,9 +191,9 @@ export default function AdminOpportunityList({ type, showHeading = false }) {
     <div className="min-w-0 space-y-6">
       {showHeading && (
         <section>
-          <p className="font-mono text-sm text-[#64ffda]">Content moderation</p>
+          <p className="font-mono text-sm text-primary">Content moderation</p>
           <h2 className="mt-2 text-2xl font-bold sm:text-3xl">{config.plural}</h2>
-          <p className="mt-3 text-[#8892b0]">Review and manage existing {config.plural.toLowerCase()}.</p>
+          <p className="mt-3 text-text-muted">Review and manage existing {config.plural.toLowerCase()}.</p>
         </section>
       )}
 
@@ -215,7 +215,7 @@ export default function AdminOpportunityList({ type, showHeading = false }) {
         </div>
       </Card>
 
-      <p className="text-sm text-[#8892b0]">Showing {visibleItems.length} on this page · {pagination.total} total {config.plural.toLowerCase()}</p>
+      <p className="text-sm text-text-muted">Showing {visibleItems.length} on this page · {pagination.total} total {config.plural.toLowerCase()}</p>
 
       {loading ? (
         <LoadingSpinner label={`Loading ${config.plural}...`} size="lg" />
@@ -235,23 +235,23 @@ export default function AdminOpportunityList({ type, showHeading = false }) {
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <h3 className="break-words font-semibold">{item.title}</h3>
-                  <p className="mt-1 break-words text-sm text-[#64ffda]">{item.company}</p>
+                  <p className="mt-1 break-words text-sm text-primary">{item.company}</p>
                 </div>
                 <StatusBadge status={item.status} styles={config.statusStyles} />
               </div>
-              <dl className="mt-5 grid grid-cols-2 gap-3 border-y border-[#233554] py-4 text-xs">
+              <dl className="mt-5 grid grid-cols-2 gap-3 border-y border-border py-4 text-xs">
                 {type === 'jobs' ? (
                   <>
-                    <div><dt className="text-[#64748b]">Location</dt><dd className="mt-1 break-words">{displayValue(item.location, 'Location unavailable')}</dd></div>
-                    <div><dt className="text-[#64748b]">Deadline</dt><dd className="mt-1 break-words">{displayValue(item.deadline, 'No deadline')}</dd></div>
+                    <div><dt className="text-text-subtle">Location</dt><dd className="mt-1 break-words">{displayValue(item.location, 'Location unavailable')}</dd></div>
+                    <div><dt className="text-text-subtle">Deadline</dt><dd className="mt-1 break-words">{displayValue(item.deadline, 'No deadline')}</dd></div>
                   </>
                 ) : (
                   <>
-                    <div><dt className="text-[#64748b]">Budget</dt><dd className="mt-1 break-words">{displayValue(item.budget, 'Budget unavailable')}</dd></div>
-                    <div><dt className="text-[#64748b]">Deadline</dt><dd className="mt-1 break-words">{displayValue(item.deadline, 'No deadline')}</dd></div>
+                    <div><dt className="text-text-subtle">Budget</dt><dd className="mt-1 break-words">{displayValue(item.budget, 'Budget unavailable')}</dd></div>
+                    <div><dt className="text-text-subtle">Deadline</dt><dd className="mt-1 break-words">{displayValue(item.deadline, 'No deadline')}</dd></div>
                   </>
                 )}
-                <div className="col-span-2"><dt className="text-[#64748b]">Created</dt><dd className="mt-1">{item.createdDate}</dd></div>
+                <div className="col-span-2"><dt className="text-text-subtle">Created</dt><dd className="mt-1">{item.createdDate}</dd></div>
               </dl>
               <div className="mt-5"><Actions item={item} /></div>
             </Card>
@@ -262,7 +262,7 @@ export default function AdminOpportunityList({ type, showHeading = false }) {
       {!loading && !error && lastPage > 1 && (
         <div className="flex items-center justify-center gap-4">
           <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => updateParams({ page: page - 1 })}>Previous</Button>
-          <span className="text-sm text-[#8892b0]">Page {pagination.current_page} of {lastPage}</span>
+          <span className="text-sm text-text-muted">Page {pagination.current_page} of {lastPage}</span>
           <Button variant="outline" size="sm" disabled={page >= lastPage} onClick={() => updateParams({ page: page + 1 })}>Next</Button>
         </div>
       )}

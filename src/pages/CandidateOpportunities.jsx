@@ -88,15 +88,15 @@ export default function CandidateOpportunities() {
     <CandidateLayout title="Opportunities">
       <section className="flex min-w-0 max-w-full flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
         <div className="min-w-0">
-          <p className="font-mono text-sm text-[#64ffda]">Member opportunities</p>
-          <h2 className="mt-2 text-3xl font-bold tracking-tight text-[#e6f1ff] sm:text-4xl">Opportunities</h2>
-          <p className="mt-4 max-w-2xl leading-7 text-[#8892b0]">
+          <p className="font-mono text-sm text-primary">Member opportunities</p>
+          <h2 className="mt-2 text-3xl font-bold tracking-tight text-text-primary sm:text-4xl">Opportunities</h2>
+          <p className="mt-4 max-w-2xl leading-7 text-text-muted">
             Find live jobs, internships, and company projects that match your next step.
           </p>
         </div>
         <div className="flex shrink-0 flex-wrap gap-4 text-sm">
-          <Link to={getCandidateActivityPath('applications')} className="text-[#a8b2d1] hover:text-[#64ffda]">My applications</Link>
-          <Link to={getCandidateActivityPath('proposals')} className="text-[#a8b2d1] hover:text-[#64ffda]">My proposals</Link>
+          <Link to={getCandidateActivityPath('applications')} className="text-text-secondary hover:text-primary">My applications</Link>
+          <Link to={getCandidateActivityPath('proposals')} className="text-text-secondary hover:text-primary">My proposals</Link>
         </div>
       </section>
 
@@ -110,7 +110,7 @@ export default function CandidateOpportunities() {
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               placeholder="Search by title, company, or skill..."
-              className="w-full min-w-0 max-w-full rounded-xl border border-[#233554] bg-[#112240]/70 px-4 py-3 text-sm text-[#e6f1ff] outline-none placeholder:text-[#64748b] focus:border-[#64ffda] focus:ring-1 focus:ring-[#64ffda]"
+              className="w-full min-w-0 max-w-full rounded-xl border border-border bg-surface/70 px-4 py-3 text-sm text-text-primary outline-none placeholder:text-text-subtle focus:border-primary focus:ring-1 focus:ring-focus-ring"
             />
           </div>
           <div className="min-w-0">
@@ -119,7 +119,7 @@ export default function CandidateOpportunities() {
               id="work-style-filter"
               value={workStyle}
               onChange={(event) => setWorkStyle(event.target.value)}
-              className="w-full min-w-0 max-w-full rounded-xl border border-[#233554] bg-[#112240]/70 px-4 py-3 text-sm text-[#e6f1ff] outline-none focus:border-[#64ffda] focus:ring-1 focus:ring-[#64ffda]"
+              className="w-full min-w-0 max-w-full rounded-xl border border-border bg-surface/70 px-4 py-3 text-sm text-text-primary outline-none focus:border-primary focus:ring-1 focus:ring-focus-ring"
             >
               {workStyleFilters.map((item) => <option key={item}>{item}</option>)}
             </select>
@@ -136,8 +136,8 @@ export default function CandidateOpportunities() {
               onClick={() => setActiveType(filter)}
               className={`shrink-0 rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
                 activeType === filter
-                  ? 'border-[#64ffda] bg-[#64ffda]/10 text-[#64ffda]'
-                  : 'border-[#233554] text-[#8892b0] hover:border-[#64ffda]/50 hover:text-[#e6f1ff]'
+                  ? 'border-primary bg-primary/10 text-primary'
+                  : 'border-border text-text-muted hover:border-primary/50 hover:text-text-primary'
               }`}
             >
               {filter}
@@ -148,27 +148,27 @@ export default function CandidateOpportunities() {
 
       <section className="mt-8 min-w-0 max-w-full" aria-live="polite">
         {jobsLoading && (
-          <div className="mb-5 rounded-xl border border-[#233554] bg-[#112240]/50 px-4 py-3">
+          <div className="mb-5 rounded-xl border border-border bg-surface/50 px-4 py-3">
             <LoadingSpinner label="Loading jobs..." />
           </div>
         )}
         {jobsError && (
-          <p className="mb-5 rounded-xl border border-[#facc15]/25 bg-[#facc15]/5 px-4 py-3 text-sm text-[#fde68a]">
+          <p className="mb-5 rounded-xl border border-warning/25 bg-warning/5 px-4 py-3 text-sm text-warning-text">
             Jobs are temporarily unavailable. Other opportunities are still shown below.
           </p>
         )}
         {projectsError && (
-          <p className="mb-5 rounded-xl border border-[#facc15]/25 bg-[#facc15]/5 px-4 py-3 text-sm text-[#fde68a]">
+          <p className="mb-5 rounded-xl border border-warning/25 bg-warning/5 px-4 py-3 text-sm text-warning-text">
             Company projects are temporarily unavailable. Jobs are still available.
           </p>
         )}
 
         <div className="mb-4 flex items-center justify-between gap-4">
-          <p className="text-sm text-[#64748b]">
+          <p className="text-sm text-text-subtle">
             {visibleOpportunities.length} {visibleOpportunities.length === 1 ? 'opportunity' : 'opportunities'}
           </p>
           {hasFilters && (
-            <button type="button" onClick={clearFilters} className="text-sm text-[#64ffda] hover:underline">
+            <button type="button" onClick={clearFilters} className="text-sm text-primary hover:underline">
               Clear filters
             </button>
           )}

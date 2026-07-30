@@ -52,15 +52,15 @@ export default function CandidateProjects() {
     <CandidateLayout title="Projects">
       <section className="flex min-w-0 max-w-full flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
         <div className="min-w-0">
-          <p className="font-mono text-sm text-[#64ffda]">Project showcase</p>
-          <h2 className="mt-2 text-3xl font-bold tracking-tight text-[#e6f1ff] sm:text-4xl">Projects</h2>
-          <p className="mt-4 max-w-2xl leading-7 text-[#8892b0]">
+          <p className="font-mono text-sm text-primary">Project showcase</p>
+          <h2 className="mt-2 text-3xl font-bold tracking-tight text-text-primary sm:text-4xl">Projects</h2>
+          <p className="mt-4 max-w-2xl leading-7 text-text-muted">
             Discover work from LinkPort members, share what you are building, and find projects looking for collaborators.
           </p>
         </div>
         <Link
           to="/member/create/project"
-          className="inline-flex shrink-0 items-center justify-center rounded-lg border border-[#64ffda] bg-[#64ffda] px-5 py-2.5 text-sm font-semibold text-[#071426] transition-colors hover:bg-[#7dffe1]"
+          className="inline-flex shrink-0 items-center justify-center rounded-lg border border-primary bg-primary px-5 py-2.5 text-sm font-semibold text-primary-contrast transition-colors hover:bg-primary-hover"
         >
           Share a project
         </Link>
@@ -75,7 +75,7 @@ export default function CandidateProjects() {
             value={search}
             onChange={(event) => setSearch(event.target.value)}
             placeholder="Search by project, description, or skill..."
-            className="min-w-0 flex-1 rounded-xl border border-[#233554] bg-[#112240]/70 px-4 py-3 text-sm text-[#e6f1ff] outline-none placeholder:text-[#64748b] focus:border-[#64ffda] focus:ring-1 focus:ring-[#64ffda]"
+            className="min-w-0 flex-1 rounded-xl border border-border bg-surface/70 px-4 py-3 text-sm text-text-primary outline-none placeholder:text-text-subtle focus:border-primary focus:ring-1 focus:ring-focus-ring"
           />
           <Button type="submit" variant="outline" className="shrink-0">Search</Button>
         </form>
@@ -90,8 +90,8 @@ export default function CandidateProjects() {
               onClick={() => selectFilter(filter.value)}
               className={`shrink-0 rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
                 activeFilter === filter.value
-                  ? 'border-[#64ffda] bg-[#64ffda]/10 text-[#64ffda]'
-                  : 'border-[#233554] text-[#8892b0] hover:border-[#64ffda]/50 hover:text-[#e6f1ff]'
+                  ? 'border-primary bg-primary/10 text-primary'
+                  : 'border-border text-text-muted hover:border-primary/50 hover:text-text-primary'
               }`}
             >
               {filter.label}
@@ -112,7 +112,7 @@ export default function CandidateProjects() {
           />
         ) : projects.length > 0 ? (
           <>
-            <p className="mb-4 text-sm text-[#64748b]">
+            <p className="mb-4 text-sm text-text-subtle">
               {meta.total} {meta.total === 1 ? 'project' : 'projects'}
             </p>
             <div className="grid min-w-0 max-w-full gap-5 md:grid-cols-2 xl:grid-cols-3">
@@ -121,7 +121,7 @@ export default function CandidateProjects() {
             {meta.last_page > 1 && (
               <nav className="mt-8 flex flex-wrap items-center justify-center gap-3" aria-label="Project pages">
                 <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((current) => Math.max(1, current - 1))}>Previous</Button>
-                <span className="text-sm text-[#8892b0]">Page {meta.current_page} of {meta.last_page}</span>
+                <span className="text-sm text-text-muted">Page {meta.current_page} of {meta.last_page}</span>
                 <Button variant="outline" size="sm" disabled={page >= meta.last_page} onClick={() => setPage((current) => current + 1)}>Next</Button>
               </nav>
             )}

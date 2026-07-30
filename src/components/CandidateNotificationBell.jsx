@@ -162,10 +162,10 @@ export default function CandidateNotificationBell({
         aria-label="Open notifications"
         aria-expanded={isOpen}
         aria-controls={panelId}
-        className={`relative flex h-10 w-10 items-center justify-center rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#64ffda] ${
+        className={`relative flex h-10 w-10 items-center justify-center rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring ${
           isOpen
-            ? 'bg-[#112240] text-[#64ffda]'
-            : 'text-[#8892b0] hover:bg-[#112240] hover:text-[#64ffda]'
+            ? 'bg-surface text-primary'
+            : 'text-text-muted hover:bg-surface hover:text-primary'
         }`}
       >
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5" aria-hidden="true">
@@ -173,7 +173,7 @@ export default function CandidateNotificationBell({
           <path d="M10 21h4" />
         </svg>
         {unreadCount > 0 && (
-          <span className="absolute right-0.5 top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#64ffda] px-1 text-[9px] font-bold text-[#071426]">
+          <span className="absolute right-0.5 top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[9px] font-bold text-primary-contrast">
             {unreadCount > 99 ? '99+' : unreadCount}
           </span>
         )}
@@ -184,25 +184,25 @@ export default function CandidateNotificationBell({
           id={panelId}
           role="dialog"
           aria-label="Recent notifications"
-          className={`absolute z-[80] mt-2 flex max-h-[calc(100vh-6rem)] min-w-0 flex-col overflow-hidden rounded-xl border border-[#233554] bg-[#112240] shadow-2xl shadow-black/45 ${panelPosition}`}
+          className={`absolute z-[80] mt-2 flex max-h-[calc(100vh-6rem)] min-w-0 flex-col overflow-hidden rounded-xl border border-border bg-surface shadow-2xl shadow-black/45 ${panelPosition}`}
         >
-          <header className="flex min-w-0 items-start justify-between gap-3 border-b border-[#233554] px-4 py-3">
+          <header className="flex min-w-0 items-start justify-between gap-3 border-b border-border px-4 py-3">
             <div className="min-w-0">
-              <h2 className="font-semibold text-[#e6f1ff]">Notifications</h2>
-              <p className="mt-0.5 text-[11px] text-[#8892b0]">{unreadCount} unread</p>
+              <h2 className="font-semibold text-text-primary">Notifications</h2>
+              <p className="mt-0.5 text-[11px] text-text-muted">{unreadCount} unread</p>
             </div>
             {unreadCount > 0 && (
-              <button type="button" disabled={isMarkingAll} onClick={markAllRead} className="shrink-0 text-xs font-medium text-[#64ffda] hover:underline disabled:cursor-wait disabled:opacity-60">
+              <button type="button" disabled={isMarkingAll} onClick={markAllRead} className="shrink-0 text-xs font-medium text-primary hover:underline disabled:cursor-wait disabled:opacity-60">
                 {isMarkingAll ? 'Marking...' : 'Mark all as read'}
               </button>
             )}
           </header>
 
           <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-1.5">
-            {isLoading && <p className="px-3 py-8 text-center text-xs text-[#8892b0]">Loading notifications...</p>}
-            {!isLoading && error && <p role="alert" className="px-3 py-3 text-center text-xs text-[#fca5a5]">{error}</p>}
+            {isLoading && <p className="px-3 py-8 text-center text-xs text-text-muted">Loading notifications...</p>}
+            {!isLoading && error && <p role="alert" className="px-3 py-3 text-center text-xs text-danger-text">{error}</p>}
             {!isLoading && notifications.length === 0 && (
-              <p className="px-3 py-8 text-center text-xs text-[#8892b0]">You have no notifications.</p>
+              <p className="px-3 py-8 text-center text-xs text-text-muted">You have no notifications.</p>
             )}
             {!isLoading && notifications.map((notification) => (
               <NotificationRow
@@ -219,7 +219,7 @@ export default function CandidateNotificationBell({
           <Link
             to="/member/notifications"
             onClick={() => setIsOpen(false)}
-            className="block border-t border-[#233554] px-4 py-3 text-center text-xs font-semibold text-[#64ffda] transition-colors hover:bg-[#172a45]"
+            className="block border-t border-border px-4 py-3 text-center text-xs font-semibold text-primary transition-colors hover:bg-surface-elevated"
           >
             View all notifications
           </Link>

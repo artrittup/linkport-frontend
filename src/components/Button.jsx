@@ -1,12 +1,12 @@
 const variants = {
   primary:
-    'border border-[#64ffda] bg-[#64ffda] text-[#0a192f] shadow-sm shadow-[#64ffda]/10 hover:border-[#7dffe1] hover:bg-[#7dffe1]',
+    'border border-primary bg-primary text-primary-contrast shadow-sm shadow-primary/10 hover:border-primary-hover hover:bg-primary-hover active:border-primary-active active:bg-primary-active',
   outline:
-    'border border-[#64ffda] bg-transparent text-[#64ffda] hover:bg-[#64ffda]/10',
+    'border border-primary bg-transparent text-primary hover:bg-primary/10',
   danger:
-    'border border-[#ef4444] bg-[#ef4444] text-[#e6f1ff] hover:border-[#ef4444]/85 hover:bg-[#ef4444]/85',
+    'border border-danger bg-danger text-on-danger hover:border-danger/85 hover:bg-danger/85',
   ghost:
-    'border border-transparent bg-transparent text-[#8892b0] hover:bg-[#112240] hover:text-[#e6f1ff]',
+    'border border-transparent bg-transparent text-text-muted hover:bg-surface hover:text-text-primary',
 }
 
 const sizes = {
@@ -32,7 +32,7 @@ export default function Button({
       type={type}
       onClick={onClick}
       disabled={disabled}
-      className={`inline-flex items-center justify-center rounded-lg font-semibold transition-all duration-200 hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#64ffda] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a192f] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 ${variantClasses} ${sizeClasses} ${className}`}
+      className={`inline-flex items-center justify-center rounded-lg font-semibold transition-all duration-200 hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 ${variantClasses} ${sizeClasses} ${className}`}
     >
       {children}
     </button>

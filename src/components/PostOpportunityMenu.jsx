@@ -63,7 +63,7 @@ export default function PostOpportunityMenu({ compact = false, onNavigate }) {
         aria-expanded={isOpen}
         aria-controls={menuId}
         onClick={() => setIsOpen((open) => !open)}
-        className={`inline-flex max-w-full items-center justify-center rounded-lg bg-[#64ffda] font-semibold text-[#071426] transition-colors hover:bg-[#7dffe1] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#64ffda] focus-visible:ring-offset-2 focus-visible:ring-offset-[#071426] ${
+        className={`inline-flex max-w-full items-center justify-center rounded-lg bg-primary font-semibold text-primary-contrast transition-colors hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring focus-visible:ring-offset-2 focus-visible:ring-offset-surface-deep ${
           compact ? 'h-10 px-3 text-xs' : 'w-full px-4 py-3 text-sm'
         }`}
       >
@@ -74,7 +74,7 @@ export default function PostOpportunityMenu({ compact = false, onNavigate }) {
         <div
           id={menuId}
           role="menu"
-          className={`absolute z-[70] mt-2 w-[min(18rem,calc(100vw-2rem))] overflow-hidden rounded-xl border border-[#233554] bg-[#112240] p-1.5 shadow-2xl shadow-black/40 ${
+          className={`absolute z-[70] mt-2 w-[min(18rem,calc(100vw-2rem))] overflow-hidden rounded-xl border border-border bg-surface p-1.5 shadow-2xl shadow-black/40 ${
             compact ? 'right-0' : 'left-0'
           }`}
         >
@@ -85,15 +85,15 @@ export default function PostOpportunityMenu({ compact = false, onNavigate }) {
                 type="button"
                 role="menuitem"
                 onClick={() => openSupportedType(type.path)}
-                className="block w-full rounded-lg px-3 py-2.5 text-left transition-colors hover:bg-[#172a45] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#64ffda]"
+                className="block w-full rounded-lg px-3 py-2.5 text-left transition-colors hover:bg-surface-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
               >
-                <span className="block text-sm font-medium text-[#e6f1ff]">{type.label}</span>
-                <span className="mt-0.5 block text-xs leading-5 text-[#8892b0]">{type.description}</span>
+                <span className="block text-sm font-medium text-text-primary">{type.label}</span>
+                <span className="mt-0.5 block text-xs leading-5 text-text-muted">{type.description}</span>
               </button>
             ) : (
               <div key={type.label} className="rounded-lg px-3 py-2.5 opacity-65">
-                <span className="block text-sm font-medium text-[#a8b2d1]">{type.label}</span>
-                <span className="mt-0.5 block text-xs leading-5 text-[#64748b]">{type.description}</span>
+                <span className="block text-sm font-medium text-text-disabled">{type.label}</span>
+                <span className="mt-0.5 block text-xs leading-5 text-text-disabled">{type.description}</span>
               </div>
             )
           ))}

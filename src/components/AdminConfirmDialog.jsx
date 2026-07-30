@@ -33,13 +33,13 @@ export default function AdminConfirmDialog({
         </>
       )}
     >
-      <p className="break-words text-sm leading-6 text-[#a8b2d1]">
-        <span className="font-semibold text-[#e6f1ff]">{entityName}</span>
+      <p className="break-words text-sm leading-6 text-text-secondary">
+        <span className="font-semibold text-text-primary">{entityName}</span>
         {' — '}
         {description}
       </p>
       {error && (
-        <p role="alert" className="mt-4 rounded-lg border border-[#ef4444]/30 bg-[#ef4444]/10 px-4 py-3 text-sm text-[#fca5a5]">
+        <p role="alert" className="mt-4 rounded-lg border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger-text">
           {error}
         </p>
       )}

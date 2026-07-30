@@ -37,7 +37,7 @@ export default function DashboardLayout({ children, title, userType }) {
   }
 
   return (
-    <div className="min-h-screen bg-[#0a192f] text-[#e6f1ff]">
+    <div className="min-h-screen bg-background text-text-primary">
       <Sidebar
         navItems={navItems}
         isOpen={isSidebarOpen}

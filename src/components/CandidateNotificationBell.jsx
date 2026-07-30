@@ -33,7 +33,13 @@ export default function CandidateNotificationBell({
   const [isMarkingAll, setIsMarkingAll] = useState(false)
 
   const refreshUnreadCount = useCallback(async () => {
-    if (!isAuthenticated || refreshingCountRef.current) return
+    if (
+      !isAuthenticated ||
+      document.visibilityState !== 'visible' ||
+      refreshingCountRef.current
+    ) {
+      return
+    }
 
     refreshingCountRef.current = true
     try {
@@ -52,10 +58,12 @@ export default function CandidateNotificationBell({
     const refreshId = window.setTimeout(refreshUnreadCount, 0)
     const intervalId = window.setInterval(refreshUnreadCount, 45000)
     window.addEventListener(NOTIFICATIONS_CHANGED_EVENT, refreshUnreadCount)
+    document.addEventListener('visibilitychange', refreshUnreadCount)
     return () => {
       window.clearTimeout(refreshId)
       window.clearInterval(intervalId)
       window.removeEventListener(NOTIFICATIONS_CHANGED_EVENT, refreshUnreadCount)
+      document.removeEventListener('visibilitychange', refreshUnreadCount)
     }
   }, [isAuthenticated, refreshUnreadCount])
 
@@ -116,7 +124,7 @@ export default function CandidateNotificationBell({
     }
 
     setIsOpen(false)
-    navigate(getNotificationDestination(notification, '/candidate/notifications'))
+    navigate(getNotificationDestination(notification, '/member/notifications'))
     setOpeningId(null)
   }
 
@@ -209,7 +217,7 @@ export default function CandidateNotificationBell({
           </div>
 
           <Link
-            to="/candidate/notifications"
+            to="/member/notifications"
             onClick={() => setIsOpen(false)}
             className="block border-t border-[#233554] px-4 py-3 text-center text-xs font-semibold text-[#64ffda] transition-colors hover:bg-[#172a45]"
           >

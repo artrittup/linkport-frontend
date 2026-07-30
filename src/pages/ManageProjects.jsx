@@ -294,7 +294,7 @@ export default function ManageProjects({ initialCreate = false }) {
               Manage Projects
             </h2>
             <p className="mt-3 text-[#8892b0]">
-              Create, edit, and manage projects that candidates can submit proposals to.
+              Create, edit, and manage projects that members can submit proposals to.
             </p>
           </div>
           <Button size="lg" onClick={openCreateForm}>

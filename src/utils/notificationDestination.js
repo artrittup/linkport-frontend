@@ -15,7 +15,7 @@ export function getNotificationDestination(notification, fallback = '/notificati
     && !targetRoute.startsWith('//')
     && !hasUnsafeCharacter
   ) {
-    return targetRoute
+    return targetRoute.replace(/^\/candidate(?=\/|$)/, '/member')
   }
 
   const data = notification?.metadata ?? {}

@@ -88,7 +88,7 @@ export default function CandidateOpportunities() {
     <CandidateLayout title="Opportunities">
       <section className="flex min-w-0 max-w-full flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
         <div className="min-w-0">
-          <p className="font-mono text-sm text-[#64ffda]">Candidate opportunities</p>
+          <p className="font-mono text-sm text-[#64ffda]">Member opportunities</p>
           <h2 className="mt-2 text-3xl font-bold tracking-tight text-[#e6f1ff] sm:text-4xl">Opportunities</h2>
           <p className="mt-4 max-w-2xl leading-7 text-[#8892b0]">
             Find live jobs, internships, and company projects that match your next step.

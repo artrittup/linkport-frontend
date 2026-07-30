@@ -60,7 +60,7 @@ export default function CandidateContentActivity({ items }) {
           title={items.length === 0 ? 'You have not shared anything yet.' : `No ${filter.toLowerCase()} shared yet`}
           description={items.length === 0 ? 'Projects, posts, and teammate requests you create will appear here.' : 'Choose another content type to review your activity.'}
           actionLabel={items.length === 0 ? 'Create something' : 'Show all content'}
-          onAction={items.length === 0 ? () => navigate('/candidate/create/project') : () => setFilter('All')}
+          onAction={items.length === 0 ? () => navigate('/member/create/project') : () => setFilter('All')}
         />
       )}
     </section>

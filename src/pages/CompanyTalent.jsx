@@ -74,11 +74,11 @@ export default function CompanyTalent() {
         </Form>
 
         <section aria-live="polite">
-          <p className="mb-4 text-sm text-[#64748b]">{isLoading ? 'Loading candidates...' : `${meta.total} ${meta.total === 1 ? 'candidate' : 'candidates'}`}</p>
+          <p className="mb-4 text-sm text-[#64748b]">{isLoading ? 'Loading members...' : `${meta.total} ${meta.total === 1 ? 'member' : 'members'}`}</p>
           {isLoading ? (
             <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3" aria-label="Loading talent">{[0, 1, 2].map((item) => <div key={item} className="h-72 animate-pulse rounded-2xl border border-[#233554] bg-[#112240]/45" />)}</div>
           ) : error ? (
-            <EmptyState title="Talent directory unavailable" description="Candidate discovery could not be loaded. Please try again." actionLabel="Try again" onAction={retry} />
+            <EmptyState title="Talent directory unavailable" description="Member discovery could not be loaded. Please try again." actionLabel="Try again" onAction={retry} />
           ) : members.length > 0 ? (
             <>
               <div className="grid min-w-0 gap-5 sm:grid-cols-2 xl:grid-cols-3">{members.map((member) => <CompanyTalentCard key={member.id} member={member} />)}</div>
@@ -89,7 +89,7 @@ export default function CompanyTalent() {
               </nav>}
             </>
           ) : (
-            <EmptyState title={hasFilters ? 'No candidates match your filters' : 'No Candidates are available yet.'} description={hasFilters ? 'Try a broader search or clear the current filters.' : 'Active Candidate profiles will appear here.'} actionLabel={hasFilters ? 'Clear filters' : undefined} onAction={hasFilters ? () => setSearchParams({}) : undefined} />
+            <EmptyState title={hasFilters ? 'No members match your filters' : 'No members are available yet.'} description={hasFilters ? 'Try a broader search or clear the current filters.' : 'Active member profiles will appear here.'} actionLabel={hasFilters ? 'Clear filters' : undefined} onAction={hasFilters ? () => setSearchParams({}) : undefined} />
           )}
         </section>
       </div>

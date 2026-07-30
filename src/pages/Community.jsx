@@ -90,7 +90,7 @@ export default function Community() {
               <h3 className="text-2xl font-semibold text-[#e6f1ff]">Collaboration requests</h3>
               <p className="mt-2 text-sm text-[#8892b0]">Recent member requests for project teammates.</p>
             </div>
-            <Link to="/candidate/create/team" className="text-sm font-medium text-[#64ffda] hover:underline">Create a request</Link>
+            <Link to="/member/create/team" className="text-sm font-medium text-[#64ffda] hover:underline">Create a request</Link>
           </div>
           {requestsLoading ? (
             <p className="mt-5 rounded-xl border border-[#233554] bg-[#112240]/45 p-5 text-sm text-[#8892b0]">Loading collaboration requests...</p>
@@ -116,7 +116,7 @@ export default function Community() {
               <h3 className="text-2xl font-semibold text-[#e6f1ff]">Upcoming events</h3>
               <p className="mt-2 text-sm text-[#8892b0]">Meet, learn, and share useful feedback with the community.</p>
             </div>
-            <Link to="/candidate/community/events" className="text-sm font-medium text-[#64ffda] hover:underline">View all events</Link>
+            <Link to="/member/community/events" className="text-sm font-medium text-[#64ffda] hover:underline">View all events</Link>
           </div>
           {eventsLoading ? (
             <p className="mt-5 rounded-xl border border-[#233554] bg-[#112240]/45 p-5 text-sm text-[#8892b0]">Loading upcoming events...</p>
@@ -173,7 +173,7 @@ export default function Community() {
                   Show all
                 </button>
               )}
-              <Link to="/candidate/community/members" className="text-sm font-medium text-[#64ffda] hover:underline">
+              <Link to="/member/community/members" className="text-sm font-medium text-[#64ffda] hover:underline">
                 View all members
               </Link>
             </div>
@@ -216,7 +216,7 @@ export default function Community() {
                 <p className="mt-4 text-xs text-[#a8b2d1]">{project.lookingForRoles.join(' · ')}</p>
                 <div className="mt-auto pt-5">
                   <Link
-                    to={`/candidate/projects/${project.id}`}
+                    to={`/member/projects/${project.id}`}
                     className="inline-flex w-full items-center justify-center rounded-lg border border-[#64ffda] px-4 py-2 text-sm font-semibold text-[#64ffda] transition-colors hover:bg-[#64ffda]/10"
                   >
                     View project

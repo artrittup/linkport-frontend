@@ -50,7 +50,7 @@ export default function CandidateMembers() {
             <h2 className="mt-2 text-3xl font-bold tracking-tight text-[#e6f1ff] sm:text-4xl">Community Members</h2>
             <p className="mt-4 max-w-2xl leading-7 text-[#8892b0]">Discover people through their interests, skills, fields of study, and projects.</p>
           </div>
-          <Link to="/candidate/profile" className="inline-flex shrink-0 items-center justify-center rounded-lg border border-[#64ffda] px-4 py-2.5 text-sm font-semibold text-[#64ffda] hover:bg-[#64ffda]/10">View my profile</Link>
+          <Link to="/member/profile" className="inline-flex shrink-0 items-center justify-center rounded-lg border border-[#64ffda] px-4 py-2.5 text-sm font-semibold text-[#64ffda] hover:bg-[#64ffda]/10">View my profile</Link>
         </section>
 
         <section className="mt-8 min-w-0 max-w-full" aria-label="Find community members">
@@ -110,7 +110,7 @@ export default function CandidateMembers() {
           ) : (
             <EmptyState
               title={debouncedSearch ? 'No members match your search' : interest ? 'No members in this interest area' : 'No community members yet'}
-              description={hasFilters ? 'Try another search or interest area.' : 'Candidate profiles will appear here when they become available.'}
+              description={hasFilters ? 'Try another search or interest area.' : 'Member profiles will appear here when they become available.'}
               actionLabel={hasFilters ? 'Clear filters' : 'Return to Community'}
               onAction={hasFilters ? clearFilters : () => window.history.back()}
             />

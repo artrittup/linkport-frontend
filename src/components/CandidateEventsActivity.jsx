@@ -16,7 +16,7 @@ export default function CandidateEventsActivity({ events, onRemove, removingEven
         title="You have not saved any events yet."
         description="Events marked as attending will appear in this list."
         actionLabel="Browse events"
-        onAction={() => navigate('/candidate/community/events')}
+        onAction={() => navigate('/member/community/events')}
       />
     )
   }
@@ -43,7 +43,7 @@ export default function CandidateEventsActivity({ events, onRemove, removingEven
             </div>
           </dl>
           <div className="mt-auto flex flex-col gap-3 pt-5 sm:flex-row">
-            <Link to={`/candidate/community/events/${event.id}`} className="inline-flex flex-1 items-center justify-center rounded-lg border border-[#64ffda] px-4 py-2.5 text-sm font-semibold text-[#64ffda] hover:bg-[#64ffda]/10">
+            <Link to={`/member/community/events/${event.id}`} className="inline-flex flex-1 items-center justify-center rounded-lg border border-[#64ffda] px-4 py-2.5 text-sm font-semibold text-[#64ffda] hover:bg-[#64ffda]/10">
               View event
             </Link>
             <button type="button" disabled={removingEventId === event.id} onClick={() => onRemove(event.id)} className="inline-flex items-center justify-center rounded-lg border border-[#233554] px-4 py-2.5 text-sm font-medium text-[#a8b2d1] hover:border-[#f87171]/50 hover:text-[#f87171] disabled:cursor-not-allowed disabled:opacity-60">

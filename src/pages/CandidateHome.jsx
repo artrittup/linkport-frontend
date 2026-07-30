@@ -137,7 +137,7 @@ export default function CandidateHome() {
       tags: project.skills,
       meta: getCommunityProjectStatusLabel(project.status),
       action: 'View project',
-      path: `/candidate/projects/${project.id}`,
+      path: `/member/projects/${project.id}`,
       createdAt: project.createdAt,
     })),
     ...communityPosts.map((post) => ({
@@ -163,7 +163,7 @@ export default function CandidateHome() {
       tags: request.skills,
       meta: `${request.rolesNeeded.length} ${request.rolesNeeded.length === 1 ? 'role' : 'roles'} · ${getTeammateRequestWorkStyleLabel(request.workStyle)}`,
       action: 'View request',
-      path: `/candidate/community/team-requests/${request.id}`,
+      path: `/member/community/team-requests/${request.id}`,
       createdAt: request.createdAt,
     })),
     ...communityEvents.map((event) => ({
@@ -176,7 +176,7 @@ export default function CandidateHome() {
       tags: event.topics,
       meta: `${formatCommunityEventDate(event.startsAt)} · ${formatCommunityEventTime(event.startsAt, event.endsAt)} · ${getCommunityEventLocationLabel(event)}`,
       action: 'View event',
-      path: `/candidate/community/events/${event.id}`,
+      path: `/member/community/events/${event.id}`,
       attending: event.isAttending,
       createdAt: event.createdAt,
     })),
@@ -190,7 +190,7 @@ export default function CandidateHome() {
       tags: opportunity.skills,
       meta: opportunity.location,
       action: 'View opportunity',
-      path: `/candidate/opportunities/${opportunity.id}`,
+      path: `/member/opportunities/${opportunity.id}`,
       createdAt: opportunity.sourceData?.created_at ?? null,
     })),
   ].sort((first, second) => {

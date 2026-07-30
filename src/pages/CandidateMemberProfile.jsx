@@ -27,10 +27,10 @@ function UnavailableMember({ notFound, onRetry }) {
       <section className="mx-auto max-w-2xl rounded-2xl border border-[#233554] bg-[#112240]/65 p-8 text-center sm:p-10">
         <p className="font-mono text-sm text-[#64ffda]">Member discovery</p>
         <h2 className="mt-3 text-2xl font-bold text-[#e6f1ff]">{notFound ? 'Member not found' : 'Member profile unavailable'}</h2>
-        <p className="mt-3 text-sm leading-6 text-[#8892b0]">{notFound ? 'This Candidate is not available in the Community directory.' : 'We could not load this member profile. Please try again.'}</p>
+        <p className="mt-3 text-sm leading-6 text-[#8892b0]">{notFound ? 'This member is not available in the Community directory.' : 'We could not load this member profile. Please try again.'}</p>
         <div className="mt-6 flex flex-wrap justify-center gap-3">
           {!notFound && <button type="button" onClick={onRetry} className="inline-flex rounded-lg border border-[#64ffda] px-4 py-2.5 text-sm font-semibold text-[#64ffda] hover:bg-[#64ffda]/10">Try again</button>}
-          <Link to="/candidate/community/members" className="inline-flex rounded-lg border border-[#233554] px-4 py-2.5 text-sm font-semibold text-[#a8b2d1] hover:border-[#64ffda]/50 hover:text-[#64ffda]">Return to members</Link>
+          <Link to="/member/community/members" className="inline-flex rounded-lg border border-[#233554] px-4 py-2.5 text-sm font-semibold text-[#a8b2d1] hover:border-[#64ffda]/50 hover:text-[#64ffda]">Return to members</Link>
         </div>
       </section>
     </CandidateLayout>
@@ -93,8 +93,8 @@ export default function CandidateMemberProfile() {
     <CandidateLayout title={member.name}>
       <div className="min-w-0 max-w-full">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <Link to="/candidate/community/members" className="text-sm font-medium text-[#64ffda] hover:underline">&larr; Back to members</Link>
-          {member.isCurrentUser && <Link to="/candidate/profile" className="text-sm font-medium text-[#64ffda] hover:underline">View my editable profile</Link>}
+          <Link to="/member/community/members" className="text-sm font-medium text-[#64ffda] hover:underline">&larr; Back to members</Link>
+          {member.isCurrentUser && <Link to="/member/profile" className="text-sm font-medium text-[#64ffda] hover:underline">View my editable profile</Link>}
         </div>
 
         <div className="mt-6"><CandidateProfileHeader profile={headerProfile} /></div>
@@ -130,7 +130,7 @@ export default function CandidateMemberProfile() {
         <section className="mt-6 min-w-0">
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div><h3 className="text-2xl font-semibold text-[#e6f1ff]">Projects</h3><p className="mt-2 text-sm text-[#8892b0]">{member.projectCount} community {member.projectCount === 1 ? 'project' : 'projects'} shared.</p></div>
-            <Link to="/candidate/projects" className="text-sm font-medium text-[#64ffda] hover:underline">Explore projects</Link>
+            <Link to="/member/projects" className="text-sm font-medium text-[#64ffda] hover:underline">Explore projects</Link>
           </div>
           {member.projects.length > 0 ? (
             <div className="mt-5 grid min-w-0 max-w-full gap-5 md:grid-cols-2 xl:grid-cols-3">{member.projects.map((project) => <ProjectShowcaseCard key={project.id} project={project} />)}</div>

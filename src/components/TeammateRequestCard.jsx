@@ -39,7 +39,7 @@ export default function TeammateRequestCard({ request }) {
       </p>
       <div className="mt-auto pt-5">
         <Link
-          to={`/candidate/community/team-requests/${request.id}`}
+          to={`/member/community/team-requests/${request.id}`}
           className="inline-flex w-full items-center justify-center rounded-lg border border-[#64ffda] px-4 py-2 text-sm font-semibold text-[#64ffda] transition-colors hover:bg-[#64ffda]/10"
         >
           View request

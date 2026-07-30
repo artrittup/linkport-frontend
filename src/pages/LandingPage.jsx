@@ -8,7 +8,7 @@ import { useAuth } from '../context/AuthContext'
 
 const navigation = [
   { id: 'home', label: 'Home', icon: 'home' },
-  { id: 'candidates', label: 'Members', icon: 'users' },
+  { id: 'members', label: 'Members', icon: 'users' },
   { id: 'companies', label: 'Companies', icon: 'building' },
   { id: 'projects', label: 'Projects', icon: 'layers' },
   { id: 'jobs', label: 'Jobs', icon: 'briefcase' },
@@ -552,7 +552,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section id="candidates" className={`${audienceSectionClass} border-b border-[#233554]/70`}>
+        <section id="members" className={`${audienceSectionClass} border-b border-[#233554]/70`}>
           <div className="mx-auto max-w-7xl px-6 lg:px-10">
             <SectionHeader label="For members" title="Turn potential into proof." description="Create a profile that works for you, then move from discovery to real experience." />
             <div className="mt-10 grid gap-4 md:grid-cols-3">{candidateFeatures.map((feature) => <FeatureCard key={feature.title} feature={feature} />)}</div>

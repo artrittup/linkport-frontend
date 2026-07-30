@@ -50,7 +50,7 @@ export default function OpportunityCard({ opportunity }) {
 
       <div className="mt-auto pt-6">
         <Link
-          to={`/candidate/opportunities/${opportunity.id}`}
+          to={`/member/opportunities/${opportunity.id}`}
           className="inline-flex w-full items-center justify-center rounded-lg border border-[#64ffda] bg-[#64ffda] px-4 py-2.5 text-sm font-semibold text-[#071426] transition-colors hover:bg-[#7dffe1] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#64ffda]"
         >
           {opportunity.actionLabel}

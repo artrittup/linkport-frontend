@@ -155,7 +155,7 @@ export default function CandidateNotifications() {
       }
     }
 
-    navigate(getNotificationDestination(notification, '/candidate/notifications'))
+    navigate(getNotificationDestination(notification, '/member/notifications'))
   }
 
   const changeFilter = (nextFilter) => {
@@ -275,7 +275,7 @@ export default function CandidateNotifications() {
     <CandidateLayout title="Notifications">
       <div className="mx-auto min-w-0 max-w-4xl">
         <section className="min-w-0">
-          <p className="font-mono text-sm text-[#64ffda]">Candidate updates</p>
+          <p className="font-mono text-sm text-[#64ffda]">Member updates</p>
           <h2 className="mt-2 text-3xl font-bold tracking-tight text-[#e6f1ff] sm:text-4xl">Notifications</h2>
           <p className="mt-4 max-w-2xl leading-7 text-[#8892b0]">
             Review useful updates about opportunities, projects, applications, proposals, and community events.
@@ -378,9 +378,9 @@ export default function CandidateNotifications() {
               title={emptyTitle}
               description={filter === 'all'
                 ? 'Explore LinkPort to find opportunities, projects, and community activity.'
-                : 'New Candidate updates will appear here when they are available.'}
+                : 'New member updates will appear here when they are available.'}
               actionLabel={filter === 'all' ? 'Explore LinkPort' : 'Browse opportunities'}
-              onAction={() => navigate(filter === 'all' ? '/candidate/community' : '/candidate/opportunities')}
+              onAction={() => navigate(filter === 'all' ? '/member/community' : '/member/opportunities')}
             />
           )}
         </section>

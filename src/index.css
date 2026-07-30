@@ -10,6 +10,23 @@
     cursor: pointer;
   }
 
+  /*
+   * Text links need a permanent visual affordance on touch screens, where a
+   * hover-only color change is invisible. Button, card, navigation, and logo
+   * links already communicate that they are interactive through their shape.
+   */
+  a[href]:not(:has(img)):not([aria-label]):not([class*="rounded"]):not([class*="border"]):not([class*="bg-"]) {
+    text-decoration-line: underline;
+    text-decoration-thickness: 0.08em;
+    text-underline-offset: 0.22em;
+  }
+
+  a[href]:focus-visible {
+    border-radius: 0.25rem;
+    outline: 2px solid #64ffda;
+    outline-offset: 3px;
+  }
+
   button:disabled,
   select:disabled,
   [aria-disabled="true"] {

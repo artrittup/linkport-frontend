@@ -476,7 +476,7 @@ export default function CandidateProfile() {
               <h3 className="text-2xl font-semibold text-[#e6f1ff]">Projects</h3>
               <p className="mt-2 text-sm text-[#8892b0]">Selected work from the LinkPort Project Showcase.</p>
             </div>
-            <Link to="/candidate/projects" className="text-sm font-medium text-[#64ffda] hover:underline">View all projects</Link>
+            <Link to="/member/projects" className="text-sm font-medium text-[#64ffda] hover:underline">View all projects</Link>
           </div>
           {projectsLoading ? (
             <Card className="mt-5"><p className="text-sm text-[#8892b0]">Loading your projects...</p></Card>
@@ -492,7 +492,7 @@ export default function CandidateProfile() {
           ) : (
             <Card className="mt-5">
               <EmptyProfileText>You have not shared a community project yet.</EmptyProfileText>
-              <Link to="/candidate/create/project" className="mt-3 inline-flex text-sm font-medium text-[#64ffda] hover:underline">Share a project</Link>
+              <Link to="/member/create/project" className="mt-3 inline-flex text-sm font-medium text-[#64ffda] hover:underline">Share a project</Link>
             </Card>
           )}
         </section>
@@ -510,7 +510,7 @@ export default function CandidateProfile() {
           </ProfileSection>
         </div>
 
-        <ProfileSection title="Activity" description="Quick links to your private Candidate activity.">
+        <ProfileSection title="Activity" description="Quick links to your private member activity.">
           <Link to={getCandidateActivityPath()} className="inline-flex w-full items-center justify-center rounded-xl border border-[#64ffda] bg-[#64ffda] px-5 py-3 text-sm font-semibold text-[#071426] transition-colors hover:bg-[#7dffe1]">
             View all activity
           </Link>

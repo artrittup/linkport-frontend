@@ -33,25 +33,25 @@ function LogoutIcon() {
 function isNavigationItemActive(item, pathname) {
   if (pathname === item.path) return true
   if (item.key === 'home') {
-    return pathname === '/candidate/create/post'
+    return pathname === '/member/create/post'
   }
   if (item.key === 'projects') {
-    return pathname.startsWith('/candidate/projects/')
-      || pathname === '/candidate/create/project'
+    return pathname.startsWith('/member/projects/')
+      || pathname === '/member/create/project'
   }
   if (item.key === 'opportunities') {
-    return pathname.startsWith('/candidate/opportunities/')
-      || pathname === '/candidate/applications'
-      || pathname === '/candidate/bids'
+    return pathname.startsWith('/member/opportunities/')
+      || pathname === '/member/applications'
+      || pathname === '/member/bids'
       || pathname === '/jobs'
       || pathname === '/projects'
   }
   if (item.key === 'community') {
-    return pathname.startsWith('/candidate/community/')
+    return pathname.startsWith('/member/community/')
       || pathname.startsWith('/circles')
-      || pathname === '/candidate/create/team'
+      || pathname === '/member/create/team'
   }
-  if (item.key === 'profile') return pathname === '/candidate/activity'
+  if (item.key === 'profile') return pathname === '/member/activity'
   return false
 }
 
@@ -87,13 +87,13 @@ export default function CandidateSidebar({ isOpen, onClose }) {
       )}
 
       <aside
-        aria-label="Candidate sidebar"
+        aria-label="Member sidebar"
         className={`fixed inset-y-0 left-0 z-50 flex w-72 flex-col border-r border-[#233554]/80 bg-[#071426] shadow-2xl shadow-black/20 transition-transform duration-200 lg:w-64 lg:translate-x-0 lg:shadow-none ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
         <div className="flex h-20 shrink-0 items-center justify-between border-b border-[#233554]/80 px-5">
-          <Link to="/candidate/home" onClick={onClose} className="flex items-center gap-2.5 font-bold text-[#e6f1ff]" aria-label="LinkPort Candidate Home">
+          <Link to="/member/home" onClick={onClose} className="flex items-center gap-2.5 font-bold text-[#e6f1ff]" aria-label="LinkPort Member Home">
             <img src={linkPortLogo} alt="" className="h-8 w-auto" />
             <span className="text-xl">Link<span className="text-[#64ffda]">Port</span></span>
           </Link>
@@ -109,7 +109,7 @@ export default function CandidateSidebar({ isOpen, onClose }) {
           <GlobalSearch className="w-full min-w-0 max-w-full" dropdownAlign="left" />
         </div>
 
-        <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4" aria-label="Candidate navigation">
+        <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4" aria-label="Member navigation">
           {navItems.map((item) => {
             const isActive = isNavigationItemActive(item, location.pathname)
 
@@ -143,7 +143,7 @@ export default function CandidateSidebar({ isOpen, onClose }) {
             </div>
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-medium text-[#e6f1ff]">{displayName}</p>
-              <Link to="/candidate/profile" onClick={onClose} className="text-xs text-[#8892b0] hover:text-[#64ffda]">View profile</Link>
+              <Link to="/member/profile" onClick={onClose} className="text-xs text-[#8892b0] hover:text-[#64ffda]">View profile</Link>
             </div>
           </div>
           <button

@@ -2,9 +2,9 @@ import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router'
 
 const createActions = [
-  { label: 'Share a project', path: '/candidate/create/project' },
-  { label: 'Create a post', path: '/candidate/create/post' },
-  { label: 'Find teammates', path: '/candidate/create/team' },
+  { label: 'Share a project', path: '/member/create/project' },
+  { label: 'Create a post', path: '/member/create/post' },
+  { label: 'Find teammates', path: '/member/create/team' },
 ]
 
 export default function CandidateCreateMenu({ onActionComplete }) {

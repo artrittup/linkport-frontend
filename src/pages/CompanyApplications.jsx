@@ -205,7 +205,7 @@ export default function CompanyApplications() {
         <section className="grid min-w-0 gap-3 sm:grid-cols-[minmax(0,1fr)_12rem]">
           <div className="min-w-0">
             <label htmlFor="company-response-search" className="sr-only">Search responses</label>
-            <input id="company-response-search" type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder={type === 'applications' ? 'Search candidates, jobs, or skills...' : 'Search candidates, projects, or proposals...'} className={controlClasses} />
+            <input id="company-response-search" type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder={type === 'applications' ? 'Search members, jobs, or skills...' : 'Search members, projects, or proposals...'} className={controlClasses} />
           </div>
           <div>
             <label htmlFor="company-response-status" className="sr-only">Filter response status</label>

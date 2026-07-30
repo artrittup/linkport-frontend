@@ -91,12 +91,12 @@ export default function CandidateOpportunityDetails() {
     return (
       <CandidateLayout title="Opportunity not found">
         <section className="mx-auto max-w-2xl rounded-2xl border border-[#233554] bg-[#112240]/65 p-8 text-center sm:p-10">
-          <p className="font-mono text-sm text-[#64ffda]">Candidate opportunities</p>
+          <p className="font-mono text-sm text-[#64ffda]">Member opportunities</p>
           <h2 className="mt-3 text-2xl font-bold text-[#e6f1ff]">Opportunity not found</h2>
           <p className="mt-3 text-sm leading-6 text-[#8892b0]">
             This opportunity does not exist or is no longer available.
           </p>
-          <Link to="/candidate/opportunities" className="mt-6 inline-flex rounded-lg border border-[#64ffda] px-4 py-2.5 text-sm font-semibold text-[#64ffda] hover:bg-[#64ffda]/10">
+          <Link to="/member/opportunities" className="mt-6 inline-flex rounded-lg border border-[#64ffda] px-4 py-2.5 text-sm font-semibold text-[#64ffda] hover:bg-[#64ffda]/10">
             Back to opportunities
           </Link>
         </section>
@@ -106,7 +106,7 @@ export default function CandidateOpportunityDetails() {
 
   return (
     <CandidateLayout title={opportunity.title}>
-      <Link to="/candidate/opportunities" className="text-sm font-medium text-[#64ffda] hover:underline">
+      <Link to="/member/opportunities" className="text-sm font-medium text-[#64ffda] hover:underline">
         ← Back to opportunities
       </Link>
 

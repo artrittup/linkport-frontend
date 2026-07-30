@@ -38,7 +38,7 @@ function UnavailableEvent({ notFound, onRetry }) {
         </p>
         <div className="mt-6 flex flex-wrap justify-center gap-3">
           {!notFound && <button type="button" onClick={onRetry} className="inline-flex rounded-lg border border-[#64ffda] px-4 py-2.5 text-sm font-semibold text-[#64ffda] hover:bg-[#64ffda]/10">Try again</button>}
-          <Link to="/candidate/community/events" className="inline-flex rounded-lg border border-[#233554] px-4 py-2.5 text-sm font-semibold text-[#a8b2d1] hover:border-[#64ffda]/50 hover:text-[#64ffda]">Browse events</Link>
+          <Link to="/member/community/events" className="inline-flex rounded-lg border border-[#233554] px-4 py-2.5 text-sm font-semibold text-[#a8b2d1] hover:border-[#64ffda]/50 hover:text-[#64ffda]">Browse events</Link>
         </div>
       </section>
     </CandidateLayout>
@@ -118,7 +118,7 @@ export default function CandidateEventDetails() {
   return (
     <CandidateLayout title={event.title}>
       <div className="min-w-0 max-w-full">
-        <Link to="/candidate/community/events" className="text-sm font-medium text-[#64ffda] hover:underline">&larr; Back to events</Link>
+        <Link to="/member/community/events" className="text-sm font-medium text-[#64ffda] hover:underline">&larr; Back to events</Link>
         <header className="mt-6 min-w-0 rounded-2xl border border-[#233554] bg-[#112240]/65 p-5 sm:p-7">
           <div className="flex min-w-0 flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
             <div className="min-w-0">

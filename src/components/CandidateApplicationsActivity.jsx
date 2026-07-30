@@ -55,7 +55,7 @@ export default function CandidateApplicationsActivity({ activity }) {
         <div className="grid min-w-0 gap-4 lg:grid-cols-2">
           {visibleApplications.map((application) => {
             const opportunityPath = application.job?.id
-              ? `/candidate/opportunities/job-${application.job.id}`
+              ? `/member/opportunities/job-${application.job.id}`
               : ''
 
             return (

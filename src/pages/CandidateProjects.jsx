@@ -59,7 +59,7 @@ export default function CandidateProjects() {
           </p>
         </div>
         <Link
-          to="/candidate/create/project"
+          to="/member/create/project"
           className="inline-flex shrink-0 items-center justify-center rounded-lg border border-[#64ffda] bg-[#64ffda] px-5 py-2.5 text-sm font-semibold text-[#071426] transition-colors hover:bg-[#7dffe1]"
         >
           Share a project
@@ -133,7 +133,7 @@ export default function CandidateProjects() {
               ? 'Try a broader search or another project status.'
               : 'Be the first member to share work with the community.'}
             actionLabel={hasFilters ? 'Clear filters' : 'Share a project'}
-            onAction={hasFilters ? clearFilters : () => navigate('/candidate/create/project')}
+            onAction={hasFilters ? clearFilters : () => navigate('/member/create/project')}
           />
         )}
       </section>

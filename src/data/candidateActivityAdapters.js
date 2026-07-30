@@ -20,7 +20,7 @@ export function getCandidateContentItems({ projects, posts, teamRequests }) {
       description: project.description,
       status: getCommunityProjectStatusLabel(project.status),
       createdAt: project.createdAt,
-      path: `/candidate/projects/${project.id}`,
+      path: `/member/projects/${project.id}`,
       action: 'View project',
     })),
     ...posts.map((post) => ({
@@ -32,7 +32,7 @@ export function getCandidateContentItems({ projects, posts, teamRequests }) {
       description: post.text,
       status: 'Published',
       createdAt: post.createdAt,
-      path: '/candidate/home',
+      path: '/member/home',
       action: 'View on Home',
     })),
     ...teamRequests.map((request) => ({
@@ -44,7 +44,7 @@ export function getCandidateContentItems({ projects, posts, teamRequests }) {
       description: request.description,
       status: getTeammateRequestStatusLabel(request.status),
       createdAt: request.createdAt,
-      path: `/candidate/community/team-requests/${request.id}`,
+      path: `/member/community/team-requests/${request.id}`,
       action: 'View request',
     })),
   ].sort((first, second) => {

@@ -21,7 +21,9 @@ const roleStyle = {
   Candidate: 'bg-blue-500/10 text-blue-300',
   Company: 'bg-violet-500/10 text-violet-300',
 }
-const displayRole = (role) => role || 'Unknown'
+const displayRole = (role) => (
+  role === 'Candidate' || role === 'candidate' ? 'Member' : role || 'Unknown'
+)
 const statusStyle = {
   Active: 'bg-[#22c55e]/10 text-[#22c55e]',
   Disabled: 'bg-[#ef4444]/10 text-[#fca5a5]',
@@ -59,9 +61,10 @@ export default function AdminUsers() {
   const { showToast } = useToast()
   const [searchParams, setSearchParams] = useSearchParams()
   const requestedRole = searchParams.get('role')
-  const role = ['candidate', 'company', 'admin'].includes(requestedRole)
+  const roleFilter = ['member', 'company', 'admin'].includes(requestedRole)
     ? requestedRole
     : 'all'
+  const role = roleFilter === 'member' ? 'candidate' : roleFilter
   const requestedStatus = searchParams.get('status')
   const status = ['active', 'disabled'].includes(requestedStatus)
     ? requestedStatus
@@ -279,7 +282,7 @@ export default function AdminUsers() {
               className={control}
             />
             <select
-              value={role}
+              value={roleFilter}
               onChange={(event) => {
                 updateParams({ role: event.target.value, page: null })
               }}
@@ -287,7 +290,7 @@ export default function AdminUsers() {
               className={control}
             >
               <option value="all">All users</option>
-              <option value="candidate">Candidates</option>
+              <option value="member">Members</option>
               <option value="company">Companies</option>
               <option value="admin">Administrators</option>
             </select>

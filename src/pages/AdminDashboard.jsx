@@ -101,7 +101,7 @@ export default function AdminDashboard() {
 
   const stats = summary.data ? [
     { label: 'Total users', value: summary.data.users_count, path: '/admin/users' },
-    { label: 'Candidate accounts', value: summary.data.candidates_count, path: '/admin/users?role=candidate' },
+    { label: 'Member accounts', value: summary.data.candidates_count, path: '/admin/users?role=member' },
     { label: 'Company accounts', value: summary.data.companies_count, path: '/admin/users?role=company' },
     { label: 'Jobs', value: summary.data.jobs_count, path: '/admin/opportunities?type=jobs' },
     { label: 'Company projects', value: summary.data.projects_count, path: '/admin/opportunities?type=projects' },

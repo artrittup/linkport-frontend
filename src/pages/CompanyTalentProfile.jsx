@@ -20,8 +20,8 @@ function ProfileUnavailable({ notFound, forbidden, onRetry }) {
   return (
     <CompanyLayout title="Talent profile">
       <section className="mx-auto max-w-2xl rounded-2xl border border-[#233554] bg-[#112240]/65 p-8 text-center">
-        <h2 className="text-2xl font-bold">{notFound ? 'Candidate not found' : forbidden ? 'Candidate profiles are temporarily unavailable' : 'Candidate profile unavailable'}</h2>
-        <p className="mt-3 text-sm leading-6 text-[#8892b0]">{notFound ? 'This active Candidate is not available in Talent.' : forbidden ? 'Company access to the Talent directory is not currently permitted by the API.' : 'We could not load this public Candidate profile.'}</p>
+        <h2 className="text-2xl font-bold">{notFound ? 'Member not found' : forbidden ? 'Member profiles are temporarily unavailable' : 'Member profile unavailable'}</h2>
+        <p className="mt-3 text-sm leading-6 text-[#8892b0]">{notFound ? 'This active member is not available in Talent.' : forbidden ? 'Company access to the Talent directory is not currently permitted by the API.' : 'We could not load this public member profile.'}</p>
         <div className="mt-6 flex flex-wrap justify-center gap-3">{!notFound && !forbidden && <button type="button" onClick={onRetry} className="rounded-lg border border-[#64ffda] px-4 py-2.5 text-sm font-semibold text-[#64ffda]">Try again</button>}<Link to="/company/talent" className="rounded-lg border border-[#233554] px-4 py-2.5 text-sm font-semibold text-[#a8b2d1]">Back to Talent</Link></div>
       </section>
     </CompanyLayout>
@@ -55,7 +55,7 @@ export default function CompanyTalentProfile() {
     return () => { active = false }
   }, [candidateId, refreshKey])
 
-  if (isLoading) return <CompanyLayout title="Talent profile"><div className="h-96 animate-pulse rounded-2xl border border-[#233554] bg-[#112240]/45" aria-label="Loading Candidate profile" /></CompanyLayout>
+  if (isLoading) return <CompanyLayout title="Talent profile"><div className="h-96 animate-pulse rounded-2xl border border-[#233554] bg-[#112240]/45" aria-label="Loading member profile" /></CompanyLayout>
   if (!member) return <ProfileUnavailable notFound={errorState === 'not-found'} forbidden={errorState === 'forbidden'} onRetry={() => setRefreshKey((current) => current + 1)} />
 
   const headerProfile = {
@@ -99,7 +99,7 @@ export default function CompanyTalentProfile() {
         <section className="mt-6 min-w-0">
           <h3 className="text-2xl font-semibold">Community Projects</h3>
           <p className="mt-2 text-sm text-[#8892b0]">{member.projectCount} public {member.projectCount === 1 ? 'project' : 'projects'} shared.</p>
-          {member.projects.length > 0 ? <div className="mt-5 grid gap-5 md:grid-cols-2 xl:grid-cols-3">{member.projects.slice(0, 3).map((project) => <ProjectShowcaseCard key={project.id} project={project} showLink={false} />)}</div> : <div className="mt-5 rounded-2xl border border-[#233554] bg-[#112240]/55 p-6 text-sm text-[#8892b0]">This Candidate has not shared a Community Project yet.</div>}
+          {member.projects.length > 0 ? <div className="mt-5 grid gap-5 md:grid-cols-2 xl:grid-cols-3">{member.projects.slice(0, 3).map((project) => <ProjectShowcaseCard key={project.id} project={project} showLink={false} />)}</div> : <div className="mt-5 rounded-2xl border border-[#233554] bg-[#112240]/55 p-6 text-sm text-[#8892b0]">This member has not shared a Community Project yet.</div>}
         </section>
       </div>
     </CompanyLayout>

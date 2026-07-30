@@ -99,7 +99,7 @@ export default function CompanyOverview() {
           <div>
             <p className="font-mono text-sm text-[#64ffda]">Company workspace</p>
             <h2 className="mt-2 text-3xl font-bold tracking-tight">Company Overview</h2>
-            <p className="mt-2 max-w-2xl text-[#8892b0]">A clear view of your opportunities and candidate activity.</p>
+            <p className="mt-2 max-w-2xl text-[#8892b0]">A clear view of your opportunities and member activity.</p>
           </div>
           <div className="w-full sm:w-auto sm:min-w-48"><PostOpportunityMenu /></div>
         </section>

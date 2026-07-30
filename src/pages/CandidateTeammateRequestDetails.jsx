@@ -42,7 +42,7 @@ function MissingRequest({ isNotFound, message }) {
             ? 'This teammate request does not exist or is no longer available.'
             : message}
         </p>
-        <Link to="/candidate/community#collaboration" className="mt-6 inline-flex rounded-lg border border-[#64ffda] px-4 py-2.5 text-sm font-semibold text-[#64ffda] hover:bg-[#64ffda]/10">
+        <Link to="/member/community#collaboration" className="mt-6 inline-flex rounded-lg border border-[#64ffda] px-4 py-2.5 text-sm font-semibold text-[#64ffda] hover:bg-[#64ffda]/10">
           Back to Community
         </Link>
       </section>
@@ -123,7 +123,7 @@ export default function CandidateTeammateRequestDetails() {
 
   return (
     <CandidateLayout title={request.title}>
-      <Link to="/candidate/community#collaboration" className="text-sm font-medium text-[#64ffda] hover:underline">
+      <Link to="/member/community#collaboration" className="text-sm font-medium text-[#64ffda] hover:underline">
         ← Back to Community
       </Link>
 

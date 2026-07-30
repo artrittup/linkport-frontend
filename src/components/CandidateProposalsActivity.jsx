@@ -55,7 +55,7 @@ export default function CandidateProposalsActivity({ activity }) {
         <div className="grid min-w-0 gap-4 lg:grid-cols-2">
           {visibleProposals.map((proposal) => {
             const opportunityPath = proposal.project?.id
-              ? `/candidate/opportunities/project-${proposal.project.id}`
+              ? `/member/opportunities/project-${proposal.project.id}`
               : ''
 
             return (

@@ -97,7 +97,7 @@ export default function CandidateActivity() {
     <CandidateLayout title="My Activity">
       <div className="min-w-0 max-w-full">
         <section>
-          <p className="font-mono text-sm text-[#64ffda]">Candidate activity</p>
+          <p className="font-mono text-sm text-[#64ffda]">Member activity</p>
           <h2 className="mt-2 text-3xl font-bold tracking-tight text-[#e6f1ff] sm:text-4xl">My Activity</h2>
           <p className="mt-4 max-w-3xl leading-7 text-[#8892b0]">
             Track your applications, proposals, shared content, teammate requests, and saved community events.

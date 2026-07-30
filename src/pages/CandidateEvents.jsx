@@ -85,7 +85,7 @@ export default function CandidateEvents() {
             <h2 className="mt-2 text-3xl font-bold tracking-tight text-[#e6f1ff] sm:text-4xl">Community Events</h2>
             <p className="mt-4 max-w-2xl leading-7 text-[#8892b0]">Join workshops, project sessions, meetups, career conversations, and community challenges.</p>
           </div>
-          <Link to="/candidate/community" className="text-sm font-medium text-[#64ffda] hover:underline">Return to Community</Link>
+          <Link to="/member/community" className="text-sm font-medium text-[#64ffda] hover:underline">Return to Community</Link>
         </section>
 
         <section className="mt-8 min-w-0 max-w-full" aria-label="Find community events">

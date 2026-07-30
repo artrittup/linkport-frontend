@@ -50,7 +50,7 @@ export default function ProjectShowcaseCard({ project, showLink = true }) {
 
       {showLink && <div className="mt-auto pt-6">
         <Link
-          to={`/candidate/projects/${project.id}`}
+          to={`/member/projects/${project.id}`}
           className="inline-flex w-full items-center justify-center rounded-lg border border-[#64ffda] px-4 py-2.5 text-sm font-semibold text-[#64ffda] transition-colors hover:bg-[#64ffda]/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#64ffda]"
         >
           View project

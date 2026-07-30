@@ -133,7 +133,7 @@ function ProjectForm({ onCancel }) {
         roles: splitList(form.roles),
       }))
       showToast(<ActivityToastMessage message="Project published to the showcase." tab="content" />, 'success', 6000)
-      navigate(`/candidate/projects/${response.data.id}`, { replace: true })
+      navigate(`/member/projects/${response.data.id}`, { replace: true })
     } catch (requestError) {
       const apiErrors = getCommunityProjectValidationErrors(requestError)
       setErrors({
@@ -260,7 +260,7 @@ function PostForm({ onCancel }) {
     try {
       await createCommunityPost(toCommunityPostPayload({ ...form, tags }))
       showToast(<ActivityToastMessage message="Post published to your Home feed." tab="content" />, 'success', 6000)
-      navigate('/candidate/home', { replace: true })
+      navigate('/member/home', { replace: true })
     } catch (error) {
       const validationErrors = getCommunityPostValidationErrors(error)
       setErrors({
@@ -366,7 +366,7 @@ function TeamRequestForm({ onCancel }) {
         skills,
       }))
       showToast(<ActivityToastMessage message="Collaboration request published." tab="content" />, 'success', 6000)
-      navigate(`/candidate/community/team-requests/${response.data.id}`, { replace: true })
+      navigate(`/member/community/team-requests/${response.data.id}`, { replace: true })
     } catch (error) {
       const validationErrors = getTeammateRequestValidationErrors(error)
       setErrors({
@@ -460,21 +460,21 @@ const pageConfig = {
     eyebrow: 'Project showcase',
     title: 'Share a project',
     description: 'Publish your work to the LinkPort Project Showcase so members can discover it across the community.',
-    cancelPath: '/candidate/projects',
+    cancelPath: '/member/projects',
     Form: ProjectForm,
   },
   post: {
     eyebrow: 'Community post',
     title: 'Create a post',
     description: 'Share one concise update with the LinkPort community Home feed.',
-    cancelPath: '/candidate/home',
+    cancelPath: '/member/home',
     Form: PostForm,
   },
   team: {
     eyebrow: 'Collaboration',
     title: 'Find teammates',
     description: 'Describe the people and commitment you need for a project idea.',
-    cancelPath: '/candidate/community',
+    cancelPath: '/member/community',
     Form: TeamRequestForm,
   },
 }

@@ -53,7 +53,7 @@ export default function EventCard({ event, onRemove, isRemoving = false }) {
       )}
 
       <div className="mt-auto flex flex-col gap-3 pt-6">
-        <Link to={`/candidate/community/events/${event.id}`} className="inline-flex w-full items-center justify-center rounded-lg border border-[#64ffda] px-4 py-2.5 text-sm font-semibold text-[#64ffda] transition-colors hover:bg-[#64ffda]/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#64ffda]">
+        <Link to={`/member/community/events/${event.id}`} className="inline-flex w-full items-center justify-center rounded-lg border border-[#64ffda] px-4 py-2.5 text-sm font-semibold text-[#64ffda] transition-colors hover:bg-[#64ffda]/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#64ffda]">
           View event
         </Link>
         {onRemove && event.isAttending && (

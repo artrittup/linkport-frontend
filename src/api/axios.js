@@ -1,4 +1,8 @@
 import axios from 'axios'
+import {
+  finishPageRequest,
+  trackPageRequest,
+} from '../utils/pageLoading'
 
 const api = axios.create({
   baseURL:
@@ -16,12 +20,17 @@ api.interceptors.request.use((config) => {
     config.headers.Authorization = `Bearer ${token}`
   }
 
-  return config
+  return trackPageRequest(config)
 })
 
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    finishPageRequest(response.config)
+    return response
+  },
   (error) => {
+    finishPageRequest(error.config)
+
     if (error.response?.status === 401) {
       localStorage.removeItem('linkport_token')
       localStorage.removeItem('linkport_user')

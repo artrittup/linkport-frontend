@@ -43,7 +43,7 @@ export default function MemberCard({ member }) {
 
       <div className="mt-auto pt-5">
         <Link
-          to={`/candidate/community/members/${member.id}`}
+          to={`/member/community/members/${member.id}`}
           className="inline-flex w-full items-center justify-center rounded-lg border border-[#64ffda] px-4 py-2.5 text-sm font-semibold text-[#64ffda] transition-colors hover:bg-[#64ffda]/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#64ffda]"
         >
           View profile

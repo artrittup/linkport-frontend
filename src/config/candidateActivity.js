@@ -17,6 +17,6 @@ export function normalizeCandidateActivityTab(tab) {
 export function getCandidateActivityPath(tab = 'overview') {
   const normalizedTab = normalizeCandidateActivityTab(tab)
   return normalizedTab === 'overview'
-    ? '/candidate/activity'
-    : `/candidate/activity?tab=${normalizedTab}`
+    ? '/member/activity'
+    : `/member/activity?tab=${normalizedTab}`
 }

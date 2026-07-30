@@ -34,7 +34,7 @@ function MissingProject({ isNotFound, message }) {
             ? 'This project does not exist or is no longer available in the showcase.'
             : message}
         </p>
-        <Link to="/candidate/projects" className="mt-6 inline-flex rounded-lg border border-[#64ffda] px-4 py-2.5 text-sm font-semibold text-[#64ffda] hover:bg-[#64ffda]/10">
+        <Link to="/member/projects" className="mt-6 inline-flex rounded-lg border border-[#64ffda] px-4 py-2.5 text-sm font-semibold text-[#64ffda] hover:bg-[#64ffda]/10">
           Back to projects
         </Link>
       </section>
@@ -98,7 +98,7 @@ export default function CandidateProjectDetails() {
 
   return (
     <CandidateLayout title={project.title}>
-      <Link to="/candidate/projects" className="text-sm font-medium text-[#64ffda] hover:underline">
+      <Link to="/member/projects" className="text-sm font-medium text-[#64ffda] hover:underline">
         ← Back to projects
       </Link>
 

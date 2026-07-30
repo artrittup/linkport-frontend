@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router'
 const opportunityTypes = [
   {
     label: 'Post a job',
-    description: 'Publish a role for candidates.',
+    description: 'Publish a role for members.',
     path: '/company/jobs/create',
   },
   {

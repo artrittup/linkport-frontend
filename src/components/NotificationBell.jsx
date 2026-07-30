@@ -26,7 +26,13 @@ export default function NotificationBell({ align = 'right' }) {
   const [openingId, setOpeningId] = useState(null)
 
   const refreshUnreadCount = useCallback(async () => {
-    if (!isAuthenticated || isRefreshingCountRef.current) return
+    if (
+      !isAuthenticated ||
+      document.visibilityState !== 'visible' ||
+      isRefreshingCountRef.current
+    ) {
+      return
+    }
 
     isRefreshingCountRef.current = true
     try {
@@ -47,11 +53,13 @@ export default function NotificationBell({ align = 'right' }) {
     const initialRefreshId = window.setTimeout(refreshUnreadCount, 0)
     const intervalId = window.setInterval(refreshUnreadCount, 45000)
     window.addEventListener(NOTIFICATIONS_CHANGED_EVENT, refreshUnreadCount)
+    document.addEventListener('visibilitychange', refreshUnreadCount)
 
     return () => {
       window.clearTimeout(initialRefreshId)
       window.clearInterval(intervalId)
       window.removeEventListener(NOTIFICATIONS_CHANGED_EVENT, refreshUnreadCount)
+      document.removeEventListener('visibilitychange', refreshUnreadCount)
     }
   }, [isAuthenticated, refreshUnreadCount])
 

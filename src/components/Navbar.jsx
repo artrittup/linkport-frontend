@@ -19,29 +19,29 @@ export default function Navbar() {
   return (
     <header className="fixed inset-x-0 top-0 z-50 border-b border-[#233554]/80 bg-[#0a192f]/95 backdrop-blur-lg">
       <nav
-        className="flex h-22 w-full items-center justify-between px-4 sm:px-6 lg:px-7"
+        className="flex min-h-20 w-full flex-wrap items-center gap-3 px-4 py-3 sm:flex-nowrap sm:px-6 lg:px-7"
         aria-label="Main navigation"
       >
         <Link
           to="/"
-          className="flex items-center gap-2.5 text-xl font-bold tracking-tight text-[#e6f1ff] transition-opacity duration-200 hover:opacity-80"
+          className="flex shrink-0 items-center gap-2.5 text-lg font-bold tracking-tight text-[#e6f1ff] transition-opacity duration-200 hover:opacity-80 sm:text-xl"
           aria-label="LinkPort home"
         >
           <img src={linkPortLogo} alt="LinkPort logo" className="h-9 w-auto" />
-          <span>
+          <span className="hidden sm:inline">
             Link<span className="text-[#64ffda]">Port</span>
           </span>
         </Link>
 
         <GlobalSearch
           placeholder="Search members or companies..."
-          className="mx-2 w-10 transition-[width] duration-200 focus-within:w-48 sm:w-full sm:max-w-xs"
+          className="order-3 w-full min-w-0 sm:order-none sm:mx-2 sm:flex-1 sm:max-w-xs"
         />
 
         {isLoading ? (
           <div className="h-9 w-32 animate-pulse rounded-lg bg-[#112240]" aria-label="Checking account" />
         ) : isAuthenticated ? (
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="ml-auto flex shrink-0 items-center gap-2 sm:gap-3">
             <NotificationBell />
             <span className="hidden max-w-40 truncate text-sm text-[#8892b0] sm:block">
               {user?.name}
@@ -58,7 +58,7 @@ export default function Navbar() {
             </button>
           </div>
         ) : (
-          <div className="flex items-center gap-2 sm:gap-4">
+          <div className="ml-auto flex shrink-0 items-center gap-2 sm:gap-4">
             <Link to="/login" className="rounded-lg px-3 py-2 text-sm font-semibold text-[#8892b0] transition-colors duration-200 hover:text-[#e6f1ff]">
               Login
             </Link>

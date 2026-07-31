@@ -163,7 +163,7 @@ export default function GlobalSearch({
           type="button"
           aria-label="Close search"
           onClick={() => setIsOpen(false)}
-          className="fixed inset-x-0 bottom-0 top-[88px] z-40 cursor-default bg-overlay/35 backdrop-blur-[1px]"
+          className="fixed inset-0 z-40 cursor-default bg-overlay/35 backdrop-blur-[1px]"
         />
         <div id={`${inputId}-results`} className={`absolute top-full z-50 mt-2 w-[min(24rem,calc(100vw-2rem))] max-w-[calc(100vw-2rem)] overflow-hidden rounded-xl border border-border bg-surface shadow-2xl shadow-black/50 ${dropdownAlign === 'left' ? 'left-0' : 'right-0'}`}>
           <div className="flex items-center justify-between border-b border-border px-3 py-2">
@@ -174,7 +174,7 @@ export default function GlobalSearch({
           </div>
 
           {filtersOpen && (
-            <div className="grid grid-cols-2 gap-2 border-b border-border bg-surface-deep/55 p-3">
+            <div className="grid grid-cols-1 gap-2 border-b border-border bg-surface-deep/55 p-3 sm:grid-cols-2">
               <select aria-label="Result type" value={type} onChange={(event) => setType(event.target.value)} className={filterInput}><option value="all">All</option><option value="members">Members</option><option value="companies">Companies</option></select>
               <select aria-label="Skill filter" value={skill} onChange={(event) => setSkill(event.target.value)} className={filterInput}>
                 <option value="">Any skill</option>

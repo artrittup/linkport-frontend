@@ -519,7 +519,7 @@ export default function LandingPage() {
         </div>
       )}
 
-      <div className="pt-22 lg:pl-20">
+      <div className="pt-28 sm:pt-24 lg:pl-20">
         <MobileNavigation activeSection={activeSection} onSelect={setActiveSection} />
 
         <section id="home" className="scroll-mt-40 overflow-hidden border-b border-border/70 lg:scroll-mt-24">

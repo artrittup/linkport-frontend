@@ -21,12 +21,12 @@ export default function Navbar() {
   return (
     <header className="app-topbar fixed inset-x-0 top-0 z-50">
       <nav
-        className="flex h-22 w-full items-center justify-between px-2 sm:px-6 lg:px-7"
+        className="flex min-h-20 w-full flex-wrap items-center gap-3 px-4 py-3 sm:flex-nowrap sm:px-6 lg:px-7"
         aria-label="Main navigation"
       >
         <Link
           to="/"
-          className="flex items-center gap-2.5 text-xl font-bold tracking-tight text-text-primary transition-opacity duration-200 hover:opacity-80"
+          className="flex shrink-0 items-center gap-2.5 text-lg font-bold tracking-tight text-text-primary transition-opacity duration-200 hover:opacity-80 sm:text-xl"
           aria-label="LinkPort home"
         >
           <LinkPortLogo className="h-8 w-auto sm:h-9" />
@@ -35,8 +35,8 @@ export default function Navbar() {
           </span>
         </Link>
 
-        <div className="ml-auto flex items-center gap-2 sm:gap-4">
-          <GlobalSearch className="w-32 sm:w-48 lg:w-56" />
+        <div className="ml-auto flex min-w-0 flex-1 flex-wrap items-center justify-end gap-2 sm:flex-nowrap sm:gap-4">
+          <GlobalSearch className="order-3 w-full min-w-0 sm:order-none sm:w-48 lg:w-56" />
           <div className="hidden sm:block">
             <ThemeToggle />
           </div>

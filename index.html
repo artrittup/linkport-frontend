@@ -1,9 +1,30 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="light">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script>
+      (() => {
+        const storageKey = 'linkport-theme'
+        window.__LINKPORT_THEME_STORAGE_KEY__ = storageKey
+        let theme = 'light'
+
+        try {
+          const storedTheme = window.localStorage.getItem(storageKey)
+          if (storedTheme === 'light' || storedTheme === 'dark') {
+            theme = storedTheme
+          }
+        } catch {
+          // Local storage can be unavailable in privacy-restricted browsers.
+        }
+
+        document.documentElement.classList.remove('light', 'dark')
+        document.documentElement.classList.add(theme)
+        document.documentElement.style.colorScheme = theme
+        window.__LINKPORT_INITIAL_THEME__ = theme
+      })()
+    </script>
     <title>linkport-frontend</title>
   </head>
   <body>

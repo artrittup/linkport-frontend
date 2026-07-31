@@ -3,11 +3,12 @@ import { Link, useNavigate } from 'react-router'
 import Button from '../components/Button'
 import Card from '../components/Card'
 import SkillsInput from '../components/SkillsInput'
+import ThemeToggle from '../components/ThemeToggle'
 import { getAuthErrorMessage } from '../api/authApi'
 import { useAuth } from '../context/AuthContext'
 
 const inputClasses =
-  'mt-2 w-full rounded-md border border-[#233554] bg-[#0a192f]/70 px-4 py-3 text-sm text-[#e6f1ff] outline-none transition-colors placeholder:text-[#64748b] hover:border-[#8892b0] focus:border-[#64ffda] focus:ring-1 focus:ring-[#64ffda]'
+  'mt-2 w-full rounded-md border border-border bg-background/70 px-4 py-3 text-sm text-text-primary outline-none transition-colors placeholder:text-text-subtle hover:border-border-strong focus:border-primary focus:ring-1 focus:ring-focus-ring'
 
 const roles = [
   {
@@ -53,7 +54,7 @@ function FieldError({ errors, name }) {
     : null
   const message = errors[name]?.[0] ?? nestedError
 
-  return message ? <p className="mt-1.5 text-xs text-[#fca5a5]">{message}</p> : null
+  return message ? <p className="mt-1.5 text-xs text-danger-text">{message}</p> : null
 }
 
 function OptionalField({
@@ -67,11 +68,11 @@ function OptionalField({
   rows,
   min,
 }) {
-  const fieldClasses = `${inputClasses} ${errors[name] ? 'border-[#ef4444]/70' : ''}`
+  const fieldClasses = `${inputClasses} ${errors[name] ? 'border-danger/70' : ''}`
 
   return (
     <div className={rows ? 'sm:col-span-2' : ''}>
-      <label htmlFor={`register-${name}`} className="text-sm font-medium text-[#e6f1ff]">
+      <label htmlFor={`register-${name}`} className="text-sm font-medium text-text-primary">
         {label}
       </label>
       {rows ? (
@@ -188,37 +189,38 @@ export default function Register() {
   }
 
   return (
-    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#0a192f] px-4 py-12 text-[#e6f1ff] sm:px-6">
-      <div className="pointer-events-none absolute left-1/2 top-1/2 h-[32rem] w-[32rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#64ffda]/5 blur-3xl" />
+    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background px-4 py-12 text-text-primary sm:px-6">
+      <ThemeToggle className="absolute right-4 top-4 z-10 sm:right-6 sm:top-6" />
+      <div className="pointer-events-none absolute left-1/2 top-1/2 h-[32rem] w-[32rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/5 blur-3xl" />
 
       <div className="relative w-full max-w-3xl">
         <Link
           to="/"
-          className="mb-8 block text-center text-2xl font-bold tracking-tight text-[#e6f1ff] transition-opacity hover:opacity-80"
+          className="mb-8 block text-center text-2xl font-bold tracking-tight text-text-primary transition-opacity hover:opacity-80"
           aria-label="LinkPort home"
         >
-          Link<span className="text-[#64ffda]">Port</span>
+          Link<span className="text-primary">Port</span>
         </Link>
 
         <Card padding="lg" className="shadow-2xl shadow-black/20">
           <div className="mb-8 text-center">
-            <p className="mb-3 font-mono text-xs uppercase tracking-[0.2em] text-[#64ffda]">
+            <p className="mb-3 font-mono text-xs uppercase tracking-[0.2em] text-primary">
               Get started
             </p>
             <h1 className="text-3xl font-bold tracking-tight">Create your account</h1>
-            <p className="mt-3 text-sm text-[#8892b0]">
+            <p className="mt-3 text-sm text-text-muted">
               Join LinkPort as a member or company.
             </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="border-b border-[#233554] pb-2">
-              <h2 className="text-base font-semibold text-[#e6f1ff]">Account details</h2>
-              <p className="mt-1 text-xs text-[#8892b0]">These fields are required to create your account.</p>
+            <div className="border-b border-border pb-2">
+              <h2 className="text-base font-semibold text-text-primary">Account details</h2>
+              <p className="mt-1 text-xs text-text-muted">These fields are required to create your account.</p>
             </div>
 
             <div>
-              <label htmlFor="full-name" className="text-sm font-medium text-[#e6f1ff]">
+              <label htmlFor="full-name" className="text-sm font-medium text-text-primary">
                 Full name
               </label>
               <input
@@ -231,13 +233,13 @@ export default function Register() {
                 onChange={updateField}
                 placeholder="Your full name"
                 aria-invalid={Boolean(validationErrors.fullName)}
-                className={`${inputClasses} ${validationErrors.fullName ? 'border-[#ef4444]/70' : ''}`}
+                className={`${inputClasses} ${validationErrors.fullName ? 'border-danger/70' : ''}`}
               />
               <FieldError errors={validationErrors} name="fullName" />
             </div>
 
             <div>
-              <label htmlFor="register-email" className="text-sm font-medium text-[#e6f1ff]">
+              <label htmlFor="register-email" className="text-sm font-medium text-text-primary">
                 Email
               </label>
               <input
@@ -250,14 +252,14 @@ export default function Register() {
                 onChange={updateField}
                 placeholder="you@example.com"
                 aria-invalid={Boolean(validationErrors.email)}
-                className={`${inputClasses} ${validationErrors.email ? 'border-[#ef4444]/70' : ''}`}
+                className={`${inputClasses} ${validationErrors.email ? 'border-danger/70' : ''}`}
               />
               <FieldError errors={validationErrors} name="email" />
             </div>
 
             <div className="grid gap-5 sm:grid-cols-2">
               <div>
-                <label htmlFor="register-password" className="text-sm font-medium text-[#e6f1ff]">
+                <label htmlFor="register-password" className="text-sm font-medium text-text-primary">
                   Password
                 </label>
                 <input
@@ -271,12 +273,12 @@ export default function Register() {
                   onChange={updateField}
                   placeholder="Create a password"
                   aria-invalid={Boolean(validationErrors.password)}
-                  className={`${inputClasses} ${validationErrors.password ? 'border-[#ef4444]/70' : ''}`}
+                  className={`${inputClasses} ${validationErrors.password ? 'border-danger/70' : ''}`}
                 />
                 <FieldError errors={validationErrors} name="password" />
               </div>
               <div>
-                <label htmlFor="confirm-password" className="text-sm font-medium text-[#e6f1ff]">
+                <label htmlFor="confirm-password" className="text-sm font-medium text-text-primary">
                   Confirm password
                 </label>
                 <input
@@ -289,14 +291,14 @@ export default function Register() {
                   onChange={updateField}
                   placeholder="Repeat password"
                   aria-invalid={Boolean(validationErrors.confirmPassword)}
-                  className={`${inputClasses} ${validationErrors.confirmPassword ? 'border-[#ef4444]/70' : ''}`}
+                  className={`${inputClasses} ${validationErrors.confirmPassword ? 'border-danger/70' : ''}`}
                 />
                 <FieldError errors={validationErrors} name="confirmPassword" />
               </div>
             </div>
 
             <fieldset>
-              <legend className="mb-2 text-sm font-medium text-[#e6f1ff]">
+              <legend className="mb-2 text-sm font-medium text-text-primary">
                 I am joining as
               </legend>
               <div className="grid grid-cols-2 gap-3">
@@ -313,18 +315,18 @@ export default function Register() {
                         setValidationErrors({})
                         setError('')
                       }}
-                      className={`rounded-md border p-4 text-left transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[#64ffda] ${
+                      className={`rounded-md border p-4 text-left transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring ${
                         isSelected
-                          ? 'border-[#64ffda] bg-[#64ffda]/10'
-                          : 'border-[#233554] bg-[#0a192f]/50 hover:border-[#8892b0] hover:bg-[#172a45]'
+                          ? 'border-primary bg-primary/10'
+                          : 'border-border bg-background/50 hover:border-border-strong hover:bg-surface-elevated'
                       }`}
                     >
                       <span
-                        className={`block text-sm font-semibold ${isSelected ? 'text-[#64ffda]' : 'text-[#e6f1ff]'}`}
+                        className={`block text-sm font-semibold ${isSelected ? 'text-primary' : 'text-text-primary'}`}
                       >
                         {role.label}
                       </span>
-                      <span className="mt-1 block text-xs text-[#8892b0]">
+                      <span className="mt-1 block text-xs text-text-muted">
                         {role.description}
                       </span>
                     </button>
@@ -337,23 +339,23 @@ export default function Register() {
 
             <details
               key={selectedRole}
-              className="group rounded-lg border border-[#233554] bg-[#0a192f]/35 open:bg-[#0a192f]/55"
+              className="group rounded-lg border border-border bg-background/35 open:bg-background/55"
             >
-              <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#64ffda]">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus-ring">
                 <span>
-                  <span className="block text-sm font-semibold text-[#e6f1ff]">
+                  <span className="block text-sm font-semibold text-text-primary">
                     {selectedRole === 'candidate'
                       ? 'Member profile details'
                       : 'Company profile details'}
                   </span>
-                  <span className="mt-1 block text-xs leading-5 text-[#8892b0]">
+                  <span className="mt-1 block text-xs leading-5 text-text-muted">
                     Optional - add them now or complete your profile later.
                   </span>
                 </span>
-                <span className="font-mono text-lg text-[#64ffda] transition-transform group-open:rotate-45" aria-hidden="true">+</span>
+                <span className="font-mono text-lg text-primary transition-transform group-open:rotate-45" aria-hidden="true">+</span>
               </summary>
 
-              <div className="border-t border-[#233554] px-5 py-5">
+              <div className="border-t border-border px-5 py-5">
                 {selectedRole === 'candidate' ? (
                   <div className="grid gap-5 sm:grid-cols-2">
                     <OptionalField errors={validationErrors} label="Professional title" name="headline" value={candidateProfile.professionalTitle} onChange={(event) => updateCandidateField({ target: { name: 'professionalTitle', value: event.target.value } })} placeholder="Junior Frontend Developer" />
@@ -364,7 +366,7 @@ export default function Register() {
                     <OptionalField errors={validationErrors} label="LinkedIn URL" name="linkedin_url" type="url" value={candidateProfile.linkedinUrl} onChange={(event) => updateCandidateField({ target: { name: 'linkedinUrl', value: event.target.value } })} placeholder="https://linkedin.com/in/username" />
                     <OptionalField errors={validationErrors} label="Bio" name="bio" rows="4" value={candidateProfile.bio} onChange={updateCandidateField} placeholder="A short introduction about you and your goals." />
                     <div className="sm:col-span-2">
-                      <label className="text-sm font-medium text-[#e6f1ff]">Skills</label>
+                      <label className="text-sm font-medium text-text-primary">Skills</label>
                       <div className="mt-2">
                         <SkillsInput skills={skills} setSkills={setSkills} placeholder="Type a skill and press Enter" />
                       </div>
@@ -393,7 +395,7 @@ export default function Register() {
             {error && (
               <p
                 role="alert"
-                className="rounded-md border border-[#ef4444]/40 bg-[#ef4444]/10 px-4 py-3 text-sm text-[#fca5a5]"
+                className="rounded-md border border-danger/40 bg-danger/10 px-4 py-3 text-sm text-danger-text"
               >
                 {error}
               </p>
@@ -404,11 +406,11 @@ export default function Register() {
             </Button>
           </form>
 
-          <p className="mt-7 text-center text-sm text-[#8892b0]">
+          <p className="mt-7 text-center text-sm text-text-muted">
             Already have an account?{' '}
             <Link
               to="/login"
-              className="font-medium text-[#64ffda] transition-opacity hover:opacity-80"
+              className="font-medium text-primary transition-opacity hover:opacity-80"
             >
               Login
             </Link>

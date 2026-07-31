@@ -1,412 +1,208 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   getCompanyProfile,
-  getProfileErrorMessage,
+  getProfileValidationErrors,
   updateCompanyProfile,
 } from '../api/profileApi'
-import { getCompanyJobs } from '../api/jobsApi'
-import { getCompanyProjects } from '../api/projectsApi'
 import Button from '../components/Button'
 import Card from '../components/Card'
+import CompanyBrandMark from '../components/CompanyBrandMark'
+import CompanyProfilePreview from '../components/CompanyProfilePreview'
 import LoadingSpinner from '../components/LoadingSpinner'
 import { useAuth } from '../context/AuthContext'
 import useToast from '../hooks/useToast'
 import DashboardLayout from '../layouts/DashboardLayout'
+import {
+  COMPANY_PROFILE_FIELD_MAP,
+  COMPANY_PROFILE_UPDATED_EVENT,
+  getCompanyProfileCompleteness,
+  mapCompanyProfileToForm,
+  mapCompanyProfileToPayload,
+} from '../utils/companyProfile'
 
-const initialForm = {
-  companyName: '',
-  industry: '',
-  location: '',
-  website: '',
-  contactEmail: '',
-  description: '',
-  phone: '',
-  linkedinUrl: '',
-  logoUrl: '',
-  employeeCount: '',
+const inputClasses = 'mt-2 w-full min-w-0 rounded-lg border border-border bg-background/70 px-4 py-3 text-sm text-text-primary outline-none placeholder:text-text-subtle focus:border-primary focus:ring-1 focus:ring-focus-ring'
+
+function FieldError({ id, children }) {
+  if (!children) return null
+  return <p id={id} role="alert" className="mt-1.5 text-xs text-danger-text">{children}</p>
 }
 
-const inputClasses =
-  'mt-2 w-full rounded-md border border-[#233554] bg-[#0a192f]/70 px-4 py-3 text-sm text-[#e6f1ff] outline-none transition-colors placeholder:text-[#64748b] focus:border-[#64ffda] focus:ring-1 focus:ring-[#64ffda]'
-
-function InformationCard({ number, title, children, className = '' }) {
+function FormSection({ title, description, children }) {
   return (
-    <Card hover className={`h-full ${className}`}>
-      <div className="mb-5 flex items-center justify-between gap-3">
-        <h3 className="font-semibold text-[#e6f1ff]">{title}</h3>
-        <span className="font-mono text-xs text-[#64ffda]">{number}</span>
-      </div>
-      {children}
-    </Card>
-  )
-}
-
-function ItemList({ items, badge, isLoading, error }) {
-  if (isLoading) {
-    return <p className="text-sm text-[#8892b0]">Loading records...</p>
-  }
-
-  if (error) {
-    return <p role="alert" className="rounded-lg border border-[#ef4444]/30 bg-[#ef4444]/10 px-3 py-2 text-sm text-[#fca5a5]">{error}</p>
-  }
-
-  if (items.length === 0) {
-    return <p className="text-sm text-[#8892b0]">No records available.</p>
-  }
-
-  return (
-    <ul className="space-y-3">
-      {items.map((item) => (
-        <li
-          key={item}
-          className="flex items-center justify-between gap-3 rounded-md border border-[#233554] bg-[#0a192f]/50 px-3 py-2.5"
-        >
-          <span className="text-sm text-[#e6f1ff]">{item}</span>
-          <span className="shrink-0 rounded-full bg-[#64ffda]/10 px-2 py-0.5 font-mono text-[10px] text-[#64ffda]">
-            {badge}
-          </span>
-        </li>
-      ))}
-    </ul>
+    <section className="border-b border-border pb-7 last:border-0 last:pb-0">
+      <h3 className="text-lg font-semibold">{title}</h3>
+      <p className="mt-1 text-sm text-text-muted">{description}</p>
+      <div className="mt-5 grid gap-5 md:grid-cols-2">{children}</div>
+    </section>
   )
 }
 
 export default function CompanyProfile() {
   const { user } = useAuth()
   const { showToast } = useToast()
-  const [form, setForm] = useState(initialForm)
-  const [openJobs, setOpenJobs] = useState([])
-  const [activeProjects, setActiveProjects] = useState([])
-  const [saved, setSaved] = useState(false)
-  const [isLoadingProfile, setIsLoadingProfile] = useState(true)
-  const [isLoadingJobs, setIsLoadingJobs] = useState(true)
-  const [isLoadingProjects, setIsLoadingProjects] = useState(true)
+  const [form, setForm] = useState(() => mapCompanyProfileToForm(null, user?.email))
+  const [savedForm, setSavedForm] = useState(() => mapCompanyProfileToForm(null, user?.email))
+  const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
-  const [loadError, setLoadError] = useState('')
-  const [jobsError, setJobsError] = useState('')
-  const [projectsError, setProjectsError] = useState('')
-  const [saveError, setSaveError] = useState('')
+  const [loadError, setLoadError] = useState(false)
+  const [generalError, setGeneralError] = useState('')
+  const [fieldErrors, setFieldErrors] = useState({})
+  const [saved, setSaved] = useState(false)
+  const [localLogoUrl, setLocalLogoUrl] = useState('')
+  const [localLogoName, setLocalLogoName] = useState('')
+  const [refreshKey, setRefreshKey] = useState(0)
 
   useEffect(() => {
-    let isActive = true
-
+    let active = true
     getCompanyProfile().then(({ profile }) => {
-      if (isActive) {
-        setForm({
-          companyName: profile?.company_name ?? '',
-          industry: profile?.industry ?? '',
-          location: profile?.location ?? '',
-          website: profile?.website ?? '',
-          contactEmail: user?.email ?? '',
-          description: profile?.description ?? '',
-          phone: profile?.phone ?? '',
-          linkedinUrl: profile?.linkedin_url ?? '',
-          logoUrl: profile?.logo_url ?? '',
-          employeeCount: profile?.employee_count?.toString() ?? '',
-        })
-      }
-    }).catch((requestError) => {
-      if (isActive) setLoadError(getProfileErrorMessage(requestError, 'Unable to load your company profile.'))
+      if (!active) return
+      const nextForm = mapCompanyProfileToForm(profile, user?.email)
+      setForm(nextForm)
+      setSavedForm(nextForm)
+      setLoadError(false)
+      window.dispatchEvent(new CustomEvent(COMPANY_PROFILE_UPDATED_EVENT, {
+        detail: {
+          companyName: nextForm.companyName,
+          logoUrl: nextForm.logoUrl,
+        },
+      }))
+    }).catch(() => {
+      if (active) setLoadError(true)
     }).finally(() => {
-      if (isActive) setIsLoadingProfile(false)
+      if (active) setIsLoading(false)
     })
+    return () => { active = false }
+  }, [refreshKey, user?.email])
 
-    getCompanyJobs({ status: 'open', per_page: 5 }).then((response) => {
-      if (isActive) setOpenJobs(response.data.map((job) => job.title))
-    }).catch((requestError) => {
-      if (isActive) setJobsError(getProfileErrorMessage(requestError, 'Unable to load open jobs.'))
-    }).finally(() => {
-      if (isActive) setIsLoadingJobs(false)
-    })
+  useEffect(() => () => {
+    if (localLogoUrl) URL.revokeObjectURL(localLogoUrl)
+  }, [localLogoUrl])
 
-    getCompanyProjects({ status: 'open', per_page: 5 }).then((response) => {
-      if (isActive) setActiveProjects(response.data.map((project) => project.title))
-    }).catch((requestError) => {
-      if (isActive) setProjectsError(getProfileErrorMessage(requestError, 'Unable to load active projects.'))
-    }).finally(() => {
-      if (isActive) setIsLoadingProjects(false)
-    })
-
-    return () => {
-      isActive = false
-    }
-  }, [user?.email])
+  const profileValues = useMemo(() => mapCompanyProfileToPayload(form), [form])
+  const savedValues = useMemo(() => mapCompanyProfileToPayload(savedForm), [savedForm])
+  const isDirty = JSON.stringify(profileValues) !== JSON.stringify(savedValues)
+  const completeness = getCompanyProfileCompleteness(profileValues)
 
   const updateField = (event) => {
     const { name, value } = event.target
     setForm((current) => ({ ...current, [name]: value }))
     setSaved(false)
+    setGeneralError('')
+    const backendField = COMPANY_PROFILE_FIELD_MAP[name]
+    if (backendField) setFieldErrors((current) => ({ ...current, [backendField]: '' }))
+  }
+
+  const selectLocalLogo = (event) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+    setLocalLogoUrl(URL.createObjectURL(file))
+    setLocalLogoName(file.name)
+  }
+
+  const clearLocalLogo = () => {
+    setLocalLogoUrl('')
+    setLocalLogoName('')
   }
 
   const handleSubmit = async (event) => {
     event.preventDefault()
-    setSaveError('')
-    setSaved(false)
+    if (!isDirty || isSaving) return
     setIsSaving(true)
-
-    const nullable = (value = '') => value.trim() || null
-
+    setSaved(false)
+    setGeneralError('')
+    setFieldErrors({})
     try {
-      const response = await updateCompanyProfile({
-        company_name: nullable(form.companyName),
-        description: nullable(form.description),
-        industry: nullable(form.industry),
-        location: nullable(form.location),
-        phone: nullable(form.phone),
-        website: nullable(form.website),
-        linkedin_url: nullable(form.linkedinUrl),
-        logo_url: nullable(form.logoUrl),
-        employee_count: form.employeeCount
-          ? Number(form.employeeCount)
-          : null,
-      })
-
+      const response = await updateCompanyProfile(profileValues)
+      const nextForm = mapCompanyProfileToForm(response.profile, user?.email)
+      setForm(nextForm)
+      setSavedForm(nextForm)
       setSaved(true)
+      window.dispatchEvent(new CustomEvent(COMPANY_PROFILE_UPDATED_EVENT, {
+        detail: {
+          companyName: nextForm.companyName,
+          logoUrl: nextForm.logoUrl,
+        },
+      }))
       showToast(response.message ?? 'Company profile saved successfully.', 'success')
-    } catch (requestError) {
-      setSaveError(
-        getProfileErrorMessage(
-          requestError,
-          'Unable to save your company profile.',
-        ),
-      )
+    } catch (error) {
+      const validationErrors = getProfileValidationErrors(error)
+      setFieldErrors(validationErrors)
+      setGeneralError(Object.keys(validationErrors).length ? 'Please correct the highlighted fields.' : 'Unable to save your Company Profile. Please try again.')
     } finally {
       setIsSaving(false)
     }
   }
 
-  const scrollToEdit = () => {
-    document.getElementById('edit-company-profile')?.scrollIntoView({
-      behavior: 'smooth',
-      block: 'start',
-    })
-  }
+  if (isLoading) return <DashboardLayout title="Company Profile" userType="Company"><LoadingSpinner label="Loading your Company Profile..." size="lg" /></DashboardLayout>
 
-  if (isLoadingProfile) {
+  if (loadError) {
     return (
       <DashboardLayout title="Company Profile" userType="Company">
-        <LoadingSpinner label="Loading your company profile..." size="lg" />
+        <Card padding="lg" className="mx-auto max-w-2xl text-center">
+          <h2 className="text-2xl font-bold">Company Profile unavailable</h2>
+          <p className="mt-3 text-sm text-text-muted">Your saved profile could not be loaded, so editing is temporarily disabled to protect your information.</p>
+          <Button className="mt-6" onClick={() => { setIsLoading(true); setRefreshKey((current) => current + 1) }}>Try again</Button>
+        </Card>
       </DashboardLayout>
     )
   }
 
   return (
     <DashboardLayout title="Company Profile" userType="Company">
-      <div className="space-y-10">
-        <section>
-          <p className="font-mono text-sm text-[#64ffda]">Public company profile</p>
-          <h2 className="mt-2 text-2xl font-bold tracking-tight sm:text-3xl">
-            Company Profile
-          </h2>
-          <p className="mt-3 text-[#8892b0]">
-            Manage your company information and public profile.
-          </p>
+      <div className="min-w-0 space-y-7">
+        <section className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
+          <div><p className="font-mono text-sm text-primary">Brand presence</p><h2 className="mt-2 text-3xl font-bold">Company Profile</h2><p className="mt-2 max-w-2xl text-text-muted">Manage supported company information and preview how it may appear across LinkPort.</p></div>
+          <div className="flex flex-col items-stretch gap-2 sm:items-end">
+            <Button type="submit" form="company-profile-form" size="lg" disabled={isSaving || !isDirty}>{isSaving ? 'Saving...' : 'Save changes'}</Button>
+            <p aria-live="polite" className="text-xs text-text-muted">{isDirty ? 'Unsaved changes' : saved ? 'All changes saved' : 'No unsaved changes'}</p>
+          </div>
         </section>
 
-        {loadError && (
-          <p role="alert" className="rounded-md border border-[#ef4444]/40 bg-[#ef4444]/10 px-4 py-3 text-sm text-[#fca5a5]">
-            {loadError}
-          </p>
-        )}
-
-        <Card padding="lg" className="relative overflow-hidden">
-          <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-[#64ffda]/5 blur-2xl" />
-          <div className="relative flex flex-col gap-6 sm:flex-row sm:items-center">
-            <div className="flex h-24 w-24 shrink-0 items-center justify-center rounded-xl border-2 border-[#64ffda]/40 bg-[#172a45] font-mono text-2xl font-bold text-[#64ffda]">
-              {(form.companyName || 'Company')
-                .split(' ')
-                .filter(Boolean)
-                .slice(0, 2)
-                .map((part) => part[0])
-                .join('')
-                .toUpperCase()}
-            </div>
-            <div className="min-w-0 flex-1">
-              <h3 className="text-2xl font-bold text-[#e6f1ff]">{form.companyName}</h3>
-              <p className="mt-1 text-[#64ffda]">{form.industry}</p>
-              <div className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-sm text-[#8892b0]">
-                <span>{form.location}</span>
-                <span>{form.website}</span>
-              </div>
-            </div>
-            <Button variant="outline" onClick={scrollToEdit}>
-              Edit Profile
-            </Button>
+        <Card className="flex flex-col gap-5 sm:flex-row sm:items-center">
+          <CompanyBrandMark name={form.companyName} logoUrl={form.logoUrl} size="lg" />
+          <div className="min-w-0 flex-1"><h3 className="break-words text-xl font-semibold">{form.companyName || 'Set up your Company Profile'}</h3><p className="mt-1 break-words text-sm text-text-muted">{form.industry || 'Add your industry and company details.'}</p></div>
+          <div className="w-full sm:max-w-xs">
+            <div className="flex items-center justify-between gap-3"><span className="text-sm font-semibold">{completeness.label}</span><span className="font-mono text-sm text-primary">{completeness.percentage}%</span></div>
+            <div className="mt-2 h-2 overflow-hidden rounded-full bg-background" role="progressbar" aria-label="Company Profile completeness" aria-valuemin="0" aria-valuemax="100" aria-valuenow={completeness.percentage}><div className="h-full bg-primary" style={{ width: `${completeness.percentage}%` }} /></div>
+            {completeness.missing.length > 0 && <p className="mt-2 text-xs leading-5 text-text-muted">Missing: {completeness.missing.join(', ')}</p>}
           </div>
         </Card>
 
-        <section>
-          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-            <InformationCard number="01" title="About Company" className="md:col-span-2">
-              <p className="text-sm leading-relaxed text-[#8892b0]">{form.description}</p>
-            </InformationCard>
-
-            <InformationCard number="02" title="Industry">
-              <p className="text-sm text-[#e6f1ff]">{form.industry}</p>
-            </InformationCard>
-
-            <InformationCard number="03" title="Location">
-              <p className="text-sm text-[#e6f1ff]">{form.location}</p>
-            </InformationCard>
-
-            <InformationCard number="04" title="Website">
-              {form.website ? <a
-                href={`https://${form.website.replace(/^https?:\/\//, '')}`}
-                target="_blank"
-                rel="noreferrer"
-                className="break-all text-sm text-[#64ffda] transition-opacity hover:opacity-80"
-              >
-                {form.website}
-              </a> : <p className="text-sm text-[#8892b0]">Not provided.</p>}
-            </InformationCard>
-
-            <InformationCard number="05" title="Contact Email">
-              <a
-                href={`mailto:${form.contactEmail}`}
-                className="break-all text-sm text-[#64ffda] transition-opacity hover:opacity-80"
-              >
-                {form.contactEmail}
-              </a>
-            </InformationCard>
-
-            <InformationCard number="06" title="Open Jobs">
-              <ItemList items={openJobs} badge="Open" isLoading={isLoadingJobs} error={jobsError} />
-            </InformationCard>
-
-            <InformationCard number="07" title="Active Projects" className="md:col-span-2">
-              <ItemList items={activeProjects} badge="Active" isLoading={isLoadingProjects} error={projectsError} />
-            </InformationCard>
-          </div>
-        </section>
-
-        <section id="edit-company-profile" className="scroll-mt-24">
-          <div className="mb-5">
-            <h2 className="text-xl font-semibold text-[#e6f1ff] sm:text-2xl">
-              Edit Company Profile
-            </h2>
-            <p className="mt-1 text-sm text-[#8892b0]">
-              Keep your public details current for candidates and collaborators.
-            </p>
-          </div>
-
+        <div className="grid min-w-0 gap-6 xl:grid-cols-[minmax(0,1.7fr)_minmax(19rem,0.8fr)]">
           <Card padding="lg">
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid gap-5 md:grid-cols-2">
-                <div>
-                  <label htmlFor="companyName" className="text-sm font-medium">
-                    Company name
-                  </label>
-                  <input
-                    id="companyName"
-                    name="companyName"
-                    value={form.companyName}
-                    onChange={updateField}
-                    required
-                    className={inputClasses}
-                  />
-                </div>
-                <div>
-                  <label htmlFor="industry" className="text-sm font-medium">
-                    Industry
-                  </label>
-                  <input
-                    id="industry"
-                    name="industry"
-                    value={form.industry}
-                    onChange={updateField}
-                    required
-                    className={inputClasses}
-                  />
-                </div>
-                <div>
-                  <label htmlFor="company-location" className="text-sm font-medium">
-                    Location
-                  </label>
-                  <input
-                    id="company-location"
-                    name="location"
-                    value={form.location}
-                    onChange={updateField}
-                    required
-                    className={inputClasses}
-                  />
-                </div>
-                <div>
-                  <label htmlFor="website" className="text-sm font-medium">
-                    Website
-                  </label>
-                  <input
-                    id="website"
-                    name="website"
-                    type="url"
-                    value={form.website}
-                    onChange={updateField}
-                    placeholder="https://www.company.com"
-                    className={inputClasses}
-                  />
-                </div>
-                <div className="md:col-span-2">
-                  <label htmlFor="contactEmail" className="text-sm font-medium">
-                    Contact email
-                  </label>
-                  <input
-                    id="contactEmail"
-                    name="contactEmail"
-                    type="email"
-                    value={form.contactEmail}
-                    readOnly
-                    className={`${inputClasses} cursor-not-allowed opacity-70`}
-                  />
-                  <p className="mt-1 text-xs text-[#64748b]">Managed by your account and not saved with this profile.</p>
-                </div>
-                <div>
-                  <label htmlFor="company-phone" className="text-sm font-medium">Phone</label>
-                  <input id="company-phone" name="phone" type="tel" value={form.phone ?? ''} onChange={updateField} className={inputClasses} />
-                </div>
-                <div>
-                  <label htmlFor="company-linkedin" className="text-sm font-medium">LinkedIn URL</label>
-                  <input id="company-linkedin" name="linkedinUrl" type="url" value={form.linkedinUrl ?? ''} onChange={updateField} className={inputClasses} />
-                </div>
-                <div>
-                  <label htmlFor="logo-url" className="text-sm font-medium">Logo URL</label>
-                  <input id="logo-url" name="logoUrl" type="url" value={form.logoUrl ?? ''} onChange={updateField} className={inputClasses} />
-                </div>
-                <div>
-                  <label htmlFor="employee-count" className="text-sm font-medium">Employee count</label>
-                  <input id="employee-count" name="employeeCount" type="number" min="1" value={form.employeeCount ?? ''} onChange={updateField} className={inputClasses} />
-                </div>
-              </div>
+            <form id="company-profile-form" onSubmit={handleSubmit} className="space-y-7" noValidate>
+              <FormSection title="Basic information" description="Account and contact information supported by your Company Profile.">
+                <div><label htmlFor="company-name" className="text-sm font-medium">Company name</label><input id="company-name" name="companyName" value={form.companyName} onChange={updateField} maxLength="255" aria-invalid={Boolean(fieldErrors.company_name)} aria-describedby={fieldErrors.company_name ? 'company-name-error' : undefined} className={inputClasses} /><FieldError id="company-name-error">{fieldErrors.company_name}</FieldError></div>
+                <div><label htmlFor="company-email" className="text-sm font-medium">Account email</label><input id="company-email" type="email" value={form.contactEmail} readOnly className={`${inputClasses} cursor-not-allowed opacity-70`} /><p className="mt-1.5 text-xs text-text-subtle">Read-only account information; it is not saved with this profile.</p></div>
+                <div><label htmlFor="company-phone" className="text-sm font-medium">Phone</label><input id="company-phone" name="phone" type="tel" value={form.phone} onChange={updateField} maxLength="30" aria-invalid={Boolean(fieldErrors.phone)} aria-describedby={fieldErrors.phone ? 'company-phone-error' : undefined} className={inputClasses} /><FieldError id="company-phone-error">{fieldErrors.phone}</FieldError></div>
+                <div><label htmlFor="company-location" className="text-sm font-medium">Location</label><input id="company-location" name="location" value={form.location} onChange={updateField} maxLength="120" aria-invalid={Boolean(fieldErrors.location)} aria-describedby={fieldErrors.location ? 'company-location-error' : undefined} className={inputClasses} /><FieldError id="company-location-error">{fieldErrors.location}</FieldError></div>
+              </FormSection>
 
-              <div>
-                <label htmlFor="company-description" className="text-sm font-medium">
-                  Description
-                </label>
-                <textarea
-                  id="company-description"
-                  name="description"
-                  rows="5"
-                  value={form.description}
-                  onChange={updateField}
-                  className={`${inputClasses} resize-y`}
-                />
-              </div>
+              <FormSection title="Company details" description="Public context that helps members understand your organization.">
+                <div><label htmlFor="company-industry" className="text-sm font-medium">Industry</label><input id="company-industry" name="industry" value={form.industry} onChange={updateField} maxLength="120" aria-invalid={Boolean(fieldErrors.industry)} aria-describedby={fieldErrors.industry ? 'company-industry-error' : undefined} className={inputClasses} /><FieldError id="company-industry-error">{fieldErrors.industry}</FieldError></div>
+                <div><label htmlFor="employee-count" className="text-sm font-medium">Employee count</label><input id="employee-count" name="employeeCount" type="number" min="1" max="10000000" value={form.employeeCount} onChange={updateField} aria-invalid={Boolean(fieldErrors.employee_count)} aria-describedby={fieldErrors.employee_count ? 'employee-count-error' : undefined} className={inputClasses} /><FieldError id="employee-count-error">{fieldErrors.employee_count}</FieldError></div>
+                <div className="md:col-span-2"><label htmlFor="company-description" className="text-sm font-medium">Description</label><textarea id="company-description" name="description" rows="6" maxLength="5000" value={form.description} onChange={updateField} aria-invalid={Boolean(fieldErrors.description)} aria-describedby={fieldErrors.description ? 'company-description-error' : undefined} className={`${inputClasses} resize-y`} /><FieldError id="company-description-error">{fieldErrors.description}</FieldError></div>
+              </FormSection>
 
-              <div className="flex flex-col-reverse gap-3 border-t border-[#233554] pt-6 sm:flex-row sm:items-center sm:justify-between">
-                <div aria-live="polite">
-                  {saveError && <p role="alert" className="text-sm text-[#fca5a5]">{saveError}</p>}
-                  {saved && (
-                    <p className="text-sm text-[#22c55e]">
-                      Company profile saved successfully.
-                    </p>
-                  )}
-                </div>
-                <Button type="submit" size="lg" disabled={isSaving}>
-                  {isSaving ? 'Saving...' : 'Save Changes'}
-                </Button>
+              <FormSection title="Online presence" description="Public links shown only when valid values are saved.">
+                <div><label htmlFor="company-website" className="text-sm font-medium">Website</label><input id="company-website" name="website" type="url" value={form.website} onChange={updateField} placeholder="https://company.example" aria-invalid={Boolean(fieldErrors.website)} aria-describedby={fieldErrors.website ? 'company-website-error' : undefined} className={inputClasses} /><FieldError id="company-website-error">{fieldErrors.website}</FieldError></div>
+                <div><label htmlFor="company-linkedin" className="text-sm font-medium">LinkedIn URL</label><input id="company-linkedin" name="linkedinUrl" type="url" value={form.linkedinUrl} onChange={updateField} placeholder="https://linkedin.com/company/..." aria-invalid={Boolean(fieldErrors.linkedin_url)} aria-describedby={fieldErrors.linkedin_url ? 'company-linkedin-error' : undefined} className={inputClasses} /><FieldError id="company-linkedin-error">{fieldErrors.linkedin_url}</FieldError></div>
+              </FormSection>
+
+              <FormSection title="Logo and brand image" description="Use a hosted URL to persist your logo, or choose a local file for temporary preview only.">
+                <div><label htmlFor="company-logo-url" className="text-sm font-medium">Persisted logo URL</label><input id="company-logo-url" name="logoUrl" type="url" value={form.logoUrl} onChange={updateField} placeholder="https://company.example/logo.png" aria-invalid={Boolean(fieldErrors.logo_url)} aria-describedby={fieldErrors.logo_url ? 'company-logo-error' : undefined} className={inputClasses} /><FieldError id="company-logo-error">{fieldErrors.logo_url}</FieldError></div>
+                <div><label htmlFor="company-logo-file" className="text-sm font-medium">Temporary local preview</label><input id="company-logo-file" type="file" accept="image/*" onChange={selectLocalLogo} className={`${inputClasses} file:mr-3 file:rounded-md file:border-0 file:bg-primary file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-primary-contrast`} />{localLogoName && <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-warning"><span className="break-all">{localLogoName} is preview-only.</span><button type="button" onClick={clearLocalLogo} className="font-semibold text-primary">Clear preview</button></div>}<p className="mt-1.5 text-xs leading-5 text-text-subtle">File upload is not connected yet. Use a hosted logo URL to save your logo.</p></div>
+              </FormSection>
+
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div aria-live="polite">{generalError && <p role="alert" className="text-sm text-danger-text">{generalError}</p>}{saved && <p className="text-sm text-success-bright">Company Profile saved successfully.</p>}</div>
+                <Button type="submit" size="lg" disabled={isSaving || !isDirty}>{isSaving ? 'Saving...' : 'Save changes'}</Button>
               </div>
             </form>
           </Card>
-        </section>
+
+          <aside className="min-w-0 xl:sticky xl:top-6 xl:self-start"><CompanyProfilePreview form={form} localLogoUrl={localLogoUrl} /></aside>
+        </div>
       </div>
     </DashboardLayout>
   )

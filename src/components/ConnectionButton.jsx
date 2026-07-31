@@ -78,8 +78,8 @@ export default function ConnectionButton({ userId, initialStatus, onStatusChange
       {status === 'pending_received' && (
         <div className="flex gap-2"><Button size="sm" onClick={accept} disabled={isWorking}>{isWorking ? 'Updating...' : 'Accept'}</Button><Button size="sm" variant="ghost" onClick={reject} disabled={isWorking}>Reject</Button></div>
       )}
-      {status === 'loading' && <span className="text-xs text-[#8892b0]">Checking connection...</span>}
-      {error && <p role="alert" className="max-w-xs text-xs text-[#fca5a5]">{error}</p>}
+      {status === 'loading' && <span className="text-xs text-text-muted">Checking connection...</span>}
+      {error && <p role="alert" className="max-w-xs text-xs text-danger-text">{error}</p>}
     </div>
   )
 }

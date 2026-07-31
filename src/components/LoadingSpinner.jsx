@@ -8,10 +8,10 @@ export default function LoadingSpinner({ label = 'Loading...', size = 'md' }) {
   return (
     <div className="flex flex-col items-center justify-center gap-3 py-8" role="status">
       <span
-        className={`animate-spin rounded-full border-[#233554] border-t-[#64ffda] ${sizes[size] ?? sizes.md}`}
+        className={`animate-spin rounded-full border-border border-t-primary ${sizes[size] ?? sizes.md}`}
         aria-hidden="true"
       />
-      {label && <span className="text-sm text-[#8892b0]">{label}</span>}
+      {label && <span className="text-sm text-text-muted">{label}</span>}
     </div>
   )
 }

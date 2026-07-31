@@ -27,7 +27,7 @@ const emptyForm = {
 }
 
 const inputClasses =
-  'mt-2 w-full rounded-md border border-[#233554] bg-[#0a192f]/70 px-4 py-3 text-sm text-[#e6f1ff] outline-none transition-colors placeholder:text-[#64748b] focus:border-[#64ffda] focus:ring-1 focus:ring-[#64ffda]'
+  'mt-2 w-full rounded-md border border-border bg-background/70 px-4 py-3 text-sm text-text-primary outline-none transition-colors placeholder:text-text-subtle focus:border-primary focus:ring-1 focus:ring-focus-ring'
 
 async function fetchCircleData() {
   const [mineResponse, publicResponse, invitationResponse, joinRequestResponse] = await Promise.all([
@@ -48,21 +48,21 @@ async function fetchCircleData() {
 function SectionHeading({ title, description }) {
   return (
     <div>
-      <h2 className="text-xl font-semibold text-[#e6f1ff] sm:text-2xl">{title}</h2>
-      <p className="mt-1 text-sm text-[#8892b0]">{description}</p>
+      <h2 className="text-xl font-semibold text-text-primary sm:text-2xl">{title}</h2>
+      <p className="mt-1 text-sm text-text-muted">{description}</p>
     </div>
   )
 }
 
 function SkillBadges({ skills }) {
   if (skills.length === 0) {
-    return <p className="text-xs text-[#64748b]">No skills listed.</p>
+    return <p className="text-xs text-text-subtle">No skills listed.</p>
   }
 
   return (
     <div className="flex flex-wrap gap-2">
       {skills.map((skill) => (
-        <span key={skill} className="rounded-full border border-[#64ffda]/20 bg-[#64ffda]/5 px-2.5 py-1 font-mono text-[10px] text-[#64ffda]">
+        <span key={skill} className="rounded-full border border-primary/20 bg-primary/5 px-2.5 py-1 font-mono text-[10px] text-primary">
           {skill}
         </span>
       ))}
@@ -80,7 +80,7 @@ function CircleCard({ circle, onView, action }) {
 
   return (
     <div
-      className="h-full cursor-pointer rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-[#64ffda]"
+      className="h-full cursor-pointer rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
       onClick={onView}
       onKeyDown={handleKeyDown}
       role="link"
@@ -89,21 +89,21 @@ function CircleCard({ circle, onView, action }) {
       <Card hover className="flex h-full flex-col">
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
-          <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-[#64ffda]">
+          <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-primary">
             {circle.category || 'Uncategorized'}
           </p>
-          <h3 className="mt-2 text-lg font-semibold text-[#e6f1ff]">{circle.name}</h3>
+          <h3 className="mt-2 text-lg font-semibold text-text-primary">{circle.name}</h3>
         </div>
-        <span className="shrink-0 rounded-full border border-[#233554] px-2.5 py-1 text-[10px] capitalize text-[#8892b0]">
+        <span className="shrink-0 rounded-full border border-border px-2.5 py-1 text-[10px] capitalize text-text-muted">
           {circle.visibility}
         </span>
       </div>
-      <p className="mt-4 flex-1 text-sm leading-6 text-[#8892b0]">
+      <p className="mt-4 flex-1 text-sm leading-6 text-text-muted">
         {circle.description || 'No description provided.'}
       </p>
       <div className="mt-5"><SkillBadges skills={circle.skills} /></div>
-      <div className="mt-5 flex items-center justify-between gap-3 border-t border-[#233554] pt-4">
-        <span className="text-xs text-[#8892b0]">{circle.memberCount} members</span>
+      <div className="mt-5 flex items-center justify-between gap-3 border-t border-border pt-4">
+        <span className="text-xs text-text-muted">{circle.memberCount} members</span>
         <div className="flex items-center gap-2" onClick={(event) => event.stopPropagation()}>
           {action}
           <Button size="sm" variant="outline" onClick={onView}>View Circle</Button>
@@ -290,23 +290,23 @@ export default function Circles() {
       <div className="space-y-12">
         <section className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="font-mono text-sm text-[#64ffda]">Member collaboration</p>
-            <h2 className="mt-2 text-3xl font-bold tracking-tight text-[#e6f1ff]">Circles</h2>
-            <p className="mt-3 max-w-2xl text-[#8892b0]">
+            <p className="font-mono text-sm text-primary">Member collaboration</p>
+            <h2 className="mt-2 text-3xl font-bold tracking-tight text-text-primary">Circles</h2>
+            <p className="mt-3 max-w-2xl text-text-muted">
               Create or join member circles to collaborate on projects.
             </p>
           </div>
           <Button size="lg" onClick={() => setIsCreateOpen(true)}>Create Circle</Button>
         </section>
 
-        <div className="flex max-w-md gap-1 rounded-xl border border-[#233554] bg-[#071426] p-1" role="tablist" aria-label="Circle views">
-          <button type="button" role="tab" aria-selected={circleTab === 'overview'} onClick={() => changeCircleTab('overview')} className={`flex-1 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${circleTab === 'overview' ? 'bg-[#112240] text-[#64ffda]' : 'text-[#8892b0] hover:text-[#e6f1ff]'}`}>Circles</button>
-          <button type="button" role="tab" aria-selected={circleTab === 'invitations'} onClick={() => changeCircleTab('invitations')} className={`flex-1 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${circleTab === 'invitations' ? 'bg-[#112240] text-[#64ffda]' : 'text-[#8892b0] hover:text-[#e6f1ff]'}`}>Invitations{invitations.length > 0 ? ` (${invitations.length})` : ''}</button>
+        <div className="flex max-w-md gap-1 rounded-xl border border-border bg-surface-deep p-1" role="tablist" aria-label="Circle views">
+          <button type="button" role="tab" aria-selected={circleTab === 'overview'} onClick={() => changeCircleTab('overview')} className={`flex-1 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${circleTab === 'overview' ? 'bg-surface text-primary' : 'text-text-muted hover:text-text-primary'}`}>Circles</button>
+          <button type="button" role="tab" aria-selected={circleTab === 'invitations'} onClick={() => changeCircleTab('invitations')} className={`flex-1 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${circleTab === 'invitations' ? 'bg-surface text-primary' : 'text-text-muted hover:text-text-primary'}`}>Invitations{invitations.length > 0 ? ` (${invitations.length})` : ''}</button>
         </div>
 
         {loadError && (
-          <div role="alert" className="flex flex-col gap-4 rounded-lg border border-[#ef4444]/40 bg-[#ef4444]/10 p-4 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-sm text-[#fca5a5]">{loadError}</p>
+          <div role="alert" className="flex flex-col gap-4 rounded-lg border border-danger/40 bg-danger/10 p-4 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-sm text-danger-text">{loadError}</p>
             <Button
               variant="outline"
               size="sm"
@@ -338,7 +338,7 @@ export default function Circles() {
                       key={circle.id}
                       circle={circle}
                       onView={() => navigate(`/circles/${circle.id}`)}
-                      action={<span className="text-xs capitalize text-[#64ffda]">{circle.membershipRole || 'member'}</span>}
+                      action={<span className="text-xs capitalize text-primary">{circle.membershipRole || 'member'}</span>}
                     />
                   ))}
                 </div>
@@ -387,9 +387,9 @@ export default function Circles() {
                     <Card key={invitation.id}>
                       <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
                         <div>
-                          <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-[#64ffda]">Invited by {invitation.invitedBy}</p>
+                          <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-primary">Invited by {invitation.invitedBy}</p>
                           <h3 className="mt-2 text-lg font-semibold">{invitation.circle?.name}</h3>
-                          <p className="mt-2 text-sm leading-6 text-[#8892b0]">
+                          <p className="mt-2 text-sm leading-6 text-text-muted">
                             {invitation.circle?.description || 'No description provided.'}
                           </p>
                         </div>
@@ -422,7 +422,7 @@ export default function Circles() {
 
       {isCreateOpen && (
         <div
-          className="fixed inset-0 z-[70] flex items-center justify-center overflow-y-auto bg-black/70 px-4 py-8 backdrop-blur-sm"
+          className="fixed inset-0 z-[70] flex items-center justify-center overflow-y-auto bg-overlay/70 px-4 py-8 backdrop-blur-sm"
           onMouseDown={(event) => {
             if (event.target === event.currentTarget && !isCreating) closeCreate()
           }}
@@ -431,11 +431,11 @@ export default function Circles() {
             <div role="dialog" aria-modal="true" aria-labelledby="create-circle-title">
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <p className="font-mono text-xs uppercase tracking-[0.16em] text-[#64ffda]">New collaboration group</p>
+                  <p className="font-mono text-xs uppercase tracking-[0.16em] text-primary">New collaboration group</p>
                   <h2 id="create-circle-title" className="mt-2 text-2xl font-bold">Create Circle</h2>
-                  <p className="mt-2 text-sm text-[#8892b0]">Your circle will be saved to LinkPort.</p>
+                  <p className="mt-2 text-sm text-text-muted">Your circle will be saved to LinkPort.</p>
                 </div>
-                <button type="button" disabled={isCreating} onClick={closeCreate} className="text-2xl text-[#8892b0] transition-colors hover:text-[#e6f1ff] disabled:opacity-50" aria-label="Close create circle form">&times;</button>
+                <button type="button" disabled={isCreating} onClick={closeCreate} className="text-2xl text-text-muted transition-colors hover:text-text-primary disabled:opacity-50" aria-label="Close create circle form">&times;</button>
               </div>
 
               <form onSubmit={handleCreateCircle} className="mt-7 space-y-5">
@@ -468,10 +468,10 @@ export default function Circles() {
                 </div>
 
                 {createError && (
-                  <p role="alert" className="rounded-md border border-[#ef4444]/40 bg-[#ef4444]/10 px-4 py-3 text-sm text-[#fca5a5]">{createError}</p>
+                  <p role="alert" className="rounded-md border border-danger/40 bg-danger/10 px-4 py-3 text-sm text-danger-text">{createError}</p>
                 )}
 
-                <div className="flex flex-col-reverse gap-3 border-t border-[#233554] pt-5 sm:flex-row sm:justify-end">
+                <div className="flex flex-col-reverse gap-3 border-t border-border pt-5 sm:flex-row sm:justify-end">
                   <Button variant="ghost" disabled={isCreating} onClick={closeCreate}>Cancel</Button>
                   <Button type="submit" disabled={isCreating}>{isCreating ? 'Creating...' : 'Create Circle'}</Button>
                 </div>

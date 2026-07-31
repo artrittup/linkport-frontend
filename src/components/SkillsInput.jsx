@@ -62,14 +62,14 @@ export default function SkillsInput({ skills, setSkills, placeholder = 'Add a sk
             aria-label="Search or add a skill"
             aria-expanded={showSuggestions && suggestionCount > 0}
             aria-controls="skill-suggestions"
-            className="w-full rounded-md border border-[#233554] bg-[#0a192f]/70 px-4 py-2.5 text-sm text-[#e6f1ff] outline-none transition-colors placeholder:text-[#64748b] focus:border-[#64ffda] focus:ring-1 focus:ring-[#64ffda]"
+            className="w-full rounded-md border border-border bg-background/70 px-4 py-2.5 text-sm text-text-primary outline-none transition-colors placeholder:text-text-subtle focus:border-primary focus:ring-1 focus:ring-focus-ring"
           />
 
           {showSuggestions && suggestionCount > 0 && (
-            <div id="skill-suggestions" role="listbox" className="absolute z-30 mt-2 max-h-64 w-full overflow-y-auto rounded-xl border border-[#233554] bg-[#112240] p-1.5 shadow-2xl shadow-black/40">
+            <div id="skill-suggestions" role="listbox" className="absolute z-30 mt-2 max-h-64 w-full overflow-y-auto rounded-xl border border-border bg-surface p-1.5 shadow-2xl shadow-black/40">
               {filteredGroups.map((group) => (
                 <section key={group.category} aria-label={group.category} className="not-last:mb-2">
-                  <p className="sticky top-0 z-10 bg-[#112240] px-3 py-2 text-[11px] font-bold uppercase tracking-[0.14em] text-[#64ffda]">
+                  <p className="sticky top-0 z-10 bg-surface px-3 py-2 text-[11px] font-bold uppercase tracking-[0.14em] text-primary">
                     {group.category}
                   </p>
                   {group.skills.map((suggestion) => (
@@ -80,10 +80,10 @@ export default function SkillsInput({ skills, setSkills, placeholder = 'Add a sk
                       aria-selected="false"
                       onMouseDown={(event) => event.preventDefault()}
                       onClick={() => addSkill(suggestion)}
-                      className="flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-left text-sm text-[#a8b2d1] transition-colors hover:bg-[#64ffda]/10 hover:text-[#64ffda]"
+                      className="flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-left text-sm text-text-secondary transition-colors hover:bg-primary/10 hover:text-primary"
                     >
                       {suggestion}
-                      <span className="text-xs text-[#64748b]">Add</span>
+                      <span className="text-xs text-text-subtle">Add</span>
                     </button>
                   ))}
                 </section>
@@ -100,12 +100,12 @@ export default function SkillsInput({ skills, setSkills, placeholder = 'Add a sk
       {skills.length > 0 && (
         <div className="mt-3 flex flex-wrap gap-2" aria-label="Selected skills">
           {skills.map((skill) => (
-            <span key={skill} className="inline-flex items-center gap-1.5 rounded-full border border-[#64ffda]/30 bg-[#64ffda]/10 py-1 pl-3 pr-1.5 font-mono text-xs text-[#64ffda]">
+            <span key={skill} className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 py-1 pl-3 pr-1.5 font-mono text-xs text-primary">
               {skill}
               <button
                 type="button"
                 onClick={() => removeSkill(skill)}
-                className="flex h-5 w-5 items-center justify-center rounded-full text-[#8892b0] transition-colors hover:bg-[#ef4444]/20 hover:text-[#ef4444] focus:outline-none focus-visible:ring-1 focus-visible:ring-[#64ffda]"
+                className="flex h-5 w-5 items-center justify-center rounded-full text-text-muted transition-colors hover:bg-danger/20 hover:text-danger focus:outline-none focus-visible:ring-1 focus-visible:ring-focus-ring"
                 aria-label={`Remove ${skill}`}
               >
                 ×

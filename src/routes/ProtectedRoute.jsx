@@ -7,7 +7,7 @@ export default function ProtectedRoute({ children, allowedRoles = [] }) {
 
   if (isLoading) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[#0a192f]">
+      <main className="flex min-h-screen items-center justify-center bg-background">
         <LoadingSpinner label="Checking your session..." />
       </main>
     )

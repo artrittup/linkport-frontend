@@ -1,4 +1,5 @@
 import api from './axios'
+import { normalizeFlatPaginatedResponse } from '../utils/apiResponse'
 
 export function normalizeJob(job) {
   if (!job) return null
@@ -17,12 +18,10 @@ export function normalizeJob(job) {
 
 export async function getJobs(params) {
   const response = await api.get('/jobs', { params })
-  const payload = response.data
-
-  return {
-    ...payload,
-    data: Array.isArray(payload.data) ? payload.data.map(normalizeJob) : [],
-  }
+  return normalizeFlatPaginatedResponse(response.data, {
+    mapItem: normalizeJob,
+    perPage: params?.per_page ?? 15,
+  })
 }
 
 export async function getJobById(id) {
@@ -32,21 +31,17 @@ export async function getJobById(id) {
 
 export async function getCompanyJobs(params) {
   const response = await api.get('/company/jobs', { params })
-  const payload = response.data
-
-  return {
-    ...payload,
-    data: Array.isArray(payload.data)
-      ? payload.data.map((job) => ({
-          ...normalizeJob(job),
-          applications: Number(job.applications_count ?? 0),
-          status: job.status
-            ? job.status.charAt(0).toUpperCase() + job.status.slice(1)
-            : 'Unknown',
-          deadline: job.deadline?.slice(0, 10) ?? '',
-        }))
-      : [],
-  }
+  return normalizeFlatPaginatedResponse(response.data, {
+    mapItem: (job) => ({
+      ...normalizeJob(job),
+      applications: Number(job.applications_count ?? 0),
+      status: job.status
+        ? job.status.charAt(0).toUpperCase() + job.status.slice(1)
+        : 'Unknown',
+      deadline: job.deadline?.slice(0, 10) ?? '',
+    }),
+    perPage: params?.per_page ?? 15,
+  })
 }
 
 export async function createJob(data) {

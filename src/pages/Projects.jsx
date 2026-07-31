@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router'
+import { useCallback, useEffect, useState } from 'react'
+import { useNavigate, useSearchParams } from 'react-router'
 import { getProjectById, getProjects } from '../api/projectsApi'
+import ActivityToastMessage from '../components/ActivityToastMessage'
 import Button from '../components/Button'
 import Card from '../components/Card'
 import EmptyState from '../components/EmptyState'
@@ -12,7 +13,7 @@ import useToast from '../hooks/useToast'
 import DashboardLayout from '../layouts/DashboardLayout'
 
 const controlClasses =
-  'w-full rounded-md border border-[#233554] bg-[#112240] px-4 py-3 text-sm text-[#e6f1ff] outline-none transition-colors placeholder:text-[#64748b] focus:border-[#64ffda] focus:ring-1 focus:ring-[#64ffda]'
+  'w-full rounded-md border border-border bg-surface px-4 py-3 text-sm text-text-primary outline-none transition-colors placeholder:text-text-subtle focus:border-primary focus:ring-1 focus:ring-focus-ring'
 
 const getMinimumBudget = (budget) =>
   Number(String(budget ?? 0).replace(/[^\d.]/g, ''))
@@ -26,6 +27,8 @@ const getDeadlineMonth = (deadline) =>
 
 export default function Projects() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const requestedProjectId = searchParams.get('open')
   const { isAuthenticated, user } = useAuth()
   const { showToast } = useToast()
   const [projects, setProjects] = useState([])
@@ -97,7 +100,7 @@ export default function Projects() {
     return matchesBudget && matchesDeadline
   })
 
-  const openDetails = async (project) => {
+  const openDetails = useCallback(async (project) => {
     setModal({ type: 'details', project, isLoading: true, error: '' })
 
     try {
@@ -121,7 +124,17 @@ export default function Projects() {
           : current,
       )
     }
-  }
+  }, [])
+
+  useEffect(() => {
+    if (!requestedProjectId) return
+
+    openDetails({
+      id: requestedProjectId,
+      title: 'Loading project...',
+      company: '',
+    })
+  }, [openDetails, requestedProjectId])
 
   const clearFilters = () => {
     setSearch('')
@@ -153,24 +166,24 @@ export default function Projects() {
 
   const handleBidSuccess = (response) => {
     setBidProject(null)
-    showToast(response.message ?? 'Bid submitted successfully.', 'success')
+    showToast(<ActivityToastMessage message={response.message ?? 'Proposal submitted successfully.'} tab="proposals" />, 'success', 6000)
   }
 
   return (
     <DashboardLayout title="Explore Projects" userType="Member">
       <div className="space-y-8">
         <section>
-          <p className="font-mono text-sm text-[#64ffda]">Project marketplace</p>
+          <p className="font-mono text-sm text-primary">Project marketplace</p>
           <h2 className="mt-2 text-2xl font-bold tracking-tight sm:text-3xl">
             Explore Projects
           </h2>
-          <p className="mt-3 text-[#8892b0]">Send offers for real company projects.</p>
+          <p className="mt-3 text-text-muted">Send offers for real company projects.</p>
         </section>
 
         <Card padding="md">
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             <div>
-              <label htmlFor="project-search" className="mb-2 block text-xs text-[#8892b0]">
+              <label htmlFor="project-search" className="mb-2 block text-xs text-text-muted">
                 Search
               </label>
               <input
@@ -183,7 +196,7 @@ export default function Projects() {
               />
             </div>
             <div>
-              <label htmlFor="budget-filter" className="mb-2 block text-xs text-[#8892b0]">
+              <label htmlFor="budget-filter" className="mb-2 block text-xs text-text-muted">
                 Budget range
               </label>
               <select
@@ -198,7 +211,7 @@ export default function Projects() {
               </select>
             </div>
             <div>
-              <label htmlFor="deadline-filter" className="mb-2 block text-xs text-[#8892b0]">
+              <label htmlFor="deadline-filter" className="mb-2 block text-xs text-text-muted">
                 Deadline
               </label>
               <select
@@ -214,7 +227,7 @@ export default function Projects() {
               </select>
             </div>
             <div>
-              <label htmlFor="project-skill-filter" className="mb-2 block text-xs text-[#8892b0]">
+              <label htmlFor="project-skill-filter" className="mb-2 block text-xs text-text-muted">
                 Skill
               </label>
               <select
@@ -234,16 +247,16 @@ export default function Projects() {
 
         <section>
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <p className="text-sm text-[#8892b0]">
+            <p className="text-sm text-text-muted">
               Showing{' '}
-              <span className="font-medium text-[#e6f1ff]">{filteredProjects.length}</span>{' '}
+              <span className="font-medium text-text-primary">{filteredProjects.length}</span>{' '}
               projects
             </p>
             {hasFilters && (
               <button
                 type="button"
                 onClick={clearFilters}
-                className="text-xs text-[#64ffda] transition-opacity hover:opacity-80"
+                className="text-xs text-primary transition-opacity hover:opacity-80"
               >
                 Clear filters
               </button>
@@ -276,7 +289,7 @@ export default function Projects() {
           {!isLoading && !error && pagination?.last_page > 1 && (
             <div className="mt-6 flex items-center justify-center gap-4">
               <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((current) => current - 1)}>Previous</Button>
-              <span className="text-sm text-[#8892b0]">Page {pagination.current_page} of {pagination.last_page}</span>
+              <span className="text-sm text-text-muted">Page {pagination.current_page} of {pagination.last_page}</span>
               <Button variant="outline" size="sm" disabled={page >= pagination.last_page} onClick={() => setPage((current) => current + 1)}>Next</Button>
             </div>
           )}
@@ -285,7 +298,7 @@ export default function Projects() {
 
       {modal && (
         <div
-          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 px-4 backdrop-blur-sm"
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-overlay/70 px-4 backdrop-blur-sm"
           role="presentation"
           onMouseDown={(event) => {
             if (event.target === event.currentTarget) setModal(null)
@@ -293,17 +306,17 @@ export default function Projects() {
         >
           <Card className="w-full max-w-md shadow-2xl shadow-black/40" padding="lg">
             <div role="dialog" aria-modal="true" aria-labelledby="project-modal-title">
-              <p className="font-mono text-xs uppercase tracking-wider text-[#64ffda]">
+              <p className="font-mono text-xs uppercase tracking-wider text-primary">
                 Project details
               </p>
-              <h2 id="project-modal-title" className="mt-3 text-xl font-bold text-[#e6f1ff]">
+              <h2 id="project-modal-title" className="mt-3 text-xl font-bold text-text-primary">
                 {modal.project.title}
               </h2>
-              <p className="mt-1 text-sm text-[#64ffda]">{modal.project.company}</p>
+              <p className="mt-1 text-sm text-primary">{modal.project.company}</p>
               {modal.isLoading ? (
                 <LoadingSpinner label="Loading project details..." />
               ) : (
-                <p className="mt-5 text-sm leading-relaxed text-[#8892b0]">
+                <p className="mt-5 text-sm leading-relaxed text-text-muted">
                   {modal.error || modal.project.description}
                 </p>
               )}

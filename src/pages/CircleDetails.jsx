@@ -19,15 +19,15 @@ import useToast from '../hooks/useToast'
 import DashboardLayout from '../layouts/DashboardLayout'
 
 const inputClasses =
-  'mt-2 w-full rounded-md border border-[#233554] bg-[#0a192f]/70 px-4 py-3 text-sm text-[#e6f1ff] outline-none transition-colors placeholder:text-[#64748b] focus:border-[#64ffda] focus:ring-1 focus:ring-[#64ffda]'
+  'mt-2 w-full rounded-md border border-border bg-background/70 px-4 py-3 text-sm text-text-primary outline-none transition-colors placeholder:text-text-subtle focus:border-primary focus:ring-1 focus:ring-focus-ring'
 
 function Skills({ skills = [] }) {
-  if (skills.length === 0) return <span className="text-sm text-[#64748b]">No skills listed.</span>
+  if (skills.length === 0) return <span className="text-sm text-text-subtle">No skills listed.</span>
 
   return (
     <div className="flex flex-wrap gap-2">
       {skills.map((skill) => (
-        <span key={skill} className="rounded-full border border-[#64ffda]/20 bg-[#64ffda]/5 px-3 py-1 font-mono text-xs text-[#64ffda]">
+        <span key={skill} className="rounded-full border border-primary/20 bg-primary/5 px-3 py-1 font-mono text-xs text-primary">
           {skill}
         </span>
       ))}
@@ -38,8 +38,8 @@ function Skills({ skills = [] }) {
 function MemberName({ member }) {
   return (
     <div className="min-w-0">
-      <p className="truncate font-medium text-[#e6f1ff]">{member.name}</p>
-      <p className="mt-0.5 truncate text-xs text-[#8892b0]">
+      <p className="truncate font-medium text-text-primary">{member.name}</p>
+      <p className="mt-0.5 truncate text-xs text-text-muted">
         {member.candidate_profile?.headline || member.email}
       </p>
     </div>
@@ -205,7 +205,7 @@ export default function CircleDetails() {
       <DashboardLayout title="Circle Details" userType="Member">
         <Card padding="lg" className="mx-auto max-w-2xl text-center">
           <h2 className="text-xl font-semibold">Circle unavailable</h2>
-          <p role="alert" className="mt-3 text-sm text-[#fca5a5]">{loadError}</p>
+          <p role="alert" className="mt-3 text-sm text-danger-text">{loadError}</p>
           <Button className="mt-6" variant="outline" onClick={() => navigate('/circles')}>Back to Circles</Button>
         </Card>
       </DashboardLayout>
@@ -221,31 +221,31 @@ export default function CircleDetails() {
   return (
     <DashboardLayout title="Circle Details" userType="Member">
       <div className="space-y-8">
-        <button type="button" onClick={() => navigate('/circles')} className="text-sm text-[#8892b0] transition-colors hover:text-[#64ffda]">
+        <button type="button" onClick={() => navigate('/circles')} className="text-sm text-text-muted transition-colors hover:text-primary">
           &larr; Back to Circles
         </button>
 
         <Card padding="lg" className="relative overflow-hidden">
-          <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-[#64ffda]/5 blur-3xl" />
+          <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-primary/5 blur-3xl" />
           <div className="relative flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
             <div className="max-w-3xl">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="font-mono text-xs uppercase tracking-[0.16em] text-[#64ffda]">{circle.category || 'Uncategorized'}</span>
-                <span className="rounded-full border border-[#233554] px-2.5 py-1 text-[10px] capitalize text-[#8892b0]">{circle.visibility}</span>
+                <span className="font-mono text-xs uppercase tracking-[0.16em] text-primary">{circle.category || 'Uncategorized'}</span>
+                <span className="rounded-full border border-border px-2.5 py-1 text-[10px] capitalize text-text-muted">{circle.visibility}</span>
               </div>
               <h1 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">{circle.name}</h1>
-              <p className="mt-4 whitespace-pre-wrap text-sm leading-7 text-[#8892b0]">{circle.description || 'No description provided.'}</p>
+              <p className="mt-4 whitespace-pre-wrap text-sm leading-7 text-text-muted">{circle.description || 'No description provided.'}</p>
               <div className="mt-6"><Skills skills={circle.skills} /></div>
-              <div className="mt-6 flex flex-wrap gap-x-6 gap-y-2 text-sm text-[#8892b0]">
-                <span>Owner: <strong className="font-medium text-[#e6f1ff]">{circle.owner?.name}</strong></span>
+              <div className="mt-6 flex flex-wrap gap-x-6 gap-y-2 text-sm text-text-muted">
+                <span>Owner: <strong className="font-medium text-text-primary">{circle.owner?.name}</strong></span>
                 <span>{circle.memberCount} {circle.memberCount === 1 ? 'member' : 'members'}</span>
               </div>
             </div>
 
             <div className="flex shrink-0 flex-wrap gap-3">
-              {membershipLabel && <span className="rounded-lg border border-[#64ffda]/30 bg-[#64ffda]/10 px-4 py-2.5 text-sm font-semibold text-[#64ffda]">{membershipLabel}</span>}
+              {membershipLabel && <span className="rounded-lg border border-primary/30 bg-primary/10 px-4 py-2.5 text-sm font-semibold text-primary">{membershipLabel}</span>}
               {!relationship?.is_member && relationship?.has_pending_invitation && (
-                <span className="rounded-lg border border-[#233554] px-4 py-2.5 text-sm text-[#8892b0]">Invitation Pending</span>
+                <span className="rounded-lg border border-border px-4 py-2.5 text-sm text-text-muted">Invitation Pending</span>
               )}
               {!relationship?.is_member && relationship?.has_pending_join_request && (
                 <Button disabled variant="outline">Request Pending</Button>
@@ -270,7 +270,7 @@ export default function CircleDetails() {
             <div id="invite-circle-member" className="scroll-mt-24">
               <Card className="h-full">
                 <h2 className="text-lg font-semibold">Invite Member</h2>
-                <p className="mt-2 text-sm leading-6 text-[#8892b0]">Enter the LinkPort user ID of an active member.</p>
+                <p className="mt-2 text-sm leading-6 text-text-muted">Enter the LinkPort user ID of an active member.</p>
                 <form className="mt-5" onSubmit={handleInvite}>
                   <label htmlFor="invitee-id" className="text-sm font-medium">Member user ID</label>
                   <input id="invitee-id" type="number" min="1" required value={inviteeId} onChange={(event) => setInviteeId(event.target.value)} className={inputClasses} />
@@ -286,16 +286,16 @@ export default function CircleDetails() {
                 <div className="flex items-center justify-between gap-3">
                   <div>
                     <h2 className="text-lg font-semibold">Join Requests</h2>
-                    <p className="mt-1 text-sm text-[#8892b0]">Review pending requests for this circle.</p>
+                    <p className="mt-1 text-sm text-text-muted">Review pending requests for this circle.</p>
                   </div>
-                  <span className="rounded-full bg-[#64ffda]/10 px-3 py-1 text-xs text-[#64ffda]">{joinRequests.length} pending</span>
+                  <span className="rounded-full bg-primary/10 px-3 py-1 text-xs text-primary">{joinRequests.length} pending</span>
                 </div>
                 {joinRequests.length === 0 ? (
                   <div className="mt-5"><EmptyState title="No pending requests" description="New membership requests will appear here." /></div>
                 ) : (
                   <div className="mt-5 space-y-3">
                     {joinRequests.map((joinRequest) => (
-                      <div key={joinRequest.id} className="flex flex-col gap-4 rounded-lg border border-[#233554] bg-[#0a192f]/50 p-4 sm:flex-row sm:items-center sm:justify-between">
+                      <div key={joinRequest.id} className="flex flex-col gap-4 rounded-lg border border-border bg-background/50 p-4 sm:flex-row sm:items-center sm:justify-between">
                         <MemberName member={joinRequest.requester} />
                         <div className="flex shrink-0 gap-2">
                           <Button size="sm" variant="ghost" disabled={processingRequestId === joinRequest.id} onClick={() => handleJoinDecision(joinRequest, 'reject')}>Reject</Button>
@@ -315,14 +315,14 @@ export default function CircleDetails() {
         <section>
           <div className="mb-5">
             <h2 className="text-2xl font-semibold">Members</h2>
-            <p className="mt-1 text-sm text-[#8892b0]">People currently collaborating in this circle.</p>
+            <p className="mt-1 text-sm text-text-muted">People currently collaborating in this circle.</p>
           </div>
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {circle.members.map((member) => (
               <Card key={member.id} className="flex items-center justify-between gap-4">
                 <MemberName member={member} />
                 <div className="flex shrink-0 items-center gap-2">
-                  <span className="rounded-full border border-[#233554] px-2.5 py-1 text-[10px] capitalize text-[#8892b0]">{member.pivot?.role || 'member'}</span>
+                  <span className="rounded-full border border-border px-2.5 py-1 text-[10px] capitalize text-text-muted">{member.pivot?.role || 'member'}</span>
                   {relationship?.can_manage && member.id !== circle.owner_id && member.id !== user?.id && (
                     <Button size="sm" variant="danger" disabled={removingUserId === member.id} onClick={() => handleRemoveMember(member)}>
                       {removingUserId === member.id ? 'Removing...' : 'Remove'}

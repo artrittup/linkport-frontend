@@ -4,6 +4,12 @@ export const COMMUNITY_POST_CATEGORIES = {
   QUESTION: 'question',
   ACHIEVEMENT: 'achievement',
   OPPORTUNITY_TIP: 'opportunity_tip',
+  TECH_DISCUSSION: 'tech_discussion',
+  CAREER_ADVICE: 'career_advice',
+  SHOWCASE: 'showcase',
+  RESOURCE: 'resource',
+  COLLABORATION: 'collaboration',
+  FEEDBACK: 'feedback',
 }
 
 const categoryLabels = {
@@ -12,6 +18,12 @@ const categoryLabels = {
   [COMMUNITY_POST_CATEGORIES.QUESTION]: 'Question',
   [COMMUNITY_POST_CATEGORIES.ACHIEVEMENT]: 'Achievement',
   [COMMUNITY_POST_CATEGORIES.OPPORTUNITY_TIP]: 'Opportunity tip',
+  [COMMUNITY_POST_CATEGORIES.TECH_DISCUSSION]: 'Tech discussion',
+  [COMMUNITY_POST_CATEGORIES.CAREER_ADVICE]: 'Career advice',
+  [COMMUNITY_POST_CATEGORIES.SHOWCASE]: 'Showcase',
+  [COMMUNITY_POST_CATEGORIES.RESOURCE]: 'Resource',
+  [COMMUNITY_POST_CATEGORIES.COLLABORATION]: 'Collaboration',
+  [COMMUNITY_POST_CATEGORIES.FEEDBACK]: 'Feedback wanted',
 }
 
 export const COMMUNITY_POST_CATEGORY_OPTIONS = Object.entries(categoryLabels).map(([value, label]) => ({

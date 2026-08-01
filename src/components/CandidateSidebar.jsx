@@ -123,7 +123,7 @@ export default function CandidateSidebar({ isOpen, onClose }) {
                 to={item.path}
                 onClick={onClose}
                 aria-current={isActive ? 'page' : undefined}
-                className={`flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring ${
+                className={`flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-bold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring ${
                   isActive
                     ? 'border border-primary-soft-border bg-primary-soft text-primary-soft-text'
                     : 'text-text-muted hover:bg-surface hover:text-text-primary'
@@ -146,14 +146,14 @@ export default function CandidateSidebar({ isOpen, onClose }) {
               {initials}
             </div>
             <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-medium text-text-primary">{displayName}</p>
+              <p className="truncate text-sm font-bold text-text-primary">{displayName}</p>
               <Link to="/member/profile" onClick={onClose} className="text-xs text-text-muted hover:text-primary">View profile</Link>
             </div>
           </div>
           <button
             type="button"
             onClick={handleLogout}
-            className="mt-1 flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-danger-soft transition-colors hover:bg-danger/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-danger"
+            className="mt-1 flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold text-danger-soft transition-colors hover:bg-danger/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-danger"
           >
             <LogoutIcon />
             Logout

@@ -29,39 +29,103 @@ function formatFeedTimestamp(value) {
     : date.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })
 }
 
+function getInitials(name) {
+  return (name || 'LP')
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join('')
+    .toUpperCase()
+}
+
 function FeedCard({ item }) {
+  const [isExpanded, setIsExpanded] = useState(false)
+  const [isCommenting, setIsCommenting] = useState(false)
+  const shouldCollapse = item.description.length > 180
+  const visibleDescription = shouldCollapse && !isExpanded
+    ? `${item.description.slice(0, 180).trim()}...`
+    : item.description
+
   return (
-    <article className="flex h-full min-w-0 max-w-full flex-col rounded-2xl border border-border bg-surface/65 p-5 sm:p-6">
-      <div className="flex min-w-0 flex-wrap items-center justify-between gap-3">
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="rounded-full bg-primary/10 px-3 py-1 font-mono text-[10px] font-semibold tracking-[0.12em] text-primary">
-            {item.type}
+    <article className="flex min-w-0 max-w-3xl flex-col overflow-hidden rounded-2xl border border-slate-300/80 bg-surface shadow-sm shadow-slate-200/50 dark:border-border dark:shadow-black/10">
+      <div className="border-b border-border/70 bg-surface/80 px-5 py-4 sm:px-6">
+        <div className="flex min-w-0 items-start justify-between gap-4">
+          <div className="flex min-w-0 items-center gap-3">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-primary/25 bg-primary/10 font-mono text-sm font-bold text-primary">
+              {getInitials(item.author)}
+            </div>
+            <div className="min-w-0">
+              <p className="truncate text-sm font-bold text-text-primary">{item.author}</p>
+              <div className="mt-1 flex min-w-0 flex-wrap items-center gap-2 text-xs text-text-subtle">
+                <span>{item.meta}</span>
+                <span aria-hidden="true">•</span>
+                <span>{item.type}</span>
+              </div>
+            </div>
+          </div>
+          <span className="shrink-0 rounded-full bg-primary/10 px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.12em] text-primary">
+            {item.categoryLabel || item.filter}
           </span>
-          {item.attending && <span className="rounded-full border border-success/30 bg-success/10 px-2.5 py-1 text-xs font-medium text-success-text">Attending</span>}
         </div>
-        <span className="text-xs text-text-subtle">{item.meta}</span>
       </div>
 
-      <h2 className="mt-5 break-words text-xl font-semibold text-text-primary">{item.title}</h2>
-      <p className="mt-3 break-words text-sm leading-6 text-text-muted">{item.description}</p>
-      <p className="mt-4 break-words text-xs font-medium text-text-secondary">{item.author}</p>
-
-      <div className="mt-5 flex flex-wrap gap-2">
-        {item.tags.map((tag) => (
-          <span key={tag} className="max-w-full break-words rounded-md border border-border px-2.5 py-1 text-xs text-text-muted">
-            {tag}
+      <div className="px-5 py-5 sm:px-6">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="rounded-md border border-border bg-background/55 px-2.5 py-1 text-xs font-semibold text-text-secondary">
+            {item.title}
           </span>
-        ))}
-      </div>
+          {item.attending && <span className="rounded-md border border-success/30 bg-success/10 px-2.5 py-1 text-xs font-semibold text-success-text">Attending</span>}
+        </div>
 
-      <div className="mt-auto pt-6">
-        {item.action && item.path && (
-          <Link
-            to={item.path}
-            className="inline-flex items-center justify-center rounded-lg border border-primary/70 px-4 py-2 text-sm font-semibold text-primary transition-colors hover:border-primary hover:bg-primary/10"
+        <p className="mt-4 break-words text-sm leading-7 text-text-muted">{visibleDescription}</p>
+
+        {item.tags.length > 0 && (
+          <div className="mt-5 flex flex-wrap gap-2">
+            {item.tags.slice(0, 8).map((tag) => (
+              <span key={tag} className="max-w-full break-words rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-medium text-primary">
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
+
+        <div className="mt-6 flex flex-wrap items-center gap-2 border-t border-border/70 pt-4">
+          {shouldCollapse && (
+            <button
+              type="button"
+              onClick={() => setIsExpanded((current) => !current)}
+              className="rounded-lg px-3 py-2 text-sm font-bold text-primary transition-colors hover:bg-primary/10"
+            >
+              {isExpanded ? 'Show less' : 'View more'}
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => setIsCommenting((current) => !current)}
+            className="rounded-lg px-3 py-2 text-sm font-bold text-text-secondary transition-colors hover:bg-surface-elevated hover:text-primary"
           >
-            {item.action}
-          </Link>
+            Comment
+          </button>
+          {item.action && item.path && (
+            <Link
+              to={item.path}
+              className="rounded-lg px-3 py-2 text-sm font-bold text-text-secondary transition-colors hover:bg-surface-elevated hover:text-primary"
+            >
+              {item.action}
+            </Link>
+          )}
+        </div>
+
+        {isCommenting && (
+          <div className="mt-4 rounded-xl border border-border bg-background/55 p-3">
+            <input
+              type="text"
+              placeholder="Write a comment..."
+              className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text-primary outline-none placeholder:text-text-subtle focus:border-primary focus:ring-1 focus:ring-focus-ring"
+            />
+            <p className="mt-2 text-xs text-text-subtle">Comments UI ready — backend comments API can be connected next.</p>
+          </div>
         )}
       </div>
     </article>
@@ -145,6 +209,7 @@ export default function CandidateHome() {
       filter: 'Posts',
       type: 'POST',
       title: getCommunityPostCategoryLabel(post.category),
+      categoryLabel: getCommunityPostCategoryLabel(post.category),
       description: post.text,
       author: post.authorName,
       tags: post.tags,
@@ -276,7 +341,7 @@ export default function CandidateHome() {
         ))}
       </div>
 
-      <section className="mt-8 grid gap-5 md:grid-cols-2" aria-live="polite">
+      <section className="mt-8 flex flex-col gap-5" aria-live="polite">
         {visibleItems.map((item) => <FeedCard key={item.id} item={item} />)}
       </section>
 

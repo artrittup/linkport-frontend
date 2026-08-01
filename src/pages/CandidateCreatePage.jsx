@@ -234,7 +234,7 @@ function ProjectForm({ onCancel }) {
 function PostForm({ onCancel }) {
   const navigate = useNavigate()
   const { showToast } = useToast()
-  const [form, setForm] = useState({ text: '', category: COMMUNITY_POST_CATEGORIES.GENERAL, tags: '' })
+  const [form, setForm] = useState({ text: '', category: COMMUNITY_POST_CATEGORIES.GENERAL, tags: [] })
   const [errors, setErrors] = useState({})
   const [submitError, setSubmitError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -243,7 +243,7 @@ function PostForm({ onCancel }) {
     event.preventDefault()
     if (isSubmitting) return
 
-    const tags = splitList(form.tags)
+    const tags = form.tags
     const nextErrors = {}
     if (!form.text.trim()) nextErrors.text = 'Post text is required.'
     if (tags.length > 10) nextErrors.tags = 'Add no more than 10 tags.'
@@ -274,7 +274,7 @@ function PostForm({ onCancel }) {
     }
   }
 
-  const isDirty = form.text || form.tags || form.category !== COMMUNITY_POST_CATEGORIES.GENERAL
+  const isDirty = form.text || form.tags.length > 0 || form.category !== COMMUNITY_POST_CATEGORIES.GENERAL
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -301,12 +301,22 @@ function PostForm({ onCancel }) {
           </select>
           <FieldError message={errors.category} />
         </label>
-        <label className="block min-w-0 text-sm font-medium">
+        <div className="block min-w-0 text-sm font-medium">
           Related skills or tags <span className="text-text-subtle">(optional)</span>
-          <input value={form.tags} onChange={(event) => { setForm((current) => ({ ...current, tags: event.target.value })); setErrors((current) => ({ ...current, tags: '' })); setSubmitError('') }} placeholder="React, Career, Design" className={inputClasses} />
-          <p className="mt-1.5 text-xs text-text-subtle">Separate tags with commas.</p>
+          <div className="mt-2">
+            <SkillsInput
+              skills={form.tags}
+              setSkills={(tags) => {
+                setForm((current) => ({ ...current, tags }))
+                setErrors((current) => ({ ...current, tags: '' }))
+                setSubmitError('')
+              }}
+              placeholder="Search React, Laravel, Unity..."
+            />
+          </div>
+          <p className="mt-1.5 text-xs text-text-subtle">Choose up to 10 skills or tags from the LinkPort list.</p>
           <FieldError message={errors.tags} />
-        </label>
+        </div>
       </div>
       {submitError && <p role="alert" className="rounded-lg border border-danger/35 bg-danger/10 px-4 py-3 text-sm text-danger-text">{submitError}</p>}
       <FormActions onCancel={() => onCancel(isDirty)} isSubmitting={isSubmitting} submitLabel="Publish post" />

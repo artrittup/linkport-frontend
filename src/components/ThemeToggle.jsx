@@ -33,7 +33,7 @@ export default function ThemeToggle({
       aria-label={label}
       aria-pressed={isDark}
       title={label}
-      className={`inline-flex ${sizeClasses} items-center justify-center gap-2 rounded-lg border border-border bg-surface px-2.5 text-text-secondary transition-colors hover:border-primary/50 hover:bg-surface-elevated hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${className}`}
+      className={`inline-flex ${sizeClasses} items-center justify-center gap-2 rounded-full px-2.5 text-text-secondary transition-colors hover:bg-primary/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${className}`}
     >
       {isDark ? <SunIcon /> : <MoonIcon />}
       {showLabel && <span className="text-xs font-semibold">{isDark ? 'Light mode' : 'Dark mode'}</span>}

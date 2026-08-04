@@ -49,14 +49,15 @@ export default function CandidateProjects() {
   const hasFilters = Boolean(appliedSearch || activeFilter)
 
   return (
-    <CandidateLayout title="Projects">
+    <CandidateLayout title="Member projects">
       <section className="flex min-w-0 max-w-full flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
         <div className="min-w-0">
-          <p className="font-mono text-sm text-primary">Project showcase</p>
-          <h2 className="mt-2 text-3xl font-bold tracking-tight text-text-primary sm:text-4xl">Projects</h2>
+          <p className="font-mono text-sm text-primary">Community showcase</p>
+          <h2 className="mt-2 text-3xl font-bold tracking-tight text-text-primary sm:text-4xl">Member projects</h2>
           <p className="mt-4 max-w-2xl leading-7 text-text-muted">
-            Discover work from LinkPort members, share what you are building, and find projects looking for collaborators.
+            Showcase work you are building, follow other members' progress, and find collaborators. These are community projects, not paid company contracts.
           </p>
+          <Link to="/member/opportunities" className="mt-3 inline-flex text-sm font-semibold text-primary hover:underline">Looking for paid company work? View Opportunities</Link>
         </div>
         <Link
           to="/member/create/project"

@@ -23,7 +23,9 @@ export async function getCommunityPost(id) {
 }
 
 export async function createCommunityPost(payload) {
-  const response = await api.post('/community-posts', payload)
+  const response = await api.post('/community-posts', payload, payload instanceof FormData
+    ? { headers: { 'Content-Type': 'multipart/form-data' } }
+    : undefined)
   return mapPostPayload(response.data)
 }
 
@@ -35,6 +37,52 @@ export async function updateCommunityPost(id, payload) {
 export async function deleteCommunityPost(id) {
   const response = await api.delete(`/community-posts/${id}`)
   return response.data
+}
+
+export async function setCommunityPostLiked(id, isLiked) {
+  const response = isLiked
+    ? await api.post(`/community-posts/${id}/like`)
+    : await api.delete(`/community-posts/${id}/like`)
+  return response.data
+}
+
+export async function setCommunityPostSaved(id, isSaved) {
+  const response = isSaved
+    ? await api.post(`/community-posts/${id}/save`)
+    : await api.delete(`/community-posts/${id}/save`)
+  return response.data
+}
+
+export async function getCommunityPostComments(id) {
+  const response = await api.get(`/community-posts/${id}/comments`)
+  return normalizePaginatedResponse(response.data, {
+    mapItem: mapCommunityPostComment,
+    perPage: 20,
+  })
+}
+
+export async function createCommunityPostComment(id, content) {
+  const response = await api.post(`/community-posts/${id}/comments`, { content })
+  return {
+    ...response.data,
+    data: mapCommunityPostComment(response.data?.data),
+  }
+}
+
+export async function deleteCommunityPostComment(postId, commentId) {
+  const response = await api.delete(`/community-posts/${postId}/comments/${commentId}`)
+  return response.data
+}
+
+function mapCommunityPostComment(comment) {
+  if (!comment || typeof comment !== 'object') return null
+  return {
+    id: comment.id,
+    content: comment.content ?? '',
+    authorName: comment.author?.name ?? 'LinkPort member',
+    canDelete: Boolean(comment.can_delete),
+    createdAt: comment.created_at ?? null,
+  }
 }
 
 export function getCommunityPostErrorMessage(error, fallback = 'Community posts are temporarily unavailable. Please try again.') {

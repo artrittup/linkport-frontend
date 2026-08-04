@@ -53,6 +53,23 @@ function isValidUrl(value) {
   }
 }
 
+function readVideoDuration(file) {
+  return new Promise((resolve, reject) => {
+    const video = document.createElement('video')
+    const objectUrl = URL.createObjectURL(file)
+    video.preload = 'metadata'
+    video.onloadedmetadata = () => {
+      URL.revokeObjectURL(objectUrl)
+      Number.isFinite(video.duration) ? resolve(video.duration) : reject(new Error('Invalid duration'))
+    }
+    video.onerror = () => {
+      URL.revokeObjectURL(objectUrl)
+      reject(new Error('Invalid video'))
+    }
+    video.src = objectUrl
+  })
+}
+
 function FieldError({ message }) {
   return message ? <p className="mt-1.5 text-xs text-danger-text">{message}</p> : null
 }
@@ -234,7 +251,14 @@ function ProjectForm({ onCancel }) {
 function PostForm({ onCancel }) {
   const navigate = useNavigate()
   const { showToast } = useToast()
-  const [form, setForm] = useState({ text: '', category: COMMUNITY_POST_CATEGORIES.GENERAL, tags: [] })
+  const [form, setForm] = useState({
+    text: '',
+    category: COMMUNITY_POST_CATEGORIES.GENERAL,
+    tags: [],
+    images: [],
+    video: null,
+    videoDuration: null,
+  })
   const [errors, setErrors] = useState({})
   const [submitError, setSubmitError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -248,6 +272,10 @@ function PostForm({ onCancel }) {
     if (!form.text.trim()) nextErrors.text = 'Post text is required.'
     if (tags.length > 10) nextErrors.tags = 'Add no more than 10 tags.'
     if (tags.some((tag) => tag.length > 50)) nextErrors.tags = 'Each tag must be 50 characters or fewer.'
+    if (form.images.length > 3) nextErrors.images = 'Add no more than 3 photos.'
+    if (form.images.some((image) => image.size > 5 * 1024 * 1024)) nextErrors.images = 'Each photo must be 5 MB or smaller.'
+    if (form.video?.size > 50 * 1024 * 1024) nextErrors.video = 'The video must be 50 MB or smaller.'
+    if (form.video && form.videoDuration > 60) nextErrors.video = 'The video must be 60 seconds or shorter.'
     if (Object.keys(nextErrors).length) {
       setErrors(nextErrors)
       return
@@ -267,6 +295,8 @@ function PostForm({ onCancel }) {
         text: validationErrors.content,
         category: validationErrors.category,
         tags: validationErrors.tags || validationErrors['tags.0'],
+        images: validationErrors.images || validationErrors['images.0'],
+        video: validationErrors.video || validationErrors.video_duration_seconds,
       })
       setSubmitError(getCommunityPostErrorMessage(error, 'We could not publish your post. Please try again.'))
     } finally {
@@ -274,7 +304,45 @@ function PostForm({ onCancel }) {
     }
   }
 
-  const isDirty = form.text || form.tags.length > 0 || form.category !== COMMUNITY_POST_CATEGORIES.GENERAL
+  const isDirty = form.text || form.tags.length > 0 || form.images.length > 0 || form.video || form.category !== COMMUNITY_POST_CATEGORIES.GENERAL
+
+  const selectImages = (event) => {
+    const images = Array.from(event.target.files ?? [])
+    event.target.value = ''
+    if (images.length > 3) {
+      setErrors((current) => ({ ...current, images: 'Choose no more than 3 photos.' }))
+      return
+    }
+    if (images.some((image) => image.size > 5 * 1024 * 1024)) {
+      setErrors((current) => ({ ...current, images: 'Each photo must be 5 MB or smaller.' }))
+      return
+    }
+    setForm((current) => ({ ...current, images }))
+    setErrors((current) => ({ ...current, images: '' }))
+    setSubmitError('')
+  }
+
+  const selectVideo = async (event) => {
+    const video = event.target.files?.[0] ?? null
+    event.target.value = ''
+    if (!video) return
+    if (video.size > 50 * 1024 * 1024) {
+      setErrors((current) => ({ ...current, video: 'The video must be 50 MB or smaller.' }))
+      return
+    }
+    try {
+      const videoDuration = await readVideoDuration(video)
+      if (videoDuration > 60) {
+        setErrors((current) => ({ ...current, video: 'The video must be 60 seconds or shorter.' }))
+        return
+      }
+      setForm((current) => ({ ...current, video, videoDuration }))
+      setErrors((current) => ({ ...current, video: '' }))
+      setSubmitError('')
+    } catch {
+      setErrors((current) => ({ ...current, video: 'Choose a valid MP4, WebM, or MOV video.' }))
+    }
+  }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -316,6 +384,34 @@ function PostForm({ onCancel }) {
           </div>
           <p className="mt-1.5 text-xs text-text-subtle">Choose up to 10 skills or tags from the LinkPort list.</p>
           <FieldError message={errors.tags} />
+        </div>
+      </div>
+      <div className="grid min-w-0 gap-5 sm:grid-cols-2">
+        <div className="min-w-0 rounded-xl border border-border bg-background/45 p-4">
+          <p className="text-sm font-medium">Photos <span className="text-text-subtle">(optional, up to 3)</span></p>
+          <label htmlFor="post-images" className="mt-3 inline-flex rounded-lg border border-border bg-surface px-4 py-2 text-sm font-semibold text-text-secondary hover:border-primary/50 hover:text-primary">Choose photos</label>
+          <input id="post-images" type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={selectImages} className="sr-only" />
+          {form.images.length > 0 && (
+            <div className="mt-3 space-y-2">
+              {form.images.map((image) => <p key={`${image.name}-${image.lastModified}`} className="truncate text-xs text-text-muted">{image.name}</p>)}
+              <button type="button" onClick={() => setForm((current) => ({ ...current, images: [] }))} className="text-xs font-medium text-danger-text hover:underline">Remove all photos</button>
+            </div>
+          )}
+          <p className="mt-2 text-xs text-text-subtle">JPG, PNG, or WebP. Maximum 5 MB each.</p>
+          <FieldError message={errors.images} />
+        </div>
+        <div className="min-w-0 rounded-xl border border-border bg-background/45 p-4">
+          <p className="text-sm font-medium">Video <span className="text-text-subtle">(optional, one)</span></p>
+          <label htmlFor="post-video" className="mt-3 inline-flex rounded-lg border border-border bg-surface px-4 py-2 text-sm font-semibold text-text-secondary hover:border-primary/50 hover:text-primary">Choose video</label>
+          <input id="post-video" type="file" accept="video/mp4,video/webm,video/quicktime" onChange={selectVideo} className="sr-only" />
+          {form.video && (
+            <div className="mt-3">
+              <p className="truncate text-xs text-text-muted">{form.video.name} · {Math.ceil(form.videoDuration)}s</p>
+              <button type="button" onClick={() => setForm((current) => ({ ...current, video: null, videoDuration: null }))} className="mt-2 text-xs font-medium text-danger-text hover:underline">Remove video</button>
+            </div>
+          )}
+          <p className="mt-2 text-xs text-text-subtle">MP4, WebM, or MOV. Up to 60 seconds and 50 MB.</p>
+          <FieldError message={errors.video} />
         </div>
       </div>
       {submitError && <p role="alert" className="rounded-lg border border-danger/35 bg-danger/10 px-4 py-3 text-sm text-danger-text">{submitError}</p>}

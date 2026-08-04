@@ -47,6 +47,13 @@ export function mapCommunityPost(post) {
     content: post.content ?? '',
     category: post.category ?? COMMUNITY_POST_CATEGORIES.GENERAL,
     tags: Array.isArray(post.tags) ? post.tags.filter(Boolean) : [],
+    images: Array.isArray(post.images) ? post.images.filter(Boolean) : [],
+    videoUrl: post.video_url ?? null,
+    videoDuration: post.video_duration_seconds ?? null,
+    likesCount: Number(post.likes_count ?? 0),
+    commentsCount: Number(post.comments_count ?? 0),
+    isLiked: Boolean(post.is_liked),
+    isSaved: Boolean(post.is_saved),
     authorName: author?.name ?? 'LinkPort member',
     authorHeadline: author?.headline ?? '',
     authorLocation: author?.location ?? '',
@@ -56,9 +63,15 @@ export function mapCommunityPost(post) {
 }
 
 export function toCommunityPostPayload(form) {
-  return {
-    content: form.text.trim(),
-    category: form.category,
-    tags: form.tags,
+  const payload = new FormData()
+  payload.append('content', form.text.trim())
+  payload.append('category', form.category)
+  form.tags.forEach((tag, index) => payload.append(`tags[${index}]`, tag))
+  ;(form.images ?? []).forEach((image, index) => payload.append(`images[${index}]`, image))
+  if (form.video) {
+    payload.append('video', form.video)
+    payload.append('video_duration_seconds', String(form.videoDuration))
   }
+
+  return payload
 }

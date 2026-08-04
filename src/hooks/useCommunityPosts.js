@@ -15,6 +15,7 @@ export default function useCommunityPosts({
   search,
   category,
   userId,
+  saved,
   page = 1,
   perPage = 15,
   enabled = true,
@@ -39,6 +40,7 @@ export default function useCommunityPosts({
           search: search || undefined,
           category: category || undefined,
           user_id: userId || undefined,
+          saved: saved || undefined,
           page,
           per_page: perPage,
         })
@@ -59,7 +61,7 @@ export default function useCommunityPosts({
     return () => {
       isActive = false
     }
-  }, [category, enabled, page, perPage, refreshKey, search, userId])
+  }, [category, enabled, page, perPage, refreshKey, saved, search, userId])
 
   const retry = useCallback(() => setRefreshKey((current) => current + 1), [])
 

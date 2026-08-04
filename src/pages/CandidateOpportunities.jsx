@@ -9,7 +9,7 @@ import { getCandidateActivityPath } from '../config/candidateActivity'
 import { jobToOpportunity, projectToOpportunity } from '../data/opportunityAdapters'
 import CandidateLayout from '../layouts/CandidateLayout'
 
-const typeFilters = ['All', 'Jobs', 'Internships', 'Projects']
+const typeFilters = ['All', 'Jobs', 'Internships', 'Company projects']
 const workStyleFilters = ['All work styles', 'Remote', 'Hybrid', 'On-site']
 
 export default function CandidateOpportunities() {
@@ -91,7 +91,7 @@ export default function CandidateOpportunities() {
           <p className="font-mono text-sm text-primary">Member opportunities</p>
           <h2 className="mt-2 text-3xl font-bold tracking-tight text-text-primary sm:text-4xl">Opportunities</h2>
           <p className="mt-4 max-w-2xl leading-7 text-text-muted">
-            Find live jobs, internships, and company projects that match your next step.
+            Find paid or formal work from companies: jobs, internships, and scoped company projects that accept proposals.
           </p>
         </div>
         <div className="flex shrink-0 flex-wrap gap-4 text-sm">

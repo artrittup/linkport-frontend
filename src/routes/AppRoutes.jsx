@@ -35,8 +35,6 @@ const CandidateEvents = lazy(() => import('../pages/CandidateEvents'))
 const CandidateEventDetails = lazy(() => import('../pages/CandidateEventDetails'))
 const CandidateTeammateRequestDetails = lazy(() => import('../pages/CandidateTeammateRequestDetails'))
 const Connections = lazy(() => import('../pages/Connections'))
-const Circles = lazy(() => import('../pages/Circles'))
-const CircleDetails = lazy(() => import('../pages/CircleDetails'))
 const CompanyProfile = lazy(() => import('../pages/CompanyProfile'))
 const CompanyOverview = lazy(() => import('../pages/CompanyOverview'))
 const CompanyOpportunities = lazy(() => import('../pages/CompanyOpportunities'))
@@ -114,8 +112,8 @@ export default function AppRoutes() {
         <Route path="/member/activity" element={<ProtectedRoute allowedRoles={candidateRoles}><CandidateActivity /></ProtectedRoute>} />
         <Route path="/member/notifications" element={<ProtectedRoute allowedRoles={candidateRoles}><CandidateNotifications /></ProtectedRoute>} />
         <Route path="/connections" element={<ProtectedRoute allowedRoles={candidateRoles}><Connections /></ProtectedRoute>} />
-        <Route path="/circles" element={<ProtectedRoute allowedRoles={candidateRoles}><Circles /></ProtectedRoute>} />
-        <Route path="/circles/:id" element={<ProtectedRoute allowedRoles={candidateRoles}><CircleDetails /></ProtectedRoute>} />
+        <Route path="/circles" element={<ProtectedRoute allowedRoles={candidateRoles}><Navigate to="/member/community?view=my-circles" replace /></ProtectedRoute>} />
+        <Route path="/circles/:id" element={<ProtectedRoute allowedRoles={candidateRoles}><Navigate to="/member/community?view=discover" replace /></ProtectedRoute>} />
         <Route path="/company/profile" element={<ProtectedRoute allowedRoles={companyRoles}><CompanyProfile /></ProtectedRoute>} />
         <Route path="/company/overview" element={<ProtectedRoute allowedRoles={companyRoles}><CompanyOverview /></ProtectedRoute>} />
         <Route path="/company/opportunities" element={<ProtectedRoute allowedRoles={companyRoles}><CompanyOpportunities /></ProtectedRoute>} />

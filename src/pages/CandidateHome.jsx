@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router'
 import { getJobs } from '../api/jobsApi'
 import { getProjects } from '../api/projectsApi'
 import CommunityFeedCard from '../components/CommunityFeedCard'
+import { FullPageLoadingScreen } from '../components/PageLoadingScreen'
 import {
   formatCommunityEventDate,
   formatCommunityEventTime,
@@ -199,6 +200,8 @@ export default function CandidateHome() {
     savedItems.error && 'Saved items',
   ].filter(Boolean)
 
+  if (isFeedLoading) return <FullPageLoadingScreen />
+
   return (
     <CandidateLayout title="Explore LinkPort">
       <section>
@@ -208,8 +211,6 @@ export default function CandidateHome() {
       </section>
 
       {feedWarnings.length > 0 && <p role="status" className="mt-4 rounded-lg border border-border bg-surface/45 px-4 py-3 text-sm text-text-muted">{feedWarnings.join(', ')} {feedWarnings.length === 1 ? 'is' : 'are'} temporarily unavailable. Other Home updates are still available.</p>}
-      {isFeedLoading && <p role="status" className="mt-4 text-sm text-text-muted">Loading the latest Home updates...</p>}
-
       <div className="mt-8 flex gap-2 overflow-x-auto pb-1" role="tablist" aria-label="Filter community feed">
         {filters.map((filter) => (
           <button

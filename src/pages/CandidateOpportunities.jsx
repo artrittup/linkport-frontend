@@ -97,9 +97,9 @@ export default function CandidateOpportunities() {
             Find paid or formal work from companies: jobs, internships, and scoped company projects that accept proposals.
           </p>
         </div>
-        <div className="flex shrink-0 flex-wrap gap-4 text-sm">
-          <Link to={getCandidateActivityPath('applications')} className="text-text-secondary hover:text-primary">My applications</Link>
-          <Link to={getCandidateActivityPath('proposals')} className="text-text-secondary hover:text-primary">My proposals</Link>
+        <div className="flex shrink-0 flex-wrap gap-2">
+          <Link to={getCandidateActivityPath('applications')} className="inline-flex items-center justify-center rounded-lg border border-primary bg-transparent px-4 py-2 text-sm font-semibold text-primary transition-colors hover:bg-primary/10">My applications</Link>
+          <Link to={getCandidateActivityPath('proposals')} className="inline-flex items-center justify-center rounded-lg border border-primary bg-transparent px-4 py-2 text-sm font-semibold text-primary transition-colors hover:bg-primary/10">My proposals</Link>
         </div>
       </section>
 

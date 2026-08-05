@@ -2,7 +2,7 @@ import { useTheme } from '../context/ThemeContext'
 
 function SunIcon() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true" className="h-5 w-5">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" aria-hidden="true" className="h-5 w-5">
       <circle cx="12" cy="12" r="4" />
       <path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.65 17.65l1.42 1.42M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.65 6.35l1.42-1.42" />
     </svg>
@@ -11,7 +11,7 @@ function SunIcon() {
 
 function MoonIcon() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="h-5 w-5">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="h-5 w-5">
       <path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5 8.5 8.5 0 1 0 20.5 14.2Z" />
     </svg>
   )
@@ -19,12 +19,11 @@ function MoonIcon() {
 
 export default function ThemeToggle({
   className = '',
-  compact = false,
   showLabel = false,
 }) {
   const { isDark, toggleTheme } = useTheme()
   const label = isDark ? 'Switch to light mode' : 'Switch to dark mode'
-  const sizeClasses = compact ? 'min-h-9 min-w-9' : 'min-h-11 min-w-11'
+  const sizeClasses = showLabel ? 'h-10 px-2.5' : 'h-10 w-10'
 
   return (
     <button
@@ -33,7 +32,7 @@ export default function ThemeToggle({
       aria-label={label}
       aria-pressed={isDark}
       title={label}
-      className={`inline-flex ${sizeClasses} items-center justify-center gap-2 rounded-full px-2.5 text-text-secondary transition-colors hover:bg-primary/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${className}`}
+      className={`inline-flex ${sizeClasses} items-center justify-center gap-2 rounded-lg text-text-muted transition-colors hover:bg-surface hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring ${className}`}
     >
       {isDark ? <SunIcon /> : <MoonIcon />}
       {showLabel && <span className="text-xs font-semibold">{isDark ? 'Light mode' : 'Dark mode'}</span>}

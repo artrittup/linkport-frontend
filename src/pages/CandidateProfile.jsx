@@ -521,7 +521,7 @@ export default function CandidateProfile() {
               { label: 'Shared content', path: getCandidateActivityPath('content') },
               { label: 'Events', path: getCandidateActivityPath('events') },
             ].map((item) => (
-              <Link key={item.path} to={item.path} className="rounded-xl border border-border bg-background/45 px-4 py-3 text-sm font-medium text-text-secondary transition-colors hover:border-primary/40 hover:text-primary">
+              <Link key={item.path} to={item.path} className="inline-flex items-center justify-center rounded-lg border border-primary bg-transparent px-4 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-primary/10">
                 {item.label}
               </Link>
             ))}

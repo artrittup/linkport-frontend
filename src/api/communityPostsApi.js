@@ -46,13 +46,6 @@ export async function setCommunityPostLiked(id, isLiked) {
   return response.data
 }
 
-export async function setCommunityPostSaved(id, isSaved) {
-  const response = isSaved
-    ? await api.post(`/community-posts/${id}/save`)
-    : await api.delete(`/community-posts/${id}/save`)
-  return response.data
-}
-
 export async function getCommunityPostComments(id) {
   const response = await api.get(`/community-posts/${id}/comments`)
   return normalizePaginatedResponse(response.data, {

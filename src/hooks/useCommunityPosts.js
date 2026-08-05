@@ -40,7 +40,7 @@ export default function useCommunityPosts({
           search: search || undefined,
           category: category || undefined,
           user_id: userId || undefined,
-          saved: saved || undefined,
+          saved: saved ? 1 : undefined,
           page,
           per_page: perPage,
         })

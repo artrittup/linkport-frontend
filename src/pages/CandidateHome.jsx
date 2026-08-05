@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useSearchParams } from 'react-router'
 import { getJobs } from '../api/jobsApi'
 import { getProjects } from '../api/projectsApi'
 import CommunityFeedCard from '../components/CommunityFeedCard'
@@ -14,13 +15,15 @@ import {
   getTeammateRequestWorkStyleLabel,
 } from '../data/teammateRequestMapper'
 import { jobToOpportunity, projectToOpportunity } from '../data/opportunityAdapters'
+import { getSavedItemKey, SAVED_ITEM_TYPES, savedItemRecordToFeedItem } from '../data/savedItemMapper'
 import useCommunityEvents from '../hooks/useCommunityEvents'
 import useCommunityPosts from '../hooks/useCommunityPosts'
 import useCommunityProjects from '../hooks/useCommunityProjects'
 import useTeammateRequests from '../hooks/useTeammateRequests'
+import useSavedItems from '../hooks/useSavedItems'
 import CandidateLayout from '../layouts/CandidateLayout'
 
-const filters = ['All', 'Projects', 'Posts', 'Team', 'Opportunities', 'Events']
+const filters = ['Saved', 'All', 'Projects', 'Posts', 'Team', 'Opportunities', 'Events']
 
 function formatFeedTimestamp(value) {
   const date = new Date(value)
@@ -29,7 +32,7 @@ function formatFeedTimestamp(value) {
     : date.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })
 }
 
-function communityPostToFeedItem(post) {
+function communityPostToFeedItem(post, isSaved) {
   return {
     id: `post-${post.id}`,
     postId: post.id,
@@ -45,7 +48,9 @@ function communityPostToFeedItem(post) {
     likesCount: post.likesCount,
     commentsCount: post.commentsCount,
     isLiked: post.isLiked,
-    isSaved: post.isSaved,
+    isSaved,
+    saveType: SAVED_ITEM_TYPES.COMMUNITY_POST,
+    saveId: post.id,
     meta: formatFeedTimestamp(post.createdAt),
     action: null,
     path: null,
@@ -54,6 +59,7 @@ function communityPostToFeedItem(post) {
 }
 
 export default function CandidateHome() {
+  const [searchParams, setSearchParams] = useSearchParams()
   const { projects: communityProjects, isLoading: projectsLoading, error: projectsError } = useCommunityProjects({ perPage: 3 })
   const { posts: communityPosts, isLoading: postsLoading, error: postsError } = useCommunityPosts({ perPage: 3 })
   const {
@@ -62,10 +68,16 @@ export default function CandidateHome() {
     error: teammateRequestsError,
   } = useTeammateRequests({ status: TEAMMATE_REQUEST_STATUSES.OPEN, perPage: 3 })
   const { events: communityEvents, isLoading: eventsLoading, error: eventsError } = useCommunityEvents({ perPage: 3 })
+  const savedItems = useSavedItems()
   const [liveOpportunities, setLiveOpportunities] = useState([])
   const [opportunitiesLoading, setOpportunitiesLoading] = useState(true)
   const [opportunitiesError, setOpportunitiesError] = useState(false)
-  const [activeFilter, setActiveFilter] = useState('All')
+  const [activeFilter, setActiveFilter] = useState(() => searchParams.get('filter') === 'saved' ? 'Saved' : 'All')
+
+  const selectFilter = (filter) => {
+    setActiveFilter(filter)
+    setSearchParams(filter === 'Saved' ? { filter: 'saved' } : {}, { replace: true })
+  }
 
   useEffect(() => {
     let isActive = true
@@ -97,8 +109,14 @@ export default function CandidateHome() {
       action: 'View project',
       path: `/member/projects/${project.id}`,
       createdAt: project.createdAt,
+      saveType: SAVED_ITEM_TYPES.COMMUNITY_PROJECT,
+      saveId: project.id,
+      isSaved: savedItems.savedKeys.has(getSavedItemKey(SAVED_ITEM_TYPES.COMMUNITY_PROJECT, project.id)),
     })),
-    ...communityPosts.map(communityPostToFeedItem),
+    ...communityPosts.map((post) => communityPostToFeedItem(
+      post,
+      savedItems.savedKeys.has(getSavedItemKey(SAVED_ITEM_TYPES.COMMUNITY_POST, post.id)),
+    )),
     ...teammateRequests.map((request) => ({
       id: `team-${request.id}`,
       filter: 'Team',
@@ -111,6 +129,9 @@ export default function CandidateHome() {
       action: 'View request',
       path: `/member/community/team-requests/${request.id}`,
       createdAt: request.createdAt,
+      saveType: SAVED_ITEM_TYPES.TEAMMATE_REQUEST,
+      saveId: request.id,
+      isSaved: savedItems.savedKeys.has(getSavedItemKey(SAVED_ITEM_TYPES.TEAMMATE_REQUEST, request.id)),
     })),
     ...communityEvents.map((event) => ({
       id: `event-${event.id}`,
@@ -125,6 +146,9 @@ export default function CandidateHome() {
       path: `/member/community/events/${event.id}`,
       attending: event.isAttending,
       createdAt: event.createdAt,
+      saveType: SAVED_ITEM_TYPES.COMMUNITY_EVENT,
+      saveId: event.id,
+      isSaved: savedItems.savedKeys.has(getSavedItemKey(SAVED_ITEM_TYPES.COMMUNITY_EVENT, event.id)),
     })),
     ...liveOpportunities.map((opportunity) => ({
       id: `opportunity-${opportunity.id}`,
@@ -138,24 +162,33 @@ export default function CandidateHome() {
       action: 'View opportunity',
       path: `/member/opportunities/${opportunity.id}`,
       createdAt: opportunity.sourceData?.created_at ?? null,
+      saveType: opportunity.source === 'job' ? SAVED_ITEM_TYPES.JOB : SAVED_ITEM_TYPES.PROJECT,
+      saveId: opportunity.sourceId,
+      isSaved: savedItems.savedKeys.has(getSavedItemKey(
+        opportunity.source === 'job' ? SAVED_ITEM_TYPES.JOB : SAVED_ITEM_TYPES.PROJECT,
+        opportunity.sourceId,
+      )),
     })),
   ].sort((first, second) => {
     const firstTimestamp = Date.parse(first.createdAt)
     const secondTimestamp = Date.parse(second.createdAt)
     return (Number.isFinite(secondTimestamp) ? secondTimestamp : 0)
       - (Number.isFinite(firstTimestamp) ? firstTimestamp : 0)
-  }), [communityEvents, communityPosts, communityProjects, liveOpportunities, teammateRequests])
+  }), [communityEvents, communityPosts, communityProjects, liveOpportunities, savedItems.savedKeys, teammateRequests])
 
   const visibleItems = activeFilter === 'All'
     ? communityFeedItems
-    : communityFeedItems.filter((item) => item.filter === activeFilter)
-  const isFeedLoading = projectsLoading || postsLoading || teammateRequestsLoading || eventsLoading || opportunitiesLoading
+    : activeFilter === 'Saved'
+      ? savedItems.items.map(savedItemRecordToFeedItem)
+      : communityFeedItems.filter((item) => item.filter === activeFilter)
+  const isFeedLoading = projectsLoading || postsLoading || teammateRequestsLoading || eventsLoading || opportunitiesLoading || savedItems.isLoading
   const activeFilterPending = {
     Projects: projectsLoading || projectsError,
     Posts: postsLoading || postsError,
     Team: teammateRequestsLoading || teammateRequestsError,
     Opportunities: opportunitiesLoading || opportunitiesError,
     Events: eventsLoading || eventsError,
+    Saved: savedItems.isLoading || savedItems.error,
   }[activeFilter]
   const feedWarnings = [
     projectsError && 'Community projects',
@@ -163,6 +196,7 @@ export default function CandidateHome() {
     teammateRequestsError && 'Teammate requests',
     eventsError && 'Upcoming events',
     opportunitiesError && 'Some live opportunities',
+    savedItems.error && 'Saved items',
   ].filter(Boolean)
 
   return (
@@ -178,15 +212,39 @@ export default function CandidateHome() {
 
       <div className="mt-8 flex gap-2 overflow-x-auto pb-1" role="tablist" aria-label="Filter community feed">
         {filters.map((filter) => (
-          <button key={filter} type="button" role="tab" aria-selected={activeFilter === filter} onClick={() => setActiveFilter(filter)} className={`shrink-0 rounded-full border px-4 py-2 text-sm font-medium transition-colors ${activeFilter === filter ? 'border-primary bg-primary/10 text-primary' : 'border-border text-text-muted hover:border-primary/50 hover:text-text-primary'}`}>{filter}</button>
+          <button
+            key={filter}
+            type="button"
+            role="tab"
+            aria-selected={activeFilter === filter}
+            onClick={() => selectFilter(filter)}
+            className={`shrink-0 rounded-full border px-4 py-2 text-sm font-semibold transition-colors ${
+              filter === 'Saved'
+                ? activeFilter === filter
+                  ? 'border-warning bg-warning text-background shadow-sm shadow-warning/20'
+                  : 'border-warning/50 bg-warning/10 text-warning-text hover:bg-warning/20'
+                : activeFilter === filter
+                  ? 'border-primary bg-primary/10 text-primary'
+                  : 'border-border text-text-muted hover:border-primary/50 hover:text-text-primary'
+            }`}
+          >
+            {filter === 'Saved' && <span aria-hidden="true" className="mr-1.5">★</span>}
+            {filter}
+          </button>
         ))}
       </div>
 
       <section className="mt-8 flex w-full flex-col gap-5" aria-live="polite">
-        {visibleItems.map((item) => <CommunityFeedCard key={item.id} item={item} />)}
+        {visibleItems.map((item) => (
+          <CommunityFeedCard
+            key={item.id}
+            item={item}
+            onSavedChange={(changedItem, nextSaved) => savedItems.updateSavedState(changedItem.saveType, changedItem.saveId, nextSaved)}
+          />
+        ))}
       </section>
 
-      {visibleItems.length === 0 && !activeFilterPending && <p className="mt-8 rounded-xl border border-border bg-surface/50 p-6 text-sm text-text-muted">{activeFilter === 'Team' ? 'No open teammate requests are available yet.' : 'No items are available in this category yet.'}</p>}
+      {visibleItems.length === 0 && !activeFilterPending && <p className="mt-8 rounded-xl border border-border bg-surface/50 p-6 text-sm text-text-muted">{activeFilter === 'Team' ? 'No open teammate requests are available yet.' : activeFilter === 'Saved' ? 'Save an item from Home to keep it here.' : 'No items are available in this category yet.'}</p>}
     </CandidateLayout>
   )
 }

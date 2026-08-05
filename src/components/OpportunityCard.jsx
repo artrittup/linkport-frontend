@@ -1,4 +1,5 @@
 import { Link } from 'react-router'
+import SaveButton from './SaveButton'
 
 const typeClasses = {
   JOB: 'border-info/30 bg-info/10 text-info-text',
@@ -16,7 +17,7 @@ function formatDeadline(deadline) {
     : new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' }).format(date)
 }
 
-export default function OpportunityCard({ opportunity }) {
+export default function OpportunityCard({ opportunity, isSaved = false, onSavedChange }) {
   const deadline = formatDeadline(opportunity.deadline)
 
   return (
@@ -49,6 +50,13 @@ export default function OpportunityCard({ opportunity }) {
       )}
 
       <div className="mt-auto pt-6">
+        <SaveButton
+          type={opportunity.source}
+          itemId={opportunity.sourceId}
+          initialSaved={isSaved}
+          onChange={onSavedChange}
+          className="mb-2 w-full items-stretch [&>button]:justify-center"
+        />
         <Link
           to={`/member/opportunities/${opportunity.id}`}
           className="inline-flex w-full items-center justify-center rounded-lg border border-primary bg-primary px-4 py-2.5 text-sm font-semibold text-primary-contrast transition-colors hover:bg-primary-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"

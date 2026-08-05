@@ -514,11 +514,12 @@ export default function CandidateProfile() {
           <Link to={getCandidateActivityPath()} className="inline-flex w-full items-center justify-center rounded-xl border border-primary bg-primary px-5 py-3 text-sm font-semibold text-primary-contrast transition-colors hover:bg-primary-hover">
             View all activity
           </Link>
-          <div className="mt-3 grid min-w-0 gap-3 sm:grid-cols-3">
+          <div className="mt-3 grid min-w-0 gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {[
               { label: 'Applications', path: getCandidateActivityPath('applications') },
               { label: 'Proposals', path: getCandidateActivityPath('proposals') },
               { label: 'Shared content', path: getCandidateActivityPath('content') },
+              { label: 'Events', path: getCandidateActivityPath('events') },
             ].map((item) => (
               <Link key={item.path} to={item.path} className="rounded-xl border border-border bg-background/45 px-4 py-3 text-sm font-medium text-text-secondary transition-colors hover:border-primary/40 hover:text-primary">
                 {item.label}

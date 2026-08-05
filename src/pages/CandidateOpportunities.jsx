@@ -7,12 +7,15 @@ import LoadingSpinner from '../components/LoadingSpinner'
 import OpportunityCard from '../components/OpportunityCard'
 import { getCandidateActivityPath } from '../config/candidateActivity'
 import { jobToOpportunity, projectToOpportunity } from '../data/opportunityAdapters'
+import { getSavedItemKey } from '../data/savedItemMapper'
+import useSavedItems from '../hooks/useSavedItems'
 import CandidateLayout from '../layouts/CandidateLayout'
 
 const typeFilters = ['All', 'Jobs', 'Internships', 'Company projects']
 const workStyleFilters = ['All work styles', 'Remote', 'Hybrid', 'On-site']
 
 export default function CandidateOpportunities() {
+  const savedItems = useSavedItems()
   const [apiOpportunities, setApiOpportunities] = useState([])
   const [search, setSearch] = useState('')
   const [activeType, setActiveType] = useState('All')
@@ -177,7 +180,12 @@ export default function CandidateOpportunities() {
         {visibleOpportunities.length > 0 ? (
           <div className="grid min-w-0 max-w-full gap-5 md:grid-cols-2 xl:grid-cols-3">
             {visibleOpportunities.map((opportunity) => (
-              <OpportunityCard key={opportunity.id} opportunity={opportunity} />
+              <OpportunityCard
+                key={opportunity.id}
+                opportunity={opportunity}
+                isSaved={savedItems.savedKeys.has(getSavedItemKey(opportunity.source, opportunity.sourceId))}
+                onSavedChange={(nextSaved) => savedItems.updateSavedState(opportunity.source, opportunity.sourceId, nextSaved)}
+              />
             ))}
           </div>
         ) : !isLoading && (

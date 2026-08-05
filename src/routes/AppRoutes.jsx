@@ -23,7 +23,6 @@ const CandidateProfile = lazy(() => import('../pages/CandidateProfile'))
 const CandidateActivity = lazy(() => import('../pages/CandidateActivity'))
 const CandidateNotifications = lazy(() => import('../pages/CandidateNotifications'))
 const CandidateHome = lazy(() => import('../pages/CandidateHome'))
-const CandidateSavedPosts = lazy(() => import('../pages/CandidateSavedPosts'))
 const CandidateProjects = lazy(() => import('../pages/CandidateProjects'))
 const CandidateProjectDetails = lazy(() => import('../pages/CandidateProjectDetails'))
 const CandidateOpportunities = lazy(() => import('../pages/CandidateOpportunities'))
@@ -97,7 +96,7 @@ export default function AppRoutes() {
         <Route path="/member/applications" element={<ProtectedRoute allowedRoles={candidateRoles}><Navigate to={getCandidateActivityPath('applications')} replace /></ProtectedRoute>} />
         <Route path="/member/bids" element={<ProtectedRoute allowedRoles={candidateRoles}><Navigate to={getCandidateActivityPath('proposals')} replace /></ProtectedRoute>} />
         <Route path="/member/home" element={<ProtectedRoute allowedRoles={candidateRoles}><CandidateHome /></ProtectedRoute>} />
-        <Route path="/member/saved-posts" element={<ProtectedRoute allowedRoles={candidateRoles}><CandidateSavedPosts /></ProtectedRoute>} />
+        <Route path="/member/saved-posts" element={<ProtectedRoute allowedRoles={candidateRoles}><Navigate to="/member/home?filter=saved" replace /></ProtectedRoute>} />
         <Route path="/member/projects" element={<ProtectedRoute allowedRoles={candidateRoles}><CandidateProjects /></ProtectedRoute>} />
         <Route path="/member/projects/:projectId" element={<ProtectedRoute allowedRoles={candidateRoles}><CandidateProjectDetails /></ProtectedRoute>} />
         <Route path="/member/opportunities" element={<ProtectedRoute allowedRoles={candidateRoles}><CandidateOpportunities /></ProtectedRoute>} />

@@ -1,26 +1,37 @@
-import { useEffect, useMemo, useState } from 'react'
+import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router'
 import CirclePreviewModal from '../components/CirclePreviewModal'
-import CommunityCirclesPanel from '../components/CommunityCirclesPanel'
-import CommunityFeed from '../components/CommunityFeed'
-import DiscoverCirclesView from '../components/DiscoverCirclesView'
-import MyCirclesView from '../components/MyCirclesView'
 import { circles as initialCircles } from '../data/circles'
 import useToast from '../hooks/useToast'
 import CandidateLayout from '../layouts/CandidateLayout'
 
 const COMMUNITY_VIEWS = [
-  { id: 'feed', label: 'Feed' },
+  { id: 'overview', label: 'Overview' },
   { id: 'my-circles', label: 'My Circles' },
-  { id: 'discover', label: 'Discover Circles' },
+  { id: 'discover', label: 'Discover' },
+  { id: 'discussions', label: 'Discussions' },
+  { id: 'ideas', label: 'Ideas' },
 ]
 const validViews = new Set(COMMUNITY_VIEWS.map((view) => view.id))
+const CommunityOverview = lazy(() => import('../components/CommunityOverview'))
+const MyCirclesView = lazy(() => import('../components/MyCirclesView'))
+const DiscoverCirclesView = lazy(() => import('../components/DiscoverCirclesView'))
+const CommunityDiscussionsView = lazy(() => import('../components/CommunityDiscussionsView'))
+const CommunityIdeasView = lazy(() => import('../components/CommunityIdeasView'))
+
+function ViewLoadingFallback() {
+  return (
+    <div className="grid gap-4 md:grid-cols-2" role="status" aria-label="Loading Community view">
+      {[1, 2, 3, 4].map((item) => <div key={item} className="h-36 animate-pulse rounded-xl border border-border bg-surface/45" />)}
+    </div>
+  )
+}
 
 export default function Community() {
   const [searchParams, setSearchParams] = useSearchParams()
   const { showToast } = useToast()
   const requestedView = searchParams.get('view')
-  const activeView = validViews.has(requestedView) ? requestedView : 'feed'
+  const activeView = validViews.has(requestedView) ? requestedView : 'overview'
   const [joinedCircleIds, setJoinedCircleIds] = useState(
     () => new Set(initialCircles.filter((circle) => circle.isJoined).map((circle) => circle.id)),
   )
@@ -39,8 +50,9 @@ export default function Community() {
 
   const selectView = (view) => {
     const nextParams = new URLSearchParams(searchParams)
-    nextParams.set('view', view)
-    if (view !== 'feed') nextParams.delete('filter')
+    if (view === 'overview') nextParams.delete('view')
+    else nextParams.set('view', view)
+    nextParams.delete('filter')
     setSearchParams(nextParams)
   }
 
@@ -58,7 +70,7 @@ export default function Community() {
           <p className="font-mono text-sm text-primary">Meet and build together</p>
           <h2 className="mt-2 text-3xl font-bold tracking-tight text-text-primary sm:text-4xl">Community</h2>
           <p className="mt-3 max-w-3xl text-sm leading-6 text-text-muted sm:text-base">
-            Discover conversations, people, projects, opportunities, and Circles built around shared interests and ideas.
+            Find people, Circles, discussions, and ideas that match what you care about.
           </p>
           <p className="mt-2 text-sm font-medium text-text-secondary">Find your people. Share ideas. Build something together.</p>
           <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-sm">
@@ -84,28 +96,33 @@ export default function Community() {
         </nav>
 
         <div className="mt-8 min-w-0">
-          {activeView === 'feed' && (
-            <CommunityFeed
-              contextLabel="Community"
-              aside={<CommunityCirclesPanel circles={circles} onViewChange={selectView} onPreview={setPreviewCircle} />}
-            />
-          )}
-          {activeView === 'my-circles' && (
-            <MyCirclesView
-              circles={circles}
-              onDiscover={() => selectView('discover')}
-              onCreate={showCreateMessage}
-              onPreview={setPreviewCircle}
-            />
-          )}
-          {activeView === 'discover' && (
-            <DiscoverCirclesView
-              circles={circles}
-              onJoin={joinCircle}
-              onCreate={showCreateMessage}
-              onPreview={setPreviewCircle}
-            />
-          )}
+          <Suspense fallback={<ViewLoadingFallback />}>
+            {activeView === 'overview' && (
+              <CommunityOverview
+                circles={circles}
+                onViewChange={selectView}
+                onPreview={setPreviewCircle}
+              />
+            )}
+            {activeView === 'my-circles' && (
+              <MyCirclesView
+                circles={circles}
+                onDiscover={() => selectView('discover')}
+                onCreate={showCreateMessage}
+                onPreview={setPreviewCircle}
+              />
+            )}
+            {activeView === 'discover' && (
+              <DiscoverCirclesView
+                circles={circles}
+                onJoin={joinCircle}
+                onCreate={showCreateMessage}
+                onPreview={setPreviewCircle}
+              />
+            )}
+            {activeView === 'discussions' && <CommunityDiscussionsView />}
+            {activeView === 'ideas' && <CommunityIdeasView />}
+          </Suspense>
         </div>
       </div>
 

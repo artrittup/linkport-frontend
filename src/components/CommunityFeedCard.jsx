@@ -6,8 +6,8 @@ import {
   getCommunityPostComments,
   getCommunityPostErrorMessage,
   setCommunityPostLiked,
-  setCommunityPostSaved,
 } from '../api/communityPostsApi'
+import SaveButton from './SaveButton'
 
 function getInitials(name) {
   return (name || 'LP')
@@ -23,7 +23,6 @@ function ActionIcon({ type, filled = false }) {
   const paths = {
     like: <path d="M7 10v11H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3Zm0 0 4-7a2 2 0 0 1 3 2v3h4.3a2 2 0 0 1 2 2.4l-1.4 8A3 3 0 0 1 16 21H7" />,
     comment: <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4v8Z" />,
-    save: <path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4-7 4V4a1 1 0 0 1 1-1Z" />,
   }
 
   return (
@@ -57,11 +56,10 @@ function PostMedia({ images, videoUrl }) {
   )
 }
 
-export default function CommunityFeedCard({ item, onUnsaved }) {
+export default function CommunityFeedCard({ item, onUnsaved, onSavedChange }) {
   const [isExpanded, setIsExpanded] = useState(false)
   const [isCommenting, setIsCommenting] = useState(false)
   const [isLiked, setIsLiked] = useState(item.isLiked ?? false)
-  const [isSaved, setIsSaved] = useState(item.isSaved ?? false)
   const [likesCount, setLikesCount] = useState(item.likesCount ?? 0)
   const [commentsCount, setCommentsCount] = useState(item.commentsCount ?? 0)
   const [comments, setComments] = useState([])
@@ -90,23 +88,6 @@ export default function CommunityFeedCard({ item, onUnsaved }) {
       setIsLiked(!nextLiked)
       setLikesCount((current) => Math.max(0, current + (nextLiked ? -1 : 1)))
       setInteractionError(getCommunityPostErrorMessage(error, 'Unable to update this like.'))
-    } finally {
-      setIsWorking(false)
-    }
-  }
-
-  const toggleSave = async () => {
-    if (isWorking) return
-    const nextSaved = !isSaved
-    setIsSaved(nextSaved)
-    setIsWorking(true)
-    setInteractionError('')
-    try {
-      await setCommunityPostSaved(item.postId, nextSaved)
-      if (!nextSaved) onUnsaved?.(item.postId)
-    } catch (error) {
-      setIsSaved(!nextSaved)
-      setInteractionError(getCommunityPostErrorMessage(error, 'Unable to update your saved posts.'))
     } finally {
       setIsWorking(false)
     }
@@ -195,10 +176,21 @@ export default function CommunityFeedCard({ item, onUnsaved }) {
             <>
               <button type="button" aria-pressed={isLiked} disabled={isWorking} onClick={toggleLike} className={`inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-bold transition-colors hover:bg-primary/10 ${isLiked ? 'text-primary' : 'text-text-secondary hover:text-primary'}`}><ActionIcon type="like" filled={isLiked} /> Like{likesCount > 0 ? ` · ${likesCount}` : ''}</button>
               <button type="button" aria-expanded={isCommenting} onClick={toggleComments} className="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-bold text-text-secondary transition-colors hover:bg-primary/10 hover:text-primary"><ActionIcon type="comment" /> Comment{commentsCount > 0 ? ` · ${commentsCount}` : ''}</button>
-              <button type="button" aria-pressed={isSaved} disabled={isWorking} onClick={toggleSave} className={`ml-auto inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-bold transition-colors hover:bg-primary/10 ${isSaved ? 'text-primary' : 'text-text-secondary hover:text-primary'}`}><ActionIcon type="save" filled={isSaved} /> {isSaved ? 'Saved' : 'Save'}</button>
             </>
           )}
           {item.action && item.path && <Link to={item.path} className="rounded-lg px-3 py-2 text-sm font-bold text-text-secondary transition-colors hover:bg-surface-elevated hover:text-primary">{item.action}</Link>}
+          {item.saveType && item.saveId && (
+            <SaveButton
+              type={item.saveType}
+              itemId={item.saveId}
+              initialSaved={item.isSaved}
+              className="ml-auto"
+              onChange={(nextSaved) => {
+                onSavedChange?.(item, nextSaved)
+                if (!nextSaved) onUnsaved?.(item)
+              }}
+            />
+          )}
         </div>
 
         {interactionError && <p role="alert" className="mt-3 text-sm text-danger-text">{interactionError}</p>}

@@ -7,7 +7,10 @@ import ApplyJobModal from '../components/ApplyJobModal'
 import Button from '../components/Button'
 import LoadingSpinner from '../components/LoadingSpinner'
 import SendBidModal from '../components/SendBidModal'
+import SaveButton from '../components/SaveButton'
 import { jobToOpportunity, projectToOpportunity } from '../data/opportunityAdapters'
+import { getSavedItemKey } from '../data/savedItemMapper'
+import useSavedItems from '../hooks/useSavedItems'
 import useToast from '../hooks/useToast'
 import CandidateLayout from '../layouts/CandidateLayout'
 
@@ -28,6 +31,7 @@ function formatDeadline(deadline) {
 export default function CandidateOpportunityDetails() {
   const { opportunityId } = useParams()
   const { showToast } = useToast()
+  const savedItems = useSavedItems()
   const [opportunity, setOpportunity] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
   const [notFound, setNotFound] = useState(false)
@@ -161,6 +165,13 @@ export default function CandidateOpportunityDetails() {
           <Button className="mt-7 w-full" onClick={handlePrimaryAction}>
             {opportunity.actionLabel}
           </Button>
+          <SaveButton
+            type={opportunity.source}
+            itemId={opportunity.sourceId}
+            initialSaved={savedItems.savedKeys.has(getSavedItemKey(opportunity.source, opportunity.sourceId))}
+            onChange={(nextSaved) => savedItems.updateSavedState(opportunity.source, opportunity.sourceId, nextSaved)}
+            className="mt-2 w-full items-stretch [&>button]:justify-center"
+          />
         </aside>
       </article>
 

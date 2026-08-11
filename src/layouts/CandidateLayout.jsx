@@ -45,8 +45,10 @@ export default function CandidateLayout({ children, title }) {
             <LinkPortLogo className="h-7 w-auto" />
             <span className="truncate text-sm font-semibold text-text-primary">{title}</span>
           </div>
-          <ThemeToggle />
-          <CandidateNotificationBell placement="mobile" />
+          <div className="-mr-1 flex items-center gap-1">
+            <ThemeToggle />
+            <CandidateNotificationBell placement="mobile" />
+          </div>
         </header>
 
         <main className="mx-auto w-full min-w-0 max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">

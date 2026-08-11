@@ -648,7 +648,7 @@ export default function LandingPage() {
                   </div>
                 ))}
               </div>
-              <Link to={protectedLandingTarget('/circles')} className="mt-7 inline-flex items-center gap-2 text-sm font-semibold text-primary transition-opacity hover:opacity-80">
+              <Link to={protectedLandingTarget('/member/community?view=discover')} className="mt-7 inline-flex items-center gap-2 text-sm font-semibold text-primary transition-opacity hover:opacity-80">
                 {protectedCtaLabel('Explore Circles')} <Icon name="arrow" className="h-4 w-4" />
               </Link>
             </div>

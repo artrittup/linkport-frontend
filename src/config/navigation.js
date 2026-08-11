@@ -4,7 +4,6 @@ export const ROLE_NAVIGATION = {
     { key: 'projects', label: 'Member projects', path: '/member/projects' },
     { key: 'opportunities', label: 'Opportunities', path: '/member/opportunities' },
     { key: 'community', label: 'Community', path: '/member/community' },
-    { key: 'saved', label: 'Saved posts', path: '/member/saved-posts' },
     { key: 'profile', label: 'Profile', path: '/member/profile' },
   ],
   company: [

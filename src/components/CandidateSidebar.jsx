@@ -13,7 +13,6 @@ function NavigationIcon({ iconKey }) {
     projects: <><path d="m12 2 9 5-9 5-9-5 9-5Z" /><path d="m3 12 9 5 9-5M3 17l9 5 9-5" /></>,
     opportunities: <><rect x="3" y="7" width="18" height="13" rx="2" /><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 12h18" /></>,
     community: <><circle cx="8" cy="8" r="3" /><circle cx="17" cy="9" r="2.5" /><path d="M2.5 20a5.5 5.5 0 0 1 11 0M13 15.5a5 5 0 0 1 8.5 3.5" /></>,
-    saved: <path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4-7 4V4a1 1 0 0 1 1-1Z" />,
     profile: <><circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0 1 16 0" /></>,
   }
 
@@ -99,7 +98,7 @@ export default function CandidateSidebar({ isOpen, onClose }) {
             <LinkPortLogo className="h-8 w-auto" />
             <span className="text-xl">Link<span className="text-primary">Port</span></span>
           </Link>
-          <div className="flex items-center gap-1">
+          <div className="-mr-2 flex items-center gap-1">
             <div className="hidden lg:block">
               <ThemeToggle compact />
             </div>
@@ -142,23 +141,30 @@ export default function CandidateSidebar({ isOpen, onClose }) {
         </div>
 
         <div className="border-t border-border/80 p-3">
-          <div className="flex items-center gap-3 rounded-xl px-2 py-2">
+          <Link
+            to="/member/profile"
+            onClick={onClose}
+            className="flex items-center gap-3 rounded-xl px-2 py-2 transition-colors hover:bg-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
+            aria-label={`Open ${displayName}'s profile`}
+          >
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-primary/35 bg-surface font-mono text-xs font-semibold text-primary">
               {initials}
             </div>
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-bold text-text-primary">{displayName}</p>
-              <Link to="/member/profile" onClick={onClose} className="text-xs text-text-muted hover:text-primary">View profile</Link>
+              <p className="text-xs text-text-muted">Member profile</p>
             </div>
+          </Link>
+          <div className="mt-2 px-2">
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="inline-flex items-center gap-2 rounded-lg border border-danger/60 px-3 py-2 text-sm font-bold text-danger-text transition-colors hover:border-danger hover:bg-danger/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-danger"
+            >
+              <LogoutIcon />
+              Logout
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={handleLogout}
-            className="mt-1 flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold text-danger-soft transition-colors hover:bg-danger/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-danger"
-          >
-            <LogoutIcon />
-            Logout
-          </button>
         </div>
       </aside>
     </>

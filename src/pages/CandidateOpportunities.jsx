@@ -7,12 +7,15 @@ import LoadingSpinner from '../components/LoadingSpinner'
 import OpportunityCard from '../components/OpportunityCard'
 import { getCandidateActivityPath } from '../config/candidateActivity'
 import { jobToOpportunity, projectToOpportunity } from '../data/opportunityAdapters'
+import { getSavedItemKey } from '../data/savedItemMapper'
+import useSavedItems from '../hooks/useSavedItems'
 import CandidateLayout from '../layouts/CandidateLayout'
 
 const typeFilters = ['All', 'Jobs', 'Internships', 'Company projects']
 const workStyleFilters = ['All work styles', 'Remote', 'Hybrid', 'On-site']
 
 export default function CandidateOpportunities() {
+  const savedItems = useSavedItems()
   const [apiOpportunities, setApiOpportunities] = useState([])
   const [search, setSearch] = useState('')
   const [activeType, setActiveType] = useState('All')
@@ -94,9 +97,9 @@ export default function CandidateOpportunities() {
             Find paid or formal work from companies: jobs, internships, and scoped company projects that accept proposals.
           </p>
         </div>
-        <div className="flex shrink-0 flex-wrap gap-4 text-sm">
-          <Link to={getCandidateActivityPath('applications')} className="text-text-secondary hover:text-primary">My applications</Link>
-          <Link to={getCandidateActivityPath('proposals')} className="text-text-secondary hover:text-primary">My proposals</Link>
+        <div className="flex shrink-0 flex-wrap gap-2">
+          <Link to={getCandidateActivityPath('applications')} className="inline-flex items-center justify-center rounded-lg border border-primary bg-transparent px-4 py-2 text-sm font-semibold text-primary transition-colors hover:bg-primary/10">My applications</Link>
+          <Link to={getCandidateActivityPath('proposals')} className="inline-flex items-center justify-center rounded-lg border border-primary bg-transparent px-4 py-2 text-sm font-semibold text-primary transition-colors hover:bg-primary/10">My proposals</Link>
         </div>
       </section>
 
@@ -177,7 +180,12 @@ export default function CandidateOpportunities() {
         {visibleOpportunities.length > 0 ? (
           <div className="grid min-w-0 max-w-full gap-5 md:grid-cols-2 xl:grid-cols-3">
             {visibleOpportunities.map((opportunity) => (
-              <OpportunityCard key={opportunity.id} opportunity={opportunity} />
+              <OpportunityCard
+                key={opportunity.id}
+                opportunity={opportunity}
+                isSaved={savedItems.savedKeys.has(getSavedItemKey(opportunity.source, opportunity.sourceId))}
+                onSavedChange={(nextSaved) => savedItems.updateSavedState(opportunity.source, opportunity.sourceId, nextSaved)}
+              />
             ))}
           </div>
         ) : !isLoading && (

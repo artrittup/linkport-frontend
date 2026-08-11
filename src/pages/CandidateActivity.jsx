@@ -100,7 +100,7 @@ export default function CandidateActivity() {
           <p className="font-mono text-sm text-primary">Member activity</p>
           <h2 className="mt-2 text-3xl font-bold tracking-tight text-text-primary sm:text-4xl">My Activity</h2>
           <p className="mt-4 max-w-3xl leading-7 text-text-muted">
-            Track your applications, proposals, shared content, teammate requests, and saved community events.
+            Track your applications, proposals, shared content, teammate requests, and community events.
           </p>
         </section>
 

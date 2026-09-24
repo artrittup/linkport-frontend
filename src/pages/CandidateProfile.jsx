@@ -476,7 +476,7 @@ export default function CandidateProfile() {
               <h3 className="text-2xl font-semibold text-text-primary">Projects</h3>
               <p className="mt-2 text-sm text-text-muted">Selected work from the LinkPort Project Showcase.</p>
             </div>
-            <Link to="/member/projects" className="text-sm font-medium text-primary hover:underline">View all projects</Link>
+            <Link to="/member/activity/projects" className="text-sm font-medium text-primary hover:underline">View all projects</Link>
           </div>
           {projectsLoading ? (
             <Card className="mt-5"><p className="text-sm text-text-muted">Loading your projects...</p></Card>

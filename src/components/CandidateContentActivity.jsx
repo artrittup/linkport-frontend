@@ -3,11 +3,9 @@ import { Link, useNavigate } from 'react-router'
 import { formatActivityDate } from '../data/candidateActivityAdapters'
 import EmptyState from './EmptyState'
 
-const contentFilters = ['All', 'Projects', 'Posts', 'Team requests']
-
-export default function CandidateContentActivity({ items }) {
+export default function CandidateContentActivity({ items, filters = ['All', 'Projects', 'Posts', 'Team requests'], initialFilter = filters[0] }) {
   const navigate = useNavigate()
-  const [filter, setFilter] = useState('All')
+  const [filter, setFilter] = useState(initialFilter)
   const visibleItems = useMemo(
     () => filter === 'All' ? items : items.filter((item) => item.type === filter),
     [filter, items],
@@ -15,8 +13,8 @@ export default function CandidateContentActivity({ items }) {
 
   return (
     <section className="min-w-0" aria-live="polite">
-      <div className="flex min-w-0 max-w-full gap-2 overflow-x-auto pb-1" role="tablist" aria-label="Filter shared content">
-        {contentFilters.map((item) => (
+      {filters.length > 1 && <div className="flex min-w-0 max-w-full gap-2 overflow-x-auto pb-1" role="tablist" aria-label="Filter shared content">
+        {filters.map((item) => (
           <button
             key={item}
             type="button"
@@ -32,7 +30,7 @@ export default function CandidateContentActivity({ items }) {
             {item}
           </button>
         ))}
-      </div>
+      </div>}
 
       <p className="my-4 text-sm text-text-subtle">{visibleItems.length} {visibleItems.length === 1 ? 'item' : 'items'}</p>
 
@@ -60,7 +58,7 @@ export default function CandidateContentActivity({ items }) {
           title={items.length === 0 ? 'You have not shared anything yet.' : `No ${filter.toLowerCase()} shared yet`}
           description={items.length === 0 ? 'Projects, posts, and teammate requests you create will appear here.' : 'Choose another content type to review your activity.'}
           actionLabel={items.length === 0 ? 'Create something' : 'Show all content'}
-          onAction={items.length === 0 ? () => navigate('/member/create/project') : () => setFilter('All')}
+          onAction={items.length === 0 ? () => navigate(initialFilter === 'Posts' ? '/member/create/post' : '/member/create/project') : () => setFilter(initialFilter)}
         />
       )}
     </section>

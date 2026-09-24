@@ -15,7 +15,7 @@ const filters = [
   { label: 'Completed', value: COMMUNITY_PROJECT_STATUSES.COMPLETED },
 ]
 
-export default function CandidateProjects() {
+export default function CandidateProjects({ embedded = false }) {
   const navigate = useNavigate()
   const [search, setSearch] = useState('')
   const [appliedSearch, setAppliedSearch] = useState('')
@@ -48,22 +48,24 @@ export default function CandidateProjects() {
 
   const hasFilters = Boolean(appliedSearch || activeFilter)
 
+  const Wrapper = embedded ? 'div' : CandidateLayout
+
   return (
-    <CandidateLayout title="Member projects">
+    <Wrapper title={embedded ? undefined : "Member projects"}>
       <section className="flex min-w-0 max-w-full flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
         <div className="min-w-0">
           <p className="font-mono text-sm text-primary">Community showcase</p>
-          <h2 className="mt-2 text-3xl font-bold tracking-tight text-text-primary sm:text-4xl">Member projects</h2>
+          <h2 className="mt-2 text-3xl font-bold tracking-tight text-text-primary sm:text-4xl">{embedded ? 'Ideas' : 'Member projects'}</h2>
           <p className="mt-4 max-w-2xl leading-7 text-text-muted">
-            Showcase work you are building, follow other members' progress, and find collaborators. These are community projects, not paid company contracts.
+            Share an early idea, find collaborators, and follow projects as they grow.
           </p>
-          <Link to="/member/opportunities" className="mt-3 inline-flex text-sm font-semibold text-primary hover:underline">Looking for paid company work? View Opportunities</Link>
+          {!embedded && <Link to="/member/opportunities" className="mt-3 inline-flex text-sm font-semibold text-primary hover:underline">Looking for paid company work? View Opportunities</Link>}
         </div>
         <Link
           to="/member/create/project"
           className="inline-flex shrink-0 items-center justify-center rounded-lg border border-primary bg-primary px-5 py-2.5 text-sm font-semibold text-primary-contrast transition-colors hover:bg-primary-hover"
         >
-          Share a project
+          {embedded ? 'Share an idea' : 'Share a project'}
         </Link>
       </section>
 
@@ -138,6 +140,6 @@ export default function CandidateProjects() {
           />
         )}
       </section>
-    </CandidateLayout>
+    </Wrapper>
   )
 }

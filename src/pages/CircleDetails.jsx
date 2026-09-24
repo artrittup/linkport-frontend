@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router'
+import { Link, useNavigate, useParams } from 'react-router'
 import {
   acceptJoinRequest,
+  deleteCircle,
   getCircle,
   getCircleErrorMessage,
   getCircleJoinRequests,
@@ -10,6 +11,9 @@ import {
   removeCircleMember,
   requestToJoinCircle,
 } from '../api/circlesApi'
+import CircleFormModal from '../components/CircleFormModal'
+import CommunityDiscussionsView from '../components/CommunityDiscussionsView'
+import { getCommunityMembers } from '../api/communityMembersApi'
 import Button from '../components/Button'
 import Card from '../components/Card'
 import EmptyState from '../components/EmptyState'
@@ -38,9 +42,9 @@ function Skills({ skills = [] }) {
 function MemberName({ member }) {
   return (
     <div className="min-w-0">
-      <p className="truncate font-medium text-text-primary">{member.name}</p>
+      <Link to={`/member/community/members/${member.id}`} className="truncate font-medium text-text-primary hover:text-primary">{member.name}</Link>
       <p className="mt-0.5 truncate text-xs text-text-muted">
-        {member.candidate_profile?.headline || member.email}
+        {member.candidate_profile?.headline || 'Community member'}
       </p>
     </div>
   )
@@ -51,6 +55,12 @@ export default function CircleDetails() {
   const navigate = useNavigate()
   const { user } = useAuth()
   const { showToast } = useToast()
+  const [isEditing, setIsEditing] = useState(false)
+  const [memberSearch, setMemberSearch] = useState('')
+  const [memberResults, setMemberResults] = useState([])
+  const [isSearching, setIsSearching] = useState(false)
+  const [searchError, setSearchError] = useState('')
+  const [isDeleting, setIsDeleting] = useState(false)
   const [circle, setCircle] = useState(null)
   const [relationship, setRelationship] = useState(null)
   const [joinRequests, setJoinRequests] = useState([])
@@ -192,6 +202,31 @@ export default function CircleDetails() {
     }
   }
 
+  const searchMembers = async (event) => {
+    event.preventDefault()
+    setIsSearching(true)
+    setSearchError('')
+    try {
+      const response = await getCommunityMembers({ search: memberSearch.trim(), per_page: 20 })
+      setMemberResults(response.data.filter((member) => !circle.members.some((existing) => String(existing.id) === String(member.id))))
+    } catch (error) { setSearchError(getCircleErrorMessage(error, 'Unable to find members.')) }
+    finally { setIsSearching(false) }
+  }
+  const leaveCircle = async () => {
+    if (!window.confirm('Leave this Circle? You will need approval to rejoin.')) return
+    setIsDeleting(true)
+    try { await removeCircleMember(id, user.id); navigate('/member/community?view=my-circles') }
+    catch (error) { showToast(getCircleErrorMessage(error, 'Unable to leave Circle.'), 'error') }
+    finally { setIsDeleting(false) }
+  }
+  const destroyCircle = async () => {
+    if (!window.confirm('Delete this Circle and all its discussions? This cannot be undone.')) return
+    setIsDeleting(true)
+    try { await deleteCircle(id); navigate('/member/community?view=my-circles') }
+    catch (error) { showToast(getCircleErrorMessage(error, 'Unable to delete Circle.'), 'error') }
+    finally { setIsDeleting(false) }
+  }
+
   if (isLoading) {
     return (
       <DashboardLayout title="Circle Details" userType="Member">
@@ -206,7 +241,7 @@ export default function CircleDetails() {
         <Card padding="lg" className="mx-auto max-w-2xl text-center">
           <h2 className="text-xl font-semibold">Circle unavailable</h2>
           <p role="alert" className="mt-3 text-sm text-danger-text">{loadError}</p>
-          <Button className="mt-6" variant="outline" onClick={() => navigate('/circles')}>Back to Circles</Button>
+          <Button className="mt-6" variant="outline" onClick={() => navigate('/member/community?view=my-circles')}>Back to Circles</Button>
         </Card>
       </DashboardLayout>
     )
@@ -221,7 +256,7 @@ export default function CircleDetails() {
   return (
     <DashboardLayout title="Circle Details" userType="Member">
       <div className="space-y-8">
-        <button type="button" onClick={() => navigate('/circles')} className="text-sm text-text-muted transition-colors hover:text-primary">
+        <button type="button" onClick={() => navigate('/member/community?view=my-circles')} className="text-sm text-text-muted transition-colors hover:text-primary">
           &larr; Back to Circles
         </button>
 
@@ -243,6 +278,9 @@ export default function CircleDetails() {
             </div>
 
             <div className="flex shrink-0 flex-wrap gap-3">
+              {relationship?.is_member && !relationship?.is_owner && <Button variant="outline" disabled={isDeleting} onClick={leaveCircle}>Leave Circle</Button>}
+              {relationship?.can_manage && <Button variant="outline" onClick={() => setIsEditing(true)}>Edit Circle</Button>}
+              {relationship?.is_owner && <Button variant="danger" disabled={isDeleting} onClick={destroyCircle}>Delete Circle</Button>}
               {membershipLabel && <span className="rounded-lg border border-primary/30 bg-primary/10 px-4 py-2.5 text-sm font-semibold text-primary">{membershipLabel}</span>}
               {!relationship?.is_member && relationship?.has_pending_invitation && (
                 <span className="rounded-lg border border-border px-4 py-2.5 text-sm text-text-muted">Invitation Pending</span>
@@ -270,13 +308,17 @@ export default function CircleDetails() {
             <div id="invite-circle-member" className="scroll-mt-24">
               <Card className="h-full">
                 <h2 className="text-lg font-semibold">Invite Member</h2>
-                <p className="mt-2 text-sm leading-6 text-text-muted">Enter the LinkPort user ID of an active member.</p>
+                <p className="mt-2 text-sm leading-6 text-text-muted">Find a member by name, skill, or location.</p>
+                <form className="mt-5" onSubmit={searchMembers}>
+                  <label htmlFor="invite-member-search" className="text-sm font-medium">Find members</label>
+                  <input id="invite-member-search" maxLength={100} value={memberSearch} onChange={(event) => setMemberSearch(event.target.value)} className={inputClasses} />
+                  <Button type="submit" className="mt-3" disabled={isSearching}>{isSearching ? 'Searching...' : 'Search members'}</Button>
+                </form>
+                {searchError && <p role="alert" className="mt-3 text-danger-text">{searchError}</p>}
                 <form className="mt-5" onSubmit={handleInvite}>
-                  <label htmlFor="invitee-id" className="text-sm font-medium">Member user ID</label>
-                  <input id="invitee-id" type="number" min="1" required value={inviteeId} onChange={(event) => setInviteeId(event.target.value)} className={inputClasses} />
-                  <Button type="submit" className="mt-4 w-full" disabled={isInviting}>
-                    {isInviting ? 'Sending...' : 'Send Invitation'}
-                  </Button>
+                  <label htmlFor="invitee-id" className="text-sm font-medium">Member to invite</label>
+                  <select id="invitee-id" required value={inviteeId} onChange={(event) => setInviteeId(event.target.value)} className={inputClasses}><option value="">Select a search result</option>{memberResults.map((member) => <option key={member.id} value={member.id}>{member.name}</option>)}</select>
+                  <Button type="submit" className="mt-4 w-full" disabled={isInviting || !inviteeId}>{isInviting ? 'Sending...' : 'Send Invitation'}</Button>
                 </form>
               </Card>
             </div>
@@ -312,6 +354,7 @@ export default function CircleDetails() {
           </section>
         )}
 
+        {relationship?.is_member || circle.visibility === 'public' ? <CommunityDiscussionsView key={circle.id} circleId={circle.id} canPost={relationship?.is_member} /> : <p className="text-text-muted">Accept your invitation to see this Circle’s discussions.</p>}
         <section>
           <div className="mb-5">
             <h2 className="text-2xl font-semibold">Members</h2>
@@ -334,6 +377,7 @@ export default function CircleDetails() {
           </div>
         </section>
       </div>
+      {isEditing && <CircleFormModal circle={circle} onClose={() => setIsEditing(false)} onSaved={() => { setIsEditing(false); loadCircle() }} />}
     </DashboardLayout>
   )
 }

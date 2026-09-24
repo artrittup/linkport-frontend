@@ -1,45 +1,28 @@
 import { useState } from 'react'
-import { Link, useLocation, useNavigate } from 'react-router'
-import { getAuthErrorMessage } from '../api/authApi'
-import { useAuth } from '../context/AuthContext'
+import { Link } from 'react-router'
+import { getAuthErrorMessage, requestPasswordReset } from '../api/authApi'
 
 const inputClasses =
   'mt-1.5 w-full border border-border bg-background px-3 py-2 text-sm text-text-primary outline-none transition-colors placeholder:text-text-subtle hover:border-border-strong focus:border-primary focus:ring-1 focus:ring-focus-ring'
 
-const labelClasses = 'block text-sm font-bold text-text-primary'
-
-export default function Login() {
-  const location = useLocation()
-  const navigate = useNavigate()
-  const { getDashboardPath, login } = useAuth()
+export default function ForgotPassword() {
   const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
+  const [notice, setNotice] = useState('')
   const [error, setError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const handleSubmit = async (event) => {
     event.preventDefault()
     setError('')
+    setNotice('')
     setIsSubmitting(true)
 
     try {
-      const authenticatedUser = await login({ email, password })
-      const requestedPath =
-        typeof location.state?.from === 'string' &&
-        location.state.from.startsWith('/') &&
-        !location.state.from.startsWith('//')
-          ? location.state.from
-          : null
-
-      navigate(requestedPath || getDashboardPath(authenticatedUser.role), {
-        replace: true,
-      })
+      const data = await requestPasswordReset(email)
+      setNotice(data?.message || 'If that email is registered, a reset link is on its way.')
     } catch (requestError) {
       setError(
-        getAuthErrorMessage(
-          requestError,
-          'Unable to log in. Please check your details and try again.',
-        ),
+        getAuthErrorMessage(requestError, 'Unable to send the reset link. Please try again.'),
       )
     } finally {
       setIsSubmitting(false)
@@ -64,25 +47,27 @@ export default function Login() {
         <nav aria-label="Breadcrumb" className="mb-3 text-xs text-text-muted">
           <Link to="/" className="underline-offset-2 hover:text-primary hover:underline">Home</Link>
           <span aria-hidden="true"> &raquo; </span>
-          <span className="text-text-secondary">Log in</span>
+          <Link to="/login" className="underline-offset-2 hover:text-primary hover:underline">Log in</Link>
+          <span aria-hidden="true"> &raquo; </span>
+          <span className="text-text-secondary">Forgot password</span>
         </nav>
 
         <section className="lp-panel">
           <h1 className="lp-panel-head px-4 py-2.5 text-sm font-bold uppercase tracking-wide text-text-primary">
-            Member log in
+            Reset your password
           </h1>
 
           <form onSubmit={handleSubmit} className="space-y-4 p-4 sm:p-5">
-            {location.state?.notice && (
-              <p role="status" className="border border-success/50 bg-success/10 px-3 py-2 text-sm text-success-text">
-                {location.state.notice}
-              </p>
-            )}
+            <p className="text-sm text-text-muted">
+              Enter the email you registered with and we will send you a link to choose a new password.
+            </p>
 
             <div>
-              <label htmlFor="email" className={labelClasses}>Email</label>
+              <label htmlFor="forgot-email" className="block text-sm font-bold text-text-primary">
+                Email
+              </label>
               <input
-                id="email"
+                id="forgot-email"
                 name="email"
                 type="email"
                 autoComplete="email"
@@ -94,34 +79,14 @@ export default function Login() {
               />
             </div>
 
-            <div>
-              <label htmlFor="password" className={labelClasses}>Password</label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete="current-password"
-                required
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                placeholder="Enter your password"
-                className={inputClasses}
-              />
-              <p className="mt-1.5 text-xs">
-                <Link
-                  to="/forgot-password"
-                  className="text-primary underline-offset-2 hover:underline"
-                >
-                  Forgot your password?
-                </Link>
+            {notice && (
+              <p role="status" className="border border-success/50 bg-success/10 px-3 py-2 text-sm text-success-text">
+                {notice}
               </p>
-            </div>
+            )}
 
             {error && (
-              <p
-                role="alert"
-                className="border border-danger/50 bg-danger/10 px-3 py-2 text-sm text-danger-text"
-              >
+              <p role="alert" className="border border-danger/50 bg-danger/10 px-3 py-2 text-sm text-danger-text">
                 {error}
               </p>
             )}
@@ -131,14 +96,14 @@ export default function Login() {
               disabled={isSubmitting}
               className="w-full border border-primary bg-primary px-4 py-2 text-sm font-bold text-primary-contrast transition-colors hover:bg-primary-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring disabled:opacity-60"
             >
-              {isSubmitting ? 'Logging in...' : 'Log in'}
+              {isSubmitting ? 'Sending...' : 'Send reset link'}
             </button>
           </form>
 
           <p className="border-t border-border bg-surface-muted px-4 py-3 text-sm text-text-muted">
-            No account yet?{' '}
-            <Link to="/register" className="font-bold text-primary underline-offset-2 hover:underline">
-              Register here
+            Remembered it?{' '}
+            <Link to="/login" className="font-bold text-primary underline-offset-2 hover:underline">
+              Back to log in
             </Link>
           </p>
         </section>

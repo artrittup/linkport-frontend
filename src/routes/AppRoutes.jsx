@@ -16,6 +16,8 @@ import ProtectedRoute from './ProtectedRoute'
 const LandingPage = lazy(() => import('../pages/LandingPage'))
 const Login = lazy(() => import('../pages/Login'))
 const Register = lazy(() => import('../pages/Register'))
+const ForgotPassword = lazy(() => import('../pages/ForgotPassword'))
+const ResetPassword = lazy(() => import('../pages/ResetPassword'))
 const InfoPage = lazy(() => import('../pages/InfoPage'))
 const Jobs = lazy(() => import('../pages/Jobs'))
 const Projects = lazy(() => import('../pages/Projects'))
@@ -88,6 +90,8 @@ export default function AppRoutes() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/:page" element={<InfoPage />} />
         <Route path="/members/:id" element={<ProtectedRoute allowedRoles={authenticatedRoles}><MemberPublicProfile /></ProtectedRoute>} />
         <Route path="/companies/:id" element={<ProtectedRoute allowedRoles={authenticatedRoles}><CompanyPublicProfile /></ProtectedRoute>} />

@@ -1,13 +1,15 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useSearchParams } from 'react-router'
+import { Link, useNavigate, useSearchParams } from 'react-router'
 import { getCommunityEventErrorMessage, removeCommunityEventAttendance } from '../api/communityEventsApi'
 import CandidateActivityOverview from '../components/CandidateActivityOverview'
 import CandidateApplicationsActivity from '../components/CandidateApplicationsActivity'
 import CandidateContentActivity from '../components/CandidateContentActivity'
 import CandidateEventsActivity from '../components/CandidateEventsActivity'
 import CandidateProposalsActivity from '../components/CandidateProposalsActivity'
+import CandidateSavedActivity from '../components/CandidateSavedActivity'
 import {
   CANDIDATE_ACTIVITY_TABS,
+  getCandidateActivityPath,
   normalizeCandidateActivityTab,
 } from '../config/candidateActivity'
 import { useAuth } from '../context/AuthContext'
@@ -22,10 +24,11 @@ import { useMyCommunityEvents } from '../hooks/useCommunityEvents'
 import useTeammateRequests from '../hooks/useTeammateRequests'
 import CandidateLayout from '../layouts/CandidateLayout'
 
-export default function CandidateActivity() {
-  const [searchParams, setSearchParams] = useSearchParams()
+export default function CandidateActivity({ section }) {
+  const [searchParams] = useSearchParams()
+  const navigate = useNavigate()
   const requestedTab = searchParams.get('tab')
-  const activeTab = normalizeCandidateActivityTab(requestedTab)
+  const activeTab = section ?? normalizeCandidateActivityTab(requestedTab)
   const applications = useCandidateApplications()
   const proposals = useCandidateProposals()
   const { user } = useAuth()
@@ -84,20 +87,15 @@ export default function CandidateActivity() {
   }
 
   useEffect(() => {
-    if (requestedTab && requestedTab !== activeTab) {
-      setSearchParams({}, { replace: true })
+    if (requestedTab && !section) {
+      navigate(getCandidateActivityPath(activeTab), { replace: true })
     }
-  }, [activeTab, requestedTab, setSearchParams])
-
-  const selectTab = (tab) => {
-    setSearchParams(tab === 'overview' ? {} : { tab })
-  }
+  }, [activeTab, navigate, requestedTab, section])
 
   return (
     <CandidateLayout title="My Activity">
       <div className="min-w-0 max-w-full">
         <section>
-          <p className="font-mono text-sm text-primary">Member activity</p>
           <h2 className="mt-2 text-3xl font-bold tracking-tight text-text-primary sm:text-4xl">My Activity</h2>
           <p className="mt-4 max-w-3xl leading-7 text-text-muted">
             Track your applications, proposals, shared content, teammate requests, and community events.
@@ -131,11 +129,10 @@ export default function CandidateActivity() {
 
         <nav className="mt-8 flex min-w-0 max-w-full gap-2 overflow-x-auto border-b border-border pb-3" aria-label="Activity sections">
           {CANDIDATE_ACTIVITY_TABS.map((tab) => (
-            <button
+            <Link
               key={tab.id}
-              type="button"
               aria-current={activeTab === tab.id ? 'page' : undefined}
-              onClick={() => selectTab(tab.id)}
+              to={getCandidateActivityPath(tab.id)}
               className={`shrink-0 rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
                 activeTab === tab.id
                   ? 'border-primary bg-primary/10 text-primary'
@@ -143,7 +140,7 @@ export default function CandidateActivity() {
               }`}
             >
               {tab.label}
-            </button>
+            </Link>
           ))}
         </nav>
 
@@ -162,22 +159,31 @@ export default function CandidateActivity() {
             />
           )}
           {activeTab === 'applications' && <CandidateApplicationsActivity activity={applications} />}
-          {activeTab === 'proposals' && <CandidateProposalsActivity activity={proposals} />}
-          {activeTab === 'content' && <CandidateContentActivity items={contentItems} />}
-          {activeTab === 'events' && (
-            eventsLoading ? (
-              <p role="status" className="rounded-xl border border-border bg-surface/45 p-5 text-sm text-text-muted">Loading My Events...</p>
-            ) : eventsError ? (
-              <div className="rounded-xl border border-border bg-surface/45 p-5">
-                <p className="text-sm text-text-muted">My Events are temporarily unavailable. Other Activity sections remain available.</p>
-                <button type="button" onClick={retryEvents} className="mt-3 text-sm font-medium text-primary hover:underline">Try again</button>
-              </div>
-            ) : (
-              <>
-                {eventActionError && <p role="alert" className="mb-4 rounded-lg border border-danger-soft/25 bg-danger-soft/5 px-4 py-3 text-sm text-danger-text">{eventActionError}</p>}
-                <CandidateEventsActivity events={savedEvents} onRemove={removeEvent} removingEventId={removingEventId} />
-              </>
-            )
+          {activeTab === 'bids' && <CandidateProposalsActivity activity={proposals} />}
+          {activeTab === 'projects' && <CandidateContentActivity items={contentItems} filters={['Projects', 'Team requests']} initialFilter="Projects" />}
+          {activeTab === 'posts' && <CandidateContentActivity items={contentItems} filters={['Posts']} initialFilter="Posts" />}
+          {activeTab === 'saved' && (
+            <div className="space-y-8">
+              <CandidateSavedActivity />
+              <section>
+                <h3 className="text-xl font-semibold text-text-primary">Events you are attending</h3>
+                <div className="mt-4">
+                  {eventsLoading ? (
+                    <p role="status" className="rounded-xl border border-border bg-surface/45 p-5 text-sm text-text-muted">Loading your events...</p>
+                  ) : eventsError ? (
+                    <div className="rounded-xl border border-border bg-surface/45 p-5">
+                      <p className="text-sm text-text-muted">Your events are temporarily unavailable.</p>
+                      <button type="button" onClick={retryEvents} className="mt-3 text-sm font-medium text-primary hover:underline">Try again</button>
+                    </div>
+                  ) : (
+                    <>
+                      {eventActionError && <p role="alert" className="mb-4 rounded-lg border border-danger-soft/25 bg-danger-soft/5 px-4 py-3 text-sm text-danger-text">{eventActionError}</p>}
+                      <CandidateEventsActivity events={savedEvents} onRemove={removeEvent} removingEventId={removingEventId} />
+                    </>
+                  )}
+                </div>
+              </section>
+            </div>
           )}
         </div>
       </div>

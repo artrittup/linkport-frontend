@@ -14,11 +14,11 @@ import CandidateLayout from '../layouts/CandidateLayout'
 const typeFilters = ['All', 'Jobs', 'Internships', 'Company projects']
 const workStyleFilters = ['All work styles', 'Remote', 'Hybrid', 'On-site']
 
-export default function CandidateOpportunities() {
+export default function CandidateOpportunities({ initialType = 'All' }) {
   const savedItems = useSavedItems()
   const [apiOpportunities, setApiOpportunities] = useState([])
   const [search, setSearch] = useState('')
-  const [activeType, setActiveType] = useState('All')
+  const [activeType, setActiveType] = useState(initialType)
   const [workStyle, setWorkStyle] = useState('All work styles')
   const [jobsLoading, setJobsLoading] = useState(true)
   const [projectsLoading, setProjectsLoading] = useState(true)
@@ -80,12 +80,12 @@ export default function CandidateOpportunities() {
 
   const clearFilters = () => {
     setSearch('')
-    setActiveType('All')
+    setActiveType(initialType)
     setWorkStyle('All work styles')
   }
 
   const isLoading = jobsLoading || projectsLoading
-  const hasFilters = search.trim() || activeType !== 'All' || workStyle !== 'All work styles'
+  const hasFilters = search.trim() || activeType !== initialType || workStyle !== 'All work styles'
 
   return (
     <CandidateLayout title="Opportunities">

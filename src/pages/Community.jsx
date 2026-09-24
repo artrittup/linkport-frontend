@@ -36,11 +36,11 @@ function ViewLoadingFallback() {
   )
 }
 
-export default function Community() {
+export default function Community({ initialView = 'overview' }) {
   const [searchParams, setSearchParams] = useSearchParams()
   const { showToast } = useToast()
   const requestedView = searchParams.get('view')
-  const activeView = validViews.has(requestedView) ? requestedView : 'overview'
+  const activeView = validViews.has(requestedView) ? requestedView : initialView
   const navigate = useNavigate()
   const { circles, invitations, isLoading, error, retry } = useCommunityCircles()
   const [isCreating, setIsCreating] = useState(false)
@@ -55,11 +55,15 @@ export default function Community() {
   }, [requestedView, searchParams, setSearchParams])
 
   const selectView = (view) => {
-    const nextParams = new URLSearchParams(searchParams)
-    if (view === 'overview') nextParams.delete('view')
-    else nextParams.set('view', view)
-    nextParams.delete('filter')
-    setSearchParams(nextParams)
+    if (view === 'overview') {
+      navigate('/member/community/discover')
+      return
+    }
+    if (view === 'my-circles') {
+      navigate('/member/community/circles')
+      return
+    }
+    navigate(`/member/community/discover?view=${view}`)
   }
 
   const joinCircle = async (circle) => {

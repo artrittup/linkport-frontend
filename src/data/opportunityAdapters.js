@@ -45,7 +45,7 @@ export function projectToOpportunity(project) {
     sourceId: project.id,
     sourceData: project,
     type: OPPORTUNITY_TYPES.PROJECT,
-    typeCategory: 'Projects',
+    typeCategory: 'Company projects',
     title: project.title,
     company: project.company,
     description: project.description,

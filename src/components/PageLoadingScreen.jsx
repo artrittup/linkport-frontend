@@ -28,7 +28,7 @@ export function FullPageLoadingScreen() {
 }
 
 export default function PageLoadingScreen() {
-  const location = useLocation()
+  const { pathname } = useLocation()
   const [isLoading, setIsLoading] = useState(getPageLoadingState)
 
   useLayoutEffect(
@@ -38,7 +38,7 @@ export default function PageLoadingScreen() {
 
   useLayoutEffect(() => {
     startPageLoad()
-  }, [location.pathname, location.search])
+  }, [pathname])
 
   return isLoading ? <FullPageLoadingScreen /> : null
 }

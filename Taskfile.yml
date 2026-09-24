@@ -1,0 +1,70 @@
+version: "3"
+
+vars:
+  COMPOSE: docker compose -f compose.yaml
+
+tasks:
+  default:
+    desc: List available tasks
+    cmds:
+      - task --list
+
+  docker:build:
+    desc: Build the development image
+    internal: true
+    cmds:
+      - "{{.COMPOSE}} build frontend"
+
+  dev:
+    desc: Start the Vite development server with hot reload
+    cmds:
+      - "{{.COMPOSE}} up --build frontend"
+
+  stop:
+    desc: Stop LinkPort frontend containers
+    cmds:
+      - "{{.COMPOSE}} down --remove-orphans"
+
+  logs:
+    desc: Follow development server logs
+    cmds:
+      - "{{.COMPOSE}} logs --follow frontend"
+
+  shell:
+    desc: Open a shell in the development container
+    deps: [docker:build]
+    cmds:
+      - "{{.COMPOSE}} run --rm --no-deps frontend sh"
+
+  lint:
+    desc: Run ESLint in Docker
+    deps: [docker:build]
+    cmds:
+      - "{{.COMPOSE}} run --rm --no-deps frontend npm run lint"
+
+  build:
+    desc: Build the Vite application in Docker
+    deps: [docker:build]
+    cmds:
+      - "{{.COMPOSE}} run --rm --no-deps frontend npm run build"
+
+  check:
+    desc: Run all available validation checks
+    cmds:
+      - task: lint
+      - task: build
+
+  prod:build:
+    desc: Build the production Nginx image
+    cmds:
+      - "{{.COMPOSE}} --profile production build frontend-production"
+
+  prod:run:
+    desc: Build and run the production frontend
+    cmds:
+      - "{{.COMPOSE}} --profile production up --build frontend-production"
+
+  clean:
+    desc: Remove this project's containers and dependency volume
+    cmds:
+      - "{{.COMPOSE}} --profile production down --volumes --remove-orphans"

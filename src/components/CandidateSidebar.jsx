@@ -98,7 +98,7 @@ export default function CandidateSidebar({ isOpen, onClose }) {
             <LinkPortLogo className="h-8 w-auto" />
             <span className="text-xl">Link<span className="text-primary">Port</span></span>
           </Link>
-          <div className="flex items-center gap-1">
+          <div className="-mr-2 flex items-center gap-1">
             <div className="hidden lg:block">
               <ThemeToggle compact />
             </div>
@@ -141,23 +141,30 @@ export default function CandidateSidebar({ isOpen, onClose }) {
         </div>
 
         <div className="border-t border-border/80 p-3">
-          <div className="flex items-center gap-3 rounded-xl px-2 py-2">
+          <Link
+            to="/member/profile"
+            onClick={onClose}
+            className="flex items-center gap-3 rounded-xl px-2 py-2 transition-colors hover:bg-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
+            aria-label={`Open ${displayName}'s profile`}
+          >
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-primary/35 bg-surface font-mono text-xs font-semibold text-primary">
               {initials}
             </div>
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-bold text-text-primary">{displayName}</p>
-              <Link to="/member/profile" onClick={onClose} className="text-xs text-text-muted hover:text-primary">View profile</Link>
+              <p className="text-xs text-text-muted">Member profile</p>
             </div>
+          </Link>
+          <div className="mt-2 px-2">
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="inline-flex items-center gap-2 rounded-lg border border-danger/60 px-3 py-2 text-sm font-bold text-danger-text transition-colors hover:border-danger hover:bg-danger/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-danger"
+            >
+              <LogoutIcon />
+              Logout
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={handleLogout}
-            className="mt-1 flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold text-danger-soft transition-colors hover:bg-danger/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-danger"
-          >
-            <LogoutIcon />
-            Logout
-          </button>
         </div>
       </aside>
     </>

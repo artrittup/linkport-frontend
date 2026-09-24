@@ -4,9 +4,13 @@ import {
   trackPageRequest,
 } from '../utils/pageLoading'
 
+const runtimeApiBaseUrl = window.__LINKPORT_CONFIG__?.apiBaseUrl
+
 const api = axios.create({
   baseURL:
-    import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api',
+    runtimeApiBaseUrl ||
+    import.meta.env.VITE_API_BASE_URL ||
+    'http://127.0.0.1:8000/api',
   headers: {
     Accept: 'application/json',
     'Content-Type': 'application/json',

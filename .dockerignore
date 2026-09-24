@@ -1,0 +1,14 @@
+.git
+.agents
+.codex
+.env
+.env.*
+!.env.example
+.idea
+.vscode
+dist
+node_modules
+*.log
+*.local
+*.swp
+.DS_Store

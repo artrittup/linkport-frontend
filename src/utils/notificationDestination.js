@@ -23,8 +23,8 @@ export function getNotificationDestination(notification, fallback = '/notificati
 
   if (type === 'connection_request') return '/connections?tab=requests'
   if (type === 'connection_accepted') return '/connections?tab=network'
-  if (type === 'circle_invitation') return '/circles?tab=invitations'
-  if (type?.startsWith('circle_') && data.circle_id) return `/circles/${data.circle_id}`
+  if (type === 'circle_invitation') return '/member/community?view=my-circles'
+  if (type?.startsWith('circle_') && data.circle_id) return '/member/community?view=my-circles'
   if (type === 'job_application_received') return '/company/applications'
   if (type === 'job_application_status') return getCandidateActivityPath('applications')
   if (type === 'project_bid_received') return '/company/applications?type=proposals'

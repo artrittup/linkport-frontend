@@ -5,7 +5,7 @@ import {
   getTeammateRequestErrorMessage,
   isTeammateRequestNotFound,
 } from '../api/teammateRequestsApi'
-import Button from '../components/Button'
+import CollaborationRequests from '../components/CollaborationRequests'
 import LoadingSpinner from '../components/LoadingSpinner'
 import { useAuth } from '../context/AuthContext'
 import {
@@ -14,7 +14,6 @@ import {
   getTeammateRequestStatusLabel,
   getTeammateRequestWorkStyleLabel,
 } from '../data/teammateRequestMapper'
-import useToast from '../hooks/useToast'
 import CandidateLayout from '../layouts/CandidateLayout'
 
 const statusClasses = {
@@ -68,7 +67,6 @@ function DetailList({ title, items }) {
 export default function CandidateTeammateRequestDetails() {
   const { requestId } = useParams()
   const { user } = useAuth()
-  const { showToast } = useToast()
   const [request, setRequest] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
@@ -117,9 +115,6 @@ export default function CandidateTeammateRequestDetails() {
   const isOwner = String(request.ownerId) === String(user?.id)
   const isOpen = request.status === TEAMMATE_REQUEST_STATUSES.OPEN
 
-  const handleInterest = () => {
-    showToast('Collaboration requests are not available yet. Your interest was not submitted.', 'info')
-  }
 
   return (
     <CandidateLayout title={request.title}>
@@ -184,14 +179,7 @@ export default function CandidateTeammateRequestDetails() {
             )}
           </dl>
 
-          {!isOwner && isOpen && (
-            <div className="mt-6">
-              <Button className="w-full" onClick={handleInterest}>Interested in collaborating</Button>
-              <p className="mt-3 text-center text-xs leading-5 text-text-subtle">
-                This is a placeholder. No collaboration request or message will be submitted.
-              </p>
-            </div>
-          )}
+          <CollaborationRequests kind="team-requests" itemId={request.id} isOwner={isOwner} isOpen={isOpen} />
           {!isOpen && (
             <p className="mt-6 rounded-lg border border-border-strong/30 bg-text-subtle/10 p-3 text-center text-xs leading-5 text-text-secondary">
               This request is closed and is not currently seeking collaborators.

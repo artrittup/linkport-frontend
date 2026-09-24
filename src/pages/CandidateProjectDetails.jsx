@@ -1,10 +1,14 @@
 import { useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router'
+import { Link, useNavigate, useParams } from 'react-router'
 import {
   getCommunityProject,
+  deleteCommunityProject,
   getCommunityProjectErrorMessage,
   isCommunityProjectNotFound,
 } from '../api/communityProjectsApi'
+import CollaborationRequests from '../components/CollaborationRequests'
+import ProjectEditModal from '../components/ProjectEditModal'
+import SaveButton from '../components/SaveButton'
 import Button from '../components/Button'
 import LoadingSpinner from '../components/LoadingSpinner'
 import { useAuth } from '../context/AuthContext'
@@ -34,8 +38,8 @@ function MissingProject({ isNotFound, message }) {
             ? 'This project does not exist or is no longer available in the showcase.'
             : message}
         </p>
-        <Link to="/member/projects" className="mt-6 inline-flex rounded-lg border border-primary px-4 py-2.5 text-sm font-semibold text-primary hover:bg-primary/10">
-          Back to projects
+        <Link to="/member/community?view=ideas" className="mt-6 inline-flex rounded-lg border border-primary px-4 py-2.5 text-sm font-semibold text-primary hover:bg-primary/10">
+          Back to ideas
         </Link>
       </section>
     </CandidateLayout>
@@ -43,6 +47,9 @@ function MissingProject({ isNotFound, message }) {
 }
 
 export default function CandidateProjectDetails() {
+  const navigate = useNavigate()
+  const [editing, setEditing] = useState(false)
+  const [deleting, setDeleting] = useState(false)
   const { projectId } = useParams()
   const { user } = useAuth()
   const { showToast } = useToast()
@@ -92,14 +99,18 @@ export default function CandidateProjectDetails() {
     || project.lookingForTeammates
   const isOwner = String(project.ownerId) === String(user?.id)
 
-  const handleJoinRequest = () => {
-    showToast('Join requests are not available yet. Your interest was not sent.', 'info')
+  const removeProject = async () => {
+    if (!window.confirm('Delete this idea and its collaboration requests?')) return
+    setDeleting(true)
+    try { await deleteCommunityProject(project.id); navigate('/member/community?view=ideas') }
+    catch (error) { showToast(getCommunityProjectErrorMessage(error), 'error') }
+    finally { setDeleting(false) }
   }
 
   return (
     <CandidateLayout title={project.title}>
-      <Link to="/member/projects" className="text-sm font-medium text-primary hover:underline">
-        ← Back to projects
+      <Link to="/member/community?view=ideas" className="text-sm font-medium text-primary hover:underline">
+        ← Back to ideas
       </Link>
 
       <article className="mt-6 grid min-w-0 gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
@@ -163,14 +174,11 @@ export default function CandidateProjectDetails() {
             </div>
           )}
 
-          {lookingForTeam && (
-            <div className="mt-6">
-              <Button className="w-full" onClick={handleJoinRequest}>Request to join</Button>
-              <p className="mt-3 text-center text-xs text-text-subtle">This is a placeholder; no request will be sent.</p>
-            </div>
-          )}
+          <div className="mt-5"><SaveButton type="community_project" itemId={project.id} initialSaved={project.isSaved} />{isOwner && <div className="mt-4 flex flex-wrap gap-3"><Button variant="outline" onClick={() => setEditing(true)}>Edit idea</Button><Button variant="danger" disabled={deleting} onClick={removeProject}>Delete idea</Button></div>}</div>
+          <CollaborationRequests kind="projects" itemId={project.id} isOwner={isOwner} isOpen={lookingForTeam && project.status !== 'completed'} />
         </aside>
       </article>
+      {editing && <ProjectEditModal project={project} onClose={() => setEditing(false)} onSaved={(next) => { setProject(next); setEditing(false) }} />}
     </CandidateLayout>
   )
 }

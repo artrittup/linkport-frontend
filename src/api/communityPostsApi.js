@@ -46,8 +46,8 @@ export async function setCommunityPostLiked(id, isLiked) {
   return response.data
 }
 
-export async function getCommunityPostComments(id) {
-  const response = await api.get(`/community-posts/${id}/comments`)
+export async function getCommunityPostComments(id, page = 1) {
+  const response = await api.get(`/community-posts/${id}/comments`, { params: { page } })
   return normalizePaginatedResponse(response.data, {
     mapItem: mapCommunityPostComment,
     perPage: 20,

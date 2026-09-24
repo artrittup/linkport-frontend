@@ -63,6 +63,8 @@ export default function CommunityFeedCard({ item, onUnsaved, onSavedChange }) {
   const [likesCount, setLikesCount] = useState(item.likesCount ?? 0)
   const [commentsCount, setCommentsCount] = useState(item.commentsCount ?? 0)
   const [comments, setComments] = useState([])
+  const [commentPage, setCommentPage] = useState(1)
+  const [lastCommentPage, setLastCommentPage] = useState(1)
   const [commentText, setCommentText] = useState('')
   const [commentsLoaded, setCommentsLoaded] = useState(false)
   const [isCommentsLoading, setIsCommentsLoading] = useState(false)
@@ -103,12 +105,27 @@ export default function CommunityFeedCard({ item, onUnsaved, onSavedChange }) {
     try {
       const response = await getCommunityPostComments(item.postId)
       setComments(response.data)
+      setCommentPage(1)
+      setLastCommentPage(response.meta.last_page)
       setCommentsLoaded(true)
     } catch (error) {
       setInteractionError(getCommunityPostErrorMessage(error, 'Unable to load comments.'))
     } finally {
       setIsCommentsLoading(false)
     }
+  }
+
+  const loadMoreComments = async () => {
+    if (isCommentsLoading) return
+    setIsCommentsLoading(true)
+    setInteractionError('')
+    try {
+      const response = await getCommunityPostComments(item.postId, commentPage + 1)
+      setComments((current) => [...new Map([...current, ...response.data].map((comment) => [comment.id, comment])).values()])
+      setCommentPage(response.meta.current_page)
+      setLastCommentPage(response.meta.last_page)
+    } catch (error) { setInteractionError(getCommunityPostErrorMessage(error, 'Unable to load comments.')) }
+    finally { setIsCommentsLoading(false) }
   }
 
   const submitComment = async (event) => {
@@ -151,7 +168,7 @@ export default function CommunityFeedCard({ item, onUnsaved, onSavedChange }) {
           <div className="flex min-w-0 items-center gap-3">
             <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-primary/25 bg-primary/10 font-mono text-sm font-bold text-primary">{getInitials(item.author)}</div>
             <div className="min-w-0">
-              <p className="truncate text-sm font-bold text-text-primary">{item.author}</p>
+              <p className="truncate text-sm font-bold text-text-primary">{item.authorId ? <Link to={`/member/community/members/${item.authorId}`} className="hover:text-primary">{item.author}</Link> : item.author}</p>
               <div className="mt-1 flex min-w-0 flex-wrap items-center gap-2 text-xs text-text-subtle">
                 <span>{item.meta}</span><span aria-hidden="true">•</span><span>{item.type}</span>
               </div>
@@ -198,9 +215,9 @@ export default function CommunityFeedCard({ item, onUnsaved, onSavedChange }) {
           <div className="mt-4 rounded-xl border border-border bg-background/55 p-4">
             <form onSubmit={submitComment} className="flex gap-2">
               <input type="text" value={commentText} maxLength="1000" onChange={(event) => setCommentText(event.target.value)} placeholder="Write a comment..." aria-label="Comment text" className="min-w-0 flex-1 rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text-primary outline-none placeholder:text-text-subtle focus:border-primary focus:ring-1 focus:ring-focus-ring" />
-              <button type="submit" disabled={isWorking || !commentText.trim()} className="rounded-lg bg-primary px-4 py-2 text-sm font-bold text-primary-contrast hover:bg-primary-hover disabled:opacity-50">Post</button>
+              <button type="submit" disabled={isWorking || isCommentsLoading || !commentText.trim()} className="rounded-lg bg-primary px-4 py-2 text-sm font-bold text-primary-contrast hover:bg-primary-hover disabled:opacity-50">Post</button>
             </form>
-            {isCommentsLoading ? <p className="mt-4 text-sm text-text-muted">Loading comments...</p> : comments.length > 0 ? (
+            {isCommentsLoading && comments.length === 0 ? <p className="mt-4 text-sm text-text-muted">Loading comments...</p> : comments.length > 0 ? (
               <div className="mt-4 space-y-3">{comments.map((comment) => (
                 <div key={comment.id} className="rounded-lg border border-border bg-surface px-3 py-3">
                   <div className="flex items-start justify-between gap-3"><p className="text-xs font-bold text-text-primary">{comment.authorName}</p>{comment.canDelete && <button type="button" disabled={isWorking} onClick={() => removeComment(comment.id)} className="text-xs text-text-subtle hover:text-danger-text">Delete</button>}</div>
@@ -208,6 +225,7 @@ export default function CommunityFeedCard({ item, onUnsaved, onSavedChange }) {
                 </div>
               ))}</div>
             ) : commentsLoaded ? <p className="mt-4 text-sm text-text-muted">No comments yet. Start the conversation.</p> : null}
+            {commentsLoaded && commentPage < lastCommentPage && <button type="button" disabled={isCommentsLoading} onClick={loadMoreComments} className="mt-4 text-sm font-semibold text-primary">{isCommentsLoading ? 'Loading...' : 'Load more replies'}</button>}
           </div>
         )}
       </div>

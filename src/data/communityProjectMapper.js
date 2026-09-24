@@ -31,6 +31,7 @@ export function mapCommunityProject(project) {
 
   return {
     id: project.id,
+    isSaved: Boolean(project.is_saved),
     ownerId: project.user_id ?? owner?.id ?? null,
     title: project.title ?? 'Untitled project',
     description: project.short_description ?? '',

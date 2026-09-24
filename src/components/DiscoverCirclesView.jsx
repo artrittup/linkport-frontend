@@ -1,21 +1,14 @@
 import { useMemo, useState } from 'react'
-import { CIRCLE_CATEGORIES, CIRCLE_SORT_OPTIONS } from '../data/circles'
+const CIRCLE_SORT_OPTIONS = [{ value: 'recommended', label: 'Name' }, { value: 'active', label: 'Most discussions' }, { value: 'newest', label: 'Newest' }, { value: 'members', label: 'Most members' }]
 import CircleCard from './CircleCard'
 import EmptyState from './EmptyState'
 
-const activityOrder = {
-  'Active today': 3,
-  'New discussions': 2,
-  'Active this week': 1,
-}
-
 function sortCircles(items, sort) {
   return [...items].sort((first, second) => {
-    if (sort === 'active') return (activityOrder[second.activityLevel] ?? 0) - (activityOrder[first.activityLevel] ?? 0)
+    if (sort === 'active') return second.discussionCount - first.discussionCount
     if (sort === 'newest') return Date.parse(second.createdAt) - Date.parse(first.createdAt)
     if (sort === 'members') return second.memberCount - first.memberCount
-    return Number(second.isRecommended) - Number(first.isRecommended)
-      || (activityOrder[second.activityLevel] ?? 0) - (activityOrder[first.activityLevel] ?? 0)
+    return first.name.localeCompare(second.name)
   })
 }
 
@@ -78,7 +71,7 @@ export default function DiscoverCirclesView({ circles, onJoin, onCreate, onPrevi
       </div>
 
       <div className="mt-4 flex gap-2 overflow-x-auto pb-2" aria-label="Filter Circles by category">
-        {CIRCLE_CATEGORIES.map((item) => (
+        {['All', ...new Set(circles.map((circle) => circle.category))].map((item) => (
           <button
             key={item}
             type="button"

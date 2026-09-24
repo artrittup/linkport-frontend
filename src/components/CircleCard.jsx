@@ -47,7 +47,7 @@ export default function CircleCard({
     )
   }
 
-  const actionLabel = primaryActionLabel ?? (circle.isJoined ? 'Joined' : 'Join')
+  const actionLabel = primaryActionLabel ?? (circle.isJoined ? 'Open Circle' : circle.isPending ? 'Request pending' : circle.isInvited ? 'Invitation pending' : 'Request to join')
 
   return (
     <article className="flex h-full min-w-0 flex-col rounded-2xl border border-border bg-surface/65 p-5 transition-colors hover:border-primary/35 sm:p-6">
@@ -57,7 +57,7 @@ export default function CircleCard({
           <div className="flex flex-wrap items-start justify-between gap-2">
             <div className="min-w-0">
               <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.13em] text-primary">{circle.category}</p>
-              <h3 className="mt-1 break-words text-lg font-semibold text-text-primary">{circle.name}</h3>
+              <h3 className="mt-1 break-words text-lg font-semibold text-text-primary"><button type="button" className="text-left hover:text-primary" onClick={() => onOpen?.(circle)}>{circle.name}</button></h3>
             </div>
             {circle.isJoined ? (
               <span className="shrink-0 rounded-full border border-success/30 bg-success/10 px-2.5 py-1 text-[10px] font-semibold text-success-text">Joined</span>
@@ -88,9 +88,9 @@ export default function CircleCard({
         {primaryActionLabel ? (
           <Button size="sm" variant="outline" onClick={() => onOpen?.(circle)}>{actionLabel}</Button>
         ) : circle.isJoined ? (
-          <Button size="sm" variant="outline" disabled>Joined</Button>
+          <Button size="sm" variant="outline" onClick={() => onOpen?.(circle)}>Open Circle</Button>
         ) : (
-          <Button size="sm" onClick={() => onJoin?.(circle)}>{actionLabel}</Button>
+          <Button size="sm" disabled={circle.isPending || circle.isInvited || circle.isBusy} onClick={() => onJoin?.(circle)}>{circle.isBusy ? 'Sending...' : actionLabel}</Button>
         )}
       </div>
     </article>

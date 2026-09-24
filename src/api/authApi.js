@@ -57,6 +57,21 @@ export async function registerUser(data) {
   return response.data
 }
 
+export async function requestPasswordReset(email) {
+  const response = await api.post('/forgot-password', { email })
+  return response.data
+}
+
+export async function resetPassword({ token, email, password, passwordConfirmation }) {
+  const response = await api.post('/reset-password', {
+    token,
+    email,
+    password,
+    password_confirmation: passwordConfirmation,
+  })
+  return response.data
+}
+
 export async function logoutUser() {
   const response = await api.post('/logout')
   return response.data

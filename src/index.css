@@ -221,6 +221,41 @@
       0 1px 2px rgb(2 12 27 / 0.5),
       0 8px 24px rgb(2 12 27 / 0.36);
   }
+
+  /* Landing chrome: flat, square, no blur or shadow. */
+  .lp-titlebar {
+    border-bottom: 3px solid var(--theme-primary);
+    background: var(--theme-surface-deep);
+  }
+
+  .lp-sectionnav {
+    border-bottom: 1px solid var(--theme-border-strong);
+    background: var(--theme-surface-muted);
+  }
+
+  .lp-sectionnav a {
+    border-right: 1px solid var(--theme-border);
+  }
+
+  .lp-sectionnav a:first-child {
+    border-left: 1px solid var(--theme-border);
+  }
+
+  .lp-panel {
+    border: 1px solid var(--theme-border);
+    background: var(--theme-surface);
+  }
+
+  .lp-panel-head {
+    border-bottom: 1px solid var(--theme-border-strong);
+    background: var(--theme-surface-muted);
+  }
+
+  /* The landing content reads as one translucent sheet over the page. */
+  .lp-content {
+    border: 1px solid var(--theme-border);
+    background: color-mix(in srgb, var(--theme-surface) 62%, transparent);
+  }
 }
 
 @layer utilities {

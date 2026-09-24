@@ -89,18 +89,60 @@ function scrollToSection(event, id) {
   document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
 }
 
-function DesktopSidebar({ activeSection, onSelect }) {
-  const {
-    user,
-    isLoading,
-    isAuthenticated,
-    logout,
-    getDashboardPath,
-  } = useAuth()
+const decorIcons = ['users', 'building', 'layers', 'briefcase', 'network', 'spark', 'send', 'profile']
+
+function SideNav({ activeSection, onSelect }) {
+  const itemClass = (active) =>
+    `block border-b border-border/25 px-4 py-2.5 text-[0.95rem] transition-colors last:border-b-0 ${
+      active
+        ? 'bg-primary/10 font-bold text-primary'
+        : 'text-text-secondary hover:bg-surface-elevated hover:text-text-primary'
+    }`
 
   return (
-    <aside className="fixed bottom-0 left-0 top-[88px] z-40 hidden w-20 bg-background lg:flex lg:flex-col">
-      <nav className="flex flex-1 flex-col items-center gap-1 px-2 py-5" aria-label="Landing sections">
+    <aside className="hidden w-52 shrink-0 lg:block" aria-label="Landing sections">
+      <div className="flex h-full flex-col py-5 pl-4 pr-3">
+        <nav className="lp-panel sticky top-5">
+          <p className="border-b border-border/30 bg-surface-muted/50 px-4 py-2.5 text-[11px] font-bold uppercase tracking-wider text-text-muted">
+            Navigation
+          </p>
+          {navigation.map((item) => (
+            <a
+              key={item.id}
+              href={`#${item.id}`}
+              aria-current={activeSection === item.id ? 'true' : undefined}
+              onClick={(event) => {
+                onSelect(item.id)
+                scrollToSection(event, item.id)
+              }}
+              className={itemClass(activeSection === item.id)}
+            >
+              {item.label}
+            </a>
+          ))}
+        </nav>
+
+        {/* Motif running the length of the page. */}
+        <div
+          aria-hidden="true"
+          className="mt-10 flex flex-1 flex-col items-center justify-around pb-10 text-primary/25"
+        >
+          {decorIcons.map((name) => (
+            <Icon key={name} name={name} className="h-14 w-14" />
+          ))}
+        </div>
+      </div>
+    </aside>
+  )
+}
+
+function MobileSectionNav({ activeSection, onSelect }) {
+  return (
+    <nav
+      className="lp-sectionnav sticky top-0 z-40 w-full overflow-x-auto lg:hidden"
+      aria-label="Landing sections"
+    >
+      <div className="flex w-max min-w-full items-stretch px-2">
         {navigation.map((item) => {
           const active = activeSection === item.id
 
@@ -108,92 +150,22 @@ function DesktopSidebar({ activeSection, onSelect }) {
             <a
               key={item.id}
               href={`#${item.id}`}
+              aria-current={active ? 'true' : undefined}
               onClick={(event) => {
                 onSelect(item.id)
                 scrollToSection(event, item.id)
               }}
-              className={`group flex w-full flex-col items-center gap-1.5 rounded-xl px-1 py-3 text-[10px] font-medium transition-all duration-200 ${
+              className={`shrink-0 px-3 py-2 text-sm transition-colors ${
                 active
-                  ? 'bg-primary/10 text-primary'
-                  : 'text-text-subtle hover:bg-surface hover:text-text-primary'
+                  ? 'bg-surface font-bold text-primary'
+                  : 'text-text-secondary hover:bg-surface hover:text-text-primary'
               }`}
             >
-              <Icon name={item.icon} className="h-5 w-5" />
               {item.label}
             </a>
           )
         })}
-      </nav>
-      <div className="w-full border-t border-border/80 p-2">
-        {isLoading ? (
-          <div className="mx-auto my-3 h-8 w-8 animate-pulse rounded-full bg-surface" />
-        ) : isAuthenticated ? (
-          <div className="space-y-1">
-            <Link
-              to={getDashboardPath(user?.role)}
-              title={user?.name || 'Open dashboard'}
-              className="flex w-full flex-col items-center gap-1 rounded-xl px-1 py-2 text-[9px] text-primary transition-colors hover:bg-surface"
-            >
-              <span className="flex h-7 w-7 items-center justify-center rounded-full border border-primary/40 bg-primary/10 text-[9px] font-bold">
-                {(user?.name || 'U').split(' ').filter(Boolean).slice(0, 2).map((part) => part[0]).join('').toUpperCase()}
-              </span>
-              Account
-            </Link>
-            <button
-              type="button"
-              onClick={logout}
-              className="flex w-full flex-col items-center gap-1 rounded-xl px-1 py-2 text-[9px] text-danger transition-colors hover:bg-danger/10"
-            >
-              <Icon name="logout" className="h-4 w-4" />
-              Logout
-            </button>
-          </div>
-        ) : (
-          <Link
-            to="/login"
-            title="Not signed in"
-            className="flex w-full flex-col items-center gap-1.5 rounded-xl px-1 py-3 text-center text-[9px] leading-tight text-text-subtle transition-colors hover:bg-surface hover:text-text-primary"
-          >
-            <span className="relative">
-              <Icon name="profile" className="h-5 w-5" />
-              <span className="absolute -bottom-0.5 -right-0.5 h-2 w-2 rounded-full border border-surface-deep bg-text-subtle" />
-            </span>
-            Not signed in
-          </Link>
-        )}
       </div>
-    </aside>
-  )
-}
-
-function MobileNavigation({ activeSection, onSelect }) {
-  return (
-    <nav
-      className="sticky top-[88px] z-40 flex gap-2 overflow-x-auto border-b border-border/80 bg-surface-deep/95 px-4 py-3 backdrop-blur-lg lg:hidden"
-      aria-label="Landing sections"
-    >
-      {navigation.map((item) => {
-        const active = activeSection === item.id
-
-        return (
-          <a
-            key={item.id}
-            href={`#${item.id}`}
-            onClick={(event) => {
-              onSelect(item.id)
-              scrollToSection(event, item.id)
-            }}
-            className={`flex shrink-0 items-center gap-2 rounded-full border px-3 py-2 text-xs font-medium transition-colors ${
-              active
-                ? 'border-primary/50 bg-primary/10 text-primary'
-                : 'border-border bg-surface/70 text-text-muted'
-            }`}
-          >
-            <Icon name={item.icon} className="h-4 w-4" />
-            {item.label}
-          </a>
-        )
-      })}
     </nav>
   )
 }
@@ -202,19 +174,19 @@ function SectionHeader({ label, title, description, align = 'left' }) {
   return (
     <div className={align === 'center' ? 'mx-auto max-w-2xl text-center' : 'max-w-2xl'}>
       <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">{label}</p>
-      <h2 className="mt-4 text-3xl font-bold tracking-tight text-text-primary sm:text-4xl">{title}</h2>
-      <p className="mt-4 text-base leading-7 text-text-muted">{description}</p>
+      <h2 className="mt-2.5 text-xl font-bold tracking-tight text-text-primary sm:text-2xl">{title}</h2>
+      <p className="mt-2.5 text-sm leading-6 text-text-muted">{description}</p>
     </div>
   )
 }
 
 function FeatureCard({ feature }) {
   return (
-    <article className="group rounded-2xl border border-border bg-surface/65 p-5 transition-all duration-200 hover:-translate-y-1 hover:border-primary/35 hover:bg-surface">
+    <article className="group border border-border bg-surface/65 p-4 transition-colors hover:border-primary/35 hover:bg-surface">
       <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-primary/20 bg-primary/10 text-primary">
         <Icon name={feature.icon} />
       </div>
-      <h3 className="mt-5 text-lg font-semibold text-text-primary">{feature.title}</h3>
+      <h3 className="mt-3 text-[0.95rem] font-semibold text-text-primary">{feature.title}</h3>
       <p className="mt-2 text-sm leading-6 text-text-muted">{feature.description}</p>
     </article>
   )
@@ -223,9 +195,8 @@ function FeatureCard({ feature }) {
 function OpportunityVisual({ job, project, isLoading }) {
   return (
     <div className="relative mx-auto w-full max-w-lg py-8 lg:py-0">
-      <div className="absolute inset-8 rounded-full bg-primary/10 blur-3xl" />
-      <div className="relative rounded-3xl border border-border bg-surface-deep/90 p-4 shadow-2xl shadow-black/30 backdrop-blur-xl sm:p-5">
-        <div className="mb-5 flex items-center justify-between">
+      <div className="relative border border-border-strong bg-surface-deep p-3 sm:p-4">
+        <div className="mb-3 flex items-center justify-between">
           <div>
             <p className="text-xs text-text-subtle">Opportunity feed</p>
             <p className="mt-1 text-sm font-semibold text-text-primary">Matched for you</p>
@@ -236,10 +207,10 @@ function OpportunityVisual({ job, project, isLoading }) {
         </div>
 
         <div className="space-y-3">
-          <div className="translate-x-3 rounded-2xl border border-border bg-surface p-4 shadow-lg sm:translate-x-8">
+          <div className="border border-border bg-surface p-3">
             <div className="flex items-start justify-between gap-4">
               <div className="flex gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                <div className="flex h-9 w-9 items-center justify-center border border-primary/20 bg-primary/10 text-primary">
                   <Icon name="briefcase" />
                 </div>
                 <div>
@@ -253,10 +224,10 @@ function OpportunityVisual({ job, project, isLoading }) {
             </div>
           </div>
 
-          <div className="-translate-x-2 rounded-2xl border border-border bg-surface p-4 shadow-lg sm:-translate-x-5">
+          <div className="border border-border bg-surface p-3">
             <div className="flex items-start justify-between gap-4">
               <div className="flex gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                <div className="flex h-9 w-9 items-center justify-center border border-primary/20 bg-primary/10 text-primary">
                   <Icon name="layers" />
                 </div>
                 <div>
@@ -285,13 +256,13 @@ function ProjectCard({ project, onClick }) {
       type="button"
       onClick={onClick}
       aria-label={`Open project: ${project.title}`}
-      className="group flex h-full w-full flex-col rounded-2xl border border-border bg-surface/65 p-5 text-left transition-all duration-200 hover:-translate-y-1 hover:border-primary/40 hover:shadow-xl hover:shadow-black/20 focus:outline-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-focus-ring/30"
+      className="group flex h-full w-full flex-col border border-border bg-surface/65 p-4 text-left transition-colors hover:border-primary/40 hover:bg-surface focus:outline-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-focus-ring/30"
     >
       <div className="flex items-center justify-between gap-3">
         <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">{project.category || 'Project'}</span>
         <span className="text-xs text-text-subtle">{project.company}</span>
       </div>
-      <h3 className="mt-5 text-lg font-semibold text-text-primary">{project.title}</h3>
+      <h3 className="mt-3 text-[0.95rem] font-semibold text-text-primary">{project.title}</h3>
       <div className="mt-4 flex flex-wrap gap-2">
         {project.skills.map((tag) => <span key={tag} className="rounded-md border border-border px-2.5 py-1 text-xs text-text-muted">{tag}</span>)}
       </div>
@@ -309,13 +280,13 @@ function JobCard({ job, onClick }) {
       type="button"
       onClick={onClick}
       aria-label={`Open job: ${job.title}`}
-      className="group flex h-full w-full flex-col rounded-2xl border border-border bg-surface/65 p-5 text-left transition-all duration-200 hover:-translate-y-1 hover:border-primary/40 hover:shadow-xl hover:shadow-black/20 focus:outline-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-focus-ring/30"
+      className="group flex h-full w-full flex-col border border-border bg-surface/65 p-4 text-left transition-colors hover:border-primary/40 hover:bg-surface focus:outline-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-focus-ring/30"
     >
       <div className="flex w-full items-center justify-between gap-3">
         <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">{job.type || 'Job'}</span>
         <span className="truncate text-xs text-text-subtle">{job.company}</span>
       </div>
-      <h3 className="mt-5 text-lg font-semibold text-text-primary">{job.title}</h3>
+      <h3 className="mt-3 text-[0.95rem] font-semibold text-text-primary">{job.title}</h3>
       <div className="mt-4 flex flex-wrap gap-2">
         {job.skills?.map((skill) => (
           <span key={skill} className="rounded-md border border-border px-2.5 py-1 text-xs text-text-muted">
@@ -334,8 +305,8 @@ function JobCard({ job, onClick }) {
   )
 }
 
-const sectionClass = 'scroll-mt-40 py-32 sm:py-36 lg:scroll-mt-24 lg:py-40'
-const audienceSectionClass = 'scroll-mt-40 py-36 sm:py-40 lg:scroll-mt-24 lg:py-44'
+const sectionClass = 'scroll-mt-14 py-12 sm:py-14 lg:py-16'
+const audienceSectionClass = 'scroll-mt-14 py-12 sm:py-16 lg:py-18'
 
 const formatCurrency = (value) => {
   const amount = Number(value)
@@ -475,7 +446,6 @@ export default function LandingPage() {
   return (
     <main className="min-h-screen bg-background text-text-primary">
       <Navbar />
-      <DesktopSidebar activeSection={activeSection} onSelect={setActiveSection} />
 
       {accessPrompt && (
         <div
@@ -489,7 +459,7 @@ export default function LandingPage() {
             role="dialog"
             aria-modal="true"
             aria-labelledby="access-prompt-title"
-            className="w-full max-w-md rounded-2xl border border-border bg-surface p-6 shadow-2xl shadow-black/40 sm:p-8"
+            className="lp-panel w-full max-w-md p-5 sm:p-6"
           >
             <div className="flex items-start justify-between gap-4">
               <div>
@@ -519,20 +489,24 @@ export default function LandingPage() {
         </div>
       )}
 
-      <div className="pt-28 sm:pt-24 lg:pl-20">
-        <MobileNavigation activeSection={activeSection} onSelect={setActiveSection} />
+      <div className="mx-auto flex w-full max-w-[100rem]">
+        <SideNav activeSection={activeSection} onSelect={setActiveSection} />
 
-        <section id="home" className="scroll-mt-40 overflow-hidden border-b border-border/70 lg:scroll-mt-24">
-          <div className="mx-auto grid min-h-[calc(100vh-88px)] max-w-7xl items-center gap-12 px-6 py-16 lg:grid-cols-[1.05fr_0.95fr] lg:px-10 lg:py-20">
+        <div className="min-w-0 flex-1 py-5 pr-4 max-lg:p-0">
+          <div className="lp-content overflow-hidden">
+          <MobileSectionNav activeSection={activeSection} onSelect={setActiveSection} />
+
+        <section id="home" className="scroll-mt-14 overflow-hidden border-b border-border">
+          <div className="mx-auto grid max-w-7xl items-center gap-8 px-6 py-12 lg:grid-cols-[1.05fr_0.95fr] lg:px-10 lg:py-14">
             <div>
               <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3 py-1.5 text-xs font-medium text-primary">
                 <span className="h-1.5 w-1.5 rounded-full bg-primary shadow-[0_0_10px] shadow-primary" />
                 The professional launchpad for emerging talent
               </div>
-              <h1 className="mt-7 max-w-3xl text-5xl font-bold leading-[1.05] tracking-[-0.04em] text-text-primary sm:text-6xl xl:text-7xl">
+              <h1 className="mt-5 max-w-3xl text-3xl font-bold leading-[1.12] tracking-[-0.02em] text-text-primary sm:text-4xl xl:text-5xl">
                 Where talent meets <span className="text-primary">opportunity.</span>
               </h1>
-              <p className="mt-6 max-w-xl text-lg leading-8 text-text-muted">
+              <p className="mt-4 max-w-xl text-sm leading-6 text-text-muted">
                 Build your future through meaningful jobs, real projects, and connections that move your career forward.
               </p>
               <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -560,7 +534,7 @@ export default function LandingPage() {
           <div className="mx-auto grid max-w-7xl grid-cols-2 px-6 py-7 sm:grid-cols-4 lg:px-10">
             {metrics.map((metric, index) => (
               <div key={metric.label} className={`px-4 py-3 text-center ${index > 0 ? 'border-l border-border' : ''}`}>
-                <p className="text-2xl font-bold text-text-primary sm:text-3xl">{metric.value}</p>
+                <p className="text-xl font-bold text-text-primary sm:text-2xl">{metric.value}</p>
                 <p className="mt-1 text-xs text-text-muted sm:text-sm">{metric.label}</p>
               </div>
             ))}
@@ -638,7 +612,7 @@ export default function LandingPage() {
         </section>
 
         <section id="community" className={sectionClass}>
-          <div className="mx-auto grid max-w-7xl gap-12 px-6 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:px-10">
+          <div className="mx-auto grid max-w-7xl gap-8 px-6 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:px-10">
             <div>
               <SectionHeader label="Circles" title="Build better, together." description="Members can create circles, invite others, and collaborate as a team. A LinkPort member account is required to join or participate." />
               <div className="mt-8 grid grid-cols-2 gap-3">
@@ -648,16 +622,16 @@ export default function LandingPage() {
                   </div>
                 ))}
               </div>
-              <Link to={protectedLandingTarget('/member/community?view=discover')} className="mt-7 inline-flex items-center gap-2 text-sm font-semibold text-primary transition-opacity hover:opacity-80">
+              <Link to={protectedLandingTarget('/member/community?view=discover')} className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-primary transition-opacity hover:opacity-80">
                 {protectedCtaLabel('Explore Circles')} <Icon name="arrow" className="h-4 w-4" />
               </Link>
             </div>
-            <div className="overflow-hidden rounded-3xl border border-border bg-surface/65 p-7 shadow-xl shadow-black/10 sm:p-9">
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-primary/25 bg-primary/10 text-primary">
+            <div className="overflow-hidden border border-border bg-surface/65 p-5 sm:p-6">
+              <div className="flex h-11 w-11 items-center justify-center border border-primary/25 bg-primary/10 text-primary">
                 <Icon name="discord" className="h-7 w-7" />
               </div>
-              <p className="mt-7 text-xs font-semibold uppercase tracking-[0.18em] text-primary">Discord Community</p>
-              <h2 className="mt-3 text-3xl font-bold tracking-tight text-text-primary">terminal_0</h2>
+              <p className="mt-4 text-xs font-semibold uppercase tracking-[0.18em] text-primary">Discord Community</p>
+              <h2 className="mt-2 text-xl font-bold tracking-tight text-text-primary">terminal_0</h2>
               <p className="mt-4 max-w-xl text-sm leading-7 text-text-muted">
                 Join the terminal_0 community on Discord. More information about the community will be added soon.
               </p>
@@ -665,7 +639,7 @@ export default function LandingPage() {
                 href="https://discord.gg/8NemkkpJj"
                 target="_blank"
                 rel="noreferrer"
-                className="mt-7 inline-flex items-center justify-center gap-2 rounded-lg border border-primary bg-primary px-6 py-3.5 text-sm font-semibold text-primary-contrast transition-all hover:-translate-y-0.5 hover:bg-primary-hover"
+                className="mt-4 inline-flex items-center justify-center gap-2 rounded-lg border border-primary bg-primary px-6 py-3.5 text-sm font-semibold text-primary-contrast transition-all hover:-translate-y-0.5 hover:bg-primary-hover"
               >
                 Join Discord <Icon name="arrow" className="h-4 w-4" />
               </a>
@@ -674,9 +648,9 @@ export default function LandingPage() {
         </section>
 
         <section className="px-6 pb-20 lg:px-10">
-          <div className="mx-auto max-w-5xl overflow-hidden rounded-3xl border border-primary/20 bg-gradient-to-br from-surface to-surface-deep px-6 py-12 text-center shadow-2xl shadow-black/20 sm:px-12">
+          <div className="mx-auto max-w-5xl overflow-hidden border border-border-strong bg-surface px-6 py-8 text-center sm:px-10">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Your next move</p>
-            <h2 className="mx-auto mt-4 max-w-2xl text-3xl font-bold text-text-primary sm:text-4xl">Start building your future on LinkPort.</h2>
+            <h2 className="mx-auto mt-2.5 max-w-2xl text-xl font-bold text-text-primary sm:text-2xl">Start building your future on LinkPort.</h2>
             <Button size="lg" className="mt-8" disabled={isLoading} onClick={goToPrimaryAction}>
               {isLoading ? 'Checking account...' : isAuthenticated ? 'Open Dashboard' : 'Create your account'}
             </Button>
@@ -700,6 +674,8 @@ export default function LandingPage() {
             </nav>
           </div>
         </footer>
+          </div>
+        </div>
       </div>
     </main>
   )

@@ -141,7 +141,8 @@
   html {
     background: var(--theme-background);
     min-width: 0;
-    overflow-x: hidden;
+    /* clip, not hidden: hidden makes these scroll containers and kills position:sticky */
+    overflow-x: clip;
   }
 
   body,
@@ -150,7 +151,7 @@
     color: var(--theme-text-primary);
     min-width: 0;
     max-width: 100%;
-    overflow-x: hidden;
+    overflow-x: clip;
   }
 
   img,
@@ -224,8 +225,15 @@
 
   /* Landing chrome: flat, square, no blur or shadow. */
   .lp-titlebar {
-    border-bottom: 3px solid var(--theme-primary);
     background: var(--theme-surface-deep);
+  }
+
+  /* sa-mp style counter strip under the header, with a neon edge */
+  .lp-statstrip {
+    background: var(--theme-primary);
+    color: var(--theme-primary-contrast);
+    border-bottom: 2px solid color-mix(in srgb, var(--theme-primary) 40%, #ffffff);
+    box-shadow: 0 2px 10px color-mix(in srgb, var(--theme-primary) 55%, transparent);
   }
 
   .lp-sectionnav {
@@ -249,6 +257,53 @@
   .lp-panel-head {
     border-bottom: 1px solid var(--theme-border-strong);
     background: var(--theme-surface-muted);
+  }
+
+  /* Promo card in the landing rail: light sweep + lift on hover. */
+  .lp-promo {
+    position: relative;
+    overflow: hidden;
+    transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+  }
+
+  .lp-promo::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    transform: translateX(-130%);
+    background: linear-gradient(
+      110deg,
+      transparent 35%,
+      color-mix(in srgb, var(--theme-primary) 22%, transparent) 50%,
+      transparent 65%
+    );
+  }
+
+  .lp-promo:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px color-mix(in srgb, var(--theme-primary) 22%, transparent);
+  }
+
+  .lp-promo:hover::after {
+    animation: lp-shine 900ms ease;
+  }
+
+  @keyframes lp-shine {
+    to {
+      transform: translateX(230%);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .lp-promo,
+    .lp-promo:hover {
+      transform: none;
+    }
+
+    .lp-promo:hover::after {
+      animation: none;
+    }
   }
 
   /* The landing content reads as one translucent sheet over the page. */

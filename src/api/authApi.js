@@ -48,6 +48,7 @@ export async function registerUser(data) {
 
   const response = await api.post('/register', {
     fullName: data.fullName ?? data.name,
+    username: data.username,
     email: data.email,
     password: data.password,
     confirmPassword: data.confirmPassword,

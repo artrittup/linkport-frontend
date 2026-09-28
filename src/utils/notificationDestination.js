@@ -28,7 +28,7 @@ export function getNotificationDestination(notification, fallback = '/notificati
   if (type === 'job_application_received') return '/company/applications'
   if (type === 'job_application_status') return getCandidateActivityPath('applications')
   if (type === 'project_bid_received') return '/company/applications?type=proposals'
-  if (type === 'project_bid_status') return getCandidateActivityPath('proposals')
+  if (type === 'project_bid_status') return getCandidateActivityPath('bids')
 
   return fallback
 }

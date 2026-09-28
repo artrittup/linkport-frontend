@@ -18,22 +18,23 @@ function getLatestItem(items) {
   }, null)
 }
 
-function usePaginatedActivity(fetchItems, errorMessage) {
+function usePaginatedActivity(fetchItems, errorMessage, enabled = true) {
   const [items, setItems] = useState([])
   const [status, setStatusState] = useState('All statuses')
   const [page, setPage] = useState(1)
   const [pagination, setPagination] = useState(initialPagination)
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(enabled)
   const [error, setError] = useState('')
   const [refreshKey, setRefreshKey] = useState(0)
   const [summary, setSummary] = useState({
     total: null,
     latest: null,
-    isLoading: true,
+    isLoading: enabled,
     error: false,
   })
 
   useEffect(() => {
+    if (!enabled) return undefined
     let isActive = true
     const isSummaryRequest = status === 'All statuses' && page === 1
 
@@ -87,7 +88,7 @@ function usePaginatedActivity(fetchItems, errorMessage) {
     return () => {
       isActive = false
     }
-  }, [errorMessage, fetchItems, page, refreshKey, status])
+  }, [enabled, errorMessage, fetchItems, page, refreshKey, status])
 
   const setStatus = useCallback((nextStatus) => {
     setStatusState(nextStatus)
@@ -112,16 +113,18 @@ function usePaginatedActivity(fetchItems, errorMessage) {
   }
 }
 
-export function useCandidateApplications() {
+export function useCandidateApplications({ enabled = true } = {}) {
   return usePaginatedActivity(
     getMyApplications,
     'Applications are temporarily unavailable. Please try again.',
+    enabled,
   )
 }
 
-export function useCandidateProposals() {
+export function useCandidateProposals({ enabled = true } = {}) {
   return usePaginatedActivity(
     getMyBids,
-    'Proposals are temporarily unavailable. Please try again.',
+    'Bids are temporarily unavailable. Please try again.',
+    enabled,
   )
 }

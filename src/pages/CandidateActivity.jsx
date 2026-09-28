@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link, useNavigate, useSearchParams } from 'react-router'
+import { useNavigate, useSearchParams } from 'react-router'
 import { getCommunityEventErrorMessage, removeCommunityEventAttendance } from '../api/communityEventsApi'
 import CandidateActivityOverview from '../components/CandidateActivityOverview'
 import CandidateApplicationsActivity from '../components/CandidateApplicationsActivity'
@@ -7,6 +7,7 @@ import CandidateContentActivity from '../components/CandidateContentActivity'
 import CandidateEventsActivity from '../components/CandidateEventsActivity'
 import CandidateProposalsActivity from '../components/CandidateProposalsActivity'
 import CandidateSavedActivity from '../components/CandidateSavedActivity'
+import SectionTabs from '../components/SectionTabs'
 import {
   CANDIDATE_ACTIVITY_TABS,
   getCandidateActivityPath,
@@ -21,57 +22,81 @@ import {
 import useCommunityProjects from '../hooks/useCommunityProjects'
 import useCommunityPosts from '../hooks/useCommunityPosts'
 import { useMyCommunityEvents } from '../hooks/useCommunityEvents'
-import useTeammateRequests from '../hooks/useTeammateRequests'
+import useSavedItems from '../hooks/useSavedItems'
 import CandidateLayout from '../layouts/CandidateLayout'
+
+const sectionCopy = {
+  applications: {
+    title: 'Applications',
+    description: 'Review the jobs you applied to and track each application status.',
+  },
+  bids: {
+    title: 'Bids',
+    description: 'Keep track of your project offers, delivery estimates, and bid status.',
+  },
+  projects: {
+    title: 'Projects',
+    description: 'Manage the community projects you have created.',
+  },
+  posts: {
+    title: 'Posts',
+    description: 'Review the posts you have shared with the LinkPort community.',
+  },
+  saved: {
+    title: 'Saved',
+    description: 'Return to jobs, projects, posts, and other community items you kept for later.',
+  },
+}
+
+function requestSummary(total, isLoading, error) {
+  return { total, isLoading, error: Boolean(error) }
+}
 
 export default function CandidateActivity({ section }) {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
   const requestedTab = searchParams.get('tab')
   const activeTab = section ?? normalizeCandidateActivityTab(requestedTab)
-  const applications = useCandidateApplications()
-  const proposals = useCandidateProposals()
+  const isOverview = activeTab === 'overview'
   const { user } = useAuth()
-  const [removingEventId, setRemovingEventId] = useState('')
-  const [eventActionError, setEventActionError] = useState('')
-  const {
-    projects,
-    isLoading: projectsLoading,
-    error: projectsError,
-  } = useCommunityProjects({
+  const applications = useCandidateApplications({ enabled: isOverview || activeTab === 'applications' })
+  const bids = useCandidateProposals({ enabled: isOverview || activeTab === 'bids' })
+  const projectsActivity = useCommunityProjects({
     userId: user?.id,
     perPage: 50,
-    enabled: Boolean(user?.id),
+    enabled: Boolean(user?.id) && (isOverview || activeTab === 'projects'),
   })
-  const {
-    posts,
-    isLoading: postsLoading,
-    error: postsError,
-  } = useCommunityPosts({
+  const postsActivity = useCommunityPosts({
     userId: user?.id,
     perPage: 50,
-    enabled: Boolean(user?.id),
+    enabled: Boolean(user?.id) && (isOverview || activeTab === 'posts'),
   })
+  const savedItems = useSavedItems({ enabled: isOverview || activeTab === 'saved' })
   const {
-    requests: teamRequests,
-    isLoading: teammateRequestsLoading,
-    error: teammateRequestsError,
-  } = useTeammateRequests({
-    userId: user?.id,
-    perPage: 50,
-    enabled: Boolean(user?.id),
-  })
-  const {
-    events: savedEvents,
+    events: attendingEvents,
     isLoading: eventsLoading,
     error: eventsError,
     retry: retryEvents,
-  } = useMyCommunityEvents({ perPage: 50 })
+  } = useMyCommunityEvents({ perPage: 50, enabled: activeTab === 'saved' })
+  const [removingEventId, setRemovingEventId] = useState('')
+  const [eventActionError, setEventActionError] = useState('')
 
-  const contentItems = useMemo(
-    () => getCandidateContentItems({ projects, posts, teamRequests }),
-    [posts, projects, teamRequests],
+  const projectItems = useMemo(
+    () => getCandidateContentItems({ projects: projectsActivity.projects, posts: [], teamRequests: [] }),
+    [projectsActivity.projects],
   )
+  const postItems = useMemo(
+    () => getCandidateContentItems({ projects: [], posts: postsActivity.posts, teamRequests: [] }),
+    [postsActivity.posts],
+  )
+  const summaries = [
+    { id: 'applications', label: 'Applications', summary: applications.summary },
+    { id: 'bids', label: 'Bids', summary: bids.summary },
+    { id: 'projects', label: 'Projects', summary: requestSummary(projectsActivity.meta.total, projectsActivity.isLoading, projectsActivity.error) },
+    { id: 'posts', label: 'Posts', summary: requestSummary(postsActivity.meta.total, postsActivity.isLoading, postsActivity.error) },
+    { id: 'saved', label: 'Saved', summary: requestSummary(savedItems.items.length, savedItems.isLoading, savedItems.error) },
+  ]
+
   async function removeEvent(eventId) {
     if (removingEventId) return
     setRemovingEventId(eventId)
@@ -92,81 +117,64 @@ export default function CandidateActivity({ section }) {
     }
   }, [activeTab, navigate, requestedTab, section])
 
+  const activeCopy = sectionCopy[activeTab]
+
   return (
     <CandidateLayout title="My Activity">
       <div className="min-w-0 max-w-full">
-        <section>
+        <header>
+          <p className="font-mono text-xs font-semibold uppercase tracking-[0.14em] text-primary">Your work on LinkPort</p>
           <h2 className="mt-2 text-3xl font-bold tracking-tight text-text-primary sm:text-4xl">My Activity</h2>
-          <p className="mt-4 max-w-3xl leading-7 text-text-muted">
-            Track your applications, proposals, shared content, teammate requests, and community events.
+          <p className="mt-3 max-w-3xl leading-7 text-text-muted">
+            Keep your applications, bids, projects, posts, and saved items together in one personal workspace.
           </p>
-        </section>
+        </header>
 
-        {projectsError && (
-          <p role="status" className="mt-4 rounded-lg border border-border bg-surface/45 px-4 py-3 text-sm text-text-muted">
-            Shared projects are temporarily unavailable. Other shared content remains available.
-          </p>
-        )}
-        {projectsLoading && (
-          <p role="status" className="mt-4 text-sm text-text-subtle">Loading shared projects...</p>
-        )}
-        {postsError && (
-          <p role="status" className="mt-4 rounded-lg border border-border bg-surface/45 px-4 py-3 text-sm text-text-muted">
-            Your posts are temporarily unavailable. Other shared content remains available.
-          </p>
-        )}
-        {postsLoading && (
-          <p role="status" className="mt-4 text-sm text-text-subtle">Loading your posts...</p>
-        )}
-        {teammateRequestsError && (
-          <p role="status" className="mt-4 rounded-lg border border-border bg-surface/45 px-4 py-3 text-sm text-text-muted">
-            Your teammate requests are temporarily unavailable. Shared projects and posts remain available.
-          </p>
-        )}
-        {teammateRequestsLoading && (
-          <p role="status" className="mt-4 text-sm text-text-subtle">Loading your teammate requests...</p>
-        )}
-
-        <nav className="mt-8 flex min-w-0 max-w-full gap-2 overflow-x-auto border-b border-border pb-3" aria-label="Activity sections">
-          {CANDIDATE_ACTIVITY_TABS.map((tab) => (
-            <Link
-              key={tab.id}
-              aria-current={activeTab === tab.id ? 'page' : undefined}
-              to={getCandidateActivityPath(tab.id)}
-              className={`shrink-0 rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
-                activeTab === tab.id
-                  ? 'border-primary bg-primary/10 text-primary'
-                  : 'border-border text-text-muted hover:border-primary/50 hover:text-text-primary'
-              }`}
-            >
-              {tab.label}
-            </Link>
-          ))}
-        </nav>
+        <SectionTabs
+          items={CANDIDATE_ACTIVITY_TABS.map((tab) => ({ ...tab, path: getCandidateActivityPath(tab.id) }))}
+          activeId={activeTab}
+          label="Activity sections"
+          className="mt-7"
+        />
 
         <div className="mt-8 min-w-0 max-w-full">
-          {activeTab === 'overview' && (
-            <CandidateActivityOverview
-              applications={applications}
-              proposals={proposals}
-              contentItems={contentItems}
-              savedEvents={savedEvents}
-              savedEventsState={{
-                total: savedEvents.length,
-                isLoading: eventsLoading,
-                error: eventsError,
-              }}
+          {isOverview ? (
+            <CandidateActivityOverview summaries={summaries} />
+          ) : (
+            <section className="mb-6">
+              <h3 className="text-xl font-semibold text-text-primary">{activeCopy.title}</h3>
+              <p className="mt-2 text-sm leading-6 text-text-muted">{activeCopy.description}</p>
+            </section>
+          )}
+
+          {activeTab === 'applications' && <CandidateApplicationsActivity activity={applications} />}
+          {activeTab === 'bids' && <CandidateProposalsActivity activity={bids} />}
+          {activeTab === 'projects' && (
+            <CandidateContentActivity
+              items={projectItems}
+              type="projects"
+              isLoading={projectsActivity.isLoading}
+              error={projectsActivity.error}
+              retry={projectsActivity.retry}
             />
           )}
-          {activeTab === 'applications' && <CandidateApplicationsActivity activity={applications} />}
-          {activeTab === 'bids' && <CandidateProposalsActivity activity={proposals} />}
-          {activeTab === 'projects' && <CandidateContentActivity items={contentItems} filters={['Projects', 'Team requests']} initialFilter="Projects" />}
-          {activeTab === 'posts' && <CandidateContentActivity items={contentItems} filters={['Posts']} initialFilter="Posts" />}
+          {activeTab === 'posts' && (
+            <CandidateContentActivity
+              items={postItems}
+              type="posts"
+              isLoading={postsActivity.isLoading}
+              error={postsActivity.error}
+              retry={postsActivity.retry}
+            />
+          )}
           {activeTab === 'saved' && (
-            <div className="space-y-8">
-              <CandidateSavedActivity />
+            <div className="space-y-10">
+              <CandidateSavedActivity savedItems={savedItems} />
               <section>
-                <h3 className="text-xl font-semibold text-text-primary">Events you are attending</h3>
+                <div>
+                  <h3 className="text-lg font-semibold text-text-primary">Events you are attending</h3>
+                  <p className="mt-1 text-sm text-text-muted">Community events you joined remain available here alongside your saved items.</p>
+                </div>
                 <div className="mt-4">
                   {eventsLoading ? (
                     <p role="status" className="rounded-xl border border-border bg-surface/45 p-5 text-sm text-text-muted">Loading your events...</p>
@@ -178,7 +186,7 @@ export default function CandidateActivity({ section }) {
                   ) : (
                     <>
                       {eventActionError && <p role="alert" className="mb-4 rounded-lg border border-danger-soft/25 bg-danger-soft/5 px-4 py-3 text-sm text-danger-text">{eventActionError}</p>}
-                      <CandidateEventsActivity events={savedEvents} onRemove={removeEvent} removingEventId={removingEventId} />
+                      <CandidateEventsActivity events={attendingEvents} onRemove={removeEvent} removingEventId={removingEventId} />
                     </>
                   )}
                 </div>

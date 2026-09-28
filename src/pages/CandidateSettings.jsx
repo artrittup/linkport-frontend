@@ -39,7 +39,7 @@ export default function CandidateSettings() {
             </div>
           </dl>
           <div className="mt-5 flex flex-wrap gap-3">
-            <Link to="/member/profile" className="rounded-lg border border-primary px-4 py-2 text-sm font-semibold text-primary hover:bg-primary/10">Edit profile</Link>
+            <Link to="/member/profile/edit" className="rounded-lg border border-primary px-4 py-2 text-sm font-semibold text-primary hover:bg-primary/10">Edit profile</Link>
             <Link to="/member/notifications" className="rounded-lg border border-border px-4 py-2 text-sm font-semibold text-text-secondary hover:border-primary hover:text-primary">Notification center</Link>
           </div>
         </section>

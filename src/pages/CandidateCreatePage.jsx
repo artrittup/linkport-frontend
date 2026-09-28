@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { useNavigate } from 'react-router'
+import { useNavigate, useSearchParams } from 'react-router'
 import {
   createCommunityProject,
   getCommunityProjectErrorMessage,
@@ -250,10 +250,15 @@ function ProjectForm({ onCancel }) {
 
 function PostForm({ onCancel }) {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const { showToast } = useToast()
+  const requestedCategory = searchParams.get('category')
+  const initialCategory = COMMUNITY_POST_CATEGORY_OPTIONS.some(({ value }) => value === requestedCategory)
+    ? requestedCategory
+    : COMMUNITY_POST_CATEGORIES.GENERAL
   const [form, setForm] = useState({
     text: '',
-    category: COMMUNITY_POST_CATEGORIES.GENERAL,
+    category: initialCategory,
     tags: [],
     images: [],
     video: null,
@@ -304,7 +309,7 @@ function PostForm({ onCancel }) {
     }
   }
 
-  const isDirty = form.text || form.tags.length > 0 || form.images.length > 0 || form.video || form.category !== COMMUNITY_POST_CATEGORIES.GENERAL
+  const isDirty = form.text || form.tags.length > 0 || form.images.length > 0 || form.video || form.category !== initialCategory
 
   const selectImages = (event) => {
     const images = Array.from(event.target.files ?? [])

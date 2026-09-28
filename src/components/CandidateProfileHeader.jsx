@@ -1,4 +1,4 @@
-import Button from './Button'
+import { Link } from 'react-router'
 import {
   getCollaborationStatusLabel,
   getSafeMemberUrl,
@@ -17,7 +17,7 @@ function ExternalLink({ href, children }) {
   )
 }
 
-export default function CandidateProfileHeader({ profile, isOwner = false, onEdit, showBio = true }) {
+export default function CandidateProfileHeader({ profile, isOwner = false, actions, showBio = true }) {
   const displayName = profile.fullName || 'LinkPort member'
   const organization = profile.university || profile.education?.split(/\r?\n/).find(Boolean)
   const initials = displayName
@@ -56,7 +56,11 @@ export default function CandidateProfileHeader({ profile, isOwner = false, onEdi
                 </p>
               )}
             </div>
-            {isOwner && <Button variant="outline" onClick={onEdit}>Edit profile</Button>}
+            {isOwner ? (
+              <Link to="/member/profile/edit" className="inline-flex shrink-0 items-center justify-center rounded-lg border border-primary px-4 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-primary/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring">
+                Edit profile
+              </Link>
+            ) : actions ? <div className="flex shrink-0 flex-wrap items-center gap-2">{actions}</div> : null}
           </div>
 
           {showBio && <p className="mt-5 max-w-3xl whitespace-pre-line break-words text-sm leading-6 text-text-secondary">

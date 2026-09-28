@@ -3,7 +3,6 @@ import LinkPortLogo from './LinkPortLogo'
 import { getNavigationForRole } from '../config/navigation'
 import { useAuth } from '../context/AuthContext'
 import CandidateCreateMenu from './CandidateCreateMenu'
-import GlobalSearch from './GlobalSearch'
 import ThemeToggle from './ThemeToggle'
 
 function NavigationIcon({ iconKey }) {
@@ -53,24 +52,8 @@ function isNavigationItemActive(item, pathname) {
       || pathname === '/member/create/project'
       || pathname === '/member/create/post'
   }
+  if (item.key === 'profile') return pathname.startsWith('/member/profile/')
   return false
-}
-
-function isChildActive(item, pathname) {
-  if (pathname === item.path) return true
-  if (item.path === '/member/community/discover') {
-    return pathname === '/member/community'
-      || pathname.startsWith('/member/community/discussions')
-      || pathname.startsWith('/member/community/events')
-      || pathname.startsWith('/member/community/team-requests')
-  }
-  if (item.path === '/member/community/circles') {
-    return pathname.startsWith('/member/community/circles/') || pathname.startsWith('/circles')
-  }
-  if (item.path === '/member/community/members') return pathname.startsWith(`${item.path}/`)
-  if (item.path === '/member/opportunities/jobs') return pathname.startsWith('/member/opportunities/job-')
-  if (item.path === '/member/opportunities/projects') return pathname.startsWith('/member/opportunities/project-')
-  return pathname.startsWith(`${item.path}/`)
 }
 
 export default function CandidateSidebar({ isOpen, onClose }) {
@@ -122,15 +105,11 @@ export default function CandidateSidebar({ isOpen, onClose }) {
           </div>
         </div>
 
-        <div className="border-b border-border/80 px-4 py-4">
-          <GlobalSearch className="w-full min-w-0 max-w-full" dropdownAlign="left" />
-        </div>
-
-        <div className="border-b border-border/80 px-4 py-4">
+        <div className="border-b border-border/80 px-4 py-3">
           <CandidateCreateMenu onActionComplete={onClose} />
         </div>
 
-        <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4" aria-label="Primary member navigation">
+        <nav className="flex-1 space-y-1 overflow-hidden px-3 py-3" aria-label="Primary member navigation">
           {navItems.map((item) => {
             const isActive = isNavigationItemActive(item, location.pathname)
 
@@ -140,7 +119,7 @@ export default function CandidateSidebar({ isOpen, onClose }) {
                   to={item.path}
                   onClick={onClose}
                   aria-current={isActive ? 'page' : undefined}
-                  className={`flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-bold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring ${
+                  className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring ${
                     isActive
                       ? 'border border-primary-soft-border bg-primary-soft text-primary-soft-text'
                       : 'text-text-muted hover:bg-surface hover:text-text-primary'
@@ -148,61 +127,36 @@ export default function CandidateSidebar({ isOpen, onClose }) {
                 >
                   <NavigationIcon iconKey={item.key} />
                   <span>{item.label}</span>
-                  {item.children && (
-                    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.7" className={`ml-auto h-4 w-4 transition-transform ${isActive ? 'rotate-180' : ''}`} aria-hidden="true">
-                      <path d="m6 8 4 4 4-4" />
-                    </svg>
-                  )}
                 </Link>
-                {item.children && isActive && (
-                  <div className="ml-6 border-l border-border py-1 pl-3" aria-label={`${item.label} sections`}>
-                    {item.children.map((child) => {
-                      const childActive = isChildActive(child, location.pathname)
-                      return (
-                        <Link
-                          key={child.path}
-                          to={child.path}
-                          onClick={onClose}
-                          aria-current={childActive ? 'page' : undefined}
-                          className={`flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold transition-colors ${childActive ? 'bg-primary-soft text-primary-soft-text' : 'text-text-muted hover:bg-surface hover:text-text-primary'}`}
-                        >
-                          <span className={`h-1.5 w-1.5 rounded-full ${childActive ? 'bg-primary' : 'bg-border-strong'}`} />
-                          {child.label}
-                        </Link>
-                      )
-                    })}
-                  </div>
-                )}
               </div>
             )
           })}
         </nav>
 
-        <div className="border-t border-border/80 p-3">
-          <div className="flex items-center gap-3 px-2 py-2">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-primary/35 bg-surface font-mono text-xs font-semibold text-primary">
+        <div className="shrink-0 border-t border-border/80 px-3 py-2">
+          <div className="flex items-center gap-2 px-2 py-1.5">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-primary/35 bg-surface font-mono text-xs font-semibold text-primary">
               {initials}
             </div>
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-bold text-text-primary">{displayName}</p>
-              <p className="text-xs text-text-muted">Member account</p>
             </div>
           </div>
-          <nav className="mt-2 space-y-1" aria-label="Member account navigation">
+          <nav className="mt-1 grid grid-cols-2 gap-1" aria-label="Member account navigation">
             {[
               { key: 'notifications', label: 'Notifications', path: '/member/notifications' },
               { key: 'settings', label: 'Settings', path: '/member/settings' },
             ].map((item) => (
-              <Link key={item.key} to={item.path} onClick={onClose} aria-current={location.pathname === item.path ? 'page' : undefined} className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-semibold transition-colors ${location.pathname === item.path ? 'bg-primary-soft text-primary-soft-text' : 'text-text-muted hover:bg-surface hover:text-text-primary'}`}>
+              <Link key={item.key} to={item.path} onClick={onClose} aria-current={location.pathname === item.path ? 'page' : undefined} className={`flex items-center gap-2 rounded-lg px-2 py-1.5 text-xs font-semibold transition-colors ${location.pathname === item.path ? 'bg-primary-soft text-primary-soft-text' : 'text-text-muted hover:bg-surface hover:text-text-primary'}`}>
                 <NavigationIcon iconKey={item.key} />
                 {item.label}
               </Link>
             ))}
-            <ThemeToggle showLabel className="w-full justify-start px-3 text-sm" />
+            <ThemeToggle showLabel className="w-full justify-start px-2 text-xs" />
             <button
               type="button"
               onClick={handleLogout}
-              className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-semibold text-danger-text transition-colors hover:bg-danger/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-danger"
+              className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-xs font-semibold text-danger-text transition-colors hover:bg-danger/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-danger"
             >
               <LogoutIcon />
               Logout

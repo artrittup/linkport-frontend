@@ -25,7 +25,7 @@ function TuneIcon() {
   )
 }
 
-function ResultSection({ label, items, kind, onSelect }) {
+function ResultSection({ label, items, kind, onSelect, memberPathPrefix = '/members' }) {
   if (!items.length) return null
 
   return (
@@ -40,7 +40,7 @@ function ResultSection({ label, items, kind, onSelect }) {
         return (
           <Link
             key={item.id}
-            to={isMember ? `/members/${item.id}` : `/companies/${item.id}`}
+            to={isMember ? `${memberPathPrefix}/${item.id}` : `/companies/${item.id}`}
             onClick={onSelect}
             className="group flex items-start gap-3 rounded-lg px-3 py-2.5 transition-colors hover:bg-surface-elevated focus:bg-surface-elevated focus:outline-none"
           >
@@ -72,7 +72,7 @@ export default function GlobalSearch({
   const inputId = useId()
   const containerRef = useRef(null)
   const requestId = useRef(0)
-  const { isAuthenticated, isLoading: isAuthLoading } = useAuth()
+  const { isAuthenticated, isLoading: isAuthLoading, user } = useAuth()
   const [query, setQuery] = useState('')
   const [type, setType] = useState('all')
   const [skill, setSkill] = useState('')
@@ -198,7 +198,7 @@ export default function GlobalSearch({
             {isAuthenticated && canSearch && !isLoading && error && <p role="alert" className="px-3 py-5 text-center text-xs text-danger-text">{error}</p>}
             {isAuthenticated && canSearch && !isLoading && !error && noResults && <p className="px-3 py-5 text-center text-xs text-text-muted">No matching members or companies.</p>}
             {isAuthenticated && canSearch && !isLoading && !error && !noResults && (
-              <div className="space-y-1"><ResultSection label="Members" items={results.members.data} kind="member" onSelect={() => setIsOpen(false)} /><ResultSection label="Companies" items={results.companies.data} kind="company" onSelect={() => setIsOpen(false)} /></div>
+              <div className="space-y-1"><ResultSection label="Members" items={results.members.data} kind="member" onSelect={() => setIsOpen(false)} memberPathPrefix={user?.role === 'candidate' ? '/member/community/members' : '/members'} /><ResultSection label="Companies" items={results.companies.data} kind="company" onSelect={() => setIsOpen(false)} /></div>
             )}
           </div>
         </div>

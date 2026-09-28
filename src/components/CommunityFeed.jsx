@@ -23,7 +23,18 @@ import useTeammateRequests from '../hooks/useTeammateRequests'
 import CommunityFeedCard from './CommunityFeedCard'
 import { FullPageLoadingScreen } from './PageLoadingScreen'
 
-const filters = ['Saved', 'All', 'Projects', 'Posts', 'Team', 'Opportunities', 'Events']
+const filters = ['All', 'Posts', 'Projects', 'Team', 'Opportunities', 'Events', 'Saved']
+
+const filterLabels = {
+  Team: 'Collaboration',
+}
+
+const postTypeLabels = {
+  question: 'DISCUSSION',
+  showcase: 'SHOWCASE',
+  collaboration: 'COLLABORATION',
+  project_update: 'PROJECT UPDATE',
+}
 
 function formatFeedTimestamp(value) {
   const date = new Date(value)
@@ -32,17 +43,27 @@ function formatFeedTimestamp(value) {
     : date.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })
 }
 
+function formatOpportunityDeadline(value) {
+  if (!value) return null
+  const date = new Date(value)
+  return Number.isNaN(date.getTime())
+    ? value
+    : date.toLocaleDateString(undefined, { dateStyle: 'medium' })
+}
+
 function communityPostToFeedItem(post, isSaved) {
   const categoryLabel = getCommunityPostCategoryLabel(post.category)
   return {
     id: `post-${post.id}`,
     postId: post.id,
     filter: 'Posts',
-    type: 'POST',
+    type: postTypeLabels[post.category] ?? 'POST',
     title: categoryLabel,
     categoryLabel,
     description: post.text,
     author: post.authorName,
+    authorId: post.authorId,
+    authorHeadline: post.authorHeadline,
     tags: post.tags,
     images: post.images,
     videoUrl: post.videoUrl,
@@ -64,6 +85,7 @@ export default function CommunityFeed({
   showHeading = false,
   fullPageLoading = false,
   contextLabel = 'Community',
+  homeFeed = false,
 }) {
   const [searchParams, setSearchParams] = useSearchParams()
   const { projects: communityProjects, isLoading: projectsLoading, error: projectsError } = useCommunityProjects({ perPage: 3 })
@@ -113,8 +135,10 @@ export default function CommunityFeed({
       title: project.title,
       description: project.description,
       author: project.creator,
+      authorId: project.ownerId,
+      authorHeadline: project.creatorHeadline,
       tags: project.skills,
-      meta: getCommunityProjectStatusLabel(project.status),
+      meta: `${formatFeedTimestamp(project.createdAt)} · ${getCommunityProjectStatusLabel(project.status)}`,
       action: 'View project',
       path: `/member/projects/${project.id}`,
       createdAt: project.createdAt,
@@ -133,8 +157,10 @@ export default function CommunityFeed({
       title: request.title,
       description: request.description,
       author: request.ownerName || 'Owner information unavailable',
+      authorId: request.ownerId,
+      authorHeadline: request.ownerHeadline,
       tags: request.skills,
-      meta: `${request.rolesNeeded.length} ${request.rolesNeeded.length === 1 ? 'role' : 'roles'} · ${getTeammateRequestWorkStyleLabel(request.workStyle)}`,
+      meta: `${formatFeedTimestamp(request.createdAt)} · ${request.rolesNeeded.length} ${request.rolesNeeded.length === 1 ? 'role' : 'roles'} · ${getTeammateRequestWorkStyleLabel(request.workStyle)}`,
       action: 'View request',
       path: `/member/community/team-requests/${request.id}`,
       createdAt: request.createdAt,
@@ -170,6 +196,9 @@ export default function CommunityFeed({
         author: opportunity.company,
         tags: opportunity.skills,
         meta: opportunity.location,
+        isOpportunity: true,
+        workStyle: opportunity.workStyle,
+        deadline: formatOpportunityDeadline(opportunity.deadline),
         action: 'View opportunity',
         path: `/member/opportunities/${opportunity.id}`,
         createdAt: opportunity.sourceData?.created_at ?? null,
@@ -226,7 +255,7 @@ export default function CommunityFeed({
 
       {feedWarnings.length > 0 && <p role="status" className={`${showHeading ? 'mt-4' : 'mb-5'} rounded-lg border border-border bg-surface/45 px-4 py-3 text-sm text-text-muted`}>{feedWarnings.join(', ')} {feedWarnings.length === 1 ? 'is' : 'are'} temporarily unavailable. Other {contextLabel} updates are still available.</p>}
 
-      <div className={`${showHeading ? 'mt-8' : ''} grid min-w-0 gap-6 ${aside ? 'xl:grid-cols-[minmax(0,3fr)_minmax(15rem,1fr)]' : ''}`}>
+      <div className={`${showHeading ? 'mt-8' : homeFeed ? 'mt-5' : ''} grid min-w-0 gap-6 ${aside ? 'xl:grid-cols-[minmax(0,3fr)_minmax(15rem,1fr)]' : ''}`}>
         <div className="min-w-0">
           <div className="flex gap-2 overflow-x-auto pb-2" role="tablist" aria-label="Filter community feed">
             {filters.map((filter) => (
@@ -247,7 +276,7 @@ export default function CommunityFeed({
                 }`}
               >
                 {filter === 'Saved' && <span aria-hidden="true" className="mr-1.5">★</span>}
-                {filter}
+                {filterLabels[filter] ?? filter}
               </button>
             ))}
           </div>

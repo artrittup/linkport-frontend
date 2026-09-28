@@ -11,6 +11,13 @@ const initialMeta = {
   total: 0,
 }
 
+const responseCache = new Map()
+const requestCache = new Map()
+
+function keyFor(params) {
+  return JSON.stringify(params)
+}
+
 export default function useCommunityMembers({
   search,
   skill,
@@ -21,9 +28,20 @@ export default function useCommunityMembers({
   perPage = 12,
   enabled = true,
 } = {}) {
-  const [members, setMembers] = useState([])
-  const [meta, setMeta] = useState(initialMeta)
-  const [isLoading, setIsLoading] = useState(true)
+  const params = {
+    search: search || undefined,
+    skill: skill || undefined,
+    interest: interest || undefined,
+    university: university || undefined,
+    collaboration_status: collaborationStatus || undefined,
+    page,
+    per_page: perPage,
+  }
+  const cacheKey = keyFor(params)
+  const initialCached = responseCache.get(cacheKey)
+  const [members, setMembers] = useState(() => initialCached?.response.data ?? [])
+  const [meta, setMeta] = useState(() => initialCached?.response.meta ?? initialMeta)
+  const [isLoading, setIsLoading] = useState(() => Boolean(enabled && !initialCached))
   const [error, setError] = useState('')
   const [refreshKey, setRefreshKey] = useState(0)
 
@@ -32,18 +50,27 @@ export default function useCommunityMembers({
     let isActive = true
 
     async function loadMembers() {
+      await Promise.resolve()
+      if (!isActive) return
+
+      const cached = responseCache.get(cacheKey)
+      if (refreshKey === 0 && cached) {
+        setMembers(cached.response.data)
+        setMeta(cached.response.meta)
+        setError('')
+        setIsLoading(false)
+        return
+      }
+
       setIsLoading(true)
       setError('')
+      const requestKey = `${cacheKey}:${refreshKey}`
+      const request = requestCache.get(requestKey) ?? getCommunityMembers(JSON.parse(cacheKey))
+      requestCache.set(requestKey, request)
+
       try {
-        const response = await getCommunityMembers({
-          search: search || undefined,
-          skill: skill || undefined,
-          interest: interest || undefined,
-          university: university || undefined,
-          collaboration_status: collaborationStatus || undefined,
-          page,
-          per_page: perPage,
-        })
+        const response = await request
+        responseCache.set(cacheKey, { response })
         if (!isActive) return
         setMembers(response.data)
         setMeta(response.meta)
@@ -53,6 +80,7 @@ export default function useCommunityMembers({
         setMeta(initialMeta)
         setError(getCommunityMemberErrorMessage(requestError))
       } finally {
+        requestCache.delete(requestKey)
         if (isActive) setIsLoading(false)
       }
     }
@@ -61,7 +89,7 @@ export default function useCommunityMembers({
     return () => {
       isActive = false
     }
-  }, [collaborationStatus, enabled, interest, page, perPage, refreshKey, search, skill, university])
+  }, [cacheKey, enabled, refreshKey])
 
   const retry = useCallback(() => setRefreshKey((current) => current + 1), [])
 

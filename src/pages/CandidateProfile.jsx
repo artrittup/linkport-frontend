@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router'
+import { Link, useLocation, useNavigate } from 'react-router'
 import {
   getCandidateProfile,
   getProfileErrorMessage,
@@ -57,18 +57,18 @@ function EmptyProfileText({ children, onEdit }) {
   )
 }
 
-export default function CandidateProfile() {
+export default function CandidateProfile({ mode = 'view' }) {
   const { user } = useAuth()
+  const navigate = useNavigate()
+  const location = useLocation()
   const { showToast } = useToast()
   const [profile, setProfile] = useState(() => mapEditableCandidateProfile(null, user))
   const [draft, setDraft] = useState(() => mapEditableCandidateProfile(null, user))
-  const [isEditing, setIsEditing] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
   const [loadError, setLoadError] = useState('')
   const [saveError, setSaveError] = useState('')
   const [fieldErrors, setFieldErrors] = useState({})
-  const [saveSuccess, setSaveSuccess] = useState(false)
   const {
     projects: profileProjects,
     isLoading: projectsLoading,
@@ -110,20 +110,9 @@ export default function CandidateProfile() {
     }
   }, [user])
 
-  const openEdit = () => {
-    setDraft(profile)
-    setSaveError('')
-    setFieldErrors({})
-    setSaveSuccess(false)
-    setIsEditing(true)
-  }
+  const openEdit = () => navigate('/member/profile/edit')
 
-  const cancelEdit = () => {
-    setDraft(profile)
-    setSaveError('')
-    setFieldErrors({})
-    setIsEditing(false)
-  }
+  const cancelEdit = () => navigate('/member/profile')
 
   const updateField = (event) => {
     const { name, value } = event.target
@@ -189,9 +178,8 @@ export default function CandidateProfile() {
       const savedProfile = mapEditableCandidateProfile(response.profile, user)
       setProfile(savedProfile)
       setDraft(savedProfile)
-      setSaveSuccess(true)
-      setIsEditing(false)
       showToast(response.message ?? 'Profile saved successfully.', 'success')
+      navigate('/member/profile', { replace: true, state: { profileSaved: true } })
     } catch (requestError) {
       setFieldErrors(getProfileValidationErrors(requestError))
       setSaveError(getProfileErrorMessage(requestError, 'Unable to save your member profile.'))
@@ -208,7 +196,7 @@ export default function CandidateProfile() {
     )
   }
 
-  if (isEditing) {
+  if (mode === 'edit') {
     return (
       <CandidateLayout title="Edit profile">
         <div className="min-w-0 max-w-4xl">
@@ -379,18 +367,18 @@ export default function CandidateProfile() {
       <div className="min-w-0 max-w-full space-y-8">
         <section>
           <p className="font-mono text-sm text-primary">Member profile</p>
-          <h2 className="mt-2 text-3xl font-bold tracking-tight text-text-primary">Profile</h2>
+          <h2 className="mt-2 text-3xl font-bold tracking-tight text-text-primary">My Profile</h2>
           <p className="mt-3 text-sm leading-6 text-text-muted">Your professional community profile and project portfolio.</p>
         </section>
 
         {loadError && (
           <p role="alert" className="rounded-lg border border-danger/35 bg-danger/10 px-4 py-3 text-sm text-danger-text">{loadError}</p>
         )}
-        {saveSuccess && (
+        {location.state?.profileSaved && (
           <p role="status" className="rounded-lg border border-success/30 bg-success/10 px-4 py-3 text-sm text-success-text">Profile changes saved successfully.</p>
         )}
 
-        <CandidateProfileHeader profile={profile} isOwner onEdit={openEdit} />
+        <CandidateProfileHeader profile={profile} isOwner showBio={false} />
 
         <div className="grid min-w-0 gap-5 lg:grid-cols-[minmax(0,1.5fr)_minmax(16rem,0.7fr)]">
           <ProfileSection title="About">
@@ -408,12 +396,6 @@ export default function CandidateProfile() {
                   {profile.graduationYear && <div><dt className="text-xs font-semibold uppercase tracking-wide text-text-subtle">Graduation year</dt><dd className="mt-2 text-sm text-text-secondary">{profile.graduationYear}</dd></div>}
                 </dl>
               )}
-              <div>
-                <h4 className="text-xs font-semibold uppercase tracking-wide text-text-subtle">Education summary</h4>
-                {profile.education
-                  ? <p className="mt-2 whitespace-pre-line break-words text-sm leading-6 text-text-secondary">{profile.education}</p>
-                  : <EmptyProfileText onEdit={openEdit}>No education summary added yet.</EmptyProfileText>}
-              </div>
               <div>
                 <h4 className="text-xs font-semibold uppercase tracking-wide text-text-subtle">Current focus</h4>
                 <p className="mt-2 break-words text-sm leading-6 text-text-secondary">
@@ -473,10 +455,10 @@ export default function CandidateProfile() {
         <section className="min-w-0">
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div>
-              <h3 className="text-2xl font-semibold text-text-primary">Projects</h3>
+              <h3 className="text-2xl font-semibold text-text-primary">Projects / Portfolio</h3>
               <p className="mt-2 text-sm text-text-muted">Selected work from the LinkPort Project Showcase.</p>
             </div>
-            <Link to="/member/projects" className="text-sm font-medium text-primary hover:underline">View all projects</Link>
+            <Link to="/member/activity/projects" className="text-sm font-medium text-primary hover:underline">View all projects</Link>
           </div>
           {projectsLoading ? (
             <Card className="mt-5"><p className="text-sm text-text-muted">Loading your projects...</p></Card>
@@ -514,17 +496,25 @@ export default function CandidateProfile() {
           <Link to={getCandidateActivityPath()} className="inline-flex w-full items-center justify-center rounded-xl border border-primary bg-primary px-5 py-3 text-sm font-semibold text-primary-contrast transition-colors hover:bg-primary-hover">
             View all activity
           </Link>
-          <div className="mt-3 grid min-w-0 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-3 grid min-w-0 gap-3 sm:grid-cols-2 lg:grid-cols-5">
             {[
               { label: 'Applications', path: getCandidateActivityPath('applications') },
-              { label: 'Proposals', path: getCandidateActivityPath('proposals') },
-              { label: 'Shared content', path: getCandidateActivityPath('content') },
-              { label: 'Events', path: getCandidateActivityPath('events') },
+              { label: 'Bids', path: getCandidateActivityPath('bids') },
+              { label: 'Projects', path: getCandidateActivityPath('projects') },
+              { label: 'Posts', path: getCandidateActivityPath('posts') },
+              { label: 'Saved', path: getCandidateActivityPath('saved') },
             ].map((item) => (
               <Link key={item.path} to={item.path} className="inline-flex items-center justify-center rounded-lg border border-primary bg-transparent px-4 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-primary/10">
                 {item.label}
               </Link>
             ))}
+          </div>
+        </ProfileSection>
+
+        <ProfileSection title="Connections" description="Your professional relationships inside the LinkPort community.">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <p className="max-w-2xl text-sm leading-6 text-text-muted">Manage accepted connections and incoming requests from your member network.</p>
+            <Link to="/member/messages" className="inline-flex shrink-0 items-center justify-center rounded-lg border border-primary px-4 py-2.5 text-sm font-semibold text-primary hover:bg-primary/10">Open my network</Link>
           </div>
         </ProfileSection>
       </div>

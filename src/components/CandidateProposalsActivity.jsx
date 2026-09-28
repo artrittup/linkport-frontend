@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Link } from 'react-router'
+import { Link, useNavigate } from 'react-router'
 import { ACTIVITY_STATUSES } from '../config/candidateActivity'
 import ActivityStatusBadge from './ActivityStatusBadge'
 import Button from './Button'
@@ -9,6 +9,7 @@ import LoadingSpinner from './LoadingSpinner'
 const inputClasses = 'w-full min-w-0 max-w-full rounded-xl border border-border bg-surface/70 px-4 py-3 text-sm text-text-primary outline-none placeholder:text-text-subtle focus:border-primary focus:ring-1 focus:ring-focus-ring'
 
 export default function CandidateProposalsActivity({ activity }) {
+  const navigate = useNavigate()
   const [search, setSearch] = useState('')
   const query = search.trim().toLowerCase()
   const visibleProposals = useMemo(
@@ -25,9 +26,9 @@ export default function CandidateProposalsActivity({ activity }) {
     <section className="min-w-0" aria-live="polite">
       <div className="grid min-w-0 gap-3 rounded-2xl border border-border bg-surface/55 p-4 sm:grid-cols-[minmax(0,1fr)_minmax(0,12rem)]">
         <div className="min-w-0">
-          <label htmlFor="activity-proposal-search" className="sr-only">Search proposals</label>
+          <label htmlFor="activity-bid-search" className="sr-only">Search bids</label>
           <input
-            id="activity-proposal-search"
+            id="activity-bid-search"
             type="search"
             value={search}
             onChange={(event) => setSearch(event.target.value)}
@@ -36,21 +37,21 @@ export default function CandidateProposalsActivity({ activity }) {
           />
         </div>
         <div className="min-w-0">
-          <label htmlFor="activity-proposal-status" className="sr-only">Proposal status</label>
-          <select id="activity-proposal-status" value={activity.status} onChange={(event) => activity.setStatus(event.target.value)} className={inputClasses}>
+          <label htmlFor="activity-bid-status" className="sr-only">Bid status</label>
+          <select id="activity-bid-status" value={activity.status} onChange={(event) => activity.setStatus(event.target.value)} className={inputClasses}>
             {ACTIVITY_STATUSES.map((status) => <option key={status}>{status}</option>)}
           </select>
         </div>
       </div>
 
       <p className="my-4 text-sm text-text-subtle">
-        {activity.isLoading ? 'Loading proposals...' : `${visibleProposals.length} proposals on this page`}
+        {activity.isLoading ? 'Loading bids...' : `${visibleProposals.length} bids on this page`}
       </p>
 
       {activity.isLoading ? (
-        <LoadingSpinner label="Loading your proposals..." size="lg" />
+        <LoadingSpinner label="Loading your bids..." size="lg" />
       ) : activity.error ? (
-        <EmptyState title="Unable to load proposals" description={activity.error} actionLabel="Try again" onAction={activity.retry} />
+        <EmptyState title="Unable to load bids" description={activity.error} actionLabel="Try again" onAction={activity.retry} />
       ) : visibleProposals.length > 0 ? (
         <div className="grid min-w-0 gap-4 lg:grid-cols-2">
           {visibleProposals.map((proposal) => {
@@ -97,10 +98,22 @@ export default function CandidateProposalsActivity({ activity }) {
         </div>
       ) : (
         <EmptyState
-          title={query ? 'No proposals match your search' : 'No proposals found'}
-          description={query ? 'Try another project title, company, or category.' : 'You have not submitted any proposals with this status.'}
-          actionLabel={query ? 'Clear search' : undefined}
-          onAction={query ? () => setSearch('') : undefined}
+          title={query
+            ? 'No bids match your search'
+            : activity.status === 'All statuses'
+              ? "You haven't submitted any bids yet."
+              : `No ${activity.status.toLowerCase()} bids`}
+          description={query
+            ? 'Try another project title, company, or category.'
+            : activity.status === 'All statuses'
+              ? 'Project bids you submit will appear here with their current status.'
+              : 'Try another status or browse available projects.'}
+          actionLabel={query ? 'Clear search' : activity.status === 'All statuses' ? 'Browse projects' : 'Show all statuses'}
+          onAction={query
+            ? () => setSearch('')
+            : activity.status === 'All statuses'
+              ? () => navigate('/member/opportunities/projects')
+              : () => activity.setStatus('All statuses')}
         />
       )}
 

@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router'
+import { Link, Navigate, useParams } from 'react-router'
 import { getMemberPublicProfile } from '../api/searchApi'
 import LoadingSpinner from '../components/LoadingSpinner'
 import ConnectionButton from '../components/ConnectionButton'
 import ThemeToggle from '../components/ThemeToggle'
+import { useAuth } from '../context/AuthContext'
 
 function ExternalLink({ href, children }) {
   if (!href) return null
@@ -12,16 +13,20 @@ function ExternalLink({ href, children }) {
 
 export default function MemberPublicProfile() {
   const { id } = useParams()
+  const { user } = useAuth()
   const [member, setMember] = useState(null)
   const [error, setError] = useState('')
 
   useEffect(() => {
+    if (user?.role === 'candidate') return undefined
     let active = true
     getMemberPublicProfile(id)
       .then((data) => active && setMember(data))
       .catch(() => active && setError('This member profile is unavailable.'))
     return () => { active = false }
-  }, [id])
+  }, [id, user?.role])
+
+  if (user?.role === 'candidate') return <Navigate to={`/member/community/members/${id}`} replace />
 
   if (!member && !error) return <div className="relative min-h-screen bg-background p-10"><ThemeToggle className="absolute right-4 top-4 sm:right-6 sm:top-6" /><LoadingSpinner label="Loading member profile..." /></div>
 

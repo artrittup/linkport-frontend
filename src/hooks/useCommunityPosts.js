@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import {
   getCommunityPostErrorMessage,
   getCommunityPosts,
+  getCommunityPost,
 } from '../api/communityPostsApi'
 
 const initialMeta = {
@@ -13,6 +14,9 @@ const initialMeta = {
 
 export default function useCommunityPosts({
   search,
+  circleId,
+  postId,
+  sort,
   category,
   userId,
   saved,
@@ -36,7 +40,11 @@ export default function useCommunityPosts({
       setError('')
 
       try {
-        const response = await getCommunityPosts({
+        const response = postId
+          ? await getCommunityPost(postId).then((response) => ({ data: [response.data], meta: { ...initialMeta, total: 1 } }))
+          : await getCommunityPosts({
+          circle_id: circleId || undefined,
+          sort,
           search: search || undefined,
           category: category || undefined,
           user_id: userId || undefined,
@@ -61,7 +69,7 @@ export default function useCommunityPosts({
     return () => {
       isActive = false
     }
-  }, [category, enabled, page, perPage, refreshKey, saved, search, userId])
+  }, [postId, circleId, sort, category, enabled, page, perPage, refreshKey, saved, search, userId])
 
   const retry = useCallback(() => setRefreshKey((current) => current + 1), [])
 

@@ -12,13 +12,14 @@ import Button from './Button'
 export default function ConnectionButton({ userId, initialStatus, onStatusChange }) {
   const { user } = useAuth()
   const initial = typeof initialStatus === 'string' ? { status: initialStatus } : initialStatus
+  const hasInitialStatus = initialStatus !== undefined
   const [status, setStatus] = useState(initial?.status ?? 'loading')
   const [connectionId, setConnectionId] = useState(initial?.connection_id ?? null)
   const [isWorking, setIsWorking] = useState(false)
   const [error, setError] = useState('')
 
   useEffect(() => {
-    if (!userId || Number(userId) === Number(user?.id)) return undefined
+    if (hasInitialStatus || !userId || Number(userId) === Number(user?.id)) return undefined
     let active = true
 
     getConnectionStatus(userId)
@@ -31,7 +32,7 @@ export default function ConnectionButton({ userId, initialStatus, onStatusChange
       .catch((requestError) => active && setError(getConnectionErrorMessage(requestError, 'Unable to load connection status.')))
 
     return () => { active = false }
-  }, [userId, user?.id])
+  }, [hasInitialStatus, userId, user?.id])
 
   if (!userId || Number(userId) === Number(user?.id) || user?.role !== 'candidate') return null
 

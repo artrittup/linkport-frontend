@@ -28,6 +28,20 @@ function formatDeadline(deadline) {
     : new Intl.DateTimeFormat(undefined, { dateStyle: 'long' }).format(date)
 }
 
+function formatBudget(value) {
+  if (value === null || value === undefined || value === '') return 'Not specified'
+  const amount = Number(value)
+  return Number.isFinite(amount)
+    ? new Intl.NumberFormat(undefined, { style: 'currency', currency: 'EUR' }).format(amount)
+    : value
+}
+
+function readable(value) {
+  return String(value ?? '')
+    .replace(/[_-]+/g, ' ')
+    .replace(/\b\w/g, (character) => character.toUpperCase())
+}
+
 export default function CandidateOpportunityDetails() {
   const { opportunityId } = useParams()
   const { showToast } = useToast()
@@ -110,8 +124,8 @@ export default function CandidateOpportunityDetails() {
 
   return (
     <CandidateLayout title={opportunity.title}>
-      <Link to="/member/opportunities" className="text-sm font-medium text-primary hover:underline">
-        ← Back to opportunities
+      <Link to={opportunity.source === 'job' ? '/member/opportunities/jobs' : '/member/opportunities/projects'} className="text-sm font-medium text-primary hover:underline">
+        ← Back to {opportunity.source === 'job' ? 'jobs' : 'projects'}
       </Link>
 
       <article className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
@@ -156,6 +170,27 @@ export default function CandidateOpportunityDetails() {
               <dt className="text-xs uppercase tracking-wide text-text-subtle">Work style</dt>
               <dd className="mt-1 text-sm text-text-primary">{opportunity.workStyle}</dd>
             </div>
+            {opportunity.source === 'job' ? (
+              <div>
+                <dt className="text-xs uppercase tracking-wide text-text-subtle">Employment type</dt>
+                <dd className="mt-1 text-sm text-text-primary">{opportunity.employmentType || 'Not specified'}</dd>
+              </div>
+            ) : (
+              <>
+                <div>
+                  <dt className="text-xs uppercase tracking-wide text-text-subtle">Budget</dt>
+                  <dd className="mt-1 text-sm text-text-primary">{formatBudget(opportunity.budget)}</dd>
+                </div>
+                <div>
+                  <dt className="text-xs uppercase tracking-wide text-text-subtle">Category</dt>
+                  <dd className="mt-1 text-sm text-text-primary">{opportunity.category || 'General'}</dd>
+                </div>
+                <div>
+                  <dt className="text-xs uppercase tracking-wide text-text-subtle">Status</dt>
+                  <dd className="mt-1 text-sm text-text-primary">{readable(opportunity.status) || 'Open'}</dd>
+                </div>
+              </>
+            )}
             <div>
               <dt className="text-xs uppercase tracking-wide text-text-subtle">Deadline</dt>
               <dd className="mt-1 text-sm text-text-primary">{formatDeadline(opportunity.deadline)}</dd>

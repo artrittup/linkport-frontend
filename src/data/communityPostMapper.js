@@ -42,6 +42,8 @@ export function mapCommunityPost(post) {
 
   return {
     id: post.id,
+    circleId: post.circle_id ?? null,
+    circleName: post.circle?.name ?? 'Circle',
     authorId: post.user_id ?? author?.id ?? null,
     text: post.content ?? '',
     content: post.content ?? '',

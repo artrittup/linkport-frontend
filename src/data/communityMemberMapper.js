@@ -72,6 +72,8 @@ export function mapCommunityMember(member) {
     githubUrl: member.github_url ?? '',
     linkedinUrl: member.linkedin_url ?? '',
     portfolioUrl: member.website ?? '',
+    education: member.education ?? '',
+    experience: member.experience ?? '',
     projects: Array.isArray(member.community_projects)
       ? member.community_projects.map(mapCommunityProject).filter(Boolean)
       : [],

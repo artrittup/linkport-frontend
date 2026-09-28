@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Link } from 'react-router'
+import { Link, useNavigate } from 'react-router'
 import { ACTIVITY_STATUSES } from '../config/candidateActivity'
 import ActivityStatusBadge from './ActivityStatusBadge'
 import Button from './Button'
@@ -9,6 +9,7 @@ import LoadingSpinner from './LoadingSpinner'
 const inputClasses = 'w-full min-w-0 max-w-full rounded-xl border border-border bg-surface/70 px-4 py-3 text-sm text-text-primary outline-none placeholder:text-text-subtle focus:border-primary focus:ring-1 focus:ring-focus-ring'
 
 export default function CandidateApplicationsActivity({ activity }) {
+  const navigate = useNavigate()
   const [search, setSearch] = useState('')
   const query = search.trim().toLowerCase()
   const visibleApplications = useMemo(
@@ -93,10 +94,22 @@ export default function CandidateApplicationsActivity({ activity }) {
         </div>
       ) : (
         <EmptyState
-          title={query ? 'No applications match your search' : 'No applications found'}
-          description={query ? 'Try another job title, company, or location.' : 'You have not submitted any applications with this status.'}
-          actionLabel={query ? 'Clear search' : undefined}
-          onAction={query ? () => setSearch('') : undefined}
+          title={query
+            ? 'No applications match your search'
+            : activity.status === 'All statuses'
+              ? "You haven't applied to any jobs yet."
+              : `No ${activity.status.toLowerCase()} applications`}
+          description={query
+            ? 'Try another job title, company, or location.'
+            : activity.status === 'All statuses'
+              ? 'Jobs you apply to will appear here with their current status.'
+              : 'Try another status or browse available jobs.'}
+          actionLabel={query ? 'Clear search' : activity.status === 'All statuses' ? 'Browse jobs' : 'Show all statuses'}
+          onAction={query
+            ? () => setSearch('')
+            : activity.status === 'All statuses'
+              ? () => navigate('/member/opportunities/jobs')
+              : () => activity.setStatus('All statuses')}
         />
       )}
 

@@ -27,12 +27,12 @@ function MemberRow({ member, children }) {
     <article className="flex flex-col gap-4 rounded-xl border border-border bg-surface p-4 sm:flex-row sm:items-center">
       <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-primary/30 bg-surface-deep font-semibold text-primary">{member?.name?.charAt(0)?.toUpperCase()}</div>
       <div className="min-w-0 flex-1"><h3 className="truncate font-semibold text-text-primary">{member?.name}</h3><p className="mt-0.5 truncate text-sm text-text-muted">{[profile.headline, profile.location].filter(Boolean).join(' · ') || 'LinkPort member'}</p><div className="mt-2 flex flex-wrap gap-1">{profile.skills?.slice(0, 4).map((skill) => <span key={skill} className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] text-primary">{skill}</span>)}</div></div>
-      <div className="flex shrink-0 flex-wrap items-center gap-2"><Link to={`/members/${member?.id}`} className="rounded-lg border border-border px-3 py-2 text-xs font-semibold text-text-primary transition-colors hover:border-primary hover:text-primary">View Profile</Link>{children}</div>
+      <div className="flex shrink-0 flex-wrap items-center gap-2"><Link to={`/member/community/members/${member?.id}`} className="rounded-lg border border-border px-3 py-2 text-xs font-semibold text-text-primary transition-colors hover:border-primary hover:text-primary">View Profile</Link>{children}</div>
     </article>
   )
 }
 
-export default function Connections() {
+export default function Connections({ messagesMode = false }) {
   const { user } = useAuth()
   const { showToast } = useToast()
   const [searchParams, setSearchParams] = useSearchParams()
@@ -87,9 +87,22 @@ export default function Connections() {
   const emptyText = tab === 'network' ? 'You have no connections yet.' : tab === 'requests' ? 'No incoming requests.' : 'No pending sent requests.'
 
   return (
-    <DashboardLayout title="My Network" userType="Member">
+    <DashboardLayout title={messagesMode ? 'Messages' : 'My Network'} userType="Member">
       <div className="mx-auto max-w-5xl space-y-6">
-        <div><p className="font-mono text-sm text-primary">Connections</p><h2 className="mt-2 text-3xl font-bold text-text-primary">My Network</h2><p className="mt-2 text-text-muted">Manage the members you know and connection requests you receive.</p></div>
+        <div>
+          <h2 className="text-3xl font-bold text-text-primary">{messagesMode ? 'Messages' : 'My Network'}</h2>
+          <p className="mt-2 text-text-muted">{messagesMode ? 'Your conversations and member connections live together here.' : 'Manage the members you know and connection requests you receive.'}</p>
+        </div>
+        {messagesMode && (
+          <section className="rounded-2xl border border-border bg-surface/60 p-6" aria-labelledby="inbox-heading">
+            <h3 id="inbox-heading" className="text-xl font-semibold text-text-primary">Inbox</h3>
+            <div className="mt-4 rounded-xl border border-dashed border-border bg-background/45 px-5 py-10 text-center">
+              <p className="font-medium text-text-primary">No conversations yet</p>
+              <p className="mx-auto mt-2 max-w-lg text-sm leading-6 text-text-muted">Direct conversations will appear here when messaging is available. You can manage your network and connection requests below.</p>
+            </div>
+          </section>
+        )}
+        {messagesMode && <div><h3 className="text-xl font-semibold text-text-primary">Your network</h3><p className="mt-1 text-sm text-text-muted">Connections are the people you will be able to message.</p></div>}
         <div className="flex gap-1 rounded-xl border border-border bg-surface-deep p-1" role="tablist">
           {tabs.map((item) => <button key={item.id} type="button" role="tab" aria-selected={tab === item.id} onClick={() => changeTab(item.id)} className={`flex-1 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${tab === item.id ? 'bg-surface text-primary' : 'text-text-muted hover:text-text-primary'}`}>{item.label}</button>)}
         </div>

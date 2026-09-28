@@ -13,8 +13,8 @@ export default function CandidateEventsActivity({ events, onRemove, removingEven
   if (events.length === 0) {
     return (
       <EmptyState
-        title="You have not saved any events yet."
-        description="Events marked as attending will appear in this list."
+        title="You aren't attending any events yet."
+        description="Events you join will appear in this list."
         actionLabel="Browse events"
         onAction={() => navigate('/member/community/events')}
       />

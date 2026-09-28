@@ -31,8 +31,11 @@ export function jobToOpportunity(job) {
     fullDescription: job.description,
     location: job.location || 'Location not specified',
     workStyle: inferWorkStyle(job.location),
+    employmentType: job.type || (internship ? 'Internship' : ''),
     skills: job.skills,
     deadline: job.deadline,
+    status: job.status ?? '',
+    postedAt: job.created_at ?? null,
     eligibility: job.requirements || 'See the full role description for requirements.',
     actionLabel: 'Apply',
   }
@@ -54,7 +57,12 @@ export function projectToOpportunity(project) {
     workStyle: 'Remote',
     skills: project.skills,
     deadline: project.deadline,
+    budget: project.budget ?? null,
+    category: project.category ?? '',
+    status: project.status ?? '',
+    bidCount: project.bids_count ?? null,
+    postedAt: project.created_at ?? null,
     eligibility: 'Open to candidates who can deliver the requested project scope.',
-    actionLabel: 'Submit proposal',
+    actionLabel: 'Submit bid',
   }
 }

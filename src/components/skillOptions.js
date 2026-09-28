@@ -91,6 +91,82 @@ const skillGroups = [
       'Technical Writing', 'Time Management',
     ],
   },
+  {
+    category: 'Arts & Creative',
+    skills: [
+      'Acting', 'Ceramics', 'Crafting', 'Creative Direction', 'Creative Writing',
+      'Drawing', 'Fashion Design', 'Film Production', 'Illustration',
+      'Interior Design', 'Painting', 'Photography', 'Sewing', 'Theatre',
+      'Videography',
+    ],
+  },
+  {
+    category: 'Music & Performance',
+    skills: [
+      'Audio Engineering', 'Dance', 'DJing', 'Drums', 'Guitar', 'Music Production',
+      'Piano', 'Public Speaking', 'Singing', 'Songwriting', 'Stage Performance',
+    ],
+  },
+  {
+    category: 'Sports & Fitness',
+    skills: [
+      'Basketball', 'Coaching', 'Cycling', 'Football', 'Hiking', 'Martial Arts',
+      'Nutrition', 'Personal Training', 'Running', 'Strength Training', 'Swimming',
+      'Tennis', 'Volleyball', 'Yoga',
+    ],
+  },
+  {
+    category: 'Media & Communication',
+    skills: [
+      'Broadcasting', 'Content Creation', 'Copywriting', 'Editing', 'Journalism',
+      'Podcasting', 'Public Relations', 'Social Media', 'Storytelling',
+      'Video Editing',
+    ],
+  },
+  {
+    category: 'Business & Entrepreneurship',
+    skills: [
+      'Accounting', 'Business Development', 'Customer Service', 'Entrepreneurship',
+      'Event Planning', 'Finance', 'Fundraising', 'Human Resources', 'Marketing',
+      'Negotiation', 'Operations', 'Sales',
+    ],
+  },
+  {
+    category: 'Education & Languages',
+    skills: [
+      'Curriculum Design', 'Language Teaching', 'Mentoring', 'Research',
+      'Teaching', 'Translation', 'Tutoring', 'Workshop Facilitation',
+    ],
+  },
+  {
+    category: 'Health, Care & Wellbeing',
+    skills: [
+      'Caregiving', 'Community Health', 'First Aid', 'Mental Health Advocacy',
+      'Mindfulness', 'Peer Support', 'Wellness Coaching',
+    ],
+  },
+  {
+    category: 'Food & Hospitality',
+    skills: [
+      'Baking', 'Barista Skills', 'Catering', 'Cooking', 'Event Hospitality',
+      'Food Styling', 'Hospitality Management',
+    ],
+  },
+  {
+    category: 'Trades & Practical Skills',
+    skills: [
+      'Auto Repair', 'Carpentry', 'Electrical Work', 'Gardening', 'Home Repair',
+      'Plumbing', 'Tailoring', 'Woodworking',
+    ],
+  },
+  {
+    category: 'Community & Everyday Life',
+    skills: [
+      'Community Organizing', 'Environmental Conservation', 'Financial Literacy',
+      'Parenting Support', 'Pet Care', 'Sustainability', 'Travel Planning',
+      'Volunteering', 'Youth Work',
+    ],
+  },
 ]
 
 export default skillGroups

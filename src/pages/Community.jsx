@@ -18,9 +18,11 @@ const COMMUNITY_TABS = [
   { id: 'discover', label: 'Discover', path: '/member/community' },
   { id: 'circles', label: 'Circles', path: '/member/community/circles' },
   { id: 'members', label: 'Members', path: '/member/community/members' },
+  { id: 'events', label: 'Events', path: '/member/community/events' },
 ]
 const legacyViews = new Set(['discussions', 'ideas'])
 const CandidateMembers = lazy(() => import('./CandidateMembers'))
+const CandidateEvents = lazy(() => import('./CandidateEvents'))
 const DiscoverCirclesView = lazy(() => import('../components/DiscoverCirclesView'))
 const CommunityDiscussionsView = lazy(() => import('../components/CommunityDiscussionsView'))
 const CommunityIdeasView = lazy(() => import('../components/CommunityIdeasView'))
@@ -68,6 +70,7 @@ export default function Community({ initialView = 'discover' }) {
   const [searchParams] = useSearchParams()
   const { showToast } = useToast()
   const requestedLegacyView = searchParams.get('view')
+  const requestedCircleCategory = searchParams.get('category') ?? 'All'
   const legacyView = legacyViews.has(requestedLegacyView) ? requestedLegacyView : null
   const normalizedInitialView = initialView === 'overview'
     ? 'discover'
@@ -86,6 +89,12 @@ export default function Community({ initialView = 'discover' }) {
     const timeout = window.setTimeout(() => setDebouncedCommunitySearch(communitySearch.trim()), 250)
     return () => window.clearTimeout(timeout)
   }, [communitySearch])
+
+  const clearCommunityFilters = () => {
+    setCommunitySearch('')
+    setDebouncedCommunitySearch('')
+    navigate(location.pathname, { replace: true })
+  }
 
   const openCircle = (circle) => navigate(`/member/community/circles/${circle.id}`)
 
@@ -125,13 +134,45 @@ export default function Community({ initialView = 'discover' }) {
   return (
     <CandidateLayout title="Community">
       <div className="min-w-0 max-w-full">
-        <header>
-          <p className="font-mono text-sm text-primary">Find your people</p>
-          <h2 className="mt-2 text-3xl font-bold tracking-tight text-text-primary sm:text-4xl">Community</h2>
-          <p className="mt-3 max-w-3xl text-sm leading-6 text-text-muted sm:text-base">
-            Discover people, interests, and small communities where you can learn, contribute, and build together.
-          </p>
-        </header>
+        {activeView === 'discover' && (
+          <header>
+            <p className="font-mono text-sm text-primary">Find your people</p>
+            <h2 className="mt-2 text-3xl font-bold tracking-tight text-text-primary sm:text-4xl">Community</h2>
+            <p className="mt-3 max-w-3xl text-sm leading-6 text-text-muted sm:text-base">
+              Discover people, interests, Circles, and events for hobbies, culture, sports, learning, careers, local life, and more.
+            </p>
+          </header>
+        )}
+
+        {activeView === 'circles' && (
+          <header className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="font-mono text-xs uppercase tracking-[0.13em] text-primary">Groups</p>
+              <h2 className="mt-1 text-2xl font-bold tracking-tight text-text-primary">Circles</h2>
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-text-muted">Join small communities organized around interests, fields, project ideas, and collaboration.</p>
+            </div>
+            <button type="button" onClick={() => setIsCreating(true)} className="inline-flex w-fit rounded-lg border border-primary bg-primary px-4 py-2 text-sm font-semibold text-primary-contrast transition-colors hover:bg-primary-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring">Create Circle</button>
+          </header>
+        )}
+
+        {activeView === 'members' && (
+          <header className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="font-mono text-xs uppercase tracking-[0.13em] text-primary">People</p>
+              <h2 className="mt-1 text-2xl font-bold tracking-tight text-text-primary">Find members</h2>
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-text-muted">Search by interests, skills, education, or location and meet people you have something in common with.</p>
+            </div>
+            <Link to="/member/profile" className="inline-flex shrink-0 items-center justify-center rounded-lg border border-primary px-4 py-2.5 text-sm font-semibold text-primary hover:bg-primary/10">View my profile</Link>
+          </header>
+        )}
+
+        {activeView === 'events' && (
+          <header>
+            <p className="font-mono text-xs uppercase tracking-[0.13em] text-primary">Events</p>
+            <h2 className="mt-1 text-2xl font-bold tracking-tight text-text-primary">Things happening in the community</h2>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-text-muted">Find meetups, workshops, matches, screenings, book clubs, local activities, and conversations around your interests.</p>
+          </header>
+        )}
 
         <SectionTabs
           items={COMMUNITY_TABS.map((tab) => ({
@@ -140,7 +181,7 @@ export default function Community({ initialView = 'discover' }) {
           }))}
           activeId={activeView}
           label="Community sections"
-          className="mt-7"
+          className={legacyView ? '' : 'mt-7'}
         />
 
         <section className="mt-6" aria-label="Search Community">
@@ -152,7 +193,13 @@ export default function Community({ initialView = 'discover' }) {
               type="search"
               value={communitySearch}
               onChange={(event) => setCommunitySearch(event.target.value)}
-              placeholder={activeView === 'members' ? 'Search members, skills, interests, or locations...' : activeView === 'circles' ? 'Search Circles by name, topic, tag, or location...' : 'Search topics, members, and Circles...'}
+              placeholder={activeView === 'members'
+                ? 'Search members, skills, interests, or locations...'
+                : activeView === 'circles'
+                  ? 'Search Circles by name, topic, tag, or location...'
+                  : activeView === 'events'
+                    ? 'Search events by title, topic, organizer, or location...'
+                    : 'Search topics, interests, members, and Circles...'}
               className="w-full rounded-xl border border-border bg-surface/70 py-3 pl-11 pr-4 text-sm text-text-primary outline-none placeholder:text-text-subtle focus:border-primary focus:ring-1 focus:ring-focus-ring"
             />
           </div>
@@ -181,12 +228,15 @@ export default function Community({ initialView = 'discover' }) {
               ) : (
                 <Suspense fallback={<ViewLoadingFallback />}>
                   <DiscoverCirclesView
+                    key={requestedCircleCategory}
                     circles={circlesWithState}
                     onJoin={joinCircle}
                     onCreate={() => setIsCreating(true)}
                     onPreview={openCircle}
                     search={debouncedCommunitySearch}
-                    onClearSearch={() => setCommunitySearch('')}
+                    initialCategory={requestedCircleCategory}
+                    showHeader={false}
+                    onClearFilters={clearCommunityFilters}
                   />
                 </Suspense>
               )}
@@ -195,7 +245,13 @@ export default function Community({ initialView = 'discover' }) {
 
           {activeView === 'members' && (
             <Suspense fallback={<ViewLoadingFallback compact />}>
-              <CandidateMembers embedded externalSearch={debouncedCommunitySearch} onClearSearch={() => setCommunitySearch('')} />
+              <CandidateMembers embedded showHeader={false} externalSearch={debouncedCommunitySearch} onClearSearch={clearCommunityFilters} />
+            </Suspense>
+          )}
+
+          {activeView === 'events' && (
+            <Suspense fallback={<ViewLoadingFallback compact />}>
+              <CandidateEvents embedded showHeader={false} externalSearch={debouncedCommunitySearch} onClearSearch={clearCommunityFilters} />
             </Suspense>
           )}
 

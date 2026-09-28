@@ -4,7 +4,7 @@ import CandidateNotificationBell from '../components/CandidateNotificationBell'
 import CandidateSidebar from '../components/CandidateSidebar'
 import ThemeToggle from '../components/ThemeToggle'
 
-export default function CandidateLayout({ children, title }) {
+export default function CandidateLayout({ children, title, wide = false }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
 
   useEffect(() => {
@@ -51,7 +51,7 @@ export default function CandidateLayout({ children, title }) {
           </div>
         </header>
 
-        <main className="mx-auto w-full min-w-0 max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
+        <main className={`mx-auto w-full min-w-0 px-4 py-8 sm:px-6 sm:py-10 lg:px-8 ${wide ? 'max-w-[96rem]' : 'max-w-7xl'}`}>
           <h1 className="sr-only">{title}</h1>
           {children}
         </main>

@@ -2,7 +2,6 @@ import { Link, useLocation, useNavigate } from 'react-router'
 import LinkPortLogo from './LinkPortLogo'
 import { getNavigationForRole } from '../config/navigation'
 import { useAuth } from '../context/AuthContext'
-import CandidateCreateMenu from './CandidateCreateMenu'
 import ThemeToggle from './ThemeToggle'
 
 function NavigationIcon({ iconKey }) {
@@ -105,11 +104,7 @@ export default function CandidateSidebar({ isOpen, onClose }) {
           </div>
         </div>
 
-        <div className="border-b border-border/80 px-4 py-3">
-          <CandidateCreateMenu onActionComplete={onClose} />
-        </div>
-
-        <nav className="flex-1 space-y-1 overflow-hidden px-3 py-3" aria-label="Primary member navigation">
+        <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-3" aria-label="Primary member navigation">
           {navItems.map((item) => {
             const isActive = isNavigationItemActive(item, location.pathname)
 

@@ -3,6 +3,9 @@ import { createCircle, updateCircle, getCircleErrorMessage } from '../api/circle
 import Modal from './Modal'
 import Button from './Button'
 import SkillsInput from './SkillsInput'
+import { CIRCLE_CATEGORIES } from '../data/circles'
+
+const categoryOptions = CIRCLE_CATEGORIES.filter((category) => category !== 'All')
 
 const input =
   'mt-2 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-text-primary focus:border-primary'
@@ -13,13 +16,16 @@ export default function CircleFormModal({ circle, onClose, onSaved }) {
     category: circle?.category ?? '',
     visibility: circle?.visibility ?? 'public',
   })
+  const availableCategories = circle?.category && !categoryOptions.includes(circle.category)
+    ? [circle.category, ...categoryOptions]
+    : categoryOptions
   const [skills, setSkills] = useState(circle?.skills ?? [])
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const change = (event) => setForm((value) => ({ ...value, [event.target.name]: event.target.value }))
   const submit = async (event) => {
     event.preventDefault()
-    if (busy || !form.name.trim()) return
+    if (busy || !form.name.trim() || !form.category) return
     setBusy(true)
     setError('')
     try {
@@ -68,14 +74,18 @@ export default function CircleFormModal({ circle, onClose, onSaved }) {
         </div>
         <div>
           <label htmlFor="circle-category">Category</label>
-          <input
+          <select
             id="circle-category"
             name="category"
-            maxLength={120}
+            required
             value={form.category}
             onChange={change}
             className={input}
-          />
+          >
+            <option value="" disabled>Choose a category</option>
+            {availableCategories.map((category) => <option key={category} value={category}>{category}</option>)}
+          </select>
+          <p className="mt-2 text-xs text-text-muted">Choose the closest broad interest. Use topics below for more specific themes.</p>
         </div>
         <div>
           <label htmlFor="circle-visibility">Visibility</label>
@@ -95,7 +105,7 @@ export default function CircleFormModal({ circle, onClose, onSaved }) {
           </p>
         </div>
         <div>
-          <p className="mb-2">Topics and skills</p>
+          <p className="mb-2">Topics, interests, and skills</p>
           <SkillsInput skills={skills} setSkills={setSkills} />
         </div>
         {error && (
@@ -107,7 +117,7 @@ export default function CircleFormModal({ circle, onClose, onSaved }) {
           <Button variant="outline" disabled={busy} onClick={onClose}>
             Cancel
           </Button>
-          <Button type="submit" disabled={busy || !form.name.trim()}>
+          <Button type="submit" disabled={busy || !form.name.trim() || !form.category}>
             {busy ? 'Saving...' : circle ? 'Save changes' : 'Create Circle'}
           </Button>
         </div>

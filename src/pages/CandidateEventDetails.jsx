@@ -17,6 +17,7 @@ import {
   isCommunityEventFull,
 } from '../data/communityEventMapper'
 import CandidateLayout from '../layouts/CandidateLayout'
+import BackToFeedLink from '../components/BackToFeedLink'
 
 function DetailSection({ title, children }) {
   return (
@@ -118,7 +119,7 @@ export default function CandidateEventDetails() {
   return (
     <CandidateLayout title={event.title}>
       <div className="min-w-0 max-w-full">
-        <Link to="/member/community/events" className="text-sm font-medium text-primary hover:underline">&larr; Back to events</Link>
+        <BackToFeedLink fallbackPath="/member/community/events" fallbackLabel="Back to events" />
         <header className="mt-6 min-w-0 rounded-2xl border border-border bg-surface/65 p-5 sm:p-7">
           <div className="flex min-w-0 flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
             <div className="min-w-0">

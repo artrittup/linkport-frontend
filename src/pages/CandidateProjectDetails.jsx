@@ -18,6 +18,7 @@ import {
 } from '../data/communityProjectMapper'
 import useToast from '../hooks/useToast'
 import CandidateLayout from '../layouts/CandidateLayout'
+import BackToFeedLink from '../components/BackToFeedLink'
 
 const statusClasses = {
   [COMMUNITY_PROJECT_STATUSES.LOOKING_FOR_TEAM]: 'border-primary/30 bg-primary/10 text-primary',
@@ -109,9 +110,7 @@ export default function CandidateProjectDetails() {
 
   return (
     <CandidateLayout title={project.title}>
-      <Link to="/member/community?view=ideas" className="text-sm font-medium text-primary hover:underline">
-        ← Back to ideas
-      </Link>
+      <BackToFeedLink fallbackPath="/member/community?view=ideas" fallbackLabel="Back to ideas" />
 
       <article className="mt-6 grid min-w-0 gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
         <div className="min-w-0 rounded-2xl border border-border bg-surface/65 p-6 sm:p-8">

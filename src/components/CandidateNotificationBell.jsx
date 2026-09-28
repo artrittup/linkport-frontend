@@ -151,7 +151,7 @@ export default function CandidateNotificationBell({
 
   const panelPosition = placement === 'sidebar'
     ? 'left-0 top-full w-[min(22rem,calc(100vw-2rem))]'
-    : 'right-0 top-full w-[min(22rem,calc(100vw-2rem))]'
+    : 'fixed inset-x-2 top-[7.5rem] w-auto sm:left-auto sm:right-4 sm:w-[min(22rem,calc(100vw-2rem))]'
 
   return (
     <div ref={containerRef} className={`relative shrink-0 ${className}`}>
@@ -184,7 +184,7 @@ export default function CandidateNotificationBell({
           id={panelId}
           role="dialog"
           aria-label="Recent notifications"
-          className={`absolute z-[80] mt-2 flex max-h-[calc(100vh-6rem)] min-w-0 flex-col overflow-hidden rounded-xl border border-border bg-surface shadow-2xl shadow-black/45 ${panelPosition}`}
+          className={`absolute z-[80] mt-2 flex max-h-[calc(100dvh-8.5rem)] min-w-0 flex-col overflow-hidden rounded-xl border border-border bg-surface shadow-2xl shadow-black/45 ${panelPosition}`}
         >
           <header className="flex min-w-0 items-start justify-between gap-3 border-b border-border px-4 py-3">
             <div className="min-w-0">

@@ -36,6 +36,10 @@ const postTypeLabels = {
   project_update: 'PROJECT UPDATE',
 }
 
+function getInitialFilter(value) {
+  return filters.find((filter) => filter.toLowerCase() === value?.toLowerCase()) ?? 'All'
+}
+
 function formatFeedTimestamp(value) {
   const date = new Date(value)
   return Number.isNaN(date.getTime())
@@ -75,7 +79,7 @@ function communityPostToFeedItem(post, isSaved) {
     saveId: post.id,
     meta: formatFeedTimestamp(post.createdAt),
     action: null,
-    path: null,
+    path: `/member/community/discussions/${post.id}`,
     createdAt: post.createdAt,
   }
 }
@@ -100,14 +104,28 @@ export default function CommunityFeed({
   const [liveOpportunities, setLiveOpportunities] = useState([])
   const [opportunitiesLoading, setOpportunitiesLoading] = useState(true)
   const [opportunitiesError, setOpportunitiesError] = useState(false)
-  const [activeFilter, setActiveFilter] = useState(() => searchParams.get('filter') === 'saved' ? 'Saved' : 'All')
+  const [activeFilter, setActiveFilter] = useState(() => getInitialFilter(searchParams.get('filter')))
+  const [feedSearch, setFeedSearch] = useState(() => searchParams.get('search') ?? '')
 
   const selectFilter = (filter) => {
     setActiveFilter(filter)
-    const nextParams = new URLSearchParams(searchParams)
-    if (filter === 'Saved') nextParams.set('filter', 'saved')
-    else nextParams.delete('filter')
-    setSearchParams(nextParams, { replace: true })
+    setSearchParams((current) => {
+      const nextParams = new URLSearchParams(current)
+      if (filter === 'All') nextParams.delete('filter')
+      else nextParams.set('filter', filter.toLowerCase())
+      return nextParams
+    }, { replace: true })
+  }
+
+  const updateFeedSearch = (event) => {
+    const value = event.target.value
+    setFeedSearch(value)
+    setSearchParams((current) => {
+      const nextParams = new URLSearchParams(current)
+      if (value.trim()) nextParams.set('search', value)
+      else nextParams.delete('search')
+      return nextParams
+    }, { replace: true })
   }
 
   useEffect(() => {
@@ -180,6 +198,9 @@ export default function CommunityFeed({
       action: 'View event',
       path: `/member/community/events/${event.id}`,
       attending: event.isAttending,
+      eventDate: formatCommunityEventDate(event.startsAt),
+      eventTime: formatCommunityEventTime(event.startsAt, event.endsAt),
+      eventLocation: getCommunityEventLocationLabel(event),
       createdAt: event.createdAt,
       saveType: SAVED_ITEM_TYPES.COMMUNITY_EVENT,
       saveId: event.id,
@@ -214,11 +235,22 @@ export default function CommunityFeed({
       - (Number.isFinite(firstTimestamp) ? firstTimestamp : 0)
   }), [communityEvents, communityPosts, communityProjects, liveOpportunities, savedItems.savedKeys, teammateRequests])
 
-  const visibleItems = activeFilter === 'All'
+  const itemsForCategory = activeFilter === 'All'
     ? communityFeedItems
     : activeFilter === 'Saved'
       ? savedItems.items.map(savedItemRecordToFeedItem)
       : communityFeedItems.filter((item) => item.filter === activeFilter)
+  const normalizedSearch = feedSearch.trim().toLowerCase()
+  const visibleItems = normalizedSearch
+    ? itemsForCategory.filter((item) => [
+      item.title,
+      item.description,
+      item.author,
+      item.type,
+      item.meta,
+      ...(item.tags ?? []),
+    ].filter(Boolean).some((value) => String(value).toLowerCase().includes(normalizedSearch)))
+    : itemsForCategory
   const isFeedLoading = projectsLoading || postsLoading || teammateRequestsLoading || eventsLoading || opportunitiesLoading || savedItems.isLoading
   const activeFilterPending = {
     Projects: projectsLoading || projectsError,
@@ -236,6 +268,25 @@ export default function CommunityFeed({
     opportunitiesError && 'Some live opportunities',
     savedItems.error && 'Saved items',
   ].filter(Boolean)
+
+  useEffect(() => {
+    if (isFeedLoading) return undefined
+
+    const savedPosition = window.sessionStorage.getItem('linkport:feed-return')
+    if (!savedPosition) return undefined
+
+    try {
+      const { path, scrollY } = JSON.parse(savedPosition)
+      const currentPath = window.location.pathname + window.location.search + window.location.hash
+      if (path !== currentPath || !Number.isFinite(scrollY)) return undefined
+      window.sessionStorage.removeItem('linkport:feed-return')
+      const frame = window.requestAnimationFrame(() => window.scrollTo({ top: scrollY, behavior: 'auto' }))
+      return () => window.cancelAnimationFrame(frame)
+    } catch {
+      window.sessionStorage.removeItem('linkport:feed-return')
+      return undefined
+    }
+  }, [isFeedLoading])
 
   if (isFeedLoading) {
     return fullPageLoading
@@ -255,9 +306,24 @@ export default function CommunityFeed({
 
       {feedWarnings.length > 0 && <p role="status" className={`${showHeading ? 'mt-4' : 'mb-5'} rounded-lg border border-border bg-surface/45 px-4 py-3 text-sm text-text-muted`}>{feedWarnings.join(', ')} {feedWarnings.length === 1 ? 'is' : 'are'} temporarily unavailable. Other {contextLabel} updates are still available.</p>}
 
-      <div className={`${showHeading ? 'mt-8' : homeFeed ? 'mt-5' : ''} grid min-w-0 gap-6 ${aside ? 'xl:grid-cols-[minmax(0,3fr)_minmax(15rem,1fr)]' : ''}`}>
+      <div className={`${showHeading ? 'mt-8' : homeFeed ? 'mt-5' : ''} grid min-w-0 gap-6 ${aside ? 'xl:grid-cols-[minmax(0,1fr)_17rem]' : ''}`}>
         <div className="min-w-0">
-          <div className="flex gap-2 overflow-x-auto pb-2" role="tablist" aria-label="Filter community feed">
+          <section aria-label="Search feed">
+            <label htmlFor="home-feed-search" className="sr-only">Search the Home feed</label>
+            <div className="relative">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-text-subtle" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-4-4" /></svg>
+              <input
+                id="home-feed-search"
+                type="search"
+                value={feedSearch}
+                onChange={updateFeedSearch}
+                placeholder="Search posts, projects, events, and opportunities..."
+                className="w-full rounded-xl border border-border bg-surface/70 py-3 pl-11 pr-4 text-sm text-text-primary outline-none placeholder:text-text-subtle focus:border-primary focus:ring-1 focus:ring-focus-ring"
+              />
+            </div>
+          </section>
+
+          <div className="mt-5 flex gap-2 overflow-x-auto pb-2" role="tablist" aria-label="Filter community feed">
             {filters.map((filter) => (
               <button
                 key={filter}
@@ -281,17 +347,18 @@ export default function CommunityFeed({
             ))}
           </div>
 
-          <section className="mt-6 flex w-full flex-col gap-5" aria-live="polite">
+          <section className="mt-5 grid w-full min-w-0 grid-cols-1 gap-4" aria-live="polite">
             {visibleItems.map((item) => (
               <CommunityFeedCard
                 key={item.id}
                 item={item}
+                preserveScrollPosition={homeFeed}
                 onSavedChange={(changedItem, nextSaved) => savedItems.updateSavedState(changedItem.saveType, changedItem.saveId, nextSaved)}
               />
             ))}
           </section>
 
-          {visibleItems.length === 0 && !activeFilterPending && <p className="mt-6 rounded-xl border border-border bg-surface/50 p-6 text-sm text-text-muted">{activeFilter === 'Team' ? 'No open teammate requests are available yet.' : activeFilter === 'Saved' ? 'Save an item to keep it here.' : 'No items are available in this category yet.'}</p>}
+          {visibleItems.length === 0 && !activeFilterPending && <p className="mt-6 rounded-xl border border-border bg-surface/50 p-6 text-sm text-text-muted">{normalizedSearch ? 'No feed items match your search.' : activeFilter === 'Team' ? 'No open teammate requests are available yet.' : activeFilter === 'Saved' ? 'Save an item to keep it here.' : 'No items are available in this category yet.'}</p>}
         </div>
         {aside && <div className="min-w-0">{aside}</div>}
       </div>

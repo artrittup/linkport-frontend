@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-const CIRCLE_SORT_OPTIONS = [{ value: 'recommended', label: 'Name' }, { value: 'active', label: 'Most discussions' }, { value: 'newest', label: 'Newest' }, { value: 'members', label: 'Most members' }]
+import { CIRCLE_CATEGORIES, CIRCLE_SORT_OPTIONS } from '../data/circles'
 import CircleCard from './CircleCard'
 import EmptyState from './EmptyState'
 
@@ -13,8 +13,8 @@ function sortCircles(items, sort) {
   })
 }
 
-export default function DiscoverCirclesView({ circles, onJoin, onCreate, onPreview, search = '', onClearSearch }) {
-  const [category, setCategory] = useState('All')
+export default function DiscoverCirclesView({ circles, onJoin, onCreate, onPreview, search = '', initialCategory = 'All', showHeader = true, onClearFilters }) {
+  const [category, setCategory] = useState(initialCategory || 'All')
   const [membership, setMembership] = useState('all')
   const [sort, setSort] = useState('recommended')
 
@@ -37,24 +37,26 @@ export default function DiscoverCirclesView({ circles, onJoin, onCreate, onPrevi
   }, [category, circles, membership, search, sort])
 
   const clearFilters = () => {
-    onClearSearch?.()
+    onClearFilters?.()
     setCategory('All')
     setMembership('all')
     setSort('recommended')
   }
 
   return (
-    <section aria-labelledby="discover-circles-heading">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <p className="font-mono text-xs uppercase tracking-[0.13em] text-primary">Groups</p>
-          <h2 id="discover-circles-heading" className="mt-1 text-2xl font-bold tracking-tight text-text-primary">Circles</h2>
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-text-muted">Join small communities organized around interests, fields, project ideas, and collaboration.</p>
+    <section aria-labelledby={showHeader ? 'discover-circles-heading' : undefined} aria-label={showHeader ? undefined : 'Circle results'}>
+      {showHeader && (
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p className="font-mono text-xs uppercase tracking-[0.13em] text-primary">Groups</p>
+            <h2 id="discover-circles-heading" className="mt-1 text-2xl font-bold tracking-tight text-text-primary">Circles</h2>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-text-muted">Join small communities organized around interests, fields, project ideas, and collaboration.</p>
+          </div>
+          <button type="button" onClick={onCreate} className="inline-flex w-fit rounded-lg border border-primary bg-primary px-4 py-2 text-sm font-semibold text-primary-contrast transition-colors hover:bg-primary-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring">Create Circle</button>
         </div>
-        <button type="button" onClick={onCreate} className="inline-flex w-fit rounded-lg border border-primary bg-primary px-4 py-2 text-sm font-semibold text-primary-contrast transition-colors hover:bg-primary-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring">Create Circle</button>
-      </div>
+      )}
 
-      <div className="mt-6 flex justify-end">
+      <div className="mt-6 flex justify-start">
         <div className="w-full sm:w-52">
           <label htmlFor="circle-sort" className="sr-only">Sort Circles</label>
           <select id="circle-sort" value={sort} onChange={(event) => setSort(event.target.value)} className="w-full rounded-xl border border-border bg-surface/70 px-4 py-3 text-sm text-text-primary outline-none focus:border-primary focus:ring-1 focus:ring-focus-ring">
@@ -69,7 +71,7 @@ export default function DiscoverCirclesView({ circles, onJoin, onCreate, onPrevi
       </div>
 
       <div className="mt-3 flex gap-2 overflow-x-auto pb-2" aria-label="Filter Circles by category">
-        {['All', ...new Set(circles.map((circle) => circle.category))].map((item) => (
+        {CIRCLE_CATEGORIES.map((item) => (
           <button
             key={item}
             type="button"

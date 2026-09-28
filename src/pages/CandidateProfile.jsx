@@ -203,7 +203,7 @@ export default function CandidateProfile({ mode = 'view' }) {
           <section>
             <p className="font-mono text-sm text-primary">Member profile</p>
             <h2 className="mt-2 text-3xl font-bold tracking-tight text-text-primary">Edit profile</h2>
-            <p className="mt-3 text-sm leading-6 text-text-muted">Update the information shown on your professional community profile.</p>
+            <p className="mt-3 text-sm leading-6 text-text-muted">Update the information that helps the community get to know you.</p>
           </section>
 
           <Card padding="lg" className="mt-8 min-w-0">
@@ -225,7 +225,7 @@ export default function CandidateProfile({ mode = 'view' }) {
 
               <fieldset className="min-w-0 border-t border-border pt-7">
                 <legend className="text-lg font-semibold text-text-primary">Community profile</legend>
-                <p className="mt-1 text-xs text-text-subtle">These fields help other members discover you and understand how you want to collaborate.</p>
+                <p className="mt-1 text-xs text-text-subtle">These fields help people discover you through shared interests, skills, and experiences.</p>
                 <div className="mt-4 grid min-w-0 gap-5 md:grid-cols-2">
                   <label className="min-w-0 text-sm font-medium">
                     University
@@ -251,8 +251,8 @@ export default function CandidateProfile({ mode = 'view' }) {
                   </label>
                   <label className="min-w-0 text-sm font-medium md:col-span-2">
                     Interests
-                    <input name="interestsInput" value={draft.interestsInput} onChange={updateField} placeholder="web_development, design, AI ethics" className={inputClasses} />
-                    <p className="mt-1.5 text-xs text-text-subtle">Separate interests with commas. Common values use readable labels publicly.</p>
+                    <input name="interestsInput" value={draft.interestsInput} onChange={updateField} placeholder="Football, movies, cooking, photography, design..." className={inputClasses} />
+                    <p className="mt-1.5 text-xs text-text-subtle">Separate interests with commas. Add any hobbies, topics, causes, or activities you enjoy.</p>
                     <FieldError errors={fieldErrors} name="interests" />
                   </label>
                   <label className="min-w-0 text-sm font-medium md:col-span-2">
@@ -368,7 +368,7 @@ export default function CandidateProfile({ mode = 'view' }) {
         <section>
           <p className="font-mono text-sm text-primary">Member profile</p>
           <h2 className="mt-2 text-3xl font-bold tracking-tight text-text-primary">My Profile</h2>
-          <p className="mt-3 text-sm leading-6 text-text-muted">Your professional community profile and project portfolio.</p>
+          <p className="mt-3 text-sm leading-6 text-text-muted">Your community profile, interests, skills, and things you want to share.</p>
         </section>
 
         {loadError && (

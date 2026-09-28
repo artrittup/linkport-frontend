@@ -15,6 +15,7 @@ import {
   getTeammateRequestWorkStyleLabel,
 } from '../data/teammateRequestMapper'
 import CandidateLayout from '../layouts/CandidateLayout'
+import BackToFeedLink from '../components/BackToFeedLink'
 
 const statusClasses = {
   [TEAMMATE_REQUEST_STATUSES.OPEN]: 'border-success/30 bg-success/10 text-success-text',
@@ -118,9 +119,7 @@ export default function CandidateTeammateRequestDetails() {
 
   return (
     <CandidateLayout title={request.title}>
-      <Link to="/member/community#collaboration" className="text-sm font-medium text-primary hover:underline">
-        ← Back to Community
-      </Link>
+      <BackToFeedLink fallbackPath="/member/community#collaboration" fallbackLabel="Back to Community" />
 
       <article className="mt-6 grid min-w-0 gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
         <div className="min-w-0 rounded-2xl border border-border bg-surface/65 p-6 sm:p-8">

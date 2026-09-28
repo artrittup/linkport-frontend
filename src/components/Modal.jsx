@@ -68,7 +68,7 @@ export default function Modal({
 
   return (
     <div
-      className="fixed inset-0 z-[70] flex items-center justify-center overflow-y-auto bg-overlay/70 px-4 py-8 backdrop-blur-sm"
+      className="fixed inset-0 z-[70] flex items-center justify-center overflow-y-auto bg-overlay/70 p-4 sm:py-8 backdrop-blur-sm"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) onClose()
       }}
@@ -79,7 +79,7 @@ export default function Modal({
         aria-modal="true"
         aria-labelledby={titleId}
         tabIndex={-1}
-        className={`max-h-[calc(100vh-4rem)] w-full ${maxWidth} overflow-y-auto rounded-2xl border border-border bg-surface shadow-2xl shadow-black/40`}
+        className={`max-h-[calc(100dvh-2rem)] sm:max-h-[calc(100dvh-4rem)] w-full ${maxWidth} overflow-y-auto rounded-2xl border border-border bg-surface shadow-2xl shadow-black/40`}
       >
         <header className="sticky top-0 z-10 flex items-start justify-between gap-4 border-b border-border bg-surface px-5 py-4 sm:px-6">
           <div className="min-w-0">

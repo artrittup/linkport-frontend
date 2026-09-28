@@ -13,6 +13,7 @@ import { getSavedItemKey } from '../data/savedItemMapper'
 import useSavedItems from '../hooks/useSavedItems'
 import useToast from '../hooks/useToast'
 import CandidateLayout from '../layouts/CandidateLayout'
+import BackToFeedLink from '../components/BackToFeedLink'
 
 const typeClasses = {
   JOB: 'border-info/30 bg-info/10 text-info-text',
@@ -124,9 +125,10 @@ export default function CandidateOpportunityDetails() {
 
   return (
     <CandidateLayout title={opportunity.title}>
-      <Link to={opportunity.source === 'job' ? '/member/opportunities/jobs' : '/member/opportunities/projects'} className="text-sm font-medium text-primary hover:underline">
-        ← Back to {opportunity.source === 'job' ? 'jobs' : 'projects'}
-      </Link>
+      <BackToFeedLink
+        fallbackPath={opportunity.source === 'job' ? '/member/opportunities/jobs' : '/member/opportunities/projects'}
+        fallbackLabel={`Back to ${opportunity.source === 'job' ? 'jobs' : 'projects'}`}
+      />
 
       <article className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
         <div className="rounded-2xl border border-border bg-surface/65 p-6 sm:p-8">

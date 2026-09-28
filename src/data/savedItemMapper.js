@@ -79,6 +79,7 @@ export function savedItemRecordToFeedItem(record) {
       commentsCount: item.commentsCount,
       isLiked: item.isLiked,
       meta: formatTimestamp(item.createdAt),
+      path: `/member/community/discussions/${item.id}`,
       createdAt: item.createdAt,
     }
   }
@@ -123,6 +124,9 @@ export function savedItemRecordToFeedItem(record) {
     action: 'View event',
     path: `/member/community/events/${item.id}`,
     attending: item.isAttending,
+    eventDate: formatCommunityEventDate(item.startsAt),
+    eventTime: formatCommunityEventTime(item.startsAt, item.endsAt),
+    eventLocation: getCommunityEventLocationLabel(item),
     createdAt: item.createdAt,
   }
 

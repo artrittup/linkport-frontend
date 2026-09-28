@@ -7,7 +7,7 @@ import useCommunityConnections from '../hooks/useCommunityConnections'
 import useCommunityMembers from '../hooks/useCommunityMembers'
 import CandidateLayout from '../layouts/CandidateLayout'
 
-export default function CandidateMembers({ embedded = false, initialSearch = '', externalSearch, onClearSearch }) {
+export default function CandidateMembers({ embedded = false, showHeader = true, initialSearch = '', externalSearch, onClearSearch }) {
   const [search, setSearch] = useState(initialSearch)
   const effectiveSearch = externalSearch ?? search
   const [debouncedSearch, setDebouncedSearch] = useState(() => effectiveSearch.trim())
@@ -47,14 +47,16 @@ export default function CandidateMembers({ embedded = false, initialSearch = '',
 
   const content = (
     <div className="min-w-0 max-w-full">
-      <section className="flex min-w-0 flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
-        <div className="min-w-0">
-          <p className="font-mono text-xs uppercase tracking-[0.13em] text-primary">People</p>
-          <h3 className="mt-1 text-2xl font-bold tracking-tight text-text-primary">{embedded ? 'Find members' : 'Community Members'}</h3>
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-text-muted">Search by skills, interests, education, or location and meet people you may want to build with.</p>
-        </div>
-        <Link to="/member/profile" className="inline-flex shrink-0 items-center justify-center rounded-lg border border-primary px-4 py-2.5 text-sm font-semibold text-primary hover:bg-primary/10">View my profile</Link>
-      </section>
+      {showHeader && (
+        <section className="flex min-w-0 flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+          <div className="min-w-0">
+            <p className="font-mono text-xs uppercase tracking-[0.13em] text-primary">People</p>
+            <h3 className="mt-1 text-2xl font-bold tracking-tight text-text-primary">{embedded ? 'Find members' : 'Community Members'}</h3>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-text-muted">Search by interests, skills, education, or location and meet people you have something in common with.</p>
+          </div>
+          <Link to="/member/profile" className="inline-flex shrink-0 items-center justify-center rounded-lg border border-primary px-4 py-2.5 text-sm font-semibold text-primary hover:bg-primary/10">View my profile</Link>
+        </section>
+      )}
 
       <section className="mt-6 min-w-0 max-w-full" aria-label="Find community members">
         {!embedded && (

@@ -50,14 +50,21 @@ export default function CircleCard({
   const actionLabel = primaryActionLabel ?? (circle.isJoined ? 'Open Circle' : circle.isPending ? 'Request pending' : circle.isInvited ? 'Invitation pending' : 'Request to join')
 
   return (
-    <article className="flex h-full min-w-0 flex-col rounded-2xl border border-border bg-surface/65 p-5 transition-colors hover:border-primary/35 sm:p-6">
+    <article className="group relative flex h-full min-w-0 flex-col rounded-2xl border border-border bg-surface/65 p-5 transition-colors hover:border-primary/35 sm:p-6">
+      <button
+        type="button"
+        onClick={() => onOpen?.(circle)}
+        aria-label={`Open ${circle.name}`}
+        className="absolute inset-0 z-0 rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus-ring"
+      />
+      <div className="pointer-events-none relative z-[1] flex h-full flex-col">
       <div className="flex min-w-0 items-start gap-3">
         <CircleVisual circle={circle} />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-start justify-between gap-2">
             <div className="min-w-0">
               <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.13em] text-primary">{circle.category}</p>
-              <h3 className="mt-1 break-words text-lg font-semibold text-text-primary"><button type="button" className="text-left hover:text-primary" onClick={() => onOpen?.(circle)}>{circle.name}</button></h3>
+              <h3 className="mt-1 break-words text-lg font-semibold text-text-primary transition-colors group-hover:text-primary">{circle.name}</h3>
             </div>
             {circle.isJoined ? (
               <span className="shrink-0 rounded-full border border-success/30 bg-success/10 px-2.5 py-1 text-[10px] font-semibold text-success-text">Joined</span>
@@ -86,12 +93,13 @@ export default function CircleCard({
       <div className="mt-auto flex flex-wrap items-center justify-between gap-3 pt-5">
         <span className="text-xs font-medium text-success-text">{circle.activityLevel}</span>
         {primaryActionLabel ? (
-          <Button size="sm" variant="outline" onClick={() => onOpen?.(circle)}>{actionLabel}</Button>
+          <Button size="sm" variant="outline" className="pointer-events-auto" onClick={() => onOpen?.(circle)}>{actionLabel}</Button>
         ) : circle.isJoined ? (
-          <Button size="sm" variant="outline" onClick={() => onOpen?.(circle)}>Open Circle</Button>
+          <Button size="sm" variant="outline" className="pointer-events-auto" onClick={() => onOpen?.(circle)}>Open Circle</Button>
         ) : (
-          <Button size="sm" disabled={circle.isPending || circle.isInvited || circle.isBusy} onClick={() => onJoin?.(circle)}>{circle.isBusy ? 'Sending...' : actionLabel}</Button>
+          <Button size="sm" className="pointer-events-auto" disabled={circle.isPending || circle.isInvited || circle.isBusy} onClick={() => onJoin?.(circle)}>{circle.isBusy ? 'Sending...' : actionLabel}</Button>
         )}
+      </div>
       </div>
     </article>
   )

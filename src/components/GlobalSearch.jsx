@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState } from 'react'
+import { useCallback, useEffect, useId, useRef, useState } from 'react'
 import { Link } from 'react-router'
 import { searchProfiles } from '../api/searchApi'
 import { useAuth } from '../context/AuthContext'
@@ -68,9 +68,12 @@ export default function GlobalSearch({
   className = '',
   placeholder = 'Search',
   dropdownAlign = 'right',
+  memberUniversal = false,
+  onNavigate,
 }) {
   const inputId = useId()
   const containerRef = useRef(null)
+  const inputRef = useRef(null)
   const requestId = useRef(0)
   const { isAuthenticated, isLoading: isAuthLoading, user } = useAuth()
   const [query, setQuery] = useState('')
@@ -87,12 +90,22 @@ export default function GlobalSearch({
   const filtersApplied = Boolean(skill.trim() || location.trim() || industry.trim() || type !== 'all')
   const canSearch = query.trim().length >= 2 || filtersApplied
 
+  const closeSearch = useCallback(() => {
+    setIsOpen(false)
+    inputRef.current?.blur()
+  }, [])
+
+  const handleResultSelect = useCallback(() => {
+    closeSearch()
+    onNavigate?.()
+  }, [closeSearch, onNavigate])
+
   useEffect(() => {
     const close = (event) => {
-      if (!containerRef.current?.contains(event.target)) setIsOpen(false)
+      if (!containerRef.current?.contains(event.target)) closeSearch()
     }
     const closeOnEscape = (event) => {
-      if (event.key === 'Escape') setIsOpen(false)
+      if (event.key === 'Escape') closeSearch()
     }
     document.addEventListener('mousedown', close)
     document.addEventListener('keydown', closeOnEscape)
@@ -100,7 +113,7 @@ export default function GlobalSearch({
       document.removeEventListener('mousedown', close)
       document.removeEventListener('keydown', closeOnEscape)
     }
-  }, [])
+  }, [closeSearch])
 
   useEffect(() => {
     if (!canSearch || !isAuthenticated) {
@@ -144,11 +157,17 @@ export default function GlobalSearch({
       <div className="group flex h-10 items-center rounded-lg border border-border bg-surface transition-colors focus-within:border-primary/70 focus-within:ring-1 focus-within:ring-focus-ring/30">
         <span className="pointer-events-none pl-3 text-text-muted group-focus-within:text-primary"><SearchIcon /></span>
         <input
+          ref={inputRef}
           id={inputId}
           type="search"
           value={query}
           onChange={(event) => { setQuery(event.target.value); setIsOpen(true) }}
           onFocus={() => setIsOpen(true)}
+          onKeyDown={(event) => {
+            if (event.key !== 'Escape') return
+            event.preventDefault()
+            closeSearch()
+          }}
           placeholder={placeholder}
           className="h-full min-w-0 flex-1 bg-transparent px-2.5 text-sm text-text-primary outline-none placeholder:text-text-subtle"
           autoComplete="off"
@@ -162,12 +181,12 @@ export default function GlobalSearch({
         <button
           type="button"
           aria-label="Close search"
-          onClick={() => setIsOpen(false)}
+          onClick={closeSearch}
           className="fixed inset-0 z-40 cursor-default bg-overlay/35 backdrop-blur-[1px]"
         />
         <div id={`${inputId}-results`} className={`absolute top-full z-50 mt-2 w-[min(24rem,calc(100vw-2rem))] max-w-[calc(100vw-2rem)] overflow-hidden rounded-xl border border-border bg-surface shadow-2xl shadow-black/50 ${dropdownAlign === 'left' ? 'left-0' : 'right-0'}`}>
           <div className="flex items-center justify-between border-b border-border px-3 py-2">
-            <span className="text-xs text-text-muted">Search people and companies</span>
+            <span className="text-xs text-text-muted">{memberUniversal ? 'Search across LinkPort' : 'Search people and companies'}</span>
             <button type="button" onClick={() => setFiltersOpen((open) => !open)} aria-expanded={filtersOpen} className={`flex items-center gap-1.5 rounded-md px-2 py-1 text-xs transition-colors ${filtersOpen || filtersApplied ? 'bg-primary/10 text-primary' : 'text-text-muted hover:bg-surface-elevated hover:text-text-primary'}`}>
               <TuneIcon /> Filters{filtersApplied ? ' •' : ''}
             </button>
@@ -175,7 +194,7 @@ export default function GlobalSearch({
 
           {filtersOpen && (
             <div className="grid grid-cols-1 gap-2 border-b border-border bg-surface-deep/55 p-3 sm:grid-cols-2">
-              <select aria-label="Result type" value={type} onChange={(event) => setType(event.target.value)} className={filterInput}><option value="all">All</option><option value="members">Members</option><option value="companies">Companies</option></select>
+              <select aria-label="Result type" value={type} onChange={(event) => setType(event.target.value)} className={filterInput}><option value="all">All</option><option value="members">{memberUniversal ? 'People' : 'Members'}</option><option value="companies">Companies</option></select>
               <select aria-label="Skill filter" value={skill} onChange={(event) => setSkill(event.target.value)} className={filterInput}>
                 <option value="">Any skill</option>
                 {skillGroups.map((group) => (
@@ -191,16 +210,21 @@ export default function GlobalSearch({
 
           <div className="max-h-[25rem] overflow-y-auto p-1.5" aria-live="polite">
             {!isAuthLoading && !isAuthenticated && (
-              <div className="px-4 py-5 text-center"><p className="text-sm text-text-primary">Sign in to search LinkPort</p><p className="mt-1 text-xs text-text-muted">Member and company profiles are available to active users.</p><Link to="/login" className="mt-3 inline-flex rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-primary-contrast">Log in</Link></div>
+              <div className="px-4 py-5 text-center"><p className="text-sm text-text-primary">Sign in to search LinkPort</p><p className="mt-1 text-xs text-text-muted">Member and company profiles are available to active users.</p><Link to="/login" onClick={onNavigate} className="mt-3 inline-flex rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-primary-contrast">Log in</Link></div>
             )}
             {isAuthenticated && !canSearch && <p className="px-3 py-5 text-center text-xs text-text-muted">Type at least 2 characters or apply a filter.</p>}
             {isAuthenticated && canSearch && isLoading && <p className="px-3 py-5 text-center text-xs text-text-muted">Searching...</p>}
             {isAuthenticated && canSearch && !isLoading && error && <p role="alert" className="px-3 py-5 text-center text-xs text-danger-text">{error}</p>}
             {isAuthenticated && canSearch && !isLoading && !error && noResults && <p className="px-3 py-5 text-center text-xs text-text-muted">No matching members or companies.</p>}
             {isAuthenticated && canSearch && !isLoading && !error && !noResults && (
-              <div className="space-y-1"><ResultSection label="Members" items={results.members.data} kind="member" onSelect={() => setIsOpen(false)} memberPathPrefix={user?.role === 'candidate' ? '/member/community/members' : '/members'} /><ResultSection label="Companies" items={results.companies.data} kind="company" onSelect={() => setIsOpen(false)} /></div>
+              <div className="space-y-1"><ResultSection label={memberUniversal ? 'People' : 'Members'} items={results.members.data} kind="member" onSelect={handleResultSelect} memberPathPrefix={user?.role === 'candidate' ? '/member/community/members' : '/members'} /><ResultSection label="Companies" items={results.companies.data} kind="company" onSelect={handleResultSelect} /></div>
             )}
           </div>
+          {memberUniversal && (
+            <p className="border-t border-border px-3 py-2.5 text-[11px] leading-5 text-text-subtle">
+              People and companies are available now. Posts, projects, jobs, and Circles will appear here when unified search support is available.
+            </p>
+          )}
         </div>
         </>
       )}

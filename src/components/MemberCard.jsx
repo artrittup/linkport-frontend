@@ -19,7 +19,13 @@ export default function MemberCard({
     ?? 'border-primary/25 bg-primary/5 text-primary'
 
   return (
-    <article className={`flex h-full min-w-0 max-w-full flex-col rounded-2xl border border-border bg-surface/65 ${compact ? 'p-4' : 'p-5'}`}>
+    <article className={`group relative flex h-full min-w-0 max-w-full flex-col rounded-2xl border border-border bg-surface/65 transition-colors hover:border-primary/35 ${compact ? 'p-4' : 'p-5'}`}>
+      <Link
+        to={`/member/community/members/${member.id}`}
+        aria-label={`View ${member.name}'s profile`}
+        className="absolute inset-0 z-0 rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus-ring"
+      />
+      <div className="pointer-events-none relative z-[1] flex h-full flex-col">
       <div className="flex min-w-0 items-start gap-3">
         <div className={`flex shrink-0 items-center justify-center rounded-full border border-primary/30 bg-background font-mono text-xs font-semibold text-primary ${compact ? 'h-11 w-11' : 'h-12 w-12'}`}>
           {member.initials}
@@ -52,11 +58,12 @@ export default function MemberCard({
       <div className="mt-auto flex flex-wrap items-center gap-2 pt-5">
         <Link
           to={`/member/community/members/${member.id}`}
-          className="inline-flex items-center justify-center rounded-lg border border-primary px-3 py-2 text-sm font-semibold text-primary transition-colors hover:bg-primary/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
+          className="pointer-events-auto inline-flex items-center justify-center rounded-lg border border-primary px-3 py-2 text-sm font-semibold text-primary transition-colors hover:bg-primary/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
         >
           View profile
         </Link>
-        {showConnection && <ConnectionButton key={`${member.id}-${initialConnectionStatus?.status}-${initialConnectionStatus?.connection_id ?? 'none'}`} userId={member.id} initialStatus={initialConnectionStatus} />}
+        {showConnection && <div className="pointer-events-auto"><ConnectionButton key={`${member.id}-${initialConnectionStatus?.status}-${initialConnectionStatus?.connection_id ?? 'none'}`} userId={member.id} initialStatus={initialConnectionStatus} /></div>}
+      </div>
       </div>
     </article>
   )

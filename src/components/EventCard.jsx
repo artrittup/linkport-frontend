@@ -11,7 +11,13 @@ export default function EventCard({ event, onRemove, isRemoving = false }) {
   const remainingTopics = Math.max(0, event.topics.length - visibleTopics.length)
 
   return (
-    <article className="flex h-full min-w-0 max-w-full flex-col rounded-2xl border border-border bg-surface/65 p-5 sm:p-6">
+    <article className="group relative flex h-full min-w-0 max-w-full flex-col rounded-2xl border border-border bg-surface/65 p-5 transition-colors hover:border-primary/35 sm:p-6">
+      <Link
+        to={`/member/community/events/${event.id}`}
+        aria-label={`View ${event.title}`}
+        className="absolute inset-0 z-0 rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus-ring"
+      />
+      <div className="pointer-events-none relative z-[1] flex h-full flex-col">
       <div className="flex min-w-0 flex-wrap items-center justify-between gap-2">
         <span className="max-w-full break-words rounded-full border border-primary/25 bg-primary/5 px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-wide text-primary">
           {getCommunityEventCategoryLabel(event.category)}
@@ -53,14 +59,15 @@ export default function EventCard({ event, onRemove, isRemoving = false }) {
       )}
 
       <div className="mt-auto flex flex-col gap-3 pt-6">
-        <Link to={`/member/community/events/${event.id}`} className="inline-flex w-full items-center justify-center rounded-lg border border-primary px-4 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-primary/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring">
+        <Link to={`/member/community/events/${event.id}`} className="pointer-events-auto inline-flex w-full items-center justify-center rounded-lg border border-primary px-4 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-primary/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring">
           View event
         </Link>
         {onRemove && event.isAttending && (
-          <button type="button" disabled={isRemoving} onClick={() => onRemove(event.id)} className="inline-flex w-full items-center justify-center rounded-lg border border-border px-4 py-2.5 text-sm font-medium text-text-secondary hover:border-danger-soft/50 hover:text-danger-soft disabled:cursor-not-allowed disabled:opacity-60">
+          <button type="button" disabled={isRemoving} onClick={() => onRemove(event.id)} className="pointer-events-auto inline-flex w-full items-center justify-center rounded-lg border border-border px-4 py-2.5 text-sm font-medium text-text-secondary hover:border-danger-soft/50 hover:text-danger-soft disabled:cursor-not-allowed disabled:opacity-60">
             {isRemoving ? 'Removing...' : 'Remove from my events'}
           </button>
         )}
+      </div>
       </div>
     </article>
   )

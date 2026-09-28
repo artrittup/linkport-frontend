@@ -7,6 +7,7 @@ import {
   useLocation,
   useParams,
 } from 'react-router'
+import { useAuth } from '../context/AuthContext'
 import PageLoadingScreen, {
   FullPageLoadingScreen,
 } from '../components/PageLoadingScreen'
@@ -23,6 +24,7 @@ const CandidateProfile = lazy(() => import('../pages/CandidateProfile'))
 const CandidateActivity = lazy(() => import('../pages/CandidateActivity'))
 const CandidateNotifications = lazy(() => import('../pages/CandidateNotifications'))
 const CandidateSettings = lazy(() => import('../pages/CandidateSettings'))
+const CandidateMessages = lazy(() => import('../pages/CandidateMessages'))
 const CandidateHome = lazy(() => import('../pages/CandidateHome'))
 const CandidateProjects = lazy(() => import('../pages/CandidateProjects'))
 const CandidateProjectDetails = lazy(() => import('../pages/CandidateProjectDetails'))
@@ -33,10 +35,8 @@ const DiscussionDetails = lazy(() => import('../pages/DiscussionDetails'))
 const CircleDetails = lazy(() => import('../pages/CircleDetails'))
 const Community = lazy(() => import('../pages/Community'))
 const CandidateMemberProfile = lazy(() => import('../pages/CandidateMemberProfile'))
-const CandidateEvents = lazy(() => import('../pages/CandidateEvents'))
 const CandidateEventDetails = lazy(() => import('../pages/CandidateEventDetails'))
 const CandidateTeammateRequestDetails = lazy(() => import('../pages/CandidateTeammateRequestDetails'))
-const Connections = lazy(() => import('../pages/Connections'))
 const CompanyProfile = lazy(() => import('../pages/CompanyProfile'))
 const CompanyOverview = lazy(() => import('../pages/CompanyOverview'))
 const CompanyOpportunities = lazy(() => import('../pages/CompanyOpportunities'))
@@ -65,17 +65,57 @@ function RouteLoadingFallback() {
   return <FullPageLoadingScreen />
 }
 
+function NotificationsByRole() {
+  const { user } = useAuth()
+  return user?.role === 'candidate'
+    ? <Navigate to="/member/notifications" replace />
+    : <Notifications />
+}
+
+function destinationWithLocation(to, location) {
+  const [pathname, targetQuery = ''] = to.split('?')
+  const params = new URLSearchParams(location.search)
+  new URLSearchParams(targetQuery).forEach((value, key) => params.set(key, value))
+  const search = params.size > 0 ? `?${params.toString()}` : ''
+  return `${pathname}${search}${location.hash}`
+}
+
+function RedirectPreservingLocation({ to }) {
+  const location = useLocation()
+  return <Navigate to={destinationWithLocation(to, location)} replace />
+}
+
 function LegacyCandidateRedirect() {
   const location = useLocation()
   const { '*': legacyPath = '' } = useParams()
-  const memberPath = legacyPath ? `/member/${legacyPath}` : '/member/home'
+  const exactRoutes = {
+    '': '/member/home',
+    dashboard: '/member/home',
+    jobs: '/member/opportunities/jobs',
+    applications: '/member/activity/applications',
+    bids: '/member/activity/bids',
+    'saved-posts': '/member/activity/saved',
+    connections: '/member/messages?view=connections',
+    network: '/member/messages?view=connections',
+  }
+  const jobMatch = legacyPath.match(/^jobs\/(\d+)$/)
+  const memberPath = jobMatch
+    ? `/member/opportunities/job-${jobMatch[1]}`
+    : exactRoutes[legacyPath] ?? `/member/${legacyPath}`
 
-  return (
-    <Navigate
-      to={`${memberPath}${location.search}${location.hash}`}
-      replace
-    />
-  )
+  return <Navigate to={destinationWithLocation(memberPath, location)} replace />
+}
+
+function LegacyCircleRedirect() {
+  const location = useLocation()
+  const { id } = useParams()
+  return <Navigate to={`/member/community/circles/${id}${location.search}${location.hash}`} replace />
+}
+
+function LegacyOpportunityRedirect({ type }) {
+  const location = useLocation()
+  const { opportunityId } = useParams()
+  return <Navigate to={`/member/opportunities/${type}-${opportunityId}${location.search}${location.hash}`} replace />
 }
 
 export default function AppRoutes() {
@@ -92,13 +132,17 @@ export default function AppRoutes() {
         <Route path="/:page" element={<InfoPage />} />
         <Route path="/members/:id" element={<ProtectedRoute allowedRoles={authenticatedRoles}><MemberPublicProfile /></ProtectedRoute>} />
         <Route path="/companies/:id" element={<ProtectedRoute allowedRoles={authenticatedRoles}><CompanyPublicProfile /></ProtectedRoute>} />
-        <Route path="/notifications" element={<ProtectedRoute allowedRoles={authenticatedRoles}><Notifications /></ProtectedRoute>} />
-        <Route path="/jobs" element={<ProtectedRoute allowedRoles={candidateRoles}><Navigate to="/member/opportunities/jobs" replace /></ProtectedRoute>} />
-        <Route path="/projects" element={<ProtectedRoute allowedRoles={candidateRoles}><Navigate to="/member/opportunities/projects" replace /></ProtectedRoute>} />
-        <Route path="/member/applications" element={<ProtectedRoute allowedRoles={candidateRoles}><Navigate to={getCandidateActivityPath('applications')} replace /></ProtectedRoute>} />
-        <Route path="/member/bids" element={<ProtectedRoute allowedRoles={candidateRoles}><Navigate to={getCandidateActivityPath('bids')} replace /></ProtectedRoute>} />
+        <Route path="/notifications" element={<ProtectedRoute allowedRoles={authenticatedRoles}><NotificationsByRole /></ProtectedRoute>} />
+        <Route path="/jobs" element={<ProtectedRoute allowedRoles={candidateRoles}><RedirectPreservingLocation to="/member/opportunities/jobs" /></ProtectedRoute>} />
+        <Route path="/jobs/:opportunityId" element={<ProtectedRoute allowedRoles={candidateRoles}><LegacyOpportunityRedirect type="job" /></ProtectedRoute>} />
+        <Route path="/projects" element={<ProtectedRoute allowedRoles={candidateRoles}><RedirectPreservingLocation to="/member/opportunities/projects" /></ProtectedRoute>} />
+        <Route path="/projects/:opportunityId" element={<ProtectedRoute allowedRoles={candidateRoles}><LegacyOpportunityRedirect type="project" /></ProtectedRoute>} />
+        <Route path="/member/jobs" element={<ProtectedRoute allowedRoles={candidateRoles}><RedirectPreservingLocation to="/member/opportunities/jobs" /></ProtectedRoute>} />
+        <Route path="/member/jobs/:opportunityId" element={<ProtectedRoute allowedRoles={candidateRoles}><LegacyOpportunityRedirect type="job" /></ProtectedRoute>} />
+        <Route path="/member/applications" element={<ProtectedRoute allowedRoles={candidateRoles}><RedirectPreservingLocation to={getCandidateActivityPath('applications')} /></ProtectedRoute>} />
+        <Route path="/member/bids" element={<ProtectedRoute allowedRoles={candidateRoles}><RedirectPreservingLocation to={getCandidateActivityPath('bids')} /></ProtectedRoute>} />
         <Route path="/member/home" element={<ProtectedRoute allowedRoles={candidateRoles}><CandidateHome /></ProtectedRoute>} />
-        <Route path="/member/saved-posts" element={<ProtectedRoute allowedRoles={candidateRoles}><Navigate to="/member/activity/saved" replace /></ProtectedRoute>} />
+        <Route path="/member/saved-posts" element={<ProtectedRoute allowedRoles={candidateRoles}><RedirectPreservingLocation to="/member/activity/saved" /></ProtectedRoute>} />
         <Route path="/member/projects" element={<ProtectedRoute allowedRoles={candidateRoles}><CandidateProjects /></ProtectedRoute>} />
         <Route path="/member/projects/:projectId" element={<ProtectedRoute allowedRoles={candidateRoles}><CandidateProjectDetails /></ProtectedRoute>} />
         <Route path="/member/opportunities" element={<ProtectedRoute allowedRoles={candidateRoles}><CandidateOpportunities section="jobs" /></ProtectedRoute>} />
@@ -109,13 +153,13 @@ export default function AppRoutes() {
         <Route path="/member/create/post" element={<ProtectedRoute allowedRoles={candidateRoles}><CandidateCreatePage type="post" /></ProtectedRoute>} />
         <Route path="/member/create/team" element={<ProtectedRoute allowedRoles={candidateRoles}><CandidateCreatePage type="team" /></ProtectedRoute>} />
         <Route path="/member/community" element={<ProtectedRoute allowedRoles={candidateRoles}><Community /></ProtectedRoute>} />
-        <Route path="/member/community/discover" element={<ProtectedRoute allowedRoles={candidateRoles}><Community /></ProtectedRoute>} />
+        <Route path="/member/community/discover" element={<ProtectedRoute allowedRoles={candidateRoles}><RedirectPreservingLocation to="/member/community" /></ProtectedRoute>} />
         <Route path="/member/community/circles" element={<ProtectedRoute allowedRoles={candidateRoles}><Community initialView="circles" /></ProtectedRoute>} />
         <Route path="/member/community/discussions/:postId" element={<ProtectedRoute allowedRoles={candidateRoles}><DiscussionDetails /></ProtectedRoute>} />
         <Route path="/member/community/circles/:id" element={<ProtectedRoute allowedRoles={candidateRoles}><CircleDetails /></ProtectedRoute>} />
         <Route path="/member/community/members" element={<ProtectedRoute allowedRoles={candidateRoles}><Community initialView="members" /></ProtectedRoute>} />
         <Route path="/member/community/members/:memberId" element={<ProtectedRoute allowedRoles={candidateRoles}><CandidateMemberProfile /></ProtectedRoute>} />
-        <Route path="/member/community/events" element={<ProtectedRoute allowedRoles={candidateRoles}><CandidateEvents /></ProtectedRoute>} />
+        <Route path="/member/community/events" element={<ProtectedRoute allowedRoles={candidateRoles}><Community initialView="events" /></ProtectedRoute>} />
         <Route path="/member/community/events/:eventId" element={<ProtectedRoute allowedRoles={candidateRoles}><CandidateEventDetails /></ProtectedRoute>} />
         <Route path="/member/community/team-requests/:requestId" element={<ProtectedRoute allowedRoles={candidateRoles}><CandidateTeammateRequestDetails /></ProtectedRoute>} />
         <Route path="/member/profile" element={<ProtectedRoute allowedRoles={candidateRoles}><CandidateProfile /></ProtectedRoute>} />
@@ -126,12 +170,15 @@ export default function AppRoutes() {
         <Route path="/member/activity/projects" element={<ProtectedRoute allowedRoles={candidateRoles}><CandidateActivity section="projects" /></ProtectedRoute>} />
         <Route path="/member/activity/posts" element={<ProtectedRoute allowedRoles={candidateRoles}><CandidateActivity section="posts" /></ProtectedRoute>} />
         <Route path="/member/activity/saved" element={<ProtectedRoute allowedRoles={candidateRoles}><CandidateActivity section="saved" /></ProtectedRoute>} />
-        <Route path="/member/messages" element={<ProtectedRoute allowedRoles={candidateRoles}><Connections messagesMode /></ProtectedRoute>} />
+        <Route path="/member/messages" element={<ProtectedRoute allowedRoles={candidateRoles}><CandidateMessages /></ProtectedRoute>} />
+        <Route path="/member/messages/connections" element={<ProtectedRoute allowedRoles={candidateRoles}><RedirectPreservingLocation to="/member/messages?view=connections" /></ProtectedRoute>} />
+        <Route path="/member/connections" element={<ProtectedRoute allowedRoles={candidateRoles}><RedirectPreservingLocation to="/member/messages?view=connections" /></ProtectedRoute>} />
+        <Route path="/member/network" element={<ProtectedRoute allowedRoles={candidateRoles}><RedirectPreservingLocation to="/member/messages?view=connections" /></ProtectedRoute>} />
         <Route path="/member/notifications" element={<ProtectedRoute allowedRoles={candidateRoles}><CandidateNotifications /></ProtectedRoute>} />
         <Route path="/member/settings" element={<ProtectedRoute allowedRoles={candidateRoles}><CandidateSettings /></ProtectedRoute>} />
-        <Route path="/connections" element={<ProtectedRoute allowedRoles={candidateRoles}><Navigate to="/member/messages" replace /></ProtectedRoute>} />
-        <Route path="/circles" element={<ProtectedRoute allowedRoles={candidateRoles}><Navigate to="/member/community/circles" replace /></ProtectedRoute>} />
-        <Route path="/circles/:id" element={<ProtectedRoute allowedRoles={candidateRoles}><CircleDetails /></ProtectedRoute>} />
+        <Route path="/connections" element={<ProtectedRoute allowedRoles={candidateRoles}><RedirectPreservingLocation to="/member/messages?view=connections" /></ProtectedRoute>} />
+        <Route path="/circles" element={<ProtectedRoute allowedRoles={candidateRoles}><RedirectPreservingLocation to="/member/community/circles" /></ProtectedRoute>} />
+        <Route path="/circles/:id" element={<ProtectedRoute allowedRoles={candidateRoles}><LegacyCircleRedirect /></ProtectedRoute>} />
         <Route path="/company/profile" element={<ProtectedRoute allowedRoles={companyRoles}><CompanyProfile /></ProtectedRoute>} />
         <Route path="/company/overview" element={<ProtectedRoute allowedRoles={companyRoles}><CompanyOverview /></ProtectedRoute>} />
         <Route path="/company/opportunities" element={<ProtectedRoute allowedRoles={companyRoles}><CompanyOpportunities /></ProtectedRoute>} />
@@ -143,7 +190,7 @@ export default function AppRoutes() {
         <Route path="/company/projects/create" element={<ProtectedRoute allowedRoles={companyRoles}><ManageProjects key="create-project" initialCreate /></ProtectedRoute>} />
         <Route path="/company/applications" element={<ProtectedRoute allowedRoles={companyRoles}><CompanyApplications /></ProtectedRoute>} />
         <Route path="/company/bids" element={<ProtectedRoute allowedRoles={companyRoles}><Navigate to="/company/applications?type=proposals" replace /></ProtectedRoute>} />
-        <Route path="/member/dashboard" element={<ProtectedRoute allowedRoles={candidateRoles}><Navigate to="/member/home" replace /></ProtectedRoute>} />
+        <Route path="/member/dashboard" element={<ProtectedRoute allowedRoles={candidateRoles}><RedirectPreservingLocation to="/member/home" /></ProtectedRoute>} />
         <Route path="/candidate/*" element={<LegacyCandidateRedirect />} />
         <Route path="/company/dashboard" element={<ProtectedRoute allowedRoles={companyRoles}><Navigate to="/company/overview" replace /></ProtectedRoute>} />
         <Route path="/admin/overview" element={<ProtectedRoute allowedRoles={adminRoles}><AdminDashboard /></ProtectedRoute>} />

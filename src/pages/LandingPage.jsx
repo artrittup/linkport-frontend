@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router'
 import { getJobs } from '../api/jobsApi'
 import { getProjects } from '../api/projectsApi'
 import Button from '../components/Button'
+import JoinCommunityArt from '../components/JoinCommunityArt'
 import Navbar from '../components/Navbar'
 import { useAuth } from '../context/AuthContext'
 
@@ -61,6 +62,7 @@ function Icon({ name, className = 'h-5 w-5' }) {
     network: <><circle cx="12" cy="12" r="3" /><circle cx="5" cy="5" r="2" /><circle cx="19" cy="5" r="2" /><circle cx="5" cy="19" r="2" /><circle cx="19" cy="19" r="2" /><path d="m7 7 3 3m4 0 3-3m-7 7-3 3m7-3 3 3" /></>,
     discord: <><path d="M8.5 8.5a8 8 0 0 1 7 0M7 18.5c3.3 1.5 6.7 1.5 10 0" /><path d="M6.5 6.5C4.8 9.2 4 12.5 4 16c1.3 1.2 2.6 2 4 2.6l1-1.4M17.5 6.5c1.7 2.7 2.5 6 2.5 9.5-1.3 1.2-2.6 2-4 2.6l-1-1.4" /><circle cx="9" cy="13" r="1" fill="currentColor" stroke="none" /><circle cx="15" cy="13" r="1" fill="currentColor" stroke="none" /></>,
     profile: <><circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0 1 16 0" /></>,
+    link: <><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.5 1.5" /><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.5-1.5" /></>,
     send: <><path d="m22 2-7 20-4-9-9-4 20-7Z" /><path d="M22 2 11 13" /></>,
     spark: <><path d="m12 3-1.4 4.2a5 5 0 0 1-3.2 3.2L3 12l4.4 1.6a5 5 0 0 1 3.2 3.2L12 21l1.4-4.2a5 5 0 0 1 3.2-3.2L21 12l-4.4-1.6a5 5 0 0 1-3.2-3.2L12 3Z" /></>,
     arrow: <><path d="M5 12h14M13 6l6 6-6 6" /></>,
@@ -89,23 +91,21 @@ function scrollToSection(event, id) {
   document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
 }
 
-const decorIcons = ['users', 'building', 'layers', 'briefcase', 'network', 'spark', 'send', 'profile']
+const railItem =
+  'flex min-h-0 flex-1 items-center gap-2.5 rounded-lg px-3 text-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring'
 
 function SideNav({ activeSection, onSelect }) {
   const itemClass = (active) =>
-    `block border-b border-border/25 px-4 py-2.5 text-[0.95rem] transition-colors last:border-b-0 ${
+    `${railItem} ${
       active
-        ? 'bg-primary/10 font-bold text-primary'
-        : 'text-text-secondary hover:bg-surface-elevated hover:text-text-primary'
+        ? 'bg-primary/10 font-semibold text-primary'
+        : 'text-text-secondary hover:bg-surface-muted hover:text-text-primary'
     }`
 
   return (
-    <aside className="hidden w-52 shrink-0 lg:block" aria-label="Landing sections">
-      <div className="flex h-full flex-col py-5 pl-4 pr-3">
-        <nav className="lp-panel sticky top-5">
-          <p className="border-b border-border/30 bg-surface-muted/50 px-4 py-2.5 text-[11px] font-bold uppercase tracking-wider text-text-muted">
-            Navigation
-          </p>
+    <aside className="hidden w-44 shrink-0 py-5 pl-4 lg:block" aria-label="Landing navigation">
+      <nav className="lp-content sticky top-5 flex h-[calc(100vh-7rem)] flex-col gap-1 p-2">
+        <div className="flex min-h-0 flex-1 flex-col gap-1">
           {navigation.map((item) => (
             <a
               key={item.id}
@@ -117,21 +117,42 @@ function SideNav({ activeSection, onSelect }) {
               }}
               className={itemClass(activeSection === item.id)}
             >
+              <Icon name={item.icon} className="h-[18px] w-[18px] shrink-0" />
               {item.label}
             </a>
           ))}
-        </nav>
-
-        {/* Motif running the length of the page. */}
-        <div
-          aria-hidden="true"
-          className="mt-10 flex flex-1 flex-col items-center justify-around pb-10 text-primary/25"
-        >
-          {decorIcons.map((name) => (
-            <Icon key={name} name={name} className="h-14 w-14" />
-          ))}
         </div>
-      </div>
+
+        <div className="shrink-0 border-t border-border pt-2">
+          <Link
+            to="/register"
+            className="lp-promo group block rounded-lg border border-border bg-surface-muted p-4 hover:border-primary/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
+          >
+            <span className="flex items-start justify-between gap-2">
+              <Icon
+                name="spark"
+                className="h-[22px] w-[22px] shrink-0 text-primary transition-transform duration-200 group-hover:scale-110"
+              />
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary text-primary-contrast transition-transform duration-200 group-hover:translate-x-0.5">
+                <Icon name="arrow" className="h-3.5 w-3.5" />
+              </span>
+            </span>
+            <span className="mt-2.5 block text-[13px] font-semibold leading-snug text-text-primary">
+              Build your future with LinkPort
+            </span>
+          </Link>
+          <p className="mt-2 text-center text-[10px] tracking-wide text-text-subtle">
+            Connect &middot; Create &middot; Grow
+          </p>
+        </div>
+
+        <div className="shrink-0 border-t border-border pt-5">
+          <JoinCommunityArt className="mx-auto block w-full" />
+          <p className="mt-1.5 text-center text-[11px] font-semibold leading-snug text-text-secondary">
+            Join a community
+          </p>
+        </div>
+      </nav>
     </aside>
   )
 }
@@ -492,7 +513,7 @@ export default function LandingPage() {
       <div className="mx-auto flex w-full max-w-[100rem]">
         <SideNav activeSection={activeSection} onSelect={setActiveSection} />
 
-        <div className="min-w-0 flex-1 py-5 pr-4 max-lg:p-0">
+        <div className="min-w-0 flex-1 py-5 pl-3 pr-4 max-lg:p-0">
           <div className="lp-content overflow-hidden">
           <MobileSectionNav activeSection={activeSection} onSelect={setActiveSection} />
 

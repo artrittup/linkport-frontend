@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import Button from './Button'
 import skillGroups from './skillOptions'
 
 export default function SkillsInput({ skills, setSkills, placeholder = 'Add a skill...' }) {
@@ -91,10 +90,6 @@ export default function SkillsInput({ skills, setSkills, placeholder = 'Add a sk
             </div>
           )}
         </div>
-
-        <Button type="button" variant="outline" size="sm" onClick={() => addSkill()}>
-          Add
-        </Button>
       </div>
 
       {skills.length > 0 && (

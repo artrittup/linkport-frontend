@@ -1,12 +1,10 @@
 import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router'
+import AuthLayout from '../components/AuthLayout'
+import FloatingField from '../components/FloatingField'
+import LinkPortLogo from '../components/LinkPortLogo'
 import { getAuthErrorMessage } from '../api/authApi'
 import { useAuth } from '../context/AuthContext'
-
-const inputClasses =
-  'mt-1.5 w-full border border-border bg-background px-3 py-2 text-sm text-text-primary outline-none transition-colors placeholder:text-text-subtle hover:border-border-strong focus:border-primary focus:ring-1 focus:ring-focus-ring'
-
-const labelClasses = 'block text-sm font-bold text-text-primary'
 
 export default function Login() {
   const location = useLocation()
@@ -47,102 +45,76 @@ export default function Login() {
   }
 
   return (
-    <main className="min-h-screen bg-background text-text-primary">
-      <header className="lp-titlebar">
-        <div className="mx-auto flex w-full max-w-4xl items-center gap-4 px-4 py-2.5 sm:px-6">
-          <Link
-            to="/"
-            className="text-lg font-bold tracking-tight text-text-primary hover:text-primary sm:text-xl"
-            aria-label="LinkPort home"
+    <AuthLayout headline="Explore your interests." identity={email}>
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight text-text-primary">Log into LinkPort</h1>
+
+        <form onSubmit={handleSubmit} className="mt-5 space-y-3">
+          {location.state?.notice && (
+            <p role="status" className="rounded-lg border border-success/50 bg-success/10 px-3 py-2 text-sm text-success-text">
+              {location.state.notice}
+            </p>
+          )}
+
+          <FloatingField
+            id="email"
+            name="email"
+            type="text"
+            label="Email or username"
+            autoComplete="username"
+            required
+            invalid={Boolean(error)}
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+          />
+
+          <FloatingField
+            id="password"
+            name="password"
+            type="password"
+            label="Password"
+            autoComplete="current-password"
+            required
+            invalid={Boolean(error)}
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+          />
+
+          {error && (
+            <p role="alert" className="text-sm text-danger-text">
+              {error}
+            </p>
+          )}
+
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="w-full rounded-lg bg-primary px-4 py-3 text-base font-bold text-primary-contrast transition-colors hover:bg-primary-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring disabled:opacity-60"
           >
-            Link<span className="text-primary">Port</span>
+            {isSubmitting ? 'Logging in...' : 'Log in'}
+          </button>
+        </form>
+
+        <p className="mt-4 text-center">
+          <Link to="/forgot-password" className="text-sm font-semibold text-text-primary no-underline hover:underline">
+            Forgot password?
           </Link>
-        </div>
-      </header>
+        </p>
 
-      <div className="mx-auto w-full max-w-md px-4 py-10 sm:px-6">
-        <nav aria-label="Breadcrumb" className="mb-3 text-xs text-text-muted">
-          <Link to="/" className="underline-offset-2 hover:text-primary hover:underline">Home</Link>
-          <span aria-hidden="true"> &raquo; </span>
-          <span className="text-text-secondary">Log in</span>
-        </nav>
+        <hr className="my-6 border-border" />
 
-        <section className="lp-panel">
-          <h1 className="lp-panel-head px-4 py-2.5 text-sm font-bold uppercase tracking-wide text-text-primary">
-            Member log in
-          </h1>
+        <Link
+          to="/register"
+          className="block rounded-lg border border-primary bg-surface px-4 py-3 text-center text-base font-bold text-primary no-underline transition-colors hover:bg-primary/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
+        >
+          Create new account
+        </Link>
 
-          <form onSubmit={handleSubmit} className="space-y-4 p-4 sm:p-5">
-            {location.state?.notice && (
-              <p role="status" className="border border-success/50 bg-success/10 px-3 py-2 text-sm text-success-text">
-                {location.state.notice}
-              </p>
-            )}
-
-            <div>
-              <label htmlFor="email" className={labelClasses}>Email</label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                placeholder="you@example.com"
-                className={inputClasses}
-              />
-            </div>
-
-            <div>
-              <label htmlFor="password" className={labelClasses}>Password</label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete="current-password"
-                required
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                placeholder="Enter your password"
-                className={inputClasses}
-              />
-              <p className="mt-1.5 text-xs">
-                <Link
-                  to="/forgot-password"
-                  className="text-primary underline-offset-2 hover:underline"
-                >
-                  Forgot your password?
-                </Link>
-              </p>
-            </div>
-
-            {error && (
-              <p
-                role="alert"
-                className="border border-danger/50 bg-danger/10 px-3 py-2 text-sm text-danger-text"
-              >
-                {error}
-              </p>
-            )}
-
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="w-full border border-primary bg-primary px-4 py-2 text-sm font-bold text-primary-contrast transition-colors hover:bg-primary-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring disabled:opacity-60"
-            >
-              {isSubmitting ? 'Logging in...' : 'Log in'}
-            </button>
-          </form>
-
-          <p className="border-t border-border bg-surface-muted px-4 py-3 text-sm text-text-muted">
-            No account yet?{' '}
-            <Link to="/register" className="font-bold text-primary underline-offset-2 hover:underline">
-              Register here
-            </Link>
-          </p>
-        </section>
+        <p className="mt-10 flex items-center justify-center gap-1.5 text-text-muted">
+          <LinkPortLogo className="h-[18px] w-auto" />
+          <span className="text-[15px] font-medium tracking-[-0.01em]">LinkPort</span>
+        </p>
       </div>
-    </main>
+    </AuthLayout>
   )
 }

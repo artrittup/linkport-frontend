@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link } from 'react-router'
+import { Link, useSearchParams } from 'react-router'
 import { getJobs } from '../api/jobsApi'
 import { getProjects } from '../api/projectsApi'
 import ActivityToastMessage from '../components/ActivityToastMessage'
@@ -49,6 +49,7 @@ function uniqueValues(items) {
 }
 
 export default function CandidateOpportunities({ section = 'jobs' }) {
+  const [searchParams] = useSearchParams()
   const savedItems = useSavedItems()
   const { showToast } = useToast()
   const [directory, setDirectory] = useState(() => opportunityCache.data ?? {
@@ -58,12 +59,13 @@ export default function CandidateOpportunities({ section = 'jobs' }) {
     projectsError: false,
   })
   const [isLoading, setIsLoading] = useState(() => !opportunityCache.data)
-  const [search, setSearch] = useState('')
+  const [search, setSearch] = useState(() => searchParams.get('company') ?? '')
   const [workStyle, setWorkStyle] = useState('All work styles')
   const [jobType, setJobType] = useState('All job types')
   const [projectCategory, setProjectCategory] = useState('All categories')
   const [projectStatus, setProjectStatus] = useState('All statuses')
   const [sort, setSort] = useState('newest')
+  const [savedOnly, setSavedOnly] = useState(false)
   const [applicationJob, setApplicationJob] = useState(null)
   const [bidProject, setBidProject] = useState(null)
   const isJobs = section !== 'projects'
@@ -112,15 +114,19 @@ export default function CandidateOpportunities({ section = 'jobs' }) {
           ...opportunity.skills,
         ].some((value) => value?.toLowerCase().includes(query))
 
+        const matchesSaved = !savedOnly || savedItems.savedKeys.has(
+          getSavedItemKey(opportunity.source, opportunity.sourceId),
+        )
+
         if (isJobs) {
           const matchesWorkStyle = workStyle === 'All work styles' || opportunity.workStyle === workStyle
           const matchesJobType = jobType === 'All job types' || opportunity.employmentType === jobType
-          return matchesSearch && matchesWorkStyle && matchesJobType
+          return matchesSearch && matchesSaved && matchesWorkStyle && matchesJobType
         }
 
         const matchesCategory = projectCategory === 'All categories' || opportunity.category === projectCategory
         const matchesStatus = projectStatus === 'All statuses' || opportunity.status === projectStatus
-        return matchesSearch && matchesCategory && matchesStatus
+        return matchesSearch && matchesSaved && matchesCategory && matchesStatus
       })
       .sort((first, second) => {
         if (sort === 'deadline') {
@@ -138,6 +144,8 @@ export default function CandidateOpportunities({ section = 'jobs' }) {
     jobType,
     projectCategory,
     projectStatus,
+    savedItems.savedKeys,
+    savedOnly,
     search,
     sort,
     workStyle,
@@ -150,11 +158,13 @@ export default function CandidateOpportunities({ section = 'jobs' }) {
     setProjectCategory('All categories')
     setProjectStatus('All statuses')
     setSort('newest')
+    setSavedOnly(false)
   }
 
   const hasFilters = Boolean(
     search.trim()
     || sort !== 'newest'
+    || savedOnly
     || (isJobs
       ? workStyle !== 'All work styles' || jobType !== 'All job types'
       : projectCategory !== 'All categories' || projectStatus !== 'All statuses'),
@@ -174,10 +184,11 @@ export default function CandidateOpportunities({ section = 'jobs' }) {
             <p className="font-mono text-sm text-primary">Find work worth doing</p>
             <h2 className="mt-2 text-3xl font-bold tracking-tight text-text-primary sm:text-4xl">Opportunities</h2>
             <p className="mt-3 max-w-2xl text-sm leading-6 text-text-muted sm:text-base">
-              Explore company roles and scoped projects, then apply or submit a bid using your LinkPort profile.
+              Explore roles and project work across healthcare, education, culture, hospitality, technology, sport, and more.
             </p>
           </div>
           <div className="flex shrink-0 flex-wrap gap-2">
+            <Link to={getCandidateActivityPath('saved')} className="rounded-lg border border-border px-4 py-2.5 text-sm font-semibold text-text-secondary hover:border-primary/50 hover:text-primary">Saved</Link>
             <Link to={getCandidateActivityPath('applications')} className="rounded-lg border border-border px-4 py-2.5 text-sm font-semibold text-text-secondary hover:border-primary/50 hover:text-primary">Applications</Link>
             <Link to={getCandidateActivityPath('bids')} className="rounded-lg border border-border px-4 py-2.5 text-sm font-semibold text-text-secondary hover:border-primary/50 hover:text-primary">Bids</Link>
           </div>
@@ -202,7 +213,7 @@ export default function CandidateOpportunities({ section = 'jobs' }) {
                 type="search"
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
-                placeholder={isJobs ? 'Search jobs by title, company, or skill...' : 'Search projects by title, company, or skill...'}
+                placeholder={isJobs ? 'Search jobs by title, company, or experience...' : 'Search projects by title, company, or category...'}
                 className="w-full rounded-xl border border-border bg-surface/70 px-4 py-3 text-sm text-text-primary outline-none placeholder:text-text-subtle focus:border-primary focus:ring-1 focus:ring-focus-ring"
               />
             </div>
@@ -239,7 +250,15 @@ export default function CandidateOpportunities({ section = 'jobs' }) {
             <p className="text-sm text-text-subtle">
               {isLoading ? 'Loading opportunities...' : `${visibleOpportunities.length} ${isJobs ? 'jobs' : 'projects'}`}
             </p>
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-3">
+              <button
+                type="button"
+                aria-pressed={savedOnly}
+                onClick={() => setSavedOnly((current) => !current)}
+                className={`rounded-lg border px-3 py-2 text-sm font-semibold transition-colors ${savedOnly ? 'border-primary bg-primary/10 text-primary' : 'border-border bg-surface text-text-secondary hover:border-primary/50 hover:text-primary'}`}
+              >
+                Saved only
+              </button>
               {hasFilters && <button type="button" onClick={clearFilters} className="text-sm font-medium text-primary hover:underline">Clear filters</button>}
               <label htmlFor="opportunity-sort" className="sr-only">Sort opportunities</label>
               <select id="opportunity-sort" value={sort} onChange={(event) => setSort(event.target.value)} className="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text-secondary outline-none focus:border-primary">
@@ -275,8 +294,8 @@ export default function CandidateOpportunities({ section = 'jobs' }) {
             </div>
           ) : !activeError && (
             <EmptyState
-              title={search.trim() ? `No ${isJobs ? 'jobs' : 'projects'} match your search` : `No ${isJobs ? 'jobs' : 'projects'} available`}
-              description="Try a broader search or clear the selected filters."
+              title={savedOnly ? `No saved ${isJobs ? 'jobs' : 'projects'} yet` : search.trim() ? `No ${isJobs ? 'jobs' : 'projects'} match your search` : `No ${isJobs ? 'jobs' : 'projects'} available`}
+              description={savedOnly ? `Save a ${isJobs ? 'job' : 'project'} and it will appear here.` : 'Try a broader search or clear the selected filters.'}
               actionLabel={hasFilters ? 'Clear filters' : undefined}
               onAction={hasFilters ? clearFilters : undefined}
             />

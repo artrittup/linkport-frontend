@@ -136,7 +136,17 @@ export default function CandidateOpportunityDetails() {
             {opportunity.type}
           </span>
           <h2 className="mt-4 text-3xl font-bold tracking-tight text-text-primary">{opportunity.title}</h2>
-          <p className="mt-2 text-lg font-medium text-primary">{opportunity.company}</p>
+          {opportunity.companyId ? (
+            <Link
+              to={`/companies/${opportunity.companyId}`}
+              className="mt-2 inline-flex items-center gap-2 text-lg font-semibold text-primary hover:text-primary-hover"
+            >
+              {opportunity.company}
+              <span aria-hidden="true">→</span>
+            </Link>
+          ) : (
+            <p className="mt-2 text-lg font-medium text-primary">{opportunity.company}</p>
+          )}
 
           <section className="mt-8">
             <h3 className="text-sm font-semibold uppercase tracking-wide text-text-secondary">About the opportunity</h3>
@@ -163,6 +173,18 @@ export default function CandidateOpportunityDetails() {
         </div>
 
         <aside className="h-fit rounded-2xl border border-border bg-surface/65 p-6">
+          {opportunity.companyId && (
+            <Link
+              to={`/companies/${opportunity.companyId}`}
+              className="mb-6 flex items-center justify-between rounded-xl border border-border bg-background/45 px-4 py-3 text-sm font-semibold text-text-primary transition-colors hover:border-primary/50 hover:text-primary"
+            >
+              <span>
+                <span className="block text-[10px] font-semibold uppercase tracking-wide text-text-subtle">Posted by</span>
+                <span className="mt-1 block">{opportunity.company}</span>
+              </span>
+              <span aria-hidden="true">→</span>
+            </Link>
+          )}
           <dl className="space-y-5">
             <div>
               <dt className="text-xs uppercase tracking-wide text-text-subtle">Location</dt>

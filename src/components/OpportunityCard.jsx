@@ -45,7 +45,16 @@ export default function OpportunityCard({
             {isJob ? (opportunity.type === 'INTERNSHIP' ? 'Internship' : 'Job') : 'Project opportunity'}
           </p>
           <h3 className="mt-2 break-words text-xl font-bold leading-snug text-text-primary">{opportunity.title}</h3>
-          <p className="mt-1 truncate text-sm font-semibold text-primary">{opportunity.company}</p>
+          {opportunity.companyId ? (
+            <Link
+              to={`/companies/${opportunity.companyId}`}
+              className="mt-1 inline-flex max-w-full truncate text-sm font-semibold text-primary hover:text-primary-hover"
+            >
+              {opportunity.company}
+            </Link>
+          ) : (
+            <p className="mt-1 truncate text-sm font-semibold text-primary">{opportunity.company}</p>
+          )}
         </div>
         <SaveButton
           type={opportunity.source}

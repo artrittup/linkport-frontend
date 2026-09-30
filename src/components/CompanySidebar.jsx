@@ -76,7 +76,7 @@ export default function CompanySidebar({ isOpen, onClose }) {
         <button type="button" aria-label="Close navigation" onClick={onClose} className="fixed inset-0 z-40 bg-overlay/60 backdrop-blur-sm lg:hidden" />
       )}
 
-      <aside className={`fixed inset-y-0 left-0 z-50 flex w-72 max-w-[calc(100vw-2rem)] flex-col border-r border-border/80 bg-background shadow-2xl shadow-black/30 transition-transform duration-200 lg:w-64 lg:max-w-none lg:translate-x-0 lg:shadow-none ${
+      <aside className={`fixed inset-y-0 left-0 z-50 flex w-72 max-w-[calc(100vw-2rem)] flex-col border-r border-border/80 bg-background shadow-2xl shadow-black/30 transition-transform duration-200 lg:top-[calc(var(--lp-header-h,5rem)+1.75rem)] lg:w-64 lg:max-w-none lg:translate-x-0 lg:shadow-none ${
         isOpen ? 'translate-x-0' : '-translate-x-full'
       }`}>
         <div className="flex h-20 shrink-0 items-center justify-between border-b border-border/80 px-5">

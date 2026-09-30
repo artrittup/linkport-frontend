@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
+import AppHeader from '../components/AppHeader'
 import LinkPortLogo from '../components/LinkPortLogo'
 import CandidateNotificationBell from '../components/CandidateNotificationBell'
 import CandidateSidebar from '../components/CandidateSidebar'
-import ThemeToggle from '../components/ThemeToggle'
 
 export default function CandidateLayout({ children, title, wide = false }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
@@ -25,6 +25,8 @@ export default function CandidateLayout({ children, title, wide = false }) {
 
   return (
     <div className="min-h-screen min-w-0 bg-background text-text-primary">
+      <AppHeader homePath="/member/home" />
+
       <CandidateSidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
 
       <div className="min-h-screen min-w-0 max-w-full lg:pl-64">
@@ -46,12 +48,11 @@ export default function CandidateLayout({ children, title, wide = false }) {
             <span className="truncate text-sm font-semibold text-text-primary">{title}</span>
           </div>
           <div className="-mr-1 flex items-center gap-1">
-            <ThemeToggle />
             <CandidateNotificationBell placement="mobile" />
           </div>
         </header>
 
-        <main className={`mx-auto w-full min-w-0 px-4 py-8 sm:px-6 sm:py-10 lg:px-8 ${wide ? 'max-w-[96rem]' : 'max-w-7xl'}`}>
+        <main className={`mx-auto w-full min-w-0 px-4 py-5 sm:px-6 sm:py-6 lg:px-8 ${wide ? 'max-w-[96rem]' : 'max-w-7xl'}`}>
           <h1 className="sr-only">{title}</h1>
           {children}
         </main>

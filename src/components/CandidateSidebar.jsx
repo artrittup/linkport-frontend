@@ -9,7 +9,13 @@ import { getNavigationForRole } from '../config/navigation'
 function NavigationIcon({ iconKey }) {
   const paths = {
     home: <path d="M11.3 2.6a1 1 0 0 1 1.4 0l8 7.2a1 1 0 0 1 .3.8V20a1.5 1.5 0 0 1-1.5 1.5H15V15H9v6.5H4.5A1.5 1.5 0 0 1 3 20v-9.4a1 1 0 0 1 .3-.8Z" />,
-    community: <><circle cx="8.5" cy="8" r="3.4" /><circle cx="17" cy="9.2" r="2.7" /><path d="M2.4 20.2a6.1 6.1 0 0 1 12.2 0 .8.8 0 0 1-.8.8H3.2a.8.8 0 0 1-.8-.8ZM15.8 14.4a5.6 5.6 0 0 1 5.8 5 .8.8 0 0 1-.8.9h-3.6a7.7 7.7 0 0 0-1.4-5.9Z" /></>,
+    community: <>
+      <circle cx="12" cy="12" r="9.4" />
+      <g fill="none" stroke="var(--theme-background)" strokeWidth="1.5" strokeLinecap="round">
+        <ellipse cx="12" cy="12" rx="4.1" ry="9.4" />
+        <path d="M3.4 9.2h17.2M3.4 14.8h17.2" />
+      </g>
+    </>,
     opportunities: <><path d="M9 4.6A2.6 2.6 0 0 1 11.6 2h.8A2.6 2.6 0 0 1 15 4.6V6h-2V4.6a.6.6 0 0 0-.6-.6h-.8a.6.6 0 0 0-.6.6V6H9Z" /><path d="M2.6 8.6A2 2 0 0 1 4.6 7h14.8a2 2 0 0 1 2 1.6l.3 2.3-9.7 2.7a2 2 0 0 1-1 0L1.3 10.9Z" /><path d="m1.6 12.9 8.9 2.5a4 4 0 0 0 3 0l8.9-2.5V19a2 2 0 0 1-2 2H3.6a2 2 0 0 1-2-2Z" /></>,
     messages: <path d="M12 3c5 0 9 3.4 9 7.8s-4 7.8-9 7.8a11 11 0 0 1-2.6-.3L5 21l1-3.6A7.7 7.7 0 0 1 3 10.8C3 6.4 7 3 12 3Z" />,
     friends: <><circle cx="9" cy="7.8" r="3.5" /><circle cx="17.2" cy="9" r="2.6" /><path d="M2.6 20.3a6.4 6.4 0 0 1 12.8 0 .7.7 0 0 1-.7.7H3.3a.7.7 0 0 1-.7-.7ZM16.2 14.2a5.4 5.4 0 0 1 5.4 4.9.7.7 0 0 1-.7.8h-3.3a8 8 0 0 0-1.4-5.7Z" /></>,
@@ -27,9 +33,9 @@ function NavigationIcon({ iconKey }) {
     >
       <defs>
         <linearGradient id="lp-nav-grad" x1="0" y1="0" x2="0.4" y2="1">
-          <stop offset="0%" stopColor="#8b93ff" />
-          <stop offset="55%" stopColor="#5b5bf0" />
-          <stop offset="100%" stopColor="#3b31c9" />
+          <stop offset="0%" stopColor="var(--theme-nav-icon-from)" />
+          <stop offset="55%" stopColor="var(--theme-nav-icon-mid)" />
+          <stop offset="100%" stopColor="var(--theme-nav-icon-to)" />
         </linearGradient>
       </defs>
       <g fill="url(#lp-nav-grad)">

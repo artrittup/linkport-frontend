@@ -60,6 +60,9 @@
   --theme-text-subtle: #64748b;
   --theme-text-disabled: #94a3b8;
   --theme-primary: #4f46e5;
+  --theme-nav-icon-from: #8b93ff;
+  --theme-nav-icon-mid: #5b5bf0;
+  --theme-nav-icon-to: #3b31c9;
   --theme-primary-hover: #4338ca;
   --theme-primary-active: #3730a3;
   --theme-primary-soft: #eef2ff;
@@ -103,6 +106,9 @@
   --theme-text-subtle: #64748b;
   --theme-text-disabled: #64748b;
   --theme-primary: #64ffda;
+  --theme-nav-icon-from: #b6fff0;
+  --theme-nav-icon-mid: #64ffda;
+  --theme-nav-icon-to: #17b89a;
   --theme-primary-hover: #7dffe1;
   --theme-primary-active: #a0ffeb;
   --theme-primary-soft: #102b38;

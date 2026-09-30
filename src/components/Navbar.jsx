@@ -3,7 +3,6 @@ import { Link, useNavigate } from 'react-router'
 import api from '../api/axios'
 import LinkPortLogo from './LinkPortLogo'
 import { useAuth } from '../context/AuthContext'
-import NetworkGlobe from './NetworkGlobe'
 import NotificationBell from './NotificationBell'
 import CandidateNotificationBell from './CandidateNotificationBell'
 
@@ -27,7 +26,7 @@ function StripIcon({ name }) {
       strokeWidth="1.8"
       strokeLinecap="round"
       strokeLinejoin="round"
-      className="h-[22px] w-[22px] shrink-0"
+      className="h-[18px] w-[18px] shrink-0"
       aria-hidden="true"
     >
       {paths[name]}
@@ -52,7 +51,7 @@ function StatsStrip() {
 
   return (
     <div className="lp-statstrip">
-      <div className="mx-auto flex w-full max-w-[100rem] items-center justify-between gap-4 px-4 py-0.5 text-[15px] sm:px-6">
+      <div className="mx-auto flex w-full max-w-[100rem] items-center justify-between gap-3 px-4 py-0.5 text-xs sm:gap-4 sm:px-6 sm:text-sm">
         <span className="flex items-center gap-1.5">
           <StripIcon name="release" />
           Release: <span className="font-bold">{BUILD_LABEL}</span>
@@ -95,9 +94,7 @@ export default function Navbar() {
           </span>
         </Link>
 
-        <NetworkGlobe className="hidden min-w-0 flex-1 lg:block" />
-
-        <div className="ml-auto flex shrink-0 items-center gap-1 lg:ml-0">
+        <div className="ml-auto flex shrink-0 items-center gap-1">
           {isLoading ? (
             <span className="px-2 text-xs text-text-subtle">...</span>
           ) : isAuthenticated ? (

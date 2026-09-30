@@ -229,12 +229,11 @@
     background: var(--theme-surface-deep);
   }
 
-  /* sa-mp style counter strip under the header, with a neon edge */
+  /* Quiet secondary context below the primary header. */
   .lp-statstrip {
-    background: var(--theme-primary);
+    background: color-mix(in srgb, var(--theme-primary) 86%, var(--theme-surface-deep));
     color: var(--theme-primary-contrast);
-    border-bottom: 2px solid color-mix(in srgb, var(--theme-primary) 40%, #ffffff);
-    box-shadow: 0 2px 10px color-mix(in srgb, var(--theme-primary) 55%, transparent);
+    border-bottom: 1px solid color-mix(in srgb, var(--theme-primary) 55%, #ffffff);
   }
 
   .lp-sectionnav {

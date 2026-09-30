@@ -54,8 +54,11 @@ export async function getCommunityPostComments(id, page = 1) {
   })
 }
 
-export async function createCommunityPostComment(id, content) {
-  const response = await api.post(`/community-posts/${id}/comments`, { content })
+export async function createCommunityPostComment(id, content, parentCommentId = null) {
+  const response = await api.post(`/community-posts/${id}/comments`, {
+    content,
+    parent_comment_id: parentCommentId,
+  })
   return {
     ...response.data,
     data: mapCommunityPostComment(response.data?.data),
@@ -67,13 +70,27 @@ export async function deleteCommunityPostComment(postId, commentId) {
   return response.data
 }
 
+export async function setCommunityPostCommentLiked(postId, commentId, isLiked) {
+  const response = isLiked
+    ? await api.post(`/community-posts/${postId}/comments/${commentId}/like`)
+    : await api.delete(`/community-posts/${postId}/comments/${commentId}/like`)
+  return response.data
+}
+
 function mapCommunityPostComment(comment) {
   if (!comment || typeof comment !== 'object') return null
   return {
     id: comment.id,
     content: comment.content ?? '',
+    parentCommentId: comment.parent_comment_id ?? null,
+    authorId: comment.author?.id ?? null,
     authorName: comment.author?.name ?? 'LinkPort member',
     canDelete: Boolean(comment.can_delete),
+    likesCount: Number(comment.likes_count ?? 0),
+    isLiked: Boolean(comment.is_liked),
+    replies: Array.isArray(comment.replies)
+      ? comment.replies.map(mapCommunityPostComment).filter(Boolean)
+      : [],
     createdAt: comment.created_at ?? null,
   }
 }

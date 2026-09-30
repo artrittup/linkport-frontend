@@ -274,19 +274,11 @@ export default function CandidateNotifications() {
   return (
     <CandidateLayout title="Notifications">
       <div className="mx-auto min-w-0 max-w-4xl">
-        <section className="min-w-0">
-          <p className="font-mono text-sm text-primary">Member updates</p>
-          <h2 className="mt-2 text-3xl font-bold tracking-tight text-text-primary sm:text-4xl">Notifications</h2>
-          <p className="mt-4 max-w-2xl leading-7 text-text-muted">
-            Review useful updates about opportunities, projects, applications, proposals, and community events.
-          </p>
-        </section>
-
         {error && (
-          <p role="alert" className="mt-6 rounded-lg border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger-text">{error}</p>
+          <p role="alert" className="mb-5 rounded-lg border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger-text">{error}</p>
         )}
 
-        <div className="mt-8 flex min-w-0 gap-2 overflow-x-auto pb-1" role="tablist" aria-label="Filter notifications">
+        <div className="flex min-w-0 gap-2 overflow-x-auto pb-1" role="tablist" aria-label="Filter notifications">
           {filters.map((item) => (
             <button
               key={item.id}

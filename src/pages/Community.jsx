@@ -134,44 +134,16 @@ export default function Community({ initialView = 'discover' }) {
   return (
     <CandidateLayout title="Community">
       <div className="min-w-0 max-w-full">
-        {activeView === 'discover' && (
-          <header>
-            <p className="font-mono text-sm text-primary">Find your people</p>
-            <h2 className="mt-2 text-3xl font-bold tracking-tight text-text-primary sm:text-4xl">Community</h2>
-            <p className="mt-3 max-w-3xl text-sm leading-6 text-text-muted sm:text-base">
-              Discover people, interests, Circles, and events for hobbies, culture, sports, learning, careers, local life, and more.
-            </p>
-          </header>
-        )}
-
         {activeView === 'circles' && (
-          <header className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <p className="font-mono text-xs uppercase tracking-[0.13em] text-primary">Groups</p>
-              <h2 className="mt-1 text-2xl font-bold tracking-tight text-text-primary">Circles</h2>
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-text-muted">Join small communities organized around interests, fields, project ideas, and collaboration.</p>
-            </div>
+          <div className="flex justify-end">
             <button type="button" onClick={() => setIsCreating(true)} className="inline-flex w-fit rounded-lg border border-primary bg-primary px-4 py-2 text-sm font-semibold text-primary-contrast transition-colors hover:bg-primary-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring">Create Circle</button>
-          </header>
+          </div>
         )}
 
         {activeView === 'members' && (
-          <header className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <p className="font-mono text-xs uppercase tracking-[0.13em] text-primary">People</p>
-              <h2 className="mt-1 text-2xl font-bold tracking-tight text-text-primary">Find members</h2>
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-text-muted">Search by interests, skills, education, or location and meet people you have something in common with.</p>
-            </div>
+          <div className="flex justify-end">
             <Link to="/member/profile" className="inline-flex shrink-0 items-center justify-center rounded-lg border border-primary px-4 py-2.5 text-sm font-semibold text-primary hover:bg-primary/10">View my profile</Link>
-          </header>
-        )}
-
-        {activeView === 'events' && (
-          <header>
-            <p className="font-mono text-xs uppercase tracking-[0.13em] text-primary">Events</p>
-            <h2 className="mt-1 text-2xl font-bold tracking-tight text-text-primary">Things happening in the community</h2>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-text-muted">Find meetups, workshops, matches, screenings, book clubs, local activities, and conversations around your interests.</p>
-          </header>
+          </div>
         )}
 
         <SectionTabs
@@ -181,7 +153,7 @@ export default function Community({ initialView = 'discover' }) {
           }))}
           activeId={activeView}
           label="Community sections"
-          className={legacyView ? '' : 'mt-7'}
+          className={activeView === 'circles' || activeView === 'members' ? 'mt-5' : ''}
         />
 
         <section className="mt-6" aria-label="Search Community">

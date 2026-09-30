@@ -179,20 +179,13 @@ export default function CandidateOpportunities({ section = 'jobs' }) {
   return (
     <CandidateLayout title="Opportunities">
       <div className="min-w-0 max-w-full">
-        <section className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <p className="font-mono text-sm text-primary">Find work worth doing</p>
-            <h2 className="mt-2 text-3xl font-bold tracking-tight text-text-primary sm:text-4xl">Opportunities</h2>
-            <p className="mt-3 max-w-2xl text-sm leading-6 text-text-muted sm:text-base">
-              Explore roles and project work across healthcare, education, culture, hospitality, technology, sport, and more.
-            </p>
-          </div>
+        <div className="flex justify-end">
           <div className="flex shrink-0 flex-wrap gap-2">
             <Link to={getCandidateActivityPath('saved')} className="rounded-lg border border-border px-4 py-2.5 text-sm font-semibold text-text-secondary hover:border-primary/50 hover:text-primary">Saved</Link>
             <Link to={getCandidateActivityPath('applications')} className="rounded-lg border border-border px-4 py-2.5 text-sm font-semibold text-text-secondary hover:border-primary/50 hover:text-primary">Applications</Link>
             <Link to={getCandidateActivityPath('bids')} className="rounded-lg border border-border px-4 py-2.5 text-sm font-semibold text-text-secondary hover:border-primary/50 hover:text-primary">Bids</Link>
           </div>
-        </section>
+        </div>
 
         <SectionTabs
           items={[
@@ -201,7 +194,7 @@ export default function CandidateOpportunities({ section = 'jobs' }) {
           ]}
           activeId={isJobs ? 'jobs' : 'projects'}
           label="Opportunity sections"
-          className="mt-7"
+          className="mt-5"
         />
 
         <section className="mt-7" aria-label={isJobs ? 'Find jobs' : 'Find projects'}>

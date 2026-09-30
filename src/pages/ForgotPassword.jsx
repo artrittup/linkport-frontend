@@ -30,7 +30,7 @@ export default function ForgotPassword() {
   }
 
   return (
-    <AuthLayout headline="Explore your interests." identity={email}>
+    <AuthLayout headline="Welcome back." variant="signin" mark="help">
       <div>
         <h1 className="text-2xl font-bold tracking-tight text-text-primary">Reset your password</h1>
         <p className="mt-2 text-sm leading-6 text-text-muted">

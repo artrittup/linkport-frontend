@@ -1,5 +1,7 @@
 import { Link } from 'react-router'
 import LinkPortLogo from './LinkPortLogo'
+import DefaultAvatar from './DefaultAvatar'
+import VerifiedBadge from './VerifiedBadge'
 
 const iconPaths = {
   profile: <><circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0 1 16 0" /></>,
@@ -29,16 +31,28 @@ function Ico({ name, className = 'h-5 w-5' }) {
 }
 
 /** Globe standing in for Facebook's emoji accent. */
-function GlobeMark({ className = 'h-14 w-14' }) {
+function ContextMark({ kind, className = 'h-14 w-14' }) {
+  const marks = {
+    person: <><circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0 1 16 0" /></>,
+    company: <><rect x="3" y="3" width="18" height="18" rx="2" /><path d="M8 7h2M14 7h2M8 11h2M14 11h2M9 21v-3h6v3" /></>,
+    help: <><circle cx="12" cy="12" r="9" /><path d="M9.6 9.3a2.5 2.5 0 0 1 4.9.7c0 1.7-2.5 2-2.5 3.5" /><path d="M12 17.2h.01" /></>,
+  }
+
   return (
     <span
       className={`flex items-center justify-center rounded-full border border-primary/25 bg-surface text-primary shadow-sm ${className}`}
       aria-hidden="true"
     >
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="h-3/5 w-3/5">
-        <circle cx="12" cy="12" r="9" />
-        <ellipse cx="12" cy="12" rx="4" ry="9" />
-        <path d="M3.4 9h17.2M3.4 15h17.2" />
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="h-3/5 w-3/5"
+      >
+        {marks[kind] ?? marks.person}
       </svg>
     </span>
   )
@@ -74,12 +88,10 @@ function ScatteredIcons() {
  * Illustrative preview of a member profile. The values are placeholders that
  * name the fields; they are not a real account.
  */
-function ProfilePreviewCard({ nickname, username }) {
-  const displayName = (nickname || '').trim() || 'Your nickname'
+function ProfilePreviewCard({ nickname, username, verified, kind = 'person' }) {
+  const fallback = kind === 'company' ? 'Your company name' : 'Your nickname'
+  const displayName = (nickname || '').trim() || fallback
   const handle = (username || '').trim()
-  const initials = displayName === 'Your nickname'
-    ? null
-    : displayName.slice(0, 2).toUpperCase()
 
   return (
     <div className="w-[21rem] rounded-2xl border border-border bg-surface p-6 shadow-lg">
@@ -88,11 +100,12 @@ function ProfilePreviewCard({ nickname, username }) {
       </p>
 
       <div className="flex items-center gap-3.5">
-        <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full border border-primary/30 bg-primary/10 font-mono text-lg font-bold text-primary">
-          {initials ?? <Ico name="profile" className="h-8 w-8" />}
-        </span>
+        <DefaultAvatar kind={kind} className="h-16 w-16" />
         <div className="min-w-0">
-          <p className="truncate text-lg font-bold text-text-primary">{displayName}</p>
+          <p className="flex items-center gap-1.5 truncate text-lg font-bold text-text-primary">
+            {displayName}
+            {verified && <VerifiedBadge className="h-[18px] w-[18px]" />}
+          </p>
           <p className="truncate text-sm text-text-muted">
             {handle ? `#${handle}` : '#yourusername'}
           </p>
@@ -156,7 +169,37 @@ function CommunityPreviewCard() {
   )
 }
 
-function AuthShowcase({ headline, nickname, username, sticky }) {
+/** Shown on sign-in screens, where a profile preview makes no sense yet. */
+function WelcomeBackCard() {
+  const rows = [
+    { icon: 'chat', title: 'Your communities', body: 'Pick up the threads you follow.' },
+    { icon: 'briefcase', title: 'Your applications', body: 'See where each one stands.' },
+    { icon: 'inbox', title: 'Your messages', body: 'Replies and invitations waiting.' },
+  ]
+
+  return (
+    <div className="w-[21rem] rounded-2xl border border-border bg-surface p-6 shadow-lg">
+      <p className="mb-4 text-[11px] font-semibold uppercase tracking-wider text-text-subtle">
+        Waiting for you
+      </p>
+      <ul className="space-y-4">
+        {rows.map((row) => (
+          <li key={row.icon} className="flex items-start gap-3">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-primary/25 bg-primary/10 text-primary">
+              <Ico name={row.icon} className="h-5 w-5" />
+            </span>
+            <span className="min-w-0">
+              <span className="block text-sm font-bold text-text-primary">{row.title}</span>
+              <span className="block text-xs leading-snug text-text-muted">{row.body}</span>
+            </span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
+function AuthShowcase({ headline, nickname, username, sticky, variant, verified, mark }) {
   return (
     <section
       aria-hidden="true"
@@ -174,9 +217,11 @@ function AuthShowcase({ headline, nickname, username, sticky }) {
         <ScatteredIcons />
 
         <div className="relative flex items-center justify-center gap-5 pt-6">
-          <ProfilePreviewCard nickname={nickname} username={username} />
+          {variant === 'signin'
+            ? <WelcomeBackCard />
+            : <ProfilePreviewCard nickname={nickname} username={username} verified={verified} kind={mark === 'company' ? 'company' : 'person'} />}
           <div className="flex flex-col items-center gap-4">
-            <GlobeMark />
+            <ContextMark kind={mark} />
             <CommunityPreviewCard />
           </div>
         </div>
@@ -191,11 +236,22 @@ export default function AuthLayout({
   nickname = '',
   username = '',
   wide = false,
+  variant = 'signup',
+  verified = false,
+  mark = 'person',
 }) {
   return (
     <main className="min-h-screen bg-background text-text-primary">
       <div className={`mx-auto flex min-h-screen w-full max-w-6xl flex-col justify-center gap-10 px-4 py-10 sm:px-6 lg:flex-row lg:gap-0 ${wide ? "lg:items-start" : "lg:items-center"}`}>
-        <AuthShowcase headline={headline} nickname={nickname} username={username} sticky={wide} />
+        <AuthShowcase
+          headline={headline}
+          nickname={nickname}
+          username={username}
+          sticky={wide}
+          variant={variant}
+          verified={verified}
+          mark={mark}
+        />
 
         <div aria-hidden="true" className="hidden w-px self-stretch bg-border lg:block" />
 

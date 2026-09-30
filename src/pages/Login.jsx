@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router'
 import AuthLayout from '../components/AuthLayout'
+import Captcha, { captchaEnabled } from '../components/Captcha'
 import FloatingField from '../components/FloatingField'
 import LinkPortLogo from '../components/LinkPortLogo'
 import { getAuthErrorMessage } from '../api/authApi'
@@ -13,6 +14,7 @@ export default function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
+  const [captchaToken, setCaptchaToken] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const handleSubmit = async (event) => {
@@ -21,7 +23,7 @@ export default function Login() {
     setIsSubmitting(true)
 
     try {
-      const authenticatedUser = await login({ email, password })
+      const authenticatedUser = await login({ email, password, captchaToken })
       const requestedPath =
         typeof location.state?.from === 'string' &&
         location.state.from.startsWith('/') &&
@@ -45,7 +47,7 @@ export default function Login() {
   }
 
   return (
-    <AuthLayout headline="Explore your interests." identity={email}>
+    <AuthLayout headline="Welcome back." variant="signin" mark="person">
       <div>
         <h1 className="text-2xl font-bold tracking-tight text-text-primary">Log into LinkPort</h1>
 
@@ -86,9 +88,11 @@ export default function Login() {
             </p>
           )}
 
+          <Captcha onToken={setCaptchaToken} />
+
           <button
             type="submit"
-            disabled={isSubmitting}
+            disabled={isSubmitting || (captchaEnabled && !captchaToken)}
             className="w-full rounded-lg bg-primary px-4 py-3 text-base font-bold text-primary-contrast transition-colors hover:bg-primary-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring disabled:opacity-60"
           >
             {isSubmitting ? 'Logging in...' : 'Log in'}

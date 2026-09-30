@@ -21,7 +21,7 @@ function Tick() {
 }
 
 /** Email input that tells the person straight away if the address is taken. */
-export default function EmailField({ value, onChange, invalid = false }) {
+export default function EmailField({ value, onChange, invalid = false, label = 'Email' }) {
   const address = value.trim()
   const valid = LOOKS_LIKE_EMAIL.test(address)
 
@@ -55,7 +55,7 @@ export default function EmailField({ value, onChange, invalid = false }) {
         id="register-email"
         name="email"
         type="email"
-        label="Email"
+        label={label}
         autoComplete="email"
         required
         value={value}

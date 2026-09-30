@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import LinkPortLogo from '../components/LinkPortLogo'
+import AppHeader from '../components/AppHeader'
 import CompanySidebar from '../components/CompanySidebar'
 import NotificationBell from '../components/NotificationBell'
 import PostOpportunityMenu from '../components/PostOpportunityMenu'
@@ -25,6 +26,8 @@ export default function CompanyLayout({ children, title }) {
 
   return (
     <div className="min-h-screen min-w-0 bg-background text-text-primary">
+      <AppHeader homePath="/company/dashboard" />
+
       <CompanySidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
 
       <div className="min-h-screen min-w-0 max-w-full lg:pl-64">

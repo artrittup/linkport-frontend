@@ -4,6 +4,7 @@ export async function loginUser(credentials) {
   const response = await api.post('/login', {
     email: credentials.email,
     password: credentials.password,
+    captcha_token: credentials.captchaToken,
   })
   return response.data
 }
@@ -17,38 +18,26 @@ export async function registerUser(data) {
 
   const optionalString = (value) => value?.trim() || undefined
   const profile = role === 'candidate'
-    ? {
-        headline: optionalString(data.candidateProfile?.professionalTitle),
-        bio: optionalString(data.candidateProfile?.bio),
-        location: optionalString(data.candidateProfile?.location),
-        phone: optionalString(data.candidateProfile?.phone),
-        website: optionalString(data.candidateProfile?.portfolioLink),
-        github_url: optionalString(data.candidateProfile?.githubUrl),
-        linkedin_url: optionalString(data.candidateProfile?.linkedinUrl),
-        skills: data.candidateProfile?.skills?.length
-          ? data.candidateProfile.skills
-          : undefined,
-        education: optionalString(data.candidateProfile?.education),
-        experience: optionalString(data.candidateProfile?.experience),
-        cv_url: optionalString(data.candidateProfile?.cvUrl),
-      }
+    ? {}
     : {
         company_name: optionalString(data.companyProfile?.companyName),
-        description: optionalString(data.companyProfile?.description),
-        industry: optionalString(data.companyProfile?.industry),
+        owner_name: optionalString(data.companyProfile?.ownerName),
+        company_type: optionalString(data.companyProfile?.companyType),
+        registration_number: optionalString(data.companyProfile?.registrationNumber),
+        registration_document_url: optionalString(data.companyProfile?.registrationDocumentUrl),
+        contact_email: optionalString(data.companyProfile?.contactEmail),
+        country: optionalString(data.companyProfile?.country),
         location: optionalString(data.companyProfile?.location),
         phone: optionalString(data.companyProfile?.phone),
         website: optionalString(data.companyProfile?.website),
-        linkedin_url: optionalString(data.companyProfile?.linkedinUrl),
-        logo_url: optionalString(data.companyProfile?.logoUrl),
-        employee_count: data.companyProfile?.employeeCount
-          ? Number(data.companyProfile.employeeCount)
-          : undefined,
+        industry: optionalString(data.companyProfile?.industry),
+        description: optionalString(data.companyProfile?.description),
       }
 
   const response = await api.post('/register', {
     fullName: data.fullName ?? data.name,
     username: data.username,
+    captcha_token: data.captchaToken,
     email: data.email,
     password: data.password,
     confirmPassword: data.confirmPassword,

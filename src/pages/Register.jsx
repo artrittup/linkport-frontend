@@ -1,53 +1,60 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 import AuthLayout from '../components/AuthLayout'
+import Captcha, { captchaEnabled } from '../components/Captcha'
+import TermsDialog from '../components/TermsDialog'
 import FloatingField from '../components/FloatingField'
+import PasswordField from '../components/PasswordField'
 import UsernameField from '../components/UsernameField'
 import EmailField from '../components/EmailField'
 import CountryPicker from '../components/CountryPicker'
 import DialCodeSelect from '../components/DialCodeSelect'
 import { COUNTRIES } from '../data/countries'
 import LinkPortLogo from '../components/LinkPortLogo'
-import SkillsInput from '../components/SkillsInput'
 import { getAuthErrorMessage } from '../api/authApi'
 import { useAuth } from '../context/AuthContext'
+
+const COMPANY_TYPES = [
+  'Sole proprietorship', 'Limited liability company (LLC)', 'Joint-stock company',
+  'Partnership', 'Non-profit / NGO', 'Public institution', 'Startup', 'Other',
+]
+
+function RoleIcon({ name, className = 'h-6 w-6' }) {
+  const paths = {
+    member: <><circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0 1 16 0" /></>,
+    company: <><rect x="3" y="3" width="18" height="18" rx="2" /><path d="M8 7h2M14 7h2M8 11h2M14 11h2M9 21v-3h6v3" /></>,
+  }
+
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.7"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+    >
+      {paths[name]}
+    </svg>
+  )
+}
 
 const roles = [
   {
     value: 'candidate',
+    icon: 'member',
     label: 'Member',
-    description: 'Find jobs and projects',
+    description: 'Join communities in your field, find jobs and projects, and build a profile.',
   },
   {
     value: 'company',
+    icon: 'company',
     label: 'Company',
-    description: 'Hire and post work',
+    description: 'Post jobs and projects, review applications, and find people to hire.',
   },
 ]
-
-const initialCandidateProfile = {
-  professionalTitle: '',
-  location: '',
-  phone: '',
-  portfolioLink: '',
-  githubUrl: '',
-  linkedinUrl: '',
-  education: '',
-  experience: '',
-  cvUrl: '',
-}
-
-const initialCompanyProfile = {
-  companyName: '',
-  description: '',
-  industry: '',
-  location: '',
-  phone: '',
-  website: '',
-  linkedinUrl: '',
-  logoUrl: '',
-  employeeCount: '',
-}
 
 function FieldError({ errors, name }) {
   const nestedError = name === 'skills'
@@ -58,21 +65,19 @@ function FieldError({ errors, name }) {
   return message ? <p className="mt-1.5 text-xs text-danger-text">{message}</p> : null
 }
 
-function PhoneField({ errors, value, onChange }) {
+
+function CompanyPhoneField({ errors, value, onChange }) {
   const match = /^(\+\d{1,4})\s*(.*)$/.exec(value || '')
   const rest = match?.[2] ?? (value || '')
-
-  // Several countries share a dial code, so remember the chosen country.
   const [country, setCountry] = useState(
     () => COUNTRIES.find((item) => item.iso === 'xk') ?? COUNTRIES[0],
   )
   const dial = match?.[1] ?? country.dial
+  const invalid = Boolean(errors.phone)
 
   const emit = (nextDial, nextRest) => {
     onChange({ target: { name: 'phone', value: `${nextDial} ${nextRest}`.trim() } })
   }
-
-  const invalid = Boolean(errors.phone)
 
   return (
     <div>
@@ -81,10 +86,9 @@ function PhoneField({ errors, value, onChange }) {
           iso={country.iso}
           onChange={(next) => { setCountry(next); emit(next.dial, rest) }}
         />
-
         <div className="relative min-w-0 flex-1">
           <input
-            id="register-phone"
+            id="company-phone"
             name="phone"
             type="tel"
             value={rest}
@@ -96,12 +100,12 @@ function PhoneField({ errors, value, onChange }) {
             }`}
           />
           <label
-            htmlFor="register-phone"
+            htmlFor="company-phone"
             className={`pointer-events-none absolute left-3 top-[0.85rem] text-[11px] leading-none transition-all peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-[15px] peer-focus:top-[0.85rem] peer-focus:translate-y-0 peer-focus:text-[11px] ${
               invalid ? 'text-danger-text' : 'text-text-muted'
             }`}
           >
-            Phone
+            Company phone
           </label>
         </div>
       </div>
@@ -110,71 +114,10 @@ function PhoneField({ errors, value, onChange }) {
   )
 }
 
-function OptionalField({
-  errors,
-  label,
-  name,
-  onChange,
-  type = 'text',
-  value,
-  rows,
-  min,
-}) {
-  const invalid = Boolean(errors[name])
-  const id = `register-${name}`
-
-  // Same floating-label treatment as the account fields above.
-  const shared = `peer w-full rounded-lg border bg-surface pb-2 pl-3 pr-3 pt-7 text-[15px] leading-tight text-text-primary outline-none transition-colors hover:border-border-strong focus:border-primary focus:ring-1 focus:ring-focus-ring ${
-    invalid ? 'border-danger' : 'border-border'
-  }`
-
-  return (
-    <div className={rows ? 'sm:col-span-2' : ''}>
-      <div className="relative">
-        {rows ? (
-          <textarea
-            id={id}
-            name={name}
-            rows={rows}
-            value={value}
-            onChange={onChange}
-            placeholder=" "
-            aria-invalid={invalid || undefined}
-            className={`${shared} resize-y`}
-          />
-        ) : (
-          <input
-            id={id}
-            name={name}
-            type={type}
-            min={min}
-            value={value}
-            onChange={onChange}
-            placeholder=" "
-            aria-invalid={invalid || undefined}
-            className={`${shared} h-[3.75rem]`}
-          />
-        )}
-        <label
-          htmlFor={id}
-          className={`pointer-events-none absolute left-3 top-[0.85rem] text-[11px] leading-none transition-all peer-focus:top-[0.85rem] peer-focus:translate-y-0 peer-focus:text-[11px] ${
-            rows
-              ? 'peer-placeholder-shown:top-[1.35rem] peer-placeholder-shown:text-[15px]'
-              : 'peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-[15px]'
-          } ${invalid ? 'text-danger-text' : 'text-text-muted'}`}
-        >
-          {label}
-        </label>
-      </div>
-      <FieldError errors={errors} name={name} />
-    </div>
-  )
-}
-
 export default function Register() {
   const navigate = useNavigate()
   const { getDashboardPath, register } = useAuth()
-  const [selectedRole, setSelectedRole] = useState('candidate')
+  const [selectedRole, setSelectedRole] = useState(null)
   const [formData, setFormData] = useState({
     name: '',
     username: '',
@@ -182,22 +125,19 @@ export default function Register() {
     password: '',
     confirmPassword: '',
   })
-  const [candidateProfile, setCandidateProfile] = useState(initialCandidateProfile)
-  const [companyProfile, setCompanyProfile] = useState(initialCompanyProfile)
-  const [skills, setSkills] = useState([])
   const [error, setError] = useState('')
   const [validationErrors, setValidationErrors] = useState({})
+  const [companyProfile, setCompanyProfile] = useState({
+    ownerName: '', companyType: '', registrationNumber: '',
+    registrationDocumentUrl: '', contactEmail: '', website: '',
+    country: '', phone: '', industry: '', description: '',
+  })
+  const [captchaToken, setCaptchaToken] = useState('')
+  const [showTerms, setShowTerms] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const updateField = (event) => {
     setFormData((current) => ({
-      ...current,
-      [event.target.name]: event.target.value,
-    }))
-  }
-
-  const updateCandidateField = (event) => {
-    setCandidateProfile((current) => ({
       ...current,
       [event.target.name]: event.target.value,
     }))
@@ -210,13 +150,45 @@ export default function Register() {
     }))
   }
 
-  const handleSubmit = async (event) => {
+  const handleSubmit = (event) => {
     event.preventDefault()
     setError('')
     setValidationErrors({})
 
+    // Name every empty required field rather than relying on browser tooltips.
+    const required = [
+      ['username', formData.username, 'Username'],
+      ['fullName', formData.name, selectedRole === 'company' ? 'Company name' : 'Nickname'],
+      ['email', formData.email, selectedRole === 'company' ? 'Company email' : 'Email'],
+      ['password', formData.password, 'New password'],
+      ['confirmPassword', formData.confirmPassword, 'Confirm password'],
+      ...(selectedRole === 'company'
+        ? [
+            ['owner_name', companyProfile.ownerName, 'CEO / Owner'],
+            ['company_type', companyProfile.companyType, 'Company type'],
+            ['registration_document_url', companyProfile.registrationDocumentUrl, 'Business registration document'],
+            ['country', companyProfile.location || companyProfile.country, 'Country'],
+          ]
+        : []),
+    ]
+
+    const missing = required.filter(([, value]) => !String(value ?? '').trim())
+
+    if (missing.length > 0) {
+      setValidationErrors(Object.fromEntries(
+        missing.map(([key, , label]) => [key, [`${label} is required.`]]),
+      ))
+      setError(
+        missing.length === 1
+          ? `${missing[0][2]} is required.`
+          : `Please fill in all required fields: ${missing.map(([, , label]) => label).join(', ')}.`,
+      )
+      return
+    }
+
     if (formData.password.length < 8) {
       setValidationErrors({ password: ['The password must be at least 8 characters.'] })
+      setError('The password must be at least 8 characters.')
       return
     }
 
@@ -224,24 +196,32 @@ export default function Register() {
       setValidationErrors({
         confirmPassword: ['The password confirmation does not match.'],
       })
+      setError('The two passwords do not match.')
       return
     }
 
+    setShowTerms(true)
+  }
+
+  const createAccount = async () => {
+    setError('')
     setIsSubmitting(true)
 
     try {
       const authenticatedUser = await register({
         ...formData,
         role: selectedRole,
-        candidateProfile: {
-          ...candidateProfile,
-          skills,
+        captchaToken,
+        companyProfile: {
+          ...companyProfile,
+          companyName: formData.name,
+          contactEmail: formData.email,
         },
-        companyProfile,
       })
       navigate(getDashboardPath(authenticatedUser.role), { replace: true })
     } catch (requestError) {
       const responseErrors = requestError.response?.data?.errors ?? {}
+      setShowTerms(false)
       setValidationErrors(responseErrors)
       setError(
         Object.keys(responseErrors).length > 0
@@ -261,11 +241,66 @@ export default function Register() {
       headline="Explore your interests."
       nickname={formData.name}
       username={formData.username}
+      mark={selectedRole === 'company' ? 'company' : 'person'}
+      verified={selectedRole === 'company'
+        && Boolean(companyProfile.ownerName && companyProfile.companyType
+          && companyProfile.registrationDocumentUrl && formData.email
+          && companyProfile.country)}
       wide
     >
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-text-primary">Create a new account</h1>
-        <p className="mt-2 text-sm text-text-muted">It is quick and free.</p>
+        {!selectedRole ? (
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight text-text-primary">Join LinkPort</h1>
+            <p className="mt-2 text-sm text-text-muted">First, tell us who you are.</p>
+
+            <div className="mt-5 space-y-3">
+              {roles.map((role) => (
+                <button
+                  key={role.value}
+                  type="button"
+                  onClick={() => setSelectedRole(role.value)}
+                  className="flex w-full items-start gap-3.5 rounded-lg border border-border bg-surface p-4 text-left transition-colors hover:border-primary hover:bg-primary/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
+                >
+                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-primary/25 bg-primary/10 text-primary">
+                    <RoleIcon name={role.icon} />
+                  </span>
+                  <span className="min-w-0">
+                    <span className="block text-base font-bold text-text-primary">{role.label}</span>
+                    <span className="mt-1 block text-sm leading-snug text-text-muted">
+                      {role.description}
+                    </span>
+                  </span>
+                </button>
+              ))}
+            </div>
+
+            <hr className="my-6 border-border" />
+
+            <Link
+              to="/login"
+              className="block rounded-lg border border-primary bg-surface px-4 py-2 text-center text-sm font-bold text-primary no-underline transition-colors hover:bg-primary/5"
+            >
+              Already have an account?
+            </Link>
+          </div>
+        ) : (
+        <div>
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight text-text-primary">
+              {selectedRole === 'candidate' ? 'Create a member account' : 'Create a company account'}
+            </h1>
+            <p className="mt-2 text-sm text-text-muted">It is quick and free.</p>
+          </div>
+          <button
+            type="button"
+            onClick={() => { setSelectedRole(null); setValidationErrors({}); setError('') }}
+            className="shrink-0 text-sm font-semibold text-primary hover:underline"
+          >
+            Change
+          </button>
+        </div>
 
         <form onSubmit={handleSubmit} className="mt-5 space-y-4">
 
@@ -280,8 +315,8 @@ export default function Register() {
             id="register-nickname"
             name="name"
             type="text"
-            label="Nickname"
-            autoComplete="nickname"
+            label={selectedRole === 'company' ? 'Company name' : 'Nickname'}
+            autoComplete={selectedRole === 'company' ? 'organization' : 'nickname'}
             required
             maxLength="60"
             value={formData.name}
@@ -290,23 +325,26 @@ export default function Register() {
           />
           <FieldError errors={validationErrors} name="fullName" />
 
+
           <EmailField
             value={formData.email}
             onChange={updateField}
             invalid={Boolean(validationErrors.email)}
+            label={selectedRole === 'company' ? 'Company email' : 'Email'}
           />
           <FieldError errors={validationErrors} name="email" />
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <FloatingField
+              <PasswordField
                 id="register-password"
                 name="password"
                 type="password"
                 label="New password"
-                autoComplete="new-password"
+                autoComplete="off"
                 required
                 minLength="8"
+                showStrength
                 value={formData.password}
                 onChange={updateField}
                 invalid={Boolean(validationErrors.password)}
@@ -314,12 +352,12 @@ export default function Register() {
               <FieldError errors={validationErrors} name="password" />
             </div>
             <div>
-              <FloatingField
+              <PasswordField
                 id="confirm-password"
                 name="confirmPassword"
                 type="password"
                 label="Confirm password"
-                autoComplete="new-password"
+                autoComplete="off"
                 required
                 value={formData.confirmPassword}
                 onChange={updateField}
@@ -329,115 +367,151 @@ export default function Register() {
             </div>
           </div>
 
-            <fieldset>
-              <legend className="mb-2 text-sm font-medium text-text-primary">
-                I am joining as
-              </legend>
-              <div className="grid grid-cols-2 gap-3">
-                {roles.map((role) => {
-                  const isSelected = selectedRole === role.value
+          {selectedRole === 'company' && (
+            <>
+              <FloatingField
+                id="company-owner"
+                name="ownerName"
+                type="text"
+                label="CEO / Owner"
+                required
+                maxLength="160"
+                value={companyProfile.ownerName}
+                onChange={updateCompanyField}
+                invalid={Boolean(validationErrors.owner_name)}
+              />
+              <FieldError errors={validationErrors} name="owner_name" />
 
-                  return (
-                    <button
-                      key={role.value}
-                      type="button"
-                      aria-pressed={isSelected}
-                      onClick={() => {
-                        setSelectedRole(role.value)
-                        setValidationErrors({})
-                        setError('')
-                      }}
-                      className={`border p-3 text-left transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring ${
-                        isSelected
-                          ? 'border-primary bg-primary/10'
-                          : 'border-border bg-background hover:border-border-strong hover:bg-surface-elevated'
-                      }`}
-                    >
-                      <span
-                        className={`block text-sm font-semibold ${isSelected ? 'text-primary' : 'text-text-primary'}`}
-                      >
-                        {role.label}
-                      </span>
-                      <span className="mt-1 block text-xs text-text-muted">
-                        {role.description}
-                      </span>
-                    </button>
-                  )
+              <div className="relative">
+                <select
+                  id="company-type"
+                  name="companyType"
+                  required
+                  value={companyProfile.companyType}
+                  onChange={updateCompanyField}
+                  className={`peer h-[3.75rem] w-full appearance-none rounded-lg border bg-surface px-3 pb-2 pt-7 text-[15px] text-text-primary outline-none transition-colors hover:border-border-strong focus:border-primary focus:ring-1 focus:ring-focus-ring ${
+                    validationErrors.company_type ? 'border-danger' : 'border-border'
+                  }`}
+                >
+                  <option value="">Select a type</option>
+                  {COMPANY_TYPES.map((type) => <option key={type} value={type}>{type}</option>)}
+                </select>
+                <label
+                  htmlFor="company-type"
+                  className="pointer-events-none absolute left-3 top-[0.85rem] text-[11px] leading-none text-text-muted"
+                >
+                  Company type
+                </label>
+              </div>
+              <FieldError errors={validationErrors} name="company_type" />
+
+              <FloatingField
+                id="company-registration-number"
+                name="registrationNumber"
+                type="text"
+                label="Business registration number (optional)"
+                maxLength="60"
+                value={companyProfile.registrationNumber}
+                onChange={updateCompanyField}
+                invalid={Boolean(validationErrors.registration_number)}
+              />
+              <FieldError errors={validationErrors} name="registration_number" />
+
+              <div>
+                <FloatingField
+                  id="company-document"
+                  name="registrationDocumentUrl"
+                  type="url"
+                  label="Business registration document (link)"
+                  required
+                  value={companyProfile.registrationDocumentUrl}
+                  onChange={updateCompanyField}
+                  invalid={Boolean(validationErrors.registration_document_url)}
+                />
+                <FieldError errors={validationErrors} name="registration_document_url" />
+              </div>
+
+              <FloatingField
+                id="company-website"
+                name="website"
+                type="url"
+                label="Website URL"
+                value={companyProfile.website}
+                onChange={updateCompanyField}
+                invalid={Boolean(validationErrors.website)}
+              />
+              <FieldError errors={validationErrors} name="website" />
+
+              <CountryPicker
+                value={companyProfile.country}
+                onChange={(event) => updateCompanyField({
+                  target: { name: 'country', value: event.target.value },
                 })}
-              </div>
-              <input type="hidden" name="role" value={selectedRole} />
-              <FieldError errors={validationErrors} name="role" />
-            </fieldset>
+                invalid={Boolean(validationErrors.country)}
+              />
+              <FieldError errors={validationErrors} name="country" />
 
-            <details
-              key={selectedRole}
-              className="group border border-border bg-background"
-            >
-              <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus-ring">
-                <span>
-                  <span className="block text-sm font-semibold text-text-primary">
-                    {selectedRole === 'candidate'
-                      ? 'Member profile details'
-                      : 'Company profile details'}
-                  </span>
-                  <span className="mt-1 block text-xs leading-5 text-text-muted">
-                    Optional - add them now or complete your profile later.
-                  </span>
-                </span>
-                <span className="font-mono text-lg text-primary transition-transform group-open:rotate-45" aria-hidden="true">+</span>
-              </summary>
+              <CompanyPhoneField
+                errors={validationErrors}
+                value={companyProfile.phone}
+                onChange={updateCompanyField}
+              />
 
-              <div className="border-t border-border px-5 py-5">
-                {selectedRole === 'candidate' ? (
-                  <div className="grid gap-5 sm:grid-cols-2">
-                    <OptionalField errors={validationErrors} label="Your field" name="headline" value={candidateProfile.professionalTitle} onChange={(event) => updateCandidateField({ target: { name: 'professionalTitle', value: event.target.value } })} />
-                    <CountryPicker value={candidateProfile.location} onChange={updateCandidateField} invalid={Boolean(validationErrors.location)} />
-                    <PhoneField errors={validationErrors} value={candidateProfile.phone} onChange={updateCandidateField} />
-                    <OptionalField errors={validationErrors} label="Portfolio / Website URL" name="website" type="url" value={candidateProfile.portfolioLink} onChange={(event) => updateCandidateField({ target: { name: 'portfolioLink', value: event.target.value } })} />
-                    <OptionalField errors={validationErrors} label="GitHub URL" name="github_url" type="url" value={candidateProfile.githubUrl} onChange={(event) => updateCandidateField({ target: { name: 'githubUrl', value: event.target.value } })} />
-                    <OptionalField errors={validationErrors} label="LinkedIn URL" name="linkedin_url" type="url" value={candidateProfile.linkedinUrl} onChange={(event) => updateCandidateField({ target: { name: 'linkedinUrl', value: event.target.value } })} />
-                    <div className="sm:col-span-2">
-                      <label className="text-sm font-medium text-text-primary">Skills</label>
-                      <div className="mt-2">
-                        <SkillsInput skills={skills} setSkills={setSkills} />
-                      </div>
-                      <FieldError errors={validationErrors} name="skills" />
-                    </div>
-                    <OptionalField errors={validationErrors} label="Education" name="education" rows="3" value={candidateProfile.education} onChange={updateCandidateField} />
-                    <OptionalField errors={validationErrors} label="Experience" name="experience" rows="3" value={candidateProfile.experience} onChange={updateCandidateField} />
-                    <OptionalField errors={validationErrors} label="CV URL" name="cv_url" type="url" value={candidateProfile.cvUrl} onChange={(event) => updateCandidateField({ target: { name: 'cvUrl', value: event.target.value } })} />
-                  </div>
-                ) : (
-                  <div className="grid gap-5 sm:grid-cols-2">
-                    <OptionalField errors={validationErrors} label="Company name" name="company_name" value={companyProfile.companyName} onChange={(event) => updateCompanyField({ target: { name: 'companyName', value: event.target.value } })} />
-                    <OptionalField errors={validationErrors} label="Industry" name="industry" value={companyProfile.industry} onChange={updateCompanyField} />
-                    <CountryPicker value={companyProfile.location} onChange={updateCompanyField} invalid={Boolean(validationErrors.location)} />
-                    <PhoneField errors={validationErrors} value={companyProfile.phone} onChange={updateCompanyField} />
-                    <OptionalField errors={validationErrors} label="Website URL" name="website" type="url" value={companyProfile.website} onChange={updateCompanyField} />
-                    <OptionalField errors={validationErrors} label="LinkedIn URL" name="linkedin_url" type="url" value={companyProfile.linkedinUrl} onChange={(event) => updateCompanyField({ target: { name: 'linkedinUrl', value: event.target.value } })} />
-                    <OptionalField errors={validationErrors} label="Logo URL" name="logo_url" type="url" value={companyProfile.logoUrl} onChange={(event) => updateCompanyField({ target: { name: 'logoUrl', value: event.target.value } })} />
-                    <OptionalField errors={validationErrors} label="Employee count" name="employee_count" type="number" min="1" value={companyProfile.employeeCount} onChange={(event) => updateCompanyField({ target: { name: 'employeeCount', value: event.target.value } })} />
-                    <OptionalField errors={validationErrors} label="Description" name="description" rows="4" value={companyProfile.description} onChange={updateCompanyField} />
-                  </div>
-                )}
+              <FloatingField
+                id="company-industry"
+                name="industry"
+                type="text"
+                label="Industry"
+                value={companyProfile.industry}
+                onChange={updateCompanyField}
+                invalid={Boolean(validationErrors.industry)}
+              />
+              <FieldError errors={validationErrors} name="industry" />
+
+              <div className="relative">
+                <textarea
+                  id="company-description"
+                  name="description"
+                  rows="4"
+                  placeholder=" "
+                  value={companyProfile.description}
+                  onChange={updateCompanyField}
+                  className="peer w-full resize-y rounded-lg border border-border bg-surface px-3 pb-2 pt-7 text-[15px] leading-tight text-text-primary outline-none transition-colors hover:border-border-strong focus:border-primary focus:ring-1 focus:ring-focus-ring"
+                />
+                <label
+                  htmlFor="company-description"
+                  className="pointer-events-none absolute left-3 top-[0.85rem] text-[11px] leading-none text-text-muted transition-all peer-placeholder-shown:top-[1.35rem] peer-placeholder-shown:text-[15px] peer-focus:top-[0.85rem] peer-focus:text-[11px]"
+                >
+                  What the company does
+                </label>
               </div>
-            </details>
+              <FieldError errors={validationErrors} name="description" />
+            </>
+          )}
+
+            <input type="hidden" name="role" value={selectedRole} />
 
             {error && (
               <p
                 role="alert"
-                className="border border-danger/50 bg-danger/10 px-3 py-2 text-sm text-danger-text"
+                className="flex items-start gap-2 rounded-lg border border-danger bg-danger/10 px-3 py-2.5 text-sm font-semibold text-danger-text"
               >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true">
+                  <circle cx="12" cy="12" r="9" />
+                  <path d="M12 7.5v5M12 16.2h.01" />
+                </svg>
                 {error}
               </p>
             )}
 
+            <Captcha onToken={setCaptchaToken} />
+
             <button
               type="submit"
-              disabled={isSubmitting}
+              disabled={captchaEnabled && !captchaToken}
               className="block w-full rounded-lg border border-primary bg-primary px-4 py-3 text-center text-base font-bold text-primary-contrast transition-colors hover:bg-primary-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring disabled:opacity-60"
             >
-              {isSubmitting ? 'Creating account...' : 'Create account'}
+              Create account
             </button>
           </form>
 
@@ -449,6 +523,16 @@ export default function Register() {
         >
           Already have an account?
         </Link>
+        </div>
+        )}
+
+        {showTerms && (
+        <TermsDialog
+          isSubmitting={isSubmitting}
+          onCancel={() => setShowTerms(false)}
+          onAccept={createAccount}
+        />
+        )}
 
         <p className="mt-10 flex items-center justify-center gap-1.5 text-text-muted">
           <LinkPortLogo className="h-[18px] w-auto" />

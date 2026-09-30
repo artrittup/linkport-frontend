@@ -1,9 +1,6 @@
-import { Link, useLocation, useNavigate } from 'react-router'
-import LinkPortLogo from './LinkPortLogo'
+import { Link, useLocation } from 'react-router'
+import SidebarCircles from './SidebarCircles'
 import { getNavigationForRole } from '../config/navigation'
-import { useAuth } from '../context/AuthContext'
-import ThemeToggle from './ThemeToggle'
-import useUnreadNotificationCount from '../hooks/useUnreadNotificationCount'
 
 function NavigationIcon({ iconKey }) {
   const paths = {
@@ -20,14 +17,6 @@ function NavigationIcon({ iconKey }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5 shrink-0" aria-hidden="true">
       {paths[iconKey] ?? paths.profile}
-    </svg>
-  )
-}
-
-function LogoutIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5 shrink-0" aria-hidden="true">
-      <path d="M10 17l5-5-5-5M15 12H3M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
     </svg>
   )
 }
@@ -58,24 +47,7 @@ function isNavigationItemActive(item, pathname) {
 
 export default function CandidateSidebar({ isOpen, onClose }) {
   const location = useLocation()
-  const navigate = useNavigate()
-  const { logout, user } = useAuth()
-  const unreadNotificationCount = useUnreadNotificationCount()
   const navItems = getNavigationForRole('candidate')
-  const displayName = user?.name || 'LinkPort Member'
-  const initials = displayName
-    .split(' ')
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0])
-    .join('')
-    .toUpperCase()
-
-  const handleLogout = async () => {
-    await logout()
-    onClose()
-    navigate('/login', { replace: true })
-  }
 
   return (
     <>
@@ -90,23 +62,23 @@ export default function CandidateSidebar({ isOpen, onClose }) {
 
       <aside
         aria-label="Member sidebar"
-        className={`fixed inset-y-0 left-0 z-50 flex w-72 flex-col border-r border-border/80 bg-background shadow-2xl shadow-black/20 transition-transform duration-200 lg:w-64 lg:translate-x-0 lg:shadow-none ${
+        className={`fixed inset-y-0 left-0 z-50 flex w-72 flex-col border-r border-border/80 bg-background shadow-2xl shadow-black/20 transition-transform duration-200 lg:top-[calc(var(--lp-header-h,5rem)+1.75rem)] lg:w-64 lg:translate-x-0 lg:shadow-none ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
-        <div className="flex h-20 shrink-0 items-center justify-between border-b border-border/80 px-5">
-          <Link to="/member/home" onClick={onClose} className="flex items-center gap-2.5 font-bold text-text-primary" aria-label="LinkPort Member Home">
-            <LinkPortLogo className="h-8 w-auto" />
-            <span className="text-xl">Link<span className="text-primary">Port</span></span>
-          </Link>
-          <div className="-mr-2 flex items-center gap-1">
-            <button type="button" onClick={onClose} className="flex h-9 w-9 items-center justify-center rounded-lg text-xl text-text-muted hover:bg-surface hover:text-primary lg:hidden" aria-label="Close menu">
-              &times;
-            </button>
-          </div>
+        <div className="flex shrink-0 justify-end px-3 pt-3 lg:hidden">
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex h-9 w-9 items-center justify-center rounded-lg text-xl text-text-muted hover:bg-surface hover:text-primary"
+            aria-label="Close menu"
+          >
+            &times;
+          </button>
         </div>
 
-        <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-3" aria-label="Primary member navigation">
+        <div className="flex-1 overflow-y-auto">
+        <nav className="space-y-1 px-3 pb-3" aria-label="Primary member navigation">
           {navItems.map((item) => {
             const isActive = isNavigationItemActive(item, location.pathname)
 
@@ -130,46 +102,9 @@ export default function CandidateSidebar({ isOpen, onClose }) {
           })}
         </nav>
 
-        <div className="shrink-0 border-t border-border/80 px-3 py-2">
-          <div className="flex items-center gap-2 px-2 py-1.5">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-primary/35 bg-surface font-mono text-xs font-semibold text-primary">
-              {initials}
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-bold text-text-primary">{displayName}</p>
-            </div>
-          </div>
-          <nav className="mt-1 grid grid-cols-2 gap-1" aria-label="Member account navigation">
-            {[
-              { key: 'notifications', label: 'Notifications', path: '/member/notifications' },
-              { key: 'settings', label: 'Settings', path: '/member/settings' },
-            ].map((item) => (
-              <Link key={item.key} to={item.path} onClick={onClose} aria-current={location.pathname === item.path ? 'page' : undefined} className={`flex items-center gap-2 rounded-lg px-2 py-1.5 text-xs font-semibold transition-colors ${location.pathname === item.path ? 'bg-primary-soft text-primary-soft-text' : 'text-text-muted hover:bg-surface hover:text-text-primary'}`}>
-                <span className="relative shrink-0">
-                  <NavigationIcon iconKey={item.key} />
-                  {item.key === 'notifications' && unreadNotificationCount > 0 && (
-                    <span
-                      aria-label={`${unreadNotificationCount} unread notifications`}
-                      className="absolute -right-2.5 -top-2.5 flex h-4 min-w-4 items-center justify-center rounded-full border border-background bg-primary px-1 text-[9px] font-bold leading-none text-primary-contrast"
-                    >
-                      {unreadNotificationCount > 99 ? '99+' : unreadNotificationCount}
-                    </span>
-                  )}
-                </span>
-                {item.label}
-              </Link>
-            ))}
-            <ThemeToggle showLabel className="w-full justify-start px-2 text-xs" />
-            <button
-              type="button"
-              onClick={handleLogout}
-              className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-xs font-semibold text-danger-text transition-colors hover:bg-danger/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-danger"
-            >
-              <LogoutIcon />
-              Logout
-            </button>
-          </nav>
+        <SidebarCircles onNavigate={onClose} />
         </div>
+
       </aside>
     </>
   )

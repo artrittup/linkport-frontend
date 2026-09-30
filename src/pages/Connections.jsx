@@ -11,6 +11,7 @@ import {
 } from '../api/connectionsApi'
 import Button from '../components/Button'
 import LoadingSpinner from '../components/LoadingSpinner'
+import SectionTabs from '../components/SectionTabs'
 import { useAuth } from '../context/AuthContext'
 import useToast from '../hooks/useToast'
 import DashboardLayout from '../layouts/DashboardLayout'
@@ -133,20 +134,15 @@ export default function Connections({ embedded = false }) {
           <p className="mt-1 text-sm leading-6 text-text-muted">Manage your network and pending requests.</p>
         </div>
 
-        <div className="mt-5 flex min-w-0 gap-1 overflow-x-auto rounded-xl border border-border bg-surface-deep p-1" role="tablist" aria-label="Connection sections">
-          {tabs.map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              role="tab"
-              aria-selected={tab === item.id}
-              onClick={() => changeTab(item.id)}
-              className={`min-w-max flex-1 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${tab === item.id ? 'bg-surface text-primary shadow-sm' : 'text-text-muted hover:text-text-primary'}`}
-            >
-              {item.label}
-            </button>
+        <SectionTabs
+          items={tabs.map((item) => (
+            item.id === tab ? { ...item, count: items.length } : item
           ))}
-        </div>
+          activeId={tab}
+          onSelect={changeTab}
+          label="Connection sections"
+          className="mt-5"
+        />
       </section>
 
       {error && <p role="alert" className="rounded-lg border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger-text">{error}</p>}

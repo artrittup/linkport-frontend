@@ -205,6 +205,7 @@
   [aria-disabled="true"] {
     cursor: not-allowed;
   }
+
 }
 
 @layer components {
@@ -257,6 +258,22 @@
   .lp-panel-head {
     border-bottom: 1px solid var(--theme-border-strong);
     background: var(--theme-surface-muted);
+  }
+
+  /* Like button: a short pop when it turns on. */
+  .lp-like-pop {
+    animation: lp-pop 320ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  @keyframes lp-pop {
+    0% { transform: scale(1); }
+    40% { transform: scale(1.35); }
+    70% { transform: scale(0.92); }
+    100% { transform: scale(1); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .lp-like-pop { animation: none; }
   }
 
   /* Promo card in the landing rail: light sweep + lift on hover. */

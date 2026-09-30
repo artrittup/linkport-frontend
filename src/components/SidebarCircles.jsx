@@ -13,13 +13,16 @@ function initialsOf(name) {
 }
 
 /** Second sidebar block: the communities this member belongs to. */
+const VISIBLE = 4
+
 export default function SidebarCircles({ onNavigate }) {
   const [circles, setCircles] = useState(null)
+  const [showAll, setShowAll] = useState(false)
 
   useEffect(() => {
     let active = true
 
-    getMyCircles({ per_page: 8 })
+    getMyCircles({ per_page: 30 })
       .then((response) => { if (active) setCircles(response.data ?? []) })
       .catch(() => { if (active) setCircles([]) })
 
@@ -42,8 +45,12 @@ export default function SidebarCircles({ onNavigate }) {
         </p>
       )}
 
-      <div className="space-y-0.5">
-        {(circles ?? []).map((circle) => (
+      <div
+        className={`space-y-0.5 ${
+          showAll ? 'max-h-64 overflow-y-auto pr-1' : ''
+        }`}
+      >
+        {(showAll ? circles ?? [] : (circles ?? []).slice(0, VISIBLE)).map((circle) => (
           <Link
             key={circle.id}
             to={`/circles/${circle.id}`}
@@ -58,13 +65,25 @@ export default function SidebarCircles({ onNavigate }) {
         ))}
       </div>
 
-      <Link
-        to="/member/community?view=discover"
-        onClick={onNavigate}
-        className="mt-1 block px-3 py-1.5 text-xs font-semibold text-primary no-underline hover:underline"
-      >
-        {circles?.length ? 'See all' : 'Find a community'}
-      </Link>
+      {(circles?.length ?? 0) > VISIBLE && (
+        <button
+          type="button"
+          onClick={() => setShowAll((current) => !current)}
+          className="mt-1 block w-full px-3 py-1.5 text-left text-xs font-semibold text-primary hover:underline"
+        >
+          {showAll ? 'Show less' : `View more (${circles.length - VISIBLE})`}
+        </button>
+      )}
+
+      {circles?.length === 0 && (
+        <Link
+          to="/member/community?view=discover"
+          onClick={onNavigate}
+          className="mt-1 block px-3 py-1.5 text-xs font-semibold text-primary no-underline hover:underline"
+        >
+          Find a community
+        </Link>
+      )}
     </div>
   )
 }

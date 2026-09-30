@@ -3,7 +3,6 @@ import { Link } from 'react-router'
 import api from '../api/axios'
 import AccountMenu from './AccountMenu'
 import CandidateNotificationBell from './CandidateNotificationBell'
-import ChatMenu from './ChatMenu'
 import NotificationBell from './NotificationBell'
 import LinkPortLogo from './LinkPortLogo'
 import NetworkGlobe from './NetworkGlobe'
@@ -90,7 +89,6 @@ export default function AppHeader({ homePath = '/' }) {
         <NetworkGlobe className="hidden min-w-0 flex-1 lg:block" />
 
         <div className="ml-auto flex shrink-0 items-center gap-2 lg:ml-0">
-          {user?.role === 'candidate' && <ChatMenu />}
           {user?.role === 'candidate' ? <CandidateNotificationBell /> : <NotificationBell />}
           <AccountMenu />
         </div>

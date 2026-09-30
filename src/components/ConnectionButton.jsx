@@ -43,6 +43,9 @@ export default function ConnectionButton({ userId, initialStatus, onStatusChange
   }
 
   const run = async (action) => {
+    // The buttons stay enabled, so guard against a double tap here.
+    if (isWorking) return null
+
     setIsWorking(true)
     setError('')
     try {
@@ -73,11 +76,11 @@ export default function ConnectionButton({ userId, initialStatus, onStatusChange
 
   return (
     <div className="flex flex-col items-start gap-2 sm:items-end">
-      {(status === 'none' || status === 'rejected') && <Button size="sm" onClick={connect} disabled={isWorking}>{isWorking ? 'Sending...' : 'Connect'}</Button>}
+      {(status === 'none' || status === 'rejected') && <Button size="sm" onClick={connect} data-busy={isWorking || undefined}>{isWorking ? 'Sending...' : 'Connect'}</Button>}
       {status === 'pending_sent' && <Button size="sm" variant="outline" disabled>Pending</Button>}
       {status === 'connected' && <Button size="sm" variant="outline" disabled>Connected</Button>}
       {status === 'pending_received' && (
-        <div className="flex gap-2"><Button size="sm" onClick={accept} disabled={isWorking}>{isWorking ? 'Updating...' : 'Accept'}</Button><Button size="sm" variant="ghost" onClick={reject} disabled={isWorking}>Reject</Button></div>
+        <div className="flex gap-2"><Button size="sm" onClick={accept} data-busy={isWorking || undefined}>{isWorking ? 'Updating...' : 'Accept'}</Button><Button size="sm" variant="ghost" onClick={reject} data-busy={isWorking || undefined}>Reject</Button></div>
       )}
       {status === 'loading' && <span className="text-xs text-text-muted">Checking connection...</span>}
       {error && <p role="alert" className="max-w-xs text-xs text-danger-text">{error}</p>}

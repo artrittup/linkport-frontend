@@ -196,15 +196,15 @@ function CommunityPostCard({ item, onUnsaved, onSavedChange, compact = false, pr
   return (
     <article className={feedCardClasses}>
       <CardLink path={detailPath} label={`Open ${item.title}`} preserveScrollPosition={preserveScrollPosition} />
-      <div className={`pointer-events-none relative z-[1] border-b border-border/70 bg-surface-muted/65 ${compact ? 'px-4 py-3.5' : 'px-5 py-4 sm:px-6'}`}>
+      <div className={`pointer-events-none relative z-[1] border-b border-border/70 bg-surface-muted/65 ${compact ? 'px-4 py-2' : 'px-4 py-2.5'}`}>
         <div className="flex min-w-0 items-start justify-between gap-3">
           <div className="flex min-w-0 items-center gap-3">
-            <div className={`flex shrink-0 items-center justify-center rounded-full border border-primary/25 bg-primary/10 font-mono font-bold text-primary ${compact ? 'h-9 w-9 text-xs' : 'h-11 w-11 text-sm'}`}>{getInitials(item.author)}</div>
+            <div className={`flex shrink-0 items-center justify-center rounded-full border border-primary/25 bg-primary/10 font-mono font-bold text-primary ${compact ? 'h-8 w-8 text-[11px]' : 'h-9 w-9 text-xs'}`}>{getInitials(item.author)}</div>
             <div className="min-w-0">
               <p className="truncate text-sm font-bold text-text-primary">
                 {item.authorId ? <Link to={`/member/community/members/${item.authorId}`} className="pointer-events-auto relative z-10 no-underline hover:text-primary hover:no-underline">{item.author}</Link> : item.author}
               </p>
-              <div className="mt-1 flex min-w-0 flex-wrap items-center gap-1.5 text-xs text-text-subtle">
+              <div className="mt-0.5 flex min-w-0 flex-wrap items-center gap-1.5 text-[11px] text-text-subtle">
                 <span className="truncate">{item.meta}</span><span aria-hidden="true">•</span><span>{item.type}</span>
               </div>
             </div>
@@ -213,35 +213,45 @@ function CommunityPostCard({ item, onUnsaved, onSavedChange, compact = false, pr
         </div>
       </div>
 
-      <div className={`pointer-events-none relative z-[1] flex flex-1 flex-col ${compact ? 'px-4 py-4' : 'px-5 py-5 sm:px-6'}`}>
+      <div className={`pointer-events-none relative z-[1] flex flex-1 flex-col ${compact ? 'px-4 py-3' : 'px-4 py-3'}`}>
         <div className="flex flex-wrap items-center gap-2">
-          <h3 className="line-clamp-1 text-base font-bold text-text-primary">{item.title}</h3>
+          <h3 className="line-clamp-1 text-sm font-bold text-text-primary">{item.title}</h3>
           {item.attending && <span className="rounded-md border border-success/30 bg-success/10 px-2 py-0.5 text-[11px] font-semibold text-success-text">Attending</span>}
         </div>
 
-        <p className={`mt-2 break-words text-sm text-text-muted ${compact ? 'line-clamp-2 leading-6' : 'leading-7'}`}>{visibleDescription}</p>
-        {item.deadline && <p className="mt-3 text-xs text-text-subtle">Deadline: {item.deadline}</p>}
+        <p className={`mt-1.5 break-words text-sm leading-6 text-text-muted ${isExpanded ? '' : 'line-clamp-2'}`}>{visibleDescription}</p>
+        {item.deadline && <p className="mt-2 text-xs text-text-subtle">Deadline: {item.deadline}</p>}
         <PostMedia images={item.images} videoUrl={item.videoUrl} compact={compact} />
         {(item.tags ?? []).length > 0 && (
-          <div className={`${compact ? 'mt-3' : 'mt-5'} flex flex-wrap gap-1.5`}>
-            {(item.tags ?? []).slice(0, compact ? 4 : 8).map((tag) => <span key={tag} className="max-w-full break-words rounded-full border border-primary/20 bg-primary/5 px-2.5 py-1 text-xs font-medium text-primary">{tag}</span>)}
+          <div className={`mt-2 flex flex-wrap gap-1.5`}>
+            {(item.tags ?? []).slice(0, 4).map((tag) => <span key={tag} className="max-w-full break-words rounded-full border border-primary/20 bg-primary/5 px-2.5 py-1 text-xs font-medium text-primary">{tag}</span>)}
           </div>
         )}
 
-        <div className={`pointer-events-auto relative z-10 mt-6 flex flex-wrap items-center gap-1 border-t border-border/70 ${compact ? 'pt-3' : 'pt-4'}`}>
-          {shouldCollapse && <button type="button" onClick={() => setIsExpanded((current) => !current)} className="rounded-lg px-3 py-2 text-sm font-bold text-primary transition-colors hover:bg-primary/10">{isExpanded ? 'Show less' : 'View more'}</button>}
+        <div className="pointer-events-auto relative z-10 mt-3 flex flex-wrap items-center gap-0.5 border-t border-border/70 pt-2">
+          
           {isPost && (
             <>
-              <button type="button" aria-pressed={isLiked} disabled={isWorking} onClick={toggleLike} className={`inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-bold transition-colors hover:bg-primary/10 ${isLiked ? 'text-primary' : 'text-text-secondary hover:text-primary'}`}><ActionIcon type="like" filled={isLiked} /> Like{likesCount > 0 ? ` · ${likesCount}` : ''}</button>
-              <button type="button" aria-expanded={isCommenting} onClick={toggleComments} className="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-bold text-text-secondary transition-colors hover:bg-primary/10 hover:text-primary"><ActionIcon type="comment" /> Comment{commentsCount > 0 ? ` · ${commentsCount}` : ''}</button>
+              <button type="button" aria-pressed={isLiked} data-busy={isWorking || undefined} onClick={toggleLike} className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[13px] font-bold transition-colors hover:bg-primary/10 ${isLiked ? 'text-primary' : 'text-text-secondary hover:text-primary'}`}><span className={isLiked ? 'lp-like-pop inline-flex' : 'inline-flex'} key={isLiked ? 'on' : 'off'}><ActionIcon type="like" filled={isLiked} /></span> Like{likesCount > 0 ? ` · ${likesCount}` : ''}</button>
+              <button type="button" aria-expanded={isCommenting} onClick={toggleComments} className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[13px] font-bold text-text-secondary transition-colors hover:bg-primary/10 hover:text-primary"><ActionIcon type="comment" /> Comment{commentsCount > 0 ? ` · ${commentsCount}` : ''}</button>
             </>
           )}
+          {shouldCollapse && (
+            <button
+              type="button"
+              onClick={() => setIsExpanded((current) => !current)}
+              className="ml-auto rounded-lg px-2.5 py-1.5 text-[13px] font-bold text-primary transition-colors hover:bg-primary/10"
+            >
+              {isExpanded ? 'Show less' : 'View more'}
+            </button>
+          )}
+
           {item.saveType && item.saveId && (
             <SaveButton
               type={item.saveType}
               itemId={item.saveId}
               initialSaved={item.isSaved}
-              className="ml-auto"
+              className={shouldCollapse ? '' : 'ml-auto'}
               onChange={(nextSaved) => {
                 onSavedChange?.(item, nextSaved)
                 if (!nextSaved) onUnsaved?.(item)

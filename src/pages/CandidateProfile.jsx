@@ -12,7 +12,6 @@ import Card from '../components/Card'
 import LoadingSpinner from '../components/LoadingSpinner'
 import ProjectShowcaseCard from '../components/ProjectShowcaseCard'
 import SkillsInput from '../components/SkillsInput'
-import { getCandidateActivityPath } from '../config/candidateActivity'
 import { useAuth } from '../context/AuthContext'
 import {
   COLLABORATION_STATUS_OPTIONS,
@@ -44,16 +43,9 @@ function ProfileSection({ title, description, children, className = '' }) {
   )
 }
 
-function EmptyProfileText({ children, onEdit }) {
+function EmptyProfileText({ children }) {
   return (
-    <div>
-      <p className="text-sm leading-6 text-text-muted">{children}</p>
-      {onEdit && (
-        <button type="button" onClick={onEdit} className="mt-3 text-sm font-medium text-primary hover:underline">
-          Add information
-        </button>
-      )}
-    </div>
+    <p className="text-sm leading-6 text-text-muted">{children}</p>
   )
 }
 
@@ -109,8 +101,6 @@ export default function CandidateProfile({ mode = 'view' }) {
       isActive = false
     }
   }, [user])
-
-  const openEdit = () => navigate('/member/profile/edit')
 
   const cancelEdit = () => navigate('/member/profile')
 
@@ -365,12 +355,6 @@ export default function CandidateProfile({ mode = 'view' }) {
   return (
     <CandidateLayout title="Profile">
       <div className="min-w-0 max-w-full space-y-8">
-        <section>
-          <p className="font-mono text-sm text-primary">Member profile</p>
-          <h2 className="mt-2 text-3xl font-bold tracking-tight text-text-primary">My Profile</h2>
-          <p className="mt-3 text-sm leading-6 text-text-muted">Your community profile, interests, skills, and things you want to share.</p>
-        </section>
-
         {loadError && (
           <p role="alert" className="rounded-lg border border-danger/35 bg-danger/10 px-4 py-3 text-sm text-danger-text">{loadError}</p>
         )}
@@ -387,7 +371,7 @@ export default function CandidateProfile({ mode = 'view' }) {
                 <h4 className="text-xs font-semibold uppercase tracking-wide text-text-subtle">Biography</h4>
                 {profile.bio
                   ? <p className="mt-2 whitespace-pre-line break-words text-sm leading-6 text-text-secondary">{profile.bio}</p>
-                  : <EmptyProfileText onEdit={openEdit}>No biography added yet.</EmptyProfileText>}
+                  : <EmptyProfileText>No biography added yet.</EmptyProfileText>}
               </div>
               {(profile.university || profile.fieldOfStudy || profile.graduationYear) && (
                 <dl className="grid gap-4 border-y border-border py-5 sm:grid-cols-2">
@@ -399,7 +383,7 @@ export default function CandidateProfile({ mode = 'view' }) {
               <div>
                 <h4 className="text-xs font-semibold uppercase tracking-wide text-text-subtle">Current focus</h4>
                 <p className="mt-2 break-words text-sm leading-6 text-text-secondary">
-                  {currentFocus.length > 0 ? currentFocus.join(', ') : (profile.professionalTitle || 'Add skills to show your current focus.')}
+                  {currentFocus.length > 0 ? currentFocus.join(', ') : (profile.professionalTitle || 'No current focus listed.')}
                 </p>
               </div>
             </div>
@@ -409,7 +393,7 @@ export default function CandidateProfile({ mode = 'view' }) {
             {profile.cvUrl ? (
               <a href={profile.cvUrl} target="_blank" rel="noreferrer" className="text-sm font-medium text-primary hover:underline">View CV</a>
             ) : (
-              <EmptyProfileText onEdit={openEdit}>No CV link added.</EmptyProfileText>
+              <EmptyProfileText>No CV link added.</EmptyProfileText>
             )}
             {!profile.portfolioLink && !profile.githubUrl && !profile.linkedinUrl && (
               <p className="mt-4 text-xs leading-5 text-text-subtle">No external professional links added yet.</p>
@@ -425,7 +409,7 @@ export default function CandidateProfile({ mode = 'view' }) {
               ))}
             </div>
           ) : (
-            <EmptyProfileText onEdit={openEdit}>No skills added yet.</EmptyProfileText>
+            <EmptyProfileText>No skills added yet.</EmptyProfileText>
           )}
         </ProfileSection>
 
@@ -435,20 +419,20 @@ export default function CandidateProfile({ mode = 'view' }) {
               <h4 className="text-xs font-semibold uppercase tracking-wide text-text-subtle">Collaboration status</h4>
               {profile.collaborationStatus
                 ? <p className="mt-2 inline-flex max-w-full break-words rounded-full border border-primary/25 bg-primary/5 px-3 py-1.5 text-sm text-primary">{getCollaborationStatusLabel(profile.collaborationStatus)}</p>
-                : <EmptyProfileText onEdit={openEdit}>No collaboration status selected.</EmptyProfileText>}
+                : <EmptyProfileText>No collaboration status selected.</EmptyProfileText>}
             </div>
             <div>
               <h4 className="text-xs font-semibold uppercase tracking-wide text-text-subtle">Looking for</h4>
               {profile.lookingForRoles.length > 0
                 ? <ul className="mt-2 space-y-1 text-sm text-text-secondary">{profile.lookingForRoles.map((role) => <li key={role} className="break-words">&bull; {role}</li>)}</ul>
-                : <EmptyProfileText onEdit={openEdit}>No collaboration roles listed.</EmptyProfileText>}
+                : <EmptyProfileText>No collaboration roles listed.</EmptyProfileText>}
             </div>
           </div>
           <div className="mt-6 border-t border-border pt-5">
             <h4 className="text-xs font-semibold uppercase tracking-wide text-text-subtle">Interests</h4>
             {profile.interests.length > 0
               ? <div className="mt-2 flex min-w-0 flex-wrap gap-2">{profile.interests.map((interest) => <span key={interest} className="max-w-full break-words rounded-full border border-border px-3 py-1.5 text-sm text-text-secondary">{getInterestLabel(interest)}</span>)}</div>
-              : <EmptyProfileText onEdit={openEdit}>No interests added yet.</EmptyProfileText>}
+              : <EmptyProfileText>No interests added yet.</EmptyProfileText>}
           </div>
         </ProfileSection>
 
@@ -483,33 +467,14 @@ export default function CandidateProfile({ mode = 'view' }) {
           <ProfileSection title="Experience">
             {profile.experience
               ? <p className="whitespace-pre-line break-words text-sm leading-6 text-text-secondary">{profile.experience}</p>
-              : <EmptyProfileText onEdit={openEdit}>No experience added yet.</EmptyProfileText>}
+              : <EmptyProfileText>No experience added yet.</EmptyProfileText>}
           </ProfileSection>
           <ProfileSection title="Education">
             {profile.education
               ? <p className="whitespace-pre-line break-words text-sm leading-6 text-text-secondary">{profile.education}</p>
-              : <EmptyProfileText onEdit={openEdit}>No education details added yet.</EmptyProfileText>}
+              : <EmptyProfileText>No education details added yet.</EmptyProfileText>}
           </ProfileSection>
         </div>
-
-        <ProfileSection title="Activity" description="Quick links to your private member activity.">
-          <Link to={getCandidateActivityPath()} className="inline-flex w-full items-center justify-center rounded-xl border border-primary bg-primary px-5 py-3 text-sm font-semibold text-primary-contrast transition-colors hover:bg-primary-hover">
-            View all activity
-          </Link>
-          <div className="mt-3 grid min-w-0 gap-3 sm:grid-cols-2 lg:grid-cols-5">
-            {[
-              { label: 'Applications', path: getCandidateActivityPath('applications') },
-              { label: 'Bids', path: getCandidateActivityPath('bids') },
-              { label: 'Projects', path: getCandidateActivityPath('projects') },
-              { label: 'Posts', path: getCandidateActivityPath('posts') },
-              { label: 'Saved', path: getCandidateActivityPath('saved') },
-            ].map((item) => (
-              <Link key={item.path} to={item.path} className="inline-flex items-center justify-center rounded-lg border border-primary bg-transparent px-4 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-primary/10">
-                {item.label}
-              </Link>
-            ))}
-          </div>
-        </ProfileSection>
 
         <ProfileSection title="Connections" description="Your professional relationships inside the LinkPort community.">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">

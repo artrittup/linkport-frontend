@@ -35,15 +35,7 @@ export default function CandidateSettings() {
   return (
     <CandidateLayout title="Settings">
       <div className="mx-auto min-w-0 max-w-4xl">
-        <header>
-          <p className="font-mono text-sm text-primary">Member preferences</p>
-          <h2 className="mt-2 text-3xl font-bold tracking-tight text-text-primary sm:text-4xl">Settings</h2>
-          <p className="mt-3 max-w-2xl text-sm leading-6 text-text-muted sm:text-base">
-            Manage account information, appearance, and the preferences available for your member experience.
-          </p>
-        </header>
-
-        <div className="mt-8 grid min-w-0 gap-5">
+        <div className="grid min-w-0 gap-5">
           <SettingsCard title="Account" description="Your sign-in identity is separate from the information shown on your public profile." labelledBy="account-settings-heading">
             <dl className="grid min-w-0 gap-4 border-y border-border py-4 sm:grid-cols-2">
               <div className="min-w-0">

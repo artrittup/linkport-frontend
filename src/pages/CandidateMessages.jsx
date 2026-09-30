@@ -11,8 +11,14 @@ import {
 import { getCommunityMember } from '../api/communityMembersApi'
 import Connections from './Connections'
 import LoadingSpinner from '../components/LoadingSpinner'
+import SectionTabs from '../components/SectionTabs'
 import useMemberConversations from '../hooks/useMemberConversations'
 import CandidateLayout from '../layouts/CandidateLayout'
+
+const MESSAGE_VIEWS = [
+  { id: 'inbox', label: 'Inbox', path: '/member/messages' },
+  { id: 'connections', label: 'Connections', path: '/member/messages?view=connections' },
+]
 
 function MessageIcon({ className = 'h-6 w-6' }) {
   return (
@@ -290,20 +296,11 @@ export default function CandidateMessages() {
   return (
     <CandidateLayout title="Messages">
       <div className="min-w-0 max-w-full">
-        <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <p className="font-mono text-sm text-primary">Stay connected</p>
-            <h2 className="mt-2 text-3xl font-bold tracking-tight text-text-primary sm:text-4xl">
-              {activeView === 'connections' ? 'Friends' : 'Messages'}
-            </h2>
-            <p className="mt-3 max-w-3xl text-sm leading-6 text-text-muted sm:text-base">
-              {activeView === 'connections'
-                ? 'People you are connected with, and the requests waiting on you.'
-                : 'Chat with your connections or send one message request to someone new.'}
-            </p>
-          </div>
+        <div className="flex justify-end">
           <Link to="/member/community/members" className="inline-flex w-fit rounded-lg border border-primary px-4 py-2.5 text-sm font-semibold text-primary hover:bg-primary/10">Find someone to message</Link>
-        </header>
+        </div>
+
+        <SectionTabs items={MESSAGE_VIEWS} activeId={activeView} label="Message sections" className="mt-5" />
 
         {activeView === 'connections' ? (
           <div className="mt-8 min-w-0"><Connections embedded /></div>

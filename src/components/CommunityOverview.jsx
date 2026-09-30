@@ -30,7 +30,7 @@ export default function CommunityOverview({ circles, onViewChange, onPreview }) 
           ))}
           {!joined.length && (
             <EmptyState
-              title="Find your people"
+            title="No Circles joined yet"
               description="Join a Circle around an interest or idea you care about."
               actionLabel="Discover Circles"
               onAction={() => onViewChange('discover')}

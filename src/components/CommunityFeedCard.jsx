@@ -5,6 +5,7 @@ import {
   deleteCommunityPostComment,
   getCommunityPostComments,
   getCommunityPostErrorMessage,
+  setCommunityPostCommentLiked,
   setCommunityPostLiked,
 } from '../api/communityPostsApi'
 import SaveButton from './SaveButton'
@@ -29,6 +30,116 @@ function ActionIcon({ type, filled = false }) {
     <svg viewBox="0 0 24 24" fill={filled ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5" aria-hidden="true">
       {paths[type]}
     </svg>
+  )
+}
+
+const commentDateFormatter = new Intl.DateTimeFormat(undefined, {
+  dateStyle: 'medium',
+  timeStyle: 'short',
+})
+
+function formatCommentDate(value) {
+  if (!value) return 'Just now'
+  const date = new Date(value)
+  return Number.isNaN(date.getTime()) ? 'Just now' : commentDateFormatter.format(date)
+}
+
+function updateCommentTree(comments, commentId, update) {
+  return comments.map((comment) => {
+    if (comment.id === commentId) return update(comment)
+    if (!comment.replies?.length) return comment
+    return { ...comment, replies: updateCommentTree(comment.replies, commentId, update) }
+  })
+}
+
+function appendCommentReply(comments, parentId, reply) {
+  return updateCommentTree(comments, parentId, (comment) => ({
+    ...comment,
+    replies: [...(comment.replies ?? []), reply],
+  }))
+}
+
+function removeCommentFromTree(comments, commentId) {
+  return comments
+    .filter((comment) => comment.id !== commentId)
+    .map((comment) => ({
+      ...comment,
+      replies: removeCommentFromTree(comment.replies ?? [], commentId),
+    }))
+}
+
+function CommentThreadItem({
+  comment,
+  depth = 0,
+  replyingToId,
+  replyText,
+  onReplyTextChange,
+  onStartReply,
+  onCancelReply,
+  onSubmitReply,
+  onToggleLike,
+  onDelete,
+  isWorking,
+}) {
+  const isReplying = replyingToId === comment.id
+  const isIndented = depth > 0 && depth < 3
+
+  return (
+    <div className={isIndented ? 'ml-4 border-l border-border/70 pl-3 sm:ml-6' : ''}>
+      <div className="flex min-w-0 items-start gap-2.5">
+        <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10 font-mono text-[10px] font-bold text-primary">
+          {getInitials(comment.authorName)}
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="rounded-lg bg-surface px-3 py-2 ring-1 ring-border/70">
+            <div className="flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-0.5">
+              <span className="truncate text-xs font-bold text-text-primary">{comment.authorName}</span>
+              <time dateTime={comment.createdAt ?? undefined} className="text-[10px] text-text-subtle">
+                {formatCommentDate(comment.createdAt)}
+              </time>
+            </div>
+            <p className="mt-0.5 break-words text-sm leading-5 text-text-muted">{comment.content}</p>
+          </div>
+
+          <div className="mt-1 flex items-center gap-3 px-1 text-[11px] font-semibold">
+            <button type="button" aria-pressed={comment.isLiked} disabled={isWorking} onClick={() => onToggleLike(comment)} className={comment.isLiked ? 'text-primary' : 'text-text-subtle hover:text-primary'}>
+              Like{comment.likesCount > 0 ? ` · ${comment.likesCount}` : ''}
+            </button>
+            <button type="button" disabled={isWorking} onClick={() => onStartReply(comment)} className="text-text-subtle hover:text-primary">Reply</button>
+            {comment.canDelete && <button type="button" disabled={isWorking} onClick={() => onDelete(comment.id)} className="text-text-subtle hover:text-danger-text">Delete</button>}
+          </div>
+
+          {isReplying && (
+            <form onSubmit={(event) => onSubmitReply(event, comment)} className="mt-2 flex gap-2">
+              <input autoFocus type="text" value={replyText} maxLength="1000" onChange={(event) => onReplyTextChange(event.target.value)} placeholder={`Reply to ${comment.authorName}...`} aria-label={`Reply to ${comment.authorName}`} className="min-w-0 flex-1 rounded-lg border border-border bg-surface px-2.5 py-1.5 text-xs text-text-primary outline-none placeholder:text-text-subtle focus:border-primary focus:ring-1 focus:ring-focus-ring" />
+              <button type="submit" disabled={isWorking || !replyText.trim()} className="rounded-lg bg-primary px-3 py-1.5 text-xs font-bold text-primary-contrast hover:bg-primary-hover disabled:opacity-50">Reply</button>
+              <button type="button" disabled={isWorking} onClick={onCancelReply} className="px-1 text-xs font-semibold text-text-subtle hover:text-text-primary">Cancel</button>
+            </form>
+          )}
+        </div>
+      </div>
+
+      {comment.replies?.length > 0 && (
+        <div className="mt-2 space-y-2">
+          {comment.replies.map((reply) => (
+            <CommentThreadItem
+              key={reply.id}
+              comment={reply}
+              depth={depth + 1}
+              replyingToId={replyingToId}
+              replyText={replyText}
+              onReplyTextChange={onReplyTextChange}
+              onStartReply={onStartReply}
+              onCancelReply={onCancelReply}
+              onSubmitReply={onSubmitReply}
+              onToggleLike={onToggleLike}
+              onDelete={onDelete}
+              isWorking={isWorking}
+            />
+          ))}
+        </div>
+      )}
+    </div>
   )
 }
 
@@ -93,6 +204,8 @@ function CommunityPostCard({ item, onUnsaved, onSavedChange, compact = false, pr
   const [commentPage, setCommentPage] = useState(1)
   const [lastCommentPage, setLastCommentPage] = useState(1)
   const [commentText, setCommentText] = useState('')
+  const [replyText, setReplyText] = useState('')
+  const [replyingTo, setReplyingTo] = useState(null)
   const [commentsLoaded, setCommentsLoaded] = useState(false)
   const [isCommentsLoading, setIsCommentsLoading] = useState(false)
   const [isWorking, setIsWorking] = useState(false)
@@ -178,14 +291,71 @@ function CommunityPostCard({ item, onUnsaved, onSavedChange, compact = false, pr
     }
   }
 
+  const startReply = (comment) => {
+    setReplyingTo(comment)
+    setReplyText('')
+  }
+
+  const cancelReply = () => {
+    setReplyingTo(null)
+    setReplyText('')
+  }
+
+  const submitReply = async (event, parentComment) => {
+    event.preventDefault()
+    if (!replyText.trim() || isWorking) return
+    setIsWorking(true)
+    setInteractionError('')
+    try {
+      const response = await createCommunityPostComment(item.postId, replyText.trim(), parentComment.id)
+      setComments((current) => appendCommentReply(current, parentComment.id, response.data))
+      setCommentsCount((current) => current + 1)
+      cancelReply()
+    } catch (error) {
+      setInteractionError(getCommunityPostErrorMessage(error, 'Unable to publish your reply.'))
+    } finally {
+      setIsWorking(false)
+    }
+  }
+
+  const toggleCommentLike = async (comment) => {
+    if (isWorking) return
+    const nextLiked = !comment.isLiked
+    setComments((current) => updateCommentTree(current, comment.id, (item) => ({
+      ...item,
+      isLiked: nextLiked,
+      likesCount: Math.max(0, item.likesCount + (nextLiked ? 1 : -1)),
+    })))
+    setIsWorking(true)
+    setInteractionError('')
+    try {
+      const response = await setCommunityPostCommentLiked(item.postId, comment.id, nextLiked)
+      setComments((current) => updateCommentTree(current, comment.id, (item) => ({
+        ...item,
+        isLiked: response.is_liked,
+        likesCount: response.likes_count,
+      })))
+    } catch (error) {
+      setComments((current) => updateCommentTree(current, comment.id, (item) => ({
+        ...item,
+        isLiked: !nextLiked,
+        likesCount: Math.max(0, item.likesCount + (nextLiked ? -1 : 1)),
+      })))
+      setInteractionError(getCommunityPostErrorMessage(error, 'Unable to update this reply like.'))
+    } finally {
+      setIsWorking(false)
+    }
+  }
+
   const removeComment = async (commentId) => {
     if (isWorking) return
     setIsWorking(true)
     setInteractionError('')
     try {
-      await deleteCommunityPostComment(item.postId, commentId)
-      setComments((current) => current.filter((comment) => comment.id !== commentId))
-      setCommentsCount((current) => Math.max(0, current - 1))
+      const response = await deleteCommunityPostComment(item.postId, commentId)
+      setComments((current) => removeCommentFromTree(current, commentId))
+      setCommentsCount(response.comments_count)
+      if (replyingTo?.id === commentId) cancelReply()
     } catch (error) {
       setInteractionError(getCommunityPostErrorMessage(error, 'Unable to delete this comment.'))
     } finally {
@@ -262,17 +432,26 @@ function CommunityPostCard({ item, onUnsaved, onSavedChange, compact = false, pr
 
         {interactionError && <p role="alert" className="pointer-events-auto relative z-10 mt-3 text-sm text-danger-text">{interactionError}</p>}
         {isCommenting && (
-          <div className="pointer-events-auto relative z-10 mt-4 rounded-xl border border-border bg-background/55 p-4">
+          <div className="pointer-events-auto relative z-10 mt-3 rounded-xl border border-border bg-background/55 p-3">
             <form onSubmit={submitComment} className="flex gap-2">
               <input type="text" value={commentText} maxLength="1000" onChange={(event) => setCommentText(event.target.value)} placeholder="Write a comment..." aria-label="Comment text" className="min-w-0 flex-1 rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text-primary outline-none placeholder:text-text-subtle focus:border-primary focus:ring-1 focus:ring-focus-ring" />
               <button type="submit" disabled={isWorking || isCommentsLoading || !commentText.trim()} className="rounded-lg bg-primary px-4 py-2 text-sm font-bold text-primary-contrast hover:bg-primary-hover disabled:opacity-50">Post</button>
             </form>
-            {isCommentsLoading && comments.length === 0 ? <p className="mt-4 text-sm text-text-muted">Loading comments...</p> : comments.length > 0 ? (
-              <div className="mt-4 space-y-3">{comments.map((comment) => (
-                <div key={comment.id} className="rounded-lg border border-border bg-surface px-3 py-3">
-                  <div className="flex items-start justify-between gap-3"><p className="text-xs font-bold text-text-primary">{comment.authorName}</p>{comment.canDelete && <button type="button" disabled={isWorking} onClick={() => removeComment(comment.id)} className="text-xs text-text-subtle hover:text-danger-text">Delete</button>}</div>
-                  <p className="mt-1 break-words text-sm leading-6 text-text-muted">{comment.content}</p>
-                </div>
+            {isCommentsLoading && comments.length === 0 ? <p className="mt-3 text-sm text-text-muted">Loading comments...</p> : comments.length > 0 ? (
+              <div className="mt-3 space-y-2.5">{comments.map((comment) => (
+                <CommentThreadItem
+                  key={comment.id}
+                  comment={comment}
+                  replyingToId={replyingTo?.id ?? null}
+                  replyText={replyText}
+                  onReplyTextChange={setReplyText}
+                  onStartReply={startReply}
+                  onCancelReply={cancelReply}
+                  onSubmitReply={submitReply}
+                  onToggleLike={toggleCommentLike}
+                  onDelete={removeComment}
+                  isWorking={isWorking}
+                />
               ))}</div>
             ) : commentsLoaded ? <p className="mt-4 text-sm text-text-muted">No comments yet. Start the conversation.</p> : null}
             {commentsLoaded && commentPage < lastCommentPage && <button type="button" disabled={isCommentsLoading} onClick={loadMoreComments} className="mt-4 text-sm font-semibold text-primary">{isCommentsLoading ? 'Loading...' : 'Load more replies'}</button>}

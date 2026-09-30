@@ -122,19 +122,10 @@ export default function CandidateActivity({ section }) {
   return (
     <CandidateLayout title="My Activity">
       <div className="min-w-0 max-w-full">
-        <header>
-          <p className="font-mono text-xs font-semibold uppercase tracking-[0.14em] text-primary">Your work on LinkPort</p>
-          <h2 className="mt-2 text-3xl font-bold tracking-tight text-text-primary sm:text-4xl">My Activity</h2>
-          <p className="mt-3 max-w-3xl leading-7 text-text-muted">
-            Keep your applications, bids, projects, posts, and saved items together in one personal workspace.
-          </p>
-        </header>
-
         <SectionTabs
           items={CANDIDATE_ACTIVITY_TABS.map((tab) => ({ ...tab, path: getCandidateActivityPath(tab.id) }))}
           activeId={activeTab}
           label="Activity sections"
-          className="mt-7"
         />
 
         <div className="mt-8 min-w-0 max-w-full">

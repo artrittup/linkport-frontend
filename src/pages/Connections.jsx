@@ -160,7 +160,12 @@ export default function Connections({ embedded = false }) {
           {items.map((connection) => (
             <MemberRow key={connection.id} member={memberFor(connection)}>
               {tab === 'network' && (
-                <Button size="sm" variant="ghost" disabled={workingId === connection.id} onClick={() => act(connection.id, deleteConnection, 'Connection removed.')}>Remove</Button>
+                <>
+                  <Link to={`/member/messages?member=${memberFor(connection)?.id}`} className="rounded-lg bg-primary px-3 py-2 text-xs font-semibold text-primary-contrast transition-colors hover:bg-primary-hover">
+                    Message
+                  </Link>
+                  <Button size="sm" variant="ghost" disabled={workingId === connection.id} onClick={() => act(connection.id, deleteConnection, 'Connection removed.')}>Remove</Button>
+                </>
               )}
               {tab === 'requests' && (
                 <>

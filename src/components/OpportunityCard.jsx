@@ -17,12 +17,6 @@ function formatBudget(value) {
     : value
 }
 
-function readable(value) {
-  return String(value ?? '')
-    .replace(/[_-]+/g, ' ')
-    .replace(/\b\w/g, (character) => character.toUpperCase())
-}
-
 export default function OpportunityCard({
   opportunity,
   isSaved = false,
@@ -31,24 +25,30 @@ export default function OpportunityCard({
 }) {
   const isJob = opportunity.source === 'job'
   const deadline = formatDate(opportunity.deadline)
-  const postedAt = formatDate(opportunity.postedAt)
   const budget = formatBudget(opportunity.budget)
-  const status = readable(opportunity.status)
-  const detailLabel = isJob ? 'View job' : 'View project'
   const actionLabel = isJob ? 'Apply' : 'Submit bid'
+  const detailsPath = `/member/opportunities/${opportunity.id}`
 
   return (
-    <article className="flex h-full min-w-0 flex-col rounded-2xl border border-border bg-surface/70 p-5 transition-colors hover:border-primary/40 sm:p-6">
+    <article className="group relative isolate flex h-full min-w-0 flex-col rounded-2xl border border-border bg-surface/70 p-4 transition-all hover:-translate-y-0.5 hover:border-primary/45 hover:shadow-sm sm:p-5">
+      <Link
+        to={detailsPath}
+        aria-label={`View ${opportunity.title}`}
+        className="absolute inset-0 z-10 rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+      />
+
       <div className="flex min-w-0 items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-primary">
-            {isJob ? (opportunity.type === 'INTERNSHIP' ? 'Internship' : 'Job') : 'Project opportunity'}
+            {isJob ? (opportunity.type === 'INTERNSHIP' ? 'Internship' : 'Job') : 'Project'}
           </p>
-          <h3 className="mt-2 break-words text-xl font-bold leading-snug text-text-primary">{opportunity.title}</h3>
+          <h3 className="mt-1.5 break-words text-lg font-bold leading-snug text-text-primary transition-colors group-hover:text-primary">
+            {opportunity.title}
+          </h3>
           {opportunity.companyId ? (
             <Link
               to={`/companies/${opportunity.companyId}`}
-              className="mt-1 inline-flex max-w-full truncate text-sm font-semibold text-primary hover:text-primary-hover"
+              className="relative z-20 mt-1 inline-flex max-w-full truncate text-sm font-semibold text-primary hover:text-primary-hover"
             >
               {opportunity.company}
             </Link>
@@ -61,75 +61,51 @@ export default function OpportunityCard({
           itemId={opportunity.sourceId}
           initialSaved={isSaved}
           onChange={onSavedChange}
-          className="shrink-0"
+          className="relative z-20 shrink-0"
         />
       </div>
 
-      <p className="mt-4 line-clamp-3 break-words text-sm leading-6 text-text-muted">{opportunity.description}</p>
+      <p className="mt-3 line-clamp-2 break-words text-sm leading-5 text-text-muted">{opportunity.description}</p>
 
-      <dl className="mt-5 grid grid-cols-2 gap-x-4 gap-y-3 border-y border-border py-4 text-xs">
+      <dl className="mt-4 grid grid-cols-2 gap-3 border-t border-border pt-3 text-xs">
         {isJob ? (
           <>
-            <div>
+            <div className="min-w-0">
               <dt className="text-text-subtle">Location</dt>
-              <dd className="mt-1 font-medium text-text-secondary">{opportunity.location}</dd>
+              <dd className="mt-0.5 truncate font-medium text-text-secondary">{opportunity.location}</dd>
             </div>
-            <div>
+            <div className="min-w-0">
               <dt className="text-text-subtle">Employment</dt>
-              <dd className="mt-1 font-medium text-text-secondary">{opportunity.employmentType || 'Not specified'}</dd>
-            </div>
-            <div>
-              <dt className="text-text-subtle">Work style</dt>
-              <dd className="mt-1 font-medium text-text-secondary">{opportunity.workStyle}</dd>
-            </div>
-            <div>
-              <dt className="text-text-subtle">{postedAt ? 'Posted' : 'Deadline'}</dt>
-              <dd className="mt-1 font-medium text-text-secondary">{postedAt || deadline || 'Open'}</dd>
+              <dd className="mt-0.5 truncate font-medium text-text-secondary">{opportunity.employmentType || 'Not specified'}</dd>
             </div>
           </>
         ) : (
           <>
-            <div>
+            <div className="min-w-0">
               <dt className="text-text-subtle">Budget</dt>
-              <dd className="mt-1 font-medium text-text-primary">{budget || 'Not specified'}</dd>
+              <dd className="mt-0.5 truncate font-medium text-text-primary">{budget || 'Not specified'}</dd>
             </div>
-            <div>
+            <div className="min-w-0">
               <dt className="text-text-subtle">Deadline</dt>
-              <dd className="mt-1 font-medium text-text-secondary">{deadline || 'Open'}</dd>
-            </div>
-            <div>
-              <dt className="text-text-subtle">Category</dt>
-              <dd className="mt-1 font-medium text-text-secondary">{opportunity.category || 'General'}</dd>
-            </div>
-            <div>
-              <dt className="text-text-subtle">Status</dt>
-              <dd className="mt-1 font-medium text-text-secondary">{status || 'Open'}</dd>
+              <dd className="mt-0.5 truncate font-medium text-text-secondary">{deadline || 'Open'}</dd>
             </div>
           </>
         )}
       </dl>
 
-      {opportunity.skills.length > 0 && (
-        <div className="mt-4 flex flex-wrap gap-2">
-          {opportunity.skills.slice(0, 5).map((skill) => (
-            <span key={skill} className="max-w-full break-words rounded-full border border-border bg-background/55 px-2.5 py-1 text-xs text-text-secondary">
-              {skill}
-            </span>
-          ))}
-        </div>
-      )}
+      <div className="mt-3 flex min-h-6 flex-wrap gap-1.5">
+        {opportunity.skills.slice(0, 3).map((skill) => (
+          <span key={skill} className="max-w-full truncate rounded-full bg-background/70 px-2.5 py-1 text-[11px] text-text-secondary">
+            {skill}
+          </span>
+        ))}
+      </div>
 
-      <div className="mt-auto grid grid-cols-2 gap-3 pt-6">
-        <Link
-          to={`/member/opportunities/${opportunity.id}`}
-          className="inline-flex items-center justify-center rounded-lg border border-primary px-3 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-primary/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
-        >
-          {detailLabel}
-        </Link>
+      <div className="mt-auto flex justify-end pt-4">
         <button
           type="button"
           onClick={() => onPrimaryAction?.(opportunity)}
-          className="rounded-lg bg-primary px-3 py-2.5 text-sm font-semibold text-primary-contrast transition-colors hover:bg-primary-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
+          className="relative z-20 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-contrast transition-colors hover:bg-primary-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
         >
           {actionLabel}
         </button>

@@ -114,6 +114,7 @@ export default function CandidateMembers({ embedded = false, showHeader = true, 
                   initialConnectionStatus={connections.isLoading
                     ? { status: 'loading' }
                     : connections.statuses.get(String(member.id)) ?? { status: 'none' }}
+                  onConnectionStatusChange={(nextStatus) => connections.updateStatus(member.id, nextStatus)}
                 />
               ))}
             </div>

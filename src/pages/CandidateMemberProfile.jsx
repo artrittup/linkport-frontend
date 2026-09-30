@@ -101,7 +101,7 @@ export default function CandidateMemberProfile() {
   const profileActions = member.isCurrentUser ? null : (
     <>
       <ConnectionButton userId={member.id} />
-      <Link to="/member/messages" className="inline-flex items-center justify-center rounded-lg border border-border px-4 py-2.5 text-sm font-semibold text-text-secondary transition-colors hover:border-primary/50 hover:text-primary">
+      <Link to={`/member/messages?member=${member.id}`} className="inline-flex items-center justify-center rounded-lg border border-border px-4 py-2.5 text-sm font-semibold text-text-secondary transition-colors hover:border-primary/50 hover:text-primary">
         Message
       </Link>
     </>

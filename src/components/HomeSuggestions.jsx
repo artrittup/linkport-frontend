@@ -108,7 +108,7 @@ export default function HomeSuggestions() {
                     <Link to={'/member/community/members/' + member.id} className="block truncate text-sm font-semibold text-text-primary no-underline hover:text-primary hover:no-underline">{member.name}</Link>
                     <p className="mt-0.5 truncate text-xs text-text-subtle">{member.skills.slice(0, 2).join(' · ') || member.fieldOfStudy || 'LinkPort member'}</p>
                   </div>
-                  {!connections.error && <ConnectionButton key={member.id + '-' + initialStatus.status + '-' + (initialStatus.connection_id ?? 'none')} userId={member.id} initialStatus={initialStatus} />}
+                  {!connections.error && <ConnectionButton key={member.id + '-' + initialStatus.status + '-' + (initialStatus.connection_id ?? 'none')} userId={member.id} initialStatus={initialStatus} onStatusChange={(nextStatus) => connections.updateStatus(member.id, nextStatus)} />}
                 </div>
               </div>
             )

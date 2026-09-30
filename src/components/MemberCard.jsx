@@ -11,6 +11,7 @@ export default function MemberCard({
   member,
   compact = false,
   initialConnectionStatus,
+  onConnectionStatusChange,
   showConnection = true,
 }) {
   const visibleSkills = member.skills.slice(0, compact ? 2 : 3)
@@ -62,7 +63,7 @@ export default function MemberCard({
         >
           View profile
         </Link>
-        {showConnection && <div className="pointer-events-auto"><ConnectionButton key={`${member.id}-${initialConnectionStatus?.status}-${initialConnectionStatus?.connection_id ?? 'none'}`} userId={member.id} initialStatus={initialConnectionStatus} /></div>}
+        {showConnection && <div className="pointer-events-auto"><ConnectionButton key={`${member.id}-${initialConnectionStatus?.status}-${initialConnectionStatus?.connection_id ?? 'none'}`} userId={member.id} initialStatus={initialConnectionStatus} onStatusChange={onConnectionStatusChange} /></div>}
       </div>
       </div>
     </article>

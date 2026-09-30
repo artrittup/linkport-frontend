@@ -159,7 +159,7 @@ export default function CandidateNotificationBell({
         ref={triggerRef}
         type="button"
         onClick={toggleDropdown}
-        aria-label="Open notifications"
+        aria-label={unreadCount > 0 ? `Open notifications, ${unreadCount} unread` : 'Open notifications'}
         aria-expanded={isOpen}
         aria-controls={panelId}
         className={`relative flex h-10 w-10 items-center justify-center rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring ${
@@ -173,7 +173,7 @@ export default function CandidateNotificationBell({
           <path d="M10 21h4" />
         </svg>
         {unreadCount > 0 && (
-          <span className="absolute right-0.5 top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[9px] font-bold text-primary-contrast">
+          <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full border-2 border-background bg-primary px-1 text-[10px] font-bold leading-none text-primary-contrast">
             {unreadCount > 99 ? '99+' : unreadCount}
           </span>
         )}

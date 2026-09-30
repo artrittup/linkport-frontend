@@ -39,7 +39,7 @@ export default function ConnectionButton({ userId, initialStatus, onStatusChange
   const updateStatus = (nextStatus, nextId = connectionId) => {
     setStatus(nextStatus)
     setConnectionId(nextId)
-    onStatusChange?.(nextStatus)
+    onStatusChange?.({ status: nextStatus, connection_id: nextId })
   }
 
   const run = async (action) => {

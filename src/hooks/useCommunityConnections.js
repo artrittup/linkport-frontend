@@ -41,6 +41,15 @@ export default function useCommunityConnections({ enabled = true } = {}) {
   const [error, setError] = useState('')
   const [version, setVersion] = useState(0)
   const retry = useCallback(() => setVersion((current) => current + 1), [])
+  const updateStatus = useCallback((memberId, nextStatus) => {
+    if (!userId || !memberId || !nextStatus?.status) return
+    setStatuses((current) => {
+      const next = new Map(current)
+      next.set(String(memberId), nextStatus)
+      cache.set(String(userId), { statuses: next })
+      return next
+    })
+  }, [userId])
 
   useEffect(() => {
     if (!enabled || !userId) return undefined
@@ -93,5 +102,5 @@ export default function useCommunityConnections({ enabled = true } = {}) {
     }
   }, [enabled, userId, version])
 
-  return { statuses, isLoading: enabled ? isLoading : false, error, retry }
+  return { statuses, isLoading: enabled ? isLoading : false, error, retry, updateStatus }
 }

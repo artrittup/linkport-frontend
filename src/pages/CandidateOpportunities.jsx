@@ -278,7 +278,7 @@ export default function CandidateOpportunities({ section = 'jobs' }) {
 
           {isLoading ? (
             <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3" aria-label="Loading opportunities">
-              {[0, 1, 2].map((item) => <div key={item} className="h-96 animate-pulse rounded-2xl border border-border bg-surface/45" />)}
+              {[0, 1, 2].map((item) => <div key={item} className="h-72 animate-pulse rounded-2xl border border-border bg-surface/45" />)}
             </div>
           ) : visibleOpportunities.length > 0 ? (
             <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">

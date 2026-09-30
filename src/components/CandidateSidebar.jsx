@@ -3,6 +3,7 @@ import LinkPortLogo from './LinkPortLogo'
 import { getNavigationForRole } from '../config/navigation'
 import { useAuth } from '../context/AuthContext'
 import ThemeToggle from './ThemeToggle'
+import useUnreadNotificationCount from '../hooks/useUnreadNotificationCount'
 
 function NavigationIcon({ iconKey }) {
   const paths = {
@@ -59,6 +60,7 @@ export default function CandidateSidebar({ isOpen, onClose }) {
   const location = useLocation()
   const navigate = useNavigate()
   const { logout, user } = useAuth()
+  const unreadNotificationCount = useUnreadNotificationCount()
   const navItems = getNavigationForRole('candidate')
   const displayName = user?.name || 'LinkPort Member'
   const initials = displayName
@@ -143,7 +145,17 @@ export default function CandidateSidebar({ isOpen, onClose }) {
               { key: 'settings', label: 'Settings', path: '/member/settings' },
             ].map((item) => (
               <Link key={item.key} to={item.path} onClick={onClose} aria-current={location.pathname === item.path ? 'page' : undefined} className={`flex items-center gap-2 rounded-lg px-2 py-1.5 text-xs font-semibold transition-colors ${location.pathname === item.path ? 'bg-primary-soft text-primary-soft-text' : 'text-text-muted hover:bg-surface hover:text-text-primary'}`}>
-                <NavigationIcon iconKey={item.key} />
+                <span className="relative shrink-0">
+                  <NavigationIcon iconKey={item.key} />
+                  {item.key === 'notifications' && unreadNotificationCount > 0 && (
+                    <span
+                      aria-label={`${unreadNotificationCount} unread notifications`}
+                      className="absolute -right-2.5 -top-2.5 flex h-4 min-w-4 items-center justify-center rounded-full border border-background bg-primary px-1 text-[9px] font-bold leading-none text-primary-contrast"
+                    >
+                      {unreadNotificationCount > 99 ? '99+' : unreadNotificationCount}
+                    </span>
+                  )}
+                </span>
                 {item.label}
               </Link>
             ))}

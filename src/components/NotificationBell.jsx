@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 import {
+  announceNotificationsChanged,
   getNotificationErrorMessage,
   getNotifications,
   getUnreadNotificationCount,
@@ -112,7 +113,7 @@ export default function NotificationBell({ align = 'right' }) {
             ? response.notification
             : item
         )))
-        refreshUnreadCount()
+        announceNotificationsChanged('notification-bell')
       } catch {
         // Navigation remains available if the read update fails.
       }
@@ -131,7 +132,7 @@ export default function NotificationBell({ align = 'right' }) {
         isRead: true,
         readAt: item.readAt || new Date().toISOString(),
       })))
-      refreshUnreadCount()
+      announceNotificationsChanged('notification-bell')
     } catch (requestError) {
       setError(getNotificationErrorMessage(requestError, 'Unable to mark notifications as read.'))
     }
@@ -139,9 +140,9 @@ export default function NotificationBell({ align = 'right' }) {
 
   return (
     <div ref={containerRef} className="relative shrink-0">
-      <button type="button" onClick={toggle} aria-label="Notifications" aria-expanded={isOpen} className="relative flex h-10 w-10 items-center justify-center rounded-lg text-text-muted transition-colors hover:bg-surface hover:text-primary">
+      <button type="button" onClick={toggle} aria-label={unreadCount > 0 ? `Notifications, ${unreadCount} unread` : 'Notifications'} aria-expanded={isOpen} className="relative flex h-10 w-10 items-center justify-center rounded-lg text-text-muted transition-colors hover:bg-surface hover:text-primary">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" className="h-5 w-5" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" /><path d="M10 21h4" /></svg>
-        {unreadCount > 0 && <span className="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[9px] font-bold text-primary-contrast">{unreadCount > 99 ? '99+' : unreadCount}</span>}
+        {unreadCount > 0 && <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full border-2 border-background bg-primary px-1 text-[10px] font-bold leading-none text-primary-contrast">{unreadCount > 99 ? '99+' : unreadCount}</span>}
       </button>
 
       {isOpen && (
